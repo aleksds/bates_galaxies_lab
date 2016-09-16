@@ -7,7 +7,7 @@
 #     science target
 # (3) combine the three image to make a single RGB image (not yet implemented)
 #
-#     For future reference, H=here are some relevant links (from a
+#     For future reference, here are some relevant links (from a
 #     Google search for  "astropy make a three color image"):
 #
 #     (A) "Making RGB images from FITS files with python / matplotlib"
