@@ -18,7 +18,7 @@ the galaxy.
 # bgl_gau_bkg.py
 
 This code analyzes the distribution of pixel values for an entire
-image and quantifies the the mean background flux and its dispersion
+image and quantifies the mean background flux and its dispersion
 by fitting a Gaussian function to a binned histogram of pixel values.
 
 # bgl_image_stamp.py
@@ -26,7 +26,8 @@ by fitting a Gaussian function to a binned histogram of pixel values.
 This code reads in images of the same galaxy in three filters and
 makes "postage stamp" visualizations with the goal of providing a
 qualitative sense for how the morphology of the galaxy and its
-luminosity change as a function of wavelength.
+luminosity change as a function of wavelength.  This code is expanded
+upon in bgl_aper_phot.py and bgl_pix_vis.py.
 
 # bgl_pix_vis.py
 
