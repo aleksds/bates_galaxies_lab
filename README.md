@@ -3,7 +3,7 @@
 This repository includes code developed by members of the Bates
 Galaxies Lab (sometimes called "the bagel," which in principle could
 stand for Bates Astrophysics Galaxy Evolution Lab) at Bates College in
-Lewiston, Maine.  As of the Fall 2016 semester, current lab members
+Lewiston, Maine.  Current lab members (as of the Fall 2016 semester),
 include Aleks Diamond-Stanic (Assistant Professor of Physics and
 Astronomy), Sophia Gottlieb (senior physics major, class of 2017), and
 Joshua Rinua (senior physics major, class of 2017).
