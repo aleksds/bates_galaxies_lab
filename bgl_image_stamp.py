@@ -19,6 +19,7 @@
 # import relevant Python modules
 import numpy as np
 from astropy.io import fits
+import os
 import glob
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -88,7 +89,8 @@ with PdfPages('bgl_image_stamp.pdf') as pdf:
     plot_image()
     plt.title('F160W')    
     
-    
     pdf.savefig()
     plt.close()
+
+    os.system('open %s &' % 'bgl_image_stamp.pdf')
     
