@@ -6,7 +6,7 @@ stand for Bates Astrophysics Galaxy Evolution Lab) at Bates College in
 Lewiston, Maine.  Current lab members (as of the Fall 2016 semester),
 include Aleks Diamond-Stanic (Assistant Professor of Physics and
 Astronomy), Sophia Gottlieb (senior physics major, class of 2017), and
-Joshua Rinua (senior physics major, class of 2017).
+Joshua Rines (senior physics major, class of 2017).
 
 # bgl_aper_phot.py
 
