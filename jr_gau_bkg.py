@@ -10,8 +10,10 @@
 import numpy as np
 from astropy.io import fits
 import glob
+import os
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 # define a function for the gaussian model
 def gaussian(x, peak, center, sigma):
@@ -23,13 +25,14 @@ def objective_function(params):
     residuals = (gaussian(bin_mids[use], peak, center, sigma) - hist[use]) / errors[use]
     return np.sum((residuals)**2) / nbin
 
-# read in an image file
-#dir = '/Users/adiamond/data/20150203_HST/J0826+4305/coarse/F814W/'
-#file = glob.glob(dir+'final*sci.fits')
-dir = '/Users/jrines/data/test/'
-file = glob.glob(dir+'final_F8*sci.fits')
-hdu = fits.open(file[0])
-data, header = hdu[0].data, hdu[0].header
+# create a PDF file for the plots
+with PdfPages('jr_gau_bkg.pdf') as pdf:
+
+    # read in an image file
+    dir = '/Users/jrines/data/test/'
+    file = glob.glob(dir+'final_F8*sci.fits')
+    hdu = fits.open(file[0])
+    data, header = hdu[0].data, hdu[0].header
 
 # select all pixels with meaningful information and put them into a
 # one-dimensional array
@@ -68,8 +71,29 @@ print('background value from gaussian fit: {0:6.3f}'.format(params_fit[1]))
 print('sigma from gaussian fit: {0:6.3f}'.format(params_fit[2]))
 
 # visualize the histogram and the fit
-plt.plot(bin_mids, hist)
-plt.plot(bin_mids[use], hist[use], color='green')
-plt.plot(bin_mids, model, color='red')
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)
+ax.plot(bin_mids, hist, 'k:', color='blue', label='pixel histogram')
+ax.plot(bin_mids[use], hist[use], color='green', label='range for model fit')
+ax.plot(bin_mids, model, 'k--', color='red', label='Gaussian model')
 
-plt.show()
+# added a legend, axis labels, title, text on plot
+legend = ax.legend(fontsize=13)
+plt.xlabel('Pixel values', fontsize=18)
+plt.tick_params(axis='x', which='major', labelsize=16)
+plt.xlim([-50., 50.])
+plt.ylabel('Number of pixels', fontsize=18)
+plt.tick_params(axis='y', which='major', labelsize=14)
+plt.title(header['TARGNAME'])
+str1 = str(r'$\mu=$')
+str2 = str('{0:5.2f}'.format(params_fit[1]))
+str3 = str(r', $\sigma=$')
+str4 = str('{0:5.2f}'.format(params_fit[2]))
+xloc = params_fit[1] - 4*params_fit[2]
+yloc = params_fit[0]*0.8
+ax.text(xloc, yloc, str1+str2+str3+str4, fontsize=14)
+
+pdf.savefig()
+plt.close()
+
+os.system('open %s &' % 'jr_gau_bkg.pdf')
