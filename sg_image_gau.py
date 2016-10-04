@@ -55,16 +55,13 @@ with PdfPages(filename) as pdf:
 
     fig = plt.figure()
     
-    y = -1
     collection = ['F475W','F814W','F160W']
-    for x in collection:
-    # for x in range(0, len(collection)):
-
-        y += 1
+    # for i in collection:
+    for i in range(0, len(collection)):
         
         # read in image
         # how can I modify this code to work for a loop?
-        file = glob.glob(dir+'final_' + collection[y] + '*sci.fits')
+        file = glob.glob(dir+'final_' + collection[i] + '*sci.fits')
         print(file)
         hdu = fits.open(file[0])
         data, header = hdu[0].data, hdu[0].header
@@ -78,9 +75,9 @@ with PdfPages(filename) as pdf:
 
         # plot the "postage stamp"
         # fig = plt.figure()
-        ax = fig.add_subplot(2,3,y+1)
+        ax = fig.add_subplot(2,3,i+1)
         plot_image()
-        plt.title(x)
+        plt.title(collection[i])
         #plt.gcf().clear()
 # begin the gau
         # select all pixels with meaningful information and put them into a
@@ -120,16 +117,17 @@ with PdfPages(filename) as pdf:
         print('sigma from gaussian fit: {0:6.3f}'.format(params_fit[2]))
         
         # visualize the histogram and the fit
-        ax = fig.add_subplot(2,3,y+4)
+        ax = fig.add_subplot(2,3,i+4)
+        plt.tick_params(axis='both', which='major', labelsize=8)
         plt.plot(bin_mids, hist)
         plt.plot(bin_mids[use], hist[use], color='green')
         plt.plot(bin_mids, model, color='red')
         # pull the axes to the correct scale, but doesn't flush out over the graph....
-        #plt.ylim([0,14000])
+        plt.ylim([0,18000])
         #plt.xlim([0,100])
        # ax = fig.add_subplot(2,3,y+4)
         #plot_image()
-        plt.title(x)
+        plt.title(collection[i])
         # plt.show()
         
     pdf.savefig()
