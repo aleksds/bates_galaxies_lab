@@ -1,10 +1,29 @@
 # Aleks Diamond-Stanic
-# 20160919
+# 20160919 -- 20161005
 #
-# the goals of this code are to do the following:
+# the preliminary goals of this code include the following:
+#
 # (1) read in three images taken in three different filters
-# (2) consider the pixels in each image that are in close proximity to the science target
+#
+# (2) consider the pixels in each image that are in close proximity to
+#     the science target
+#
 # (3) visualize the colors and flux of these pixels
+#
+#
+# more advanced goals include the following:
+#
+# (A) construct mutltiple apertures (e.g., a central circular aperture
+#     and surrounding annuli) and perform photometry in those
+#     apertures for all three images
+#
+# (B) show the photometry from each aperture on each color-magnitude plot
+#
+# (C) visualize each each aperture on top of the postage stamp images
+#
+# (D) use the color information in each aperture to estimate a
+#     mass-to-light ratio for that aperture
+
 
 # import relevant Python modules
 import os
@@ -48,6 +67,7 @@ with PdfPages('bgl_pix_vis.pdf') as pdf:
     ax = fig.add_subplot(2,3,1)
     plot_image(stamp475)
     plt.title('F475W')
+    plt.suptitle(header['TARGNAME'])
       
     # read in the F814W image
     file = glob.glob(dir+'F814W/final*sci.fits')
