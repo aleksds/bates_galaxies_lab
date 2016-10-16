@@ -45,7 +45,7 @@ with PdfPages('sg_flux_pix.pdf') as pdf:
     
     collection = ['F475W','F814W','F160W']
     filter = [475, 814, 1600]
-    colors = ['go', 'bo', 'ro']
+    colors = ['bo', 'go', 'ro']
     
     for i in range(0, len(collection)):
         
