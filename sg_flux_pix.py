@@ -42,10 +42,10 @@ dy = 100.
 with PdfPages('sg_flux_pix.pdf') as pdf:
     fig = plt.figure()
 
-    # I THINK THIS WILL DO IT
     
     collection = ['F475W','F814W','F160W']
     filter = [475, 814, 1600]
+    colors = ['go', 'bo', 'ro']
     
     for i in range(0, len(collection)):
         
@@ -69,22 +69,40 @@ with PdfPages('sg_flux_pix.pdf') as pdf:
             aperture = CircularAperture(positions, radius)
             phot_table = aperture_photometry(data, aperture)
             flux.append(phot_table['aperture_sum'][0])
-        ax = fig.add_subplot(1,1,1)
+        cx = fig.add_subplot(3,1,1)
+        ax = fig.add_subplot(3,1,2)
+        bx = fig.add_subplot(3,1,3)
+
         wavelength[0] = filter[i]
+        areaflux[0] = flux[0]
         for j in range (1, len(radii)):
             wavelength[j] = filter[i]
             areaflux[j] = flux[j] - flux [j-1]
-        ax.plot(wavelength, areaflux, 'ro')
+        cx.plot(wavelength, np.log10(areaflux), colors[i])
         # ax.plot(wavelength, flux, 'ro')
         # plt.ylim([0,4e6])
-        plt.ylim([0,5e5])
+        #plt.ylim([0,6])
         plt.xlim([400,1675])
         plt.xlabel('wavelength in nm')
         plt.ylabel('mother fluxer')
+        plt.tick_params(axis='both',which='major', labelsize = 8)
+        fig.tight_layout()
+                
+        #do stuff
+        ax.plot(radii, flux, colors[i])
+        plt.xlabel('aperture radius')
+        plt.ylabel('cumulative flux')
+        plt.tick_params(axis='both',which='major', labelsize = 8)
+        fig.tight_layout()
+        
+        bx.plot(radii, areaflux, colors[i])
+        plt.xlabel('aperture radius')
+        plt.ylabel('subtractive flux')
+        plt.xlim([0,100])
+        plt.tick_params(axis='both',which='major', labelsize = 8)
+        fig.tight_layout()
+        
 
-    ## HERE IS WHERE I STOPPED FUCKING SHIT UP
-
-    
     pdf.savefig()
     plt.close()
 os.system('open %s &' % 'sg_flux_pix.pdf')
