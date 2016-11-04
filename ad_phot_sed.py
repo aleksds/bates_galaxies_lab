@@ -55,6 +55,11 @@ with PdfPages('ad_phot_sed.pdf') as pdf:
         aperture = CircularAperture(positions, radius)
         phot_table = aperture_photometry(data475, aperture)
         flux475.append(phot_table['aperture_sum'][0])
+
+    photfnu475 = header475['PHOTFNU']
+    exptime475 = header475['EXPTIME']
+    fnujy475 = np.array(flux475) * photfnu475 / exptime475
+    mab475 = -2.5 * np.log10(fnujy475 / 3631.)
         
     # do photometry on F814W image
     flux814 = [0.]
@@ -62,6 +67,11 @@ with PdfPages('ad_phot_sed.pdf') as pdf:
         aperture = CircularAperture(positions, radius)
         phot_table = aperture_photometry(data814, aperture)
         flux814.append(phot_table['aperture_sum'][0])
+
+    photfnu814 = header814['PHOTFNU']
+    exptime814 = header814['EXPTIME']
+    fnujy814 = np.array(flux814) * photfnu814 / exptime814
+    mab814 = -2.5 * np.log10(fnujy814 / 3631.)
         
     # do photometry on F160W image
     flux160 = [0.]
@@ -70,19 +80,24 @@ with PdfPages('ad_phot_sed.pdf') as pdf:
         phot_table = aperture_photometry(data160, aperture)
         flux160.append(phot_table['aperture_sum'][0])
 
+    photfnu160 = header160['PHOTFNU']
+    exptime160 = header160['EXPTIME']
+    fnujy160 = np.array(flux160) * photfnu160 / exptime160
+    mab160 = -2.5 * np.log10(fnujy160 / 3631.)
+        
     # set up the plot
     ax = fig.add_subplot(1,1,1)
 
     # plot lines connecting photometric points for each aperture
     for i in range(0,len(radii)):
         wv = np.array([475.,814.,1600])
-        fx = np.array([flux475[i+1]-flux475[i], flux814[i+1]-flux814[i], flux160[i+1]-flux160[i]])
+        fx = np.array([fnujy475[i+1]-fnujy475[i], fnujy814[i+1]-fnujy814[i], fnujy160[i+1]-fnujy160[i]])
         ax.plot(wv, fx, color='0.75')
 
     # plot symbols for each photometric point with color scaled to aperture radius
     for i in range(0,len(radii)):
         wv = np.array([475.,814.,1600])
-        fx = np.array([flux475[i+1]-flux475[i], flux814[i+1]-flux814[i], flux160[i+1]-flux160[i]])
+        fx = np.array([fnujy475[i+1]-fnujy475[i], fnujy814[i+1]-fnujy814[i], fnujy160[i+1]-fnujy160[i]])
         cax = ax.scatter(wv, fx, c=np.array([radii[i],radii[i],radii[i]]), vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2, marker='s')
         
     # set plot parameters
@@ -90,8 +105,8 @@ with PdfPages('ad_phot_sed.pdf') as pdf:
     cbar.set_label('radius [pixels]', fontsize=18)
     ax.set_yscale('log')
     ax.set_xscale('log')
-    plt.ylim([1e4,6e5])
-    plt.ylabel('flux [image units]', fontsize=18)
+    plt.ylim([3e-7,5e-5])
+    plt.ylabel('flux [Jy]', fontsize=18)
     plt.xlim([300.,2000.])
     plt.xlabel(r'wavelength [$\AA$]', fontsize=18)
 
