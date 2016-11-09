@@ -1,3 +1,9 @@
+# Edits made by Sophia Gottlieb include
+# Units from rando units to Jys.
+# Edits made by Drunk Sophia Gottlieb include
+# Putting this mother function in a loop.
+# #fuckyes.
+
 # Aleks Diamond-Stanic
 # 20161014
 #
@@ -15,6 +21,7 @@ import glob
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.backends.backend_pdf import PdfPages
+import math
 
 # define the directory that contains the images
 # dir = os.environ['HSTDIR']
@@ -34,6 +41,11 @@ ycen = 4153.
 
 # define the radii to be used for aperture photometry
 radii = np.array([1,2,3,4,5,8,10,15,20,25,30,35,40])
+bagel =[0 for x in range(len(radii))]
+
+bagel[0] = math.pi*math.pow(radii[0],2)
+for i in range(1, len(bagel)):
+    bagel[i] = math.pi * (math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 # create a PDF file for the plots    
 with PdfPages('sg_phot_sed.pdf') as pdf:
@@ -60,8 +72,12 @@ with PdfPages('sg_phot_sed.pdf') as pdf:
         # do photometry
         flux[i] = [0.]
         for radius in radii:
+        #for bagelite in bagel:
+        #    aperture = CircularAperture(positions, radii[bagelite])
+        #    phot_table = aperture_photometry(data[i]*fnu[i]/(exp[i]*bagelite), aperture)
+        #    flux[i].append(phot_table['aperture_sum'][0])
             aperture = CircularAperture(positions, radius)
-            phot_table = aperture_photometry(data[i]*fnu[i]/exp[i], aperture)
+            phot_table = aperture_photometry(data[i]*fnu[i]/(bagel[i]*exp[i]), aperture)
             flux[i].append(phot_table['aperture_sum'][0])
 # HERE BE WHERE I STOP
 
@@ -87,7 +103,7 @@ with PdfPages('sg_phot_sed.pdf') as pdf:
     ax.set_yscale('log')
     ax.set_xscale('log')
     plt.ylim([1e-7,1e-4])
-    plt.ylabel('flux [Jy]', fontsize=18)
+    plt.ylabel('flux per area [Jy / pixel^2]', fontsize=18)
     plt.xlim([300.,2000.])
     plt.xlabel(r'wavelength [$\AA$]', fontsize=18)
 
