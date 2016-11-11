@@ -7,6 +7,11 @@
 # (2) do aperature photometry on each image
 # (3) use measurements in three different aperatures to make a plot of flux vs wavelength for each aperature
 
+# we have since then gone on to make three plots with this code; all of which plot the the data from three different filters showing F475W as blue, F814W as green, and F160W as red, as listed below:
+# (1) log of subtractive flux vs wavelength
+# (2) subtractive flux vs aperature radius
+# (3) flux vs wavelength
+
 
 # import relevant Python modules
 import os
@@ -18,6 +23,7 @@ from photutils import CircularAperture
 from photutils import CircularAnnulus
 from photutils import aperture_photometry
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib import colors
 
 # define a function to plot "postage stamp" images
 def plot_image(stamp):
@@ -42,6 +48,7 @@ with PdfPages('jr_flux_vs_wavelength.pdf') as pdf:
 
     collection = ['F475W', 'F814W', 'F160W']
     filter = [475, 814, 1600]
+    colors = ['b', 'g', 'r']
     
     for i in range (0, len(collection)):
 
@@ -59,11 +66,11 @@ with PdfPages('jr_flux_vs_wavelength.pdf') as pdf:
         # plt.suptitle(header475['TARGNAME'])
         # plt.tick_params(axis='both', which='major', labelsize=8)
     
-        # plot 475W flux vs wavelength
+        # set up for plots, establishing "fence post" correction and defining list lengths
         positions = [(xcen, ycen)]
         radii = np.arange(dx)+1
         wavelength = np.arange(dx)+1
-        mf = np.arange(dx)+1
+        subflux = np.arange(dx)+1
         flux = []
         for radius in radii:
             aperture = CircularAperture(positions, radius)
@@ -72,20 +79,37 @@ with PdfPages('jr_flux_vs_wavelength.pdf') as pdf:
         for j in range (0, len(radii)):
             wavelength[j] = filter[i]
             if j == 0:
-                mf[j] = flux[0]
+                subflux[j] = flux[0]
             else:
-                mf[j] = flux[j]-flux[j-1]
-        for radius in radii:
-            aperture = CircularAperture(positions, radius)
-            phot_table = aperture_photometry(data475, aperture)
-            flux.append(phot_table['aperture_sum'][0])
-        ax = fig.add_subplot(1,1,1)
-        ax.plot(wavelength, np.log10(mf), 'ro')
+                subflux[j] = flux[j]-flux[j-1]
+            
+        # plot log of subflux vs wavelength for three filters  
+        ax = fig.add_subplot(3,1,1)
+        ax.plot(wavelength, np.log10(subflux), colors[i])
         plt.xlim([400,1700])
         plt.ylim([3,6])
         plt.xlabel('wavelength')
-        plt.ylabel('log flux')
+        plt.ylabel('log subflux')
         plt.tick_params(axis='both', which='major', labelsize=8)
+        fig.tight_layout()
+
+        # plot the subtractive flux vs aperature radius
+        bx = fig.add_subplot(3,1,2)
+        bx.plot(radii, subflux, colors[i])
+        plt.xlabel('aperature radius')
+        plt.ylabel('subflux')
+        plt.tick_params(axis='both', which='major', labelsize=8)
+        fig.tight_layout()
+
+        # plot the flux vs radius
+        cx = fig.add_subplot(3,1,3)
+        cx.plot(radii, flux, colors[i])
+        plt.xlabel('aperature radius')
+        plt.ylabel('flux')
+        plt.tick_params(axis='both', which='major', labelsize=8)
+        fig.tight_layout()
+
+
     
     pdf.savefig()
     plt.close()
