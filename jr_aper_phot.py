@@ -53,7 +53,7 @@ def plot_image(stamp):
     plt.tick_params(axis='both', which='major', labelsize=8)
 
 # define the directory that contains the images
-dir = '/Users/jrines/data/test/'
+dir = os.environ['HSTDIR']
 
 # specify the position of the science target and the size of the
 # region around the science target to consider
