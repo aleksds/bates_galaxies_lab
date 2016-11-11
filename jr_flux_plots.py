@@ -48,17 +48,17 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
 
     collection = ['F475W', 'F814W', 'F160W']
     filter = [475, 814, 1600]
-    colors = ['b', 'g', 'r']
+    colors = ['bo', 'go', 'ro']
     
     for i in range (0, len(collection)):
 
-        # read in the 475W image
+        # read in the images
         file = glob.glob(dir+'final_'+collection[i]+'*sci.fits')
         hdu = fits.open(file[0])
-        data475, header475 = hdu[0].data, hdu[0].header
+        data, header = hdu[0].data, hdu[0].header
     
         # create a "postage stamp" image centered on the science target
-        stamp475 = data475[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
+        stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
     
         # plot the "postage stamp"
         # ax = fig.add_subplot(2,3,1)
@@ -74,8 +74,9 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
         flux = []
         for radius in radii:
             aperture = CircularAperture(positions, radius)
-            phot_table = aperture_photometry(data475, aperture)
+            phot_table = aperture_photometry(data, aperture)
             flux.append(phot_table['aperture_sum'][0])
+            print (phot_table)
         for j in range (0, len(radii)):
             wavelength[j] = filter[i]
             if j == 0:
@@ -86,6 +87,7 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
         # plot log of subflux vs wavelength for three filters  
         ax = fig.add_subplot(3,1,1)
         ax.plot(wavelength, np.log10(subflux), colors[i])
+        plt.title('Log Subflux vs. Wavelength (three filters)')
         plt.xlim([400,1700])
         plt.ylim([3,6])
         plt.xlabel('wavelength')
@@ -96,6 +98,7 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
         # plot the subtractive flux vs aperature radius
         bx = fig.add_subplot(3,1,2)
         bx.plot(radii, subflux, colors[i])
+        plt.title('Subtractive Flux vs. Aperture Radius')
         plt.xlabel('aperature radius')
         plt.ylabel('subflux')
         plt.tick_params(axis='both', which='major', labelsize=8)
@@ -104,6 +107,7 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
         # plot the flux vs radius
         cx = fig.add_subplot(3,1,3)
         cx.plot(radii, flux, colors[i])
+        plt.title('Flux vs. Radius')
         plt.xlabel('aperature radius')
         plt.ylabel('flux')
         plt.tick_params(axis='both', which='major', labelsize=8)
