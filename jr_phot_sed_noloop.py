@@ -17,7 +17,7 @@ from matplotlib import cm
 from matplotlib.backends.backend_pdf import PdfPages
 
 # define the directory that contains the images
-dir = '/Users/jrines/data/test/'
+dir = os.environ['HSTDIR']
 
 # specify the position of the science target and the size of the region around the science target to consider
 xcen = 3388.
