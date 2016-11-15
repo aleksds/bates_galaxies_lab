@@ -40,23 +40,23 @@ def plot_image(stamp):
     plt.tick_params(axis='both', which='major', labelsize=8)
 
 # define the directory that contains the images
-dir = '/Users/adiamond/data/20150203_HST/J0826+4305/coarse/'
+dir = '/Users/jrines/data/test/'
 
 # specify the position of the science target and the size of the
 # region around the science target to consider
-xcen = 3629.
-ycen = 4153.
+xcen = 3388.
+ycen = 3504.
 dx = 30.
 dy = 30.
 
 
 # create a PDF file for the plots    
-with PdfPages('bgl_pix_vis.pdf') as pdf:
+with PdfPages('jr_pix_vis.pdf') as pdf:
 
     fig = plt.figure()
 
     # read in the F475W image
-    file = glob.glob(dir+'F475W/final*sci.fits')
+    file = glob.glob(dir+'final_F4*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -70,7 +70,7 @@ with PdfPages('bgl_pix_vis.pdf') as pdf:
     plt.suptitle(header['TARGNAME'])
       
     # read in the F814W image
-    file = glob.glob(dir+'F814W/final*sci.fits')
+    file = glob.glob(dir+'final_F8*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -83,7 +83,7 @@ with PdfPages('bgl_pix_vis.pdf') as pdf:
     plt.title('F814W')
 
     # read in the F160W image
-    file = glob.glob(dir+'F160W/final*sci.fits')
+    file = glob.glob(dir+'final_F1*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -127,4 +127,4 @@ with PdfPages('bgl_pix_vis.pdf') as pdf:
     plt.close()
 
     
-    os.system('open %s &' % 'bgl_pix_vis.pdf')
+    os.system('open %s &' % 'jr_pix_vis.pdf')
