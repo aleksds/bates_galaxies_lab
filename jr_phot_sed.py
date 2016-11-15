@@ -22,13 +22,14 @@ from matplotlib.backends.backend_pdf import PdfPages
 import math
 
 # define the directory that contains the images
-dir = '/Users/jrines/data/test/'
+dir = os.environ['HSTDIR']
 
 #setting up arrays with three elements, all zeros - placeholders
 wavelengths = [4,8,1]
 data = [0 for x in range(len(wavelengths))]
 header = [0 for x in range(len(wavelengths))]
-flux = [0 for x in range(len(wavelengths))]
+fnu = [0 for x in range(len(wavelengths))]
+exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
 xcen = 3388.
@@ -57,6 +58,7 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
     collection = ['F475W','F814W','F160W']
 
     flux = np.zeros([len(collection),len(radii)])
+    subflux = np.zeros([len(collection),len(radii)])
 
     for i in range (0, len(collection)):
         
@@ -64,6 +66,8 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
         file = glob.glob(dir+'final_'+collection[i]+'*sci.fits')
         hdu = fits.open(file[0])
         data[i], header[i] = hdu[0].data, hdu[0].header
+        fnu[i] = header[i]['PHOTFNU']
+        exp[i] = header[i]['EXPTIME']
 
         #define positions for photometry
         positions = [(xcen, ycen)]
@@ -72,7 +76,11 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
         for j in range(0,len(radii)):
             aperture = CircularAperture(positions, radii[j])
             phot_table = aperture_photometry(data[i], aperture)
-            flux[i,j] = phot_table['aperture_sum'][0]
+            flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])
+            if j == 0:
+                subflux[i,j] = flux[i,j]
+            else:
+                subflux[i,j] = flux[i,j]-flux[i,j-1]
         
     #set up the plot
     ax = fig.add_subplot(1,1,1)
@@ -80,14 +88,13 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
     # plot lines connecting photometric points for each aperture
     for j in range(0,len(radii)-1):
         wv = np.array([475.,814.,1600.])
-        fx = np.array([flux[0][j+1]-flux[0][j], flux[1][j+1]-flux[1][j], flux[2][j+1]-flux[2][j]])/area[j]
+        fx = (subflux[0:len(wv),j])/(area[j])
+        #fx = np.array([flux[0,j+1]-flux[0,j], flux[1,j+1]-flux[1,j], flux[2,j+1]-flux[2,j]])*(fnu[i])/(area[j]*exp[i])
         ax.plot(wv, fx, color='0.75')
-
-    # plot symbols for each photometric point with color scaled to aperture radius
-    for j in range(0,len(radii)-1):
-        wv = np.array([475.,814.,1600.])
-        fx = np.array([flux[0][j+1]-flux[0][j], flux[1][j+1]-flux[1][j], flux[2][j+1]-flux[2][j]])/area[j]
+        
+        # plot symbols for each photometric point with color scaled to aperture radius
         cax = ax.scatter(wv, fx, c=np.array([radii[j],radii[j],radii[j]]), vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2, marker='s')
+
 
     # set plot parameters
     cbar = fig.colorbar(cax)
@@ -95,7 +102,7 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
     ax.set_yscale('log')
     ax.set_xscale('log')
     #plt.ylim([1e4,6e5])
-    plt.ylabel('flux [image units]', fontsize=18)
+    plt.ylabel('flux/area [Jy]', fontsize=18)
     plt.xlim([300.,2000.])
     plt.xlabel(r'wavelength [$\AA$]', fontsize=18)
 
