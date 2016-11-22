@@ -123,6 +123,7 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
     plt.xlabel('aperture radius')
     plt.ylabel('flux')
     plt.tick_params(axis='both', which='major', labelsize=8)
+    fluxtot1 = flux[40]
 
     # plot F814W photometric curve of growth
     positions = [(xcen, ycen)]
@@ -138,6 +139,7 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
     plt.xlabel('aperture radius')
     plt.ylabel('flux')
     plt.tick_params(axis='both', which='major', labelsize=8)
+    fluxtot8 = flux[40]
     
     # plot F475W photometric curve of growth
     positions = [(xcen, ycen)]
@@ -153,6 +155,7 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
     plt.xlabel('aperture radius')
     plt.ylabel('flux')
     plt.tick_params(axis='both', which='major', labelsize=8)
+    fluxtot4 = flux[40]
     
     pdf.savefig()
     plt.close()

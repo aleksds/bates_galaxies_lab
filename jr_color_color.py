@@ -1,13 +1,7 @@
 # Joshua Rines
 # 20161029
 #
-# the main goal of this code is to perform photometry in different
-# apertures in three different images for a galaxy and then plots flux
-# vs wavelegnth (i.e., a spectral energy distribution) for each aperture
-
-#will be adding in conversion of flux from image units to Jy, NOT STARTED
-#will be adding in putting this into a loop, IN PROGRESS
-#will be adding in dividing flux by area, IN PROGRESS
+# the main goal of this code is to create color vs color plots comparing subtractive flux annuli in three filters
 
 # import relevant Python modules
 import os
@@ -38,7 +32,7 @@ dx = 100
 dy = 100
 
 # define the radii to be used for aperture photometry
-radii = np.array([1,2,3,4,5,8,10,15,20,25,30,35,40])
+radii = np.arange(40)+1
 
 #make an array for the calculation of the area of each bagel (annulus)
 area = [0 for x in range(len(radii))]
@@ -85,16 +79,22 @@ with PdfPages('jr_color_color.pdf') as pdf:
         
         #set up the plot
         ax = fig.add_subplot(1,1,1)
-        ax.scatter(-2.5*np.log10(subflux[1] / subflux[2]), -2.5*np.log10(subflux[0] / subflux[1]), c=radii)
+        cax = ax.scatter(-2.5*np.log10(subflux[1] / subflux[2]), -2.5*np.log10(subflux[0] / subflux[1]), c=radii, vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2,)
+
+        #finding magnitudes for M/L ratio
+        mag475 = -2.5*np.log10(flux[0,13])
+        mag814 = -2.5*np.log10(flux[1,13])
+        color814 = mag475-mag814
+
 
     # set plot parameters
-    #cbar = fig.colorbar(ax)
-    #cbar.set_label('radius [pixels]', fontsize=18)
-    ax.set_yscale('log')
-    ax.set_xscale('log')
-    #plt.ylim([1e4,6e5])
+    cbar = fig.colorbar(cax)
+    cbar.set_label('radius [pixels]', fontsize=18)
+    #ax.set_yscale('log')
+    #ax.set_xscale('log')
+    #plt.ylim([10**(-1),1e1])
     plt.ylabel('U-V', fontsize=18)
-    #plt.xlim([300.,2000.])
+    #plt.xlim([10**(-1),1e1])
     plt.xlabel('V-J', fontsize=18)
 
     pdf.savefig()
