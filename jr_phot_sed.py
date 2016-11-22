@@ -89,7 +89,6 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
     for j in range(0,len(radii)-1):
         wv = np.array([475.,814.,1600.])
         fx = (subflux[0:len(wv),j])/(area[j])
-        #fx = np.array([flux[0,j+1]-flux[0,j], flux[1,j+1]-flux[1,j], flux[2,j+1]-flux[2,j]])*(fnu[i])/(area[j]*exp[i])
         ax.plot(wv, fx, color='0.75')
         
         # plot symbols for each photometric point with color scaled to aperture radius
