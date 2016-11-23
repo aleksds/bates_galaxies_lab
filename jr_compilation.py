@@ -104,12 +104,12 @@ with PdfPages('jr_compilation.pdf') as pdf:
     colorVJ = mag814-mag160
 
     #determining M/L ratio using Table 1 of Bell & de Jong
-    MLR1 = 10**(-.994+(1.804*colorUV))
-    MLR2 = 10**(-.734+(1.404*colorUV))
-    MLR3 = 10**(-1.477+(.905*colorVJ))
-    MLR4 = 10**(-1.029+(.700*colorVJ))
-    MLR5 = 10**(-.621+(.794*colorUV))
-    MLR6 = 10**(-1.903+(1.138*colorVJ))
+    MLR_BV_B = 10**(-.994+(1.804*colorUV))
+    MLR_BV_V = 10**(-.734+(1.404*colorUV))
+    MLR_BV_J = 10**(-0.621+(0.794*colorUV))
+    MLR_VJ_B = 10**(-1.903+(1.138*colorVJ))
+    MLR_VJ_V = 10**(-1.477+0.905*(colorVJ))
+    MLR_VJ_J = 10**(-1.029+(.505*colorVJ))
 
     #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24)
     c = 299792458
@@ -123,13 +123,13 @@ with PdfPages('jr_compilation.pdf') as pdf:
     Lsol160 = LnuNu160 / (3.846*10**33)
 
     #calculate mass of galaxy in solar units
-    M1 = Lsol475*MLR1
-    M2 = Lsol814*MLR2
-    M3 = Lsol814*MLR3
-    M4 = Lsol160*MLR4
-    M5 = Lsol160*MLR5
-    M6 = Lsol475*MLR6 
-    print(M1/1e11, M2/1e11, M3/1e11, M4/1e11, M5/1e11, M6/1e11)
+    M_BV_B = Lsol475*MLR_BV_B
+    M_BV_V = Lsol814*MLR_BV_V
+    M_BV_J = Lsol160*MLR_BV_J
+    M_VJ_B = Lsol475*MLR_VJ_B
+    M_VJ_V = Lsol814*MLR_VJ_V
+    M_VJ_J = Lsol160*MLR_VJ_J
+    print(M_BV_B/1e11, M_BV_V/1e11, M_BV_J/1e11, M_VJ_B/1e11, M_VJ_V/1e11, M_VJ_J/1e11)
 
     #calculation of flux for each annulus
     aflux475 = subflux[0]
@@ -154,4 +154,4 @@ with PdfPages('jr_compilation.pdf') as pdf:
     plt.close()
 
     
-    os.system('open %s &' % 'jr_compilation.pdf')
+    #os.system('open %s &' % 'jr_compilation.pdf')
