@@ -1,4 +1,4 @@
-# Joshua Rines
+# Aleks Diamond-Stanic
 # 20161122
 #
 #the goal of this script is to take our flux values, whether it be in annulus form or total flux form, and calculate a few things:
@@ -39,7 +39,7 @@ dx = 100
 dy = 100
 
 # define the radii to be used for aperture photometry
-radii = np.arange(50)+1
+radii = np.arange(40)+1
 
 #make an array for the calculation of the area of each bagel (annulus)
 area = [0 for x in range(len(radii))]
@@ -104,12 +104,12 @@ with PdfPages('jr_compilation.pdf') as pdf:
     colorVJ = mag814-mag160
 
     #determining M/L ratio using Table 1 of Bell & de Jong
-    ML_BV_B = 10**(-.994+(1.804*colorUV))
-    ML_BV_V = 10**(-.734+(1.404*colorUV))
-    ML_BV_J = 10**(-.621+(.794*colorUV))
-    ML_VJ_B = 10**(-1.903+(1.138*colorVJ))
-    ML_VJ_V = 10**(-1.477+(.905*colorVJ))
-    ML_VJ_J = 10**(-1.029+(.505*colorVJ))
+    MLR_BV_B = 10**(-.994+(1.804*colorUV))
+    MLR_BV_V = 10**(-.734+(1.404*colorUV))
+    MLR_BV_J = 10**(-.621+(.794*colorUV))
+    MLR_VJ_B = 10**(-1.903+(1.138*colorVJ))
+    MLR_VJ_V = 10**(-1.477+(.905*colorVJ))
+    MLR_VJ_J = 10**(-1.029+(.505*colorVJ))
 
     #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24)
     c = 299792458
@@ -123,21 +123,46 @@ with PdfPages('jr_compilation.pdf') as pdf:
     Lsol160 = LnuNu160 / (3.846*10**33)
 
     #calculate mass of galaxy in solar units
-    M_BV_B = Lsol475*ML_BV_B
-    M_BV_V = Lsol814*ML_BV_V
-    M_BV_J = Lsol160*ML_BV_J
-    M_VJ_B = Lsol475*ML_VJ_B
-    M_VJ_V = Lsol814*ML_VJ_V
-    M_VJ_J = Lsol160*ML_VJ_J
+    M_BV_B = Lsol475*MLR_BV_B
+    M_BV_V = Lsol814*MLR_BV_V
+    M_BV_J = Lsol160*MLR_BV_J
+    M_VJ_B = Lsol475*MLR_VJ_B
+    M_VJ_V = Lsol814*MLR_VJ_V
+    M_VJ_J = Lsol160*MLR_VJ_J
     print('M_BV_B', M_BV_B/1e11, 'M_BV_V', M_BV_V/1e11, 'M_BV_J', M_BV_J/1e11, 'M_VJ_B', M_VJ_B/1e11, 'M_VJ_V', M_VJ_V/1e11, 'M_VJ_J', M_VJ_J/1e11)
 
-    #calculation of flux for each annulus
-    aflux475 = subflux[0]
-    aflux814 = subflux[1]
-    aflux160 = subflux[2]
+    #calculation of flux for each annulus, in erg/s units
+    aflux475 = subflux[0]*10**-23
+    aflux814 = subflux[1]*10**-23
+    aflux160 = subflux[2]*10**-23
 
-    #finding magnitudes and color for M/L ratio in each annulus
-    #for j in range(0,len(radii))
+    #calculation of magnitudes and color for each annulus
+    amag475 = -2.5*np.log10(aflux475 / 3631)
+    amag814 = -2.5*np.log10(aflux814 / 3631)
+    amag160 = -2.5*np.log10(aflux160 / 3631)
+    acolorUV = amag475-amag814
+    acolorVJ = amag814-amag160
+
+    #determining M/L ratio using Table 1 of Bell & de Jong
+    aML_BV_B = 10**(-.994+(1.804*acolorUV))
+    aML_BV_V = 10**(-.734+(1.404*acolorUV))
+    aML_BV_J = 10**(-.621+(.794*acolorUV))
+
+    #calculating nu_e * L_nu_e luminosity in erg/s units for each annulus from Hogg eq (24)
+    c = 299792458
+    aLnuNu475 = (c/(475*10**-9))*aflux475*(4*math.pi*LdJ0905**2)
+    aLnuNu814 = (c/(814*10**-9))*aflux814*(4*math.pi*LdJ0905**2)
+    aLnuNu160 = (c/(1600*10**-9))*aflux160*(4*math.pi*LdJ0905**2)
+
+    #convert luminosity for each annulus to solar units
+    aLsol475 = aLnuNu475 / (3.846*10**33)
+    aLsol814 = aLnuNu814 / (3.846*10**33)
+    aLsol160 = aLnuNu160 / (3.846*10**33)
+
+    #calculate mass associated with each annulus in solar units
+    aM_BV_B = aLsol475*aML_BV_B
+    aM_BV_V = aLsol814*aML_BV_V
+    aM_BV_J = aLsol160*aML_BV_J
             
 
     # set plot parameters
@@ -154,4 +179,4 @@ with PdfPages('jr_compilation.pdf') as pdf:
     plt.close()
 
     
-    os.system('open %s &' % 'jr_compilation.pdf')
+    #os.system('open %s &' % 'jr_compilation.pdf')
