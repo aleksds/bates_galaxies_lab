@@ -52,7 +52,7 @@ for i in range(0, len(area)):
         area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 # create a PDF file for the plots    
-with PdfPages('jr_compilation.pdf') as pdf:
+with PdfPages('ad_compilation.pdf') as pdf:
 
     fig = plt.figure()
 
@@ -88,6 +88,9 @@ with PdfPages('jr_compilation.pdf') as pdf:
         #ax = fig.add_subplot(1,1,1)
         #cax = ax.scatter(-2.5*np.log10(subflux[1] / subflux[2]), -2.5*np.log10(subflux[0] / subflux[1]), c=radii, vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2,)
 
+        
+    #calculating galaxy-wide
+    
     #finding total flux in galaxy in erg/s
     tflux475 = flux[0,len(radii)-1]*(10**-23)
     tflux814 = flux[1,len(radii)-1]*(10**-23)
@@ -130,6 +133,9 @@ with PdfPages('jr_compilation.pdf') as pdf:
     M_VJ_V = Lsol814*MLR_VJ_V
     M_VJ_J = Lsol160*MLR_VJ_J
     print('M_BV_B', M_BV_B/1e11, 'M_BV_V', M_BV_V/1e11, 'M_BV_J', M_BV_J/1e11, 'M_VJ_B', M_VJ_B/1e11, 'M_VJ_V', M_VJ_V/1e11, 'M_VJ_J', M_VJ_J/1e11)
+    
+
+    #calculation annulus-based
 
     #calculation of flux for each annulus, in erg/s units
     aflux475 = subflux[0]*10**-23
@@ -179,4 +185,4 @@ with PdfPages('jr_compilation.pdf') as pdf:
     plt.close()
 
     
-    #os.system('open %s &' % 'jr_compilation.pdf')
+    #os.system('open %s &' % 'ad_compilation.pdf')
