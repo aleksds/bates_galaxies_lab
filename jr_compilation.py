@@ -84,11 +84,7 @@ with PdfPages('jr_compilation.pdf') as pdf:
             else:
                 subflux[i,j] = flux[i,j]-flux[i,j-1]
         
-        #set up the plot
-        #ax = fig.add_subplot(1,1,1)
-        #cax = ax.scatter(-2.5*np.log10(subflux[1] / subflux[2]), -2.5*np.log10(subflux[0] / subflux[1]), c=radii, vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2,)
 
-        
     #calculating galaxy-wide
 
     #set up two-dimensional arrays for the a and b coefficients based on the luminosity and color
@@ -215,7 +211,17 @@ with PdfPages('jr_compilation.pdf') as pdf:
     aM_BV_B = aLsol475*aMLR_BV_B
     aM_BV_V = aLsol814*aMLR_BV_V
     aM_BV_J = aLsol160*aMLR_BV_J
-            
+    mass = (aM_BV_B,aM_BV_V,aM_BV_J)
+
+    #plotting mass vs radius
+    colors = ['b', 'g', 'r']
+    for k in range(0,len(colors)):
+        ax = fig.add_subplot(1,1,1)
+        ax.plot(radii,mass[k],colors[k])
+
+    #set up the plot
+    #ax = fig.add_subplot(1,1,1)
+    #cax = ax.scatter(-2.5*np.log10(subflux[1] / subflux[2]), -2.5*np.log10(subflux[0] / subflux[1]), c=radii, vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2,)
 
     # set plot parameters
     #cbar = fig.colorbar(cax)
@@ -231,4 +237,4 @@ with PdfPages('jr_compilation.pdf') as pdf:
     plt.close()
 
     
-    #os.system('open %s &' % 'jr_compilation.pdf')
+    os.system('open %s &' % 'jr_compilation.pdf')
