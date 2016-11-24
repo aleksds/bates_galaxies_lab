@@ -39,7 +39,7 @@ dx = 100
 dy = 100
 
 # define the radii to be used for aperture photometry
-radii = np.arange(50)+1
+radii = np.arange(40)+1
 
 #make an array for the calculation of the area of each bagel (annulus)
 area = [0 for x in range(len(radii))]
@@ -88,6 +88,21 @@ with PdfPages('jr_compilation.pdf') as pdf:
         #ax = fig.add_subplot(1,1,1)
         #cax = ax.scatter(-2.5*np.log10(subflux[1] / subflux[2]), -2.5*np.log10(subflux[0] / subflux[1]), c=radii, vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2,)
 
+        
+    #calculating galaxy-wide
+
+    #set up two-dimensional arrays for the a and b coefficients based on the luminosity and color
+    #this will be in the same format ish as the table in Josh's blue notebook
+    Ba = [-1.019,-1.113,-1.026,-.990,-1.110,-.994,-.888]
+    Bb = [1.937,2.065,1.954,1.883,2.018,1.804,1.758]
+    B_coeff = [Ba,Bb]
+    Va = [-.759,-.853,-.766,-.730,-.850,-.734,-.628]
+    Vb = [1.537,1.665,1.554,1.483,1.618,1.404,1.358]
+    V_coeff = [Va,Vb]
+    Ja = [-.540,-.658,-.527,-.514,-.659,-.621,-.550]
+    Jb = [.757,.907,.741,.704,.878,.794,.801]
+    J_coeff = [Ja,Jb]
+    
     #finding total flux in galaxy in erg/s
     tflux475 = flux[0,len(radii)-1]*(10**-23)
     tflux814 = flux[1,len(radii)-1]*(10**-23)
@@ -103,15 +118,16 @@ with PdfPages('jr_compilation.pdf') as pdf:
     colorUV = mag475-mag814
     colorVJ = mag814-mag160
 
-    #determining M/L ratio using Table 1 of Bell & de Jong
-    MLR_BV_B = 10**(-.994+(1.804*colorUV))
-    MLR_BV_V = 10**(-.734+(1.404*colorUV))
-    MLR_BV_J = 10**(-0.621+(0.794*colorUV))
-    MLR_VJ_B = 10**(-1.903+(1.138*colorVJ))
-    MLR_VJ_V = 10**(-1.477+0.905*(colorVJ))
-    MLR_VJ_J = 10**(-1.029+(.505*colorVJ))
+    #determining M/L ratio using Table 3 of Bell & de Jong, seven coefficients for each luminosity for BV color
+    MLR_BV_Bk = np.zeros([len(Ba)])
+    MLR_BV_Vk = np.zeros([len(Va)])
+    MLR_BV_Jk = np.zeros([len(Ja)])
+    for k in range(0,len(Ba)):
+        MLR_BV_Bk[k] = 10**(Ba[k]+(Bb[k]*colorUV))
+        MLR_BV_Vk[k] = 10**(Va[k]+(Vb[k]*colorUV))
+        MLR_BV_Jk[k] = 10**(Ja[k]+(Jb[k]*colorUV))
 
-    #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24)
+    #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24), only three values depending on filter
     c = 299792458
     LnuNu475 = (c/(475*10**-9))*tflux475*(4*math.pi*LdJ0905**2)
     LnuNu814 = (c/(814*10**-9))*tflux814*(4*math.pi*LdJ0905**2)
@@ -122,22 +138,83 @@ with PdfPages('jr_compilation.pdf') as pdf:
     Lsol814 = LnuNu814 / (3.846*10**33)
     Lsol160 = LnuNu160 / (3.846*10**33)
 
+    #calculate mass of galaxy in solar units, 3 arrays of masses for each coefficient for 3 different filters will yield a total of 21 galaxy masses, 7 values for each luminosity in the BV color
+    M_BV_Bk = np.zeros([len(Ba)])
+    M_BV_Vk = np.zeros([len(Va)])
+    M_BV_Jk = np.zeros([len(Ja)])
+    
+    M_BV_Bk = Lsol475*MLR_BV_Bk
+    M_BV_Vk = Lsol814*MLR_BV_Vk
+    M_BV_Jk = Lsol160*MLR_BV_Jk
+
+    #determining M/L ratio using Table 1 of Bell & de Jong
+    #MLR_BV_B = 10**(-.994+(1.804*colorUV))
+    #MLR_BV_V = 10**(-.734+(1.404*colorUV))
+    #MLR_BV_J = 10**(-0.621+(0.794*colorUV))
+    #MLR_VJ_B = 10**(-1.903+(1.138*colorVJ))
+    #MLR_VJ_V = 10**(-1.477+0.905*(colorVJ))
+    #MLR_VJ_J = 10**(-1.029+(.505*colorVJ))
+
+    #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24)
+    #c = 299792458
+    #LnuNu475 = (c/(475*10**-9))*tflux475*(4*math.pi*LdJ0905**2)
+    #LnuNu814 = (c/(814*10**-9))*tflux814*(4*math.pi*LdJ0905**2)
+    #LnuNu160 = (c/(1600*10**-9))*tflux160*(4*math.pi*LdJ0905**2)
+
+    #convert luminosity to solar units
+    #Lsol475 = LnuNu475 / (3.846*10**33)
+    #Lsol814 = LnuNu814 / (3.846*10**33)
+    #Lsol160 = LnuNu160 / (3.846*10**33)
+
     #calculate mass of galaxy in solar units
-    M_BV_B = Lsol475*MLR_BV_B
-    M_BV_V = Lsol814*MLR_BV_V
-    M_BV_J = Lsol160*MLR_BV_J
-    M_VJ_B = Lsol475*MLR_VJ_B
-    M_VJ_V = Lsol814*MLR_VJ_V
-    M_VJ_J = Lsol160*MLR_VJ_J
-    print(M_BV_B/1e11, M_BV_V/1e11, M_BV_J/1e11, M_VJ_B/1e11, M_VJ_V/1e11, M_VJ_J/1e11)
+    #M_BV_B = Lsol475*MLR_BV_B
+    #M_BV_V = Lsol814*MLR_BV_V
+    #M_BV_J = Lsol160*MLR_BV_J
+    #M_VJ_B = Lsol475*MLR_VJ_B
+    #M_VJ_V = Lsol814*MLR_VJ_V
+    #M_VJ_J = Lsol160*MLR_VJ_J
+    #print(M_BV_B/1e11, M_BV_V/1e11, M_BV_J/1e11, M_VJ_B/1e11, M_VJ_V/1e11, M_VJ_J/1e11)
+    
 
-    #calculation of flux for each annulus
-    aflux475 = subflux[0]
-    aflux814 = subflux[1]
-    aflux160 = subflux[2]
+    #calculation annulus-based
 
-    #finding magnitudes and color for M/L ratio in each annulus
-    #for j in range(0,len(radii))
+    #calculation of flux for each annulus, given in an array, for each filter, in erg/s units
+    aflux475 = subflux[0]*10**-23
+    aflux814 = subflux[1]*10**-23
+    aflux160 = subflux[2]*10**-23
+
+    #calculation of magnitudes and color for each annulus
+    amag475 = -2.5*np.log10(aflux475 / 3631)
+    amag814 = -2.5*np.log10(aflux814 / 3631)
+    amag160 = -2.5*np.log10(aflux160 / 3631)
+    acolorUV = amag475-amag814
+    acolorVJ = amag814-amag160
+
+    #determining M/L ratio using Table 1 of Bell & de Jong
+    #need to set up a 2d array with values which will be done later, for now just using Table 1 coefficients
+    #aMLR_BV_Bk = np.zeros([len(Ba)])
+    #aMLR_BV_Bk = 10**(Ba[k]+(Bb[k]*colorUV))
+
+    #I THINK I FIGURED IT OUT: I only need the ML ratio for the entire galaxy, NOT for each specific annulus...that somehow seems to mess up the total mass.  THUS: I am essentially using the same MLR as MLR_BV_X , so the 'acolor' things were not necessary I dont think...but if need be, I will put the 'acolorUV' code back in place of the 'colorUV' code below.
+    aMLR_BV_B = 10**(-.994+(1.804*colorUV))
+    aMLR_BV_V = 10**(-.734+(1.404*colorUV))
+    aMLR_BV_J = 10**(-.621+(.794*colorUV))
+
+    #calculating nu_e * L_nu_e luminosity in erg/s units for each annulus from Hogg eq (24)
+    c = 299792458
+    aLnuNu475 = (c/(475*10**-9))*aflux475*(4*math.pi*LdJ0905**2)
+    aLnuNu814 = (c/(814*10**-9))*aflux814*(4*math.pi*LdJ0905**2)
+    aLnuNu160 = (c/(1600*10**-9))*aflux160*(4*math.pi*LdJ0905**2)
+
+    #convert luminosity for each annulus to solar units
+    aLsol475 = aLnuNu475 / (3.846*10**33)
+    aLsol814 = aLnuNu814 / (3.846*10**33)
+    aLsol160 = aLnuNu160 / (3.846*10**33)
+
+    #calculate mass associated with each annulus in solar units
+    aM_BV_B = aLsol475*aMLR_BV_B
+    aM_BV_V = aLsol814*aMLR_BV_V
+    aM_BV_J = aLsol160*aMLR_BV_J
             
 
     # set plot parameters
