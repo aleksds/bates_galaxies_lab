@@ -30,7 +30,14 @@ def plot_image():
     print(y1, y2, y3)
 
 # define the directory that contains the images
-dir = '/Users/adiamond/data/20150203_HST/J0826+4305/coarse/'
+dir = os.environ['HSTDIR']
+
+#setting up arrays with three elements, all zeros - placeholders
+wavelengths = [4,8,1]
+data = [0 for x in range(len(wavelengths))]
+header = [0 for x in range(len(wavelengths))]
+fnu = [0 for x in range(len(wavelengths))]
+exp = [0 for x in range(len(wavelengths))]
 
 xcen = 3629.
 ycen = 4153.
@@ -38,12 +45,12 @@ dx = 5
 dy = 5
 
 # create a PDF file for the plots    
-with PdfPages('bgl_image_stamp.pdf') as pdf:
+with PdfPages('ad_centroid.pdf') as pdf:
 
     fig = plt.figure()
 
     # read in the F475W image
-    file = glob.glob(dir+'F475W/final*sci.fits')
+    file = glob.glob(dir+'J0905_final_F4*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -56,7 +63,7 @@ with PdfPages('bgl_image_stamp.pdf') as pdf:
     plt.title('F475W')
       
     # read in the F814W image
-    file = glob.glob(dir+'F814W/final*sci.fits')
+    file = glob.glob(dir+'J0905_final_F8*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -69,7 +76,7 @@ with PdfPages('bgl_image_stamp.pdf') as pdf:
     plt.title('F814W')
 
     # read in the F160W image
-    file = glob.glob(dir+'F160W/final*sci.fits')
+    file = glob.glob(dir+'J0905_final_F1*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -84,5 +91,5 @@ with PdfPages('bgl_image_stamp.pdf') as pdf:
     pdf.savefig()
     plt.close()
 
-    os.system('open %s &' % 'bgl_image_stamp.pdf')
+    os.system('open %s &' % 'ad_centroid.pdf')
     
