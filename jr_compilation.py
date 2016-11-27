@@ -180,6 +180,7 @@ with PdfPages('jr_compilation.pdf') as pdf:
     aflux160 = subflux[2]*10**-23
 
     #calculation of magnitudes and color for each annulus
+    #I do not think I need to calculate 'acolorUV', but rather simply use the 'colorUV' calculation to determine MLR, however I have left this in the code in case we need to refer to it later. I did not comment it out since it isn't used later in the code.
     amag475 = -2.5*np.log10(aflux475 / 3631)
     amag814 = -2.5*np.log10(aflux814 / 3631)
     amag160 = -2.5*np.log10(aflux160 / 3631)
@@ -192,6 +193,8 @@ with PdfPages('jr_compilation.pdf') as pdf:
     #aMLR_BV_Bk = 10**(Ba[k]+(Bb[k]*colorUV))
 
     #I THINK I FIGURED IT OUT: I only need the ML ratio for the entire galaxy, NOT for each specific annulus...that somehow seems to mess up the total mass.  THUS: I am essentially using the same MLR as MLR_BV_X , so the 'acolor' things were not necessary I dont think...but if need be, I will put the 'acolorUV' code back in place of the 'colorUV' code below.
+    
+    #this is determining MLR using Table 1 coeffieicnts.  I could extend this to use all the coefficients, but for now, my plan is to calculate statistical uncertainty using the 21 values I have from finding the total mass of the galaxy and extend it to these measurements.  I could use the 3 values I have calculated below for the annuli.
     aMLR_BV_B = 10**(-.994+(1.804*colorUV))
     aMLR_BV_V = 10**(-.734+(1.404*colorUV))
     aMLR_BV_J = 10**(-.621+(.794*colorUV))
@@ -215,23 +218,14 @@ with PdfPages('jr_compilation.pdf') as pdf:
 
     #plotting mass vs radius
     colors = ['b', 'g', 'r']
+    dot = ['bo','go','ro']
     for k in range(0,len(colors)):
         ax = fig.add_subplot(1,1,1)
         ax.plot(radii,mass[k],colors[k])
-
-    #set up the plot
-    #ax = fig.add_subplot(1,1,1)
-    #cax = ax.scatter(-2.5*np.log10(subflux[1] / subflux[2]), -2.5*np.log10(subflux[0] / subflux[1]), c=radii, vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2,)
-
-    # set plot parameters
-    #cbar = fig.colorbar(cax)
-    #cbar.set_label('radius [pixels]', fontsize=18)
-    #ax.set_yscale('log')
-    #ax.set_xscale('log')
-    #plt.ylim([10**(-1),1e1])
-    #plt.ylabel('U-V', fontsize=18)
-    #plt.xlim([10**(-1),1e1])
-    #plt.xlabel('V-J', fontsize=18)
+        ax.plot(radii,mass[k],dot[k])
+    plt.xlabel('Radius',fontsize=18)
+    plt.ylabel('Mass',fontsize=18)
+    plt.title('Mass vs. Radius, J0905',fontsize=20)
 
     pdf.savefig()
     plt.close()
