@@ -35,8 +35,8 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-xcen = 3388.
-ycen = 3504.
+xcen = 3386.5
+ycen = 3503.2
 dx = 100
 dy = 100
 
@@ -235,7 +235,7 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     step2 = 1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2])
 
     best_value = step1/step2
-    print('J0905 mass best value:', best_value)
+    print('J0905 mass best value:', best_value/1e11)
 
     #plotting mass vs radius
     colors = ['b', 'g', 'r']
