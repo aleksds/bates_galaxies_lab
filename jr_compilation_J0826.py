@@ -21,6 +21,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.backends.backend_pdf import PdfPages
 import math
+import matplotlib.lines as mlines
+from matplotlib.legend_handler import HandlerLine2D
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
@@ -143,6 +145,8 @@ with PdfPages('jr_compilation_J0826.pdf') as pdf:
     M_BV_Vk = Lsol814*MLR_BV_Vk
     M_BV_Jk = Lsol160*MLR_BV_Jk
 
+    mass = (M_BV_Bk, M_BV_Vk, M_BV_Jk)
+
     #determining M/L ratio using Table 1 of Bell & de Jong
     #MLR_BV_B = 10**(-.994+(1.804*colorUV))
     #MLR_BV_V = 10**(-.734+(1.404*colorUV))
@@ -214,18 +218,39 @@ with PdfPages('jr_compilation_J0826.pdf') as pdf:
     aM_BV_B = aLsol475*aMLR_BV_B
     aM_BV_V = aLsol814*aMLR_BV_V
     aM_BV_J = aLsol160*aMLR_BV_J
-    mass = (aM_BV_B,aM_BV_V,aM_BV_J)
+    amass = (aM_BV_B,aM_BV_V,aM_BV_J)
+
+    #making various calculations, including std, best value, etc.
+    ave_mass475 = np.mean(mass[0])
+    ave_mass814 = np.mean(mass[1])
+    ave_mass160 = np.mean(mass[2])
+    ave_mass = (ave_mass475,ave_mass814,ave_mass160)
+    
+    std_mass475 = np.std(mass[0])
+    std_mass814 = np.std(mass[1])
+    std_mass160 = np.std(mass[2])
+    std_mass = (std_mass475,std_mass814,std_mass160)
+
+    step1 = ave_mass[0]/np.square(std_mass[0]) + ave_mass[1]/np.square(std_mass[1]) + ave_mass[2]/np.square(std_mass[2])
+    step2 = 1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2])
+
+    best_value = step1/step2
+    print('J0905 mass best value:', best_value)
 
     #plotting mass vs radius
     colors = ['b', 'g', 'r']
     dot = ['bo','go','ro']
     for k in range(0,len(colors)):
         ax = fig.add_subplot(1,1,1)
-        ax.plot(radii,mass[k],colors[k])
-        ax.plot(radii,mass[k],dot[k])
-    plt.xlabel('Radius',fontsize=18)
-    plt.ylabel('Mass',fontsize=18)
+        ax.plot(radii,amass[k],colors[k], marker='o', label=str(collection[k]))
+        ax.plot(radii,amass[k],dot[k])
+    plt.xlabel('Radius (pixels)',fontsize=18)
+    plt.ylabel('Mass (solar masses)',fontsize=18)
     plt.title('Mass vs. Radius, J0826',fontsize=20)
+
+    #adding the legend
+    legend = ax.legend(loc='upper right')
+    
 
     pdf.savefig()
     plt.close()
