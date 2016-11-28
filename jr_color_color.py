@@ -86,6 +86,8 @@ with PdfPages('jr_color_color.pdf') as pdf:
         mag814 = -2.5*np.log10(flux[1,13])
         color814 = mag475-mag814
 
+        color = -2.5*np.log10(subflux[1] / subflux[2])
+
 
     # set plot parameters
     cbar = fig.colorbar(cax)
