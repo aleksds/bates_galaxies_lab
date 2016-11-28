@@ -63,7 +63,7 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
     for i in range (0, len(collection)):
         
         # read in the images
-        file = glob.glob(dir+'final_'+collection[i]+'*sci.fits')
+        file = glob.glob(dir+'J0905_final_'+collection[i]+'*sci.fits')
         hdu = fits.open(file[0])
         data[i], header[i] = hdu[0].data, hdu[0].header
         fnu[i] = header[i]['PHOTFNU']
