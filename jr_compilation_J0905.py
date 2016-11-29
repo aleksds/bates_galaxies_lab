@@ -23,6 +23,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import math
 import matplotlib.lines as mlines
 from matplotlib.legend_handler import HandlerLine2D
+from scipy import integrate
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
@@ -35,8 +36,8 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-xcen = 3388.
-ycen = 3504.
+xcen = 3386.5
+ycen = 3503.2
 dx = 100
 dy = 100
 
@@ -199,9 +200,16 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     #I THINK I FIGURED IT OUT: I only need the ML ratio for the entire galaxy, NOT for each specific annulus...that somehow seems to mess up the total mass.  THUS: I am essentially using the same MLR as MLR_BV_X , so the 'acolor' things were not necessary I dont think...but if need be, I will put the 'acolorUV' code back in place of the 'colorUV' code below.
     
     #this is determining MLR using Table 1 coeffieicnts.  I could extend this to use all the coefficients, but for now, my plan is to calculate statistical uncertainty using the 21 values I have from finding the total mass of the galaxy and extend it to these measurements.  I could use the 3 values I have calculated below for the annuli.
-    aMLR_BV_B = 10**(-.994+(1.804*colorUV))
-    aMLR_BV_V = 10**(-.734+(1.404*colorUV))
-    aMLR_BV_J = 10**(-.621+(.794*colorUV))
+
+    #after discussing with Aleks, we determined that we do want an individualized MLR for each annulus, so I have done that by replacing the 'acolorUV' below. This gives an array with size 40 with which we can calculate the aLunuNu, and later on the mass in each ring.
+    aMLR_BV_B = 10**(-.994+(1.804*acolorUV))
+    aMLR_BV_V = 10**(-.734+(1.404*acolorUV))
+    aMLR_BV_J = 10**(-.621+(.794*acolorUV))
+
+    #calculation of annular MLR based on one MLR for the entire galaxy, since we plan to overlay polots of both. this will be denoted 'bMLR...'
+    bMLR_BV_B = 10**(-.994+(1.804*colorUV))
+    bMLR_BV_V = 10**(-.734+(1.404*colorUV))
+    bMLR_BV_J = 10**(-.621+(.794*colorUV))
 
     #calculating nu_e * L_nu_e luminosity in erg/s units for each annulus from Hogg eq (24)
     c = 299792458
@@ -209,16 +217,24 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     aLnuNu814 = (c/(814*10**-9))*aflux814*(4*math.pi*LdJ0905**2)
     aLnuNu160 = (c/(1600*10**-9))*aflux160*(4*math.pi*LdJ0905**2)
 
+    #NOTE: we can use the same luminosity calculations, since the luminosity doesnt depend on M/L ratio, which is why we don't make a 'bLunuNu...' calculation
+    
     #convert luminosity for each annulus to solar units
     aLsol475 = aLnuNu475 / (3.846*10**33)
     aLsol814 = aLnuNu814 / (3.846*10**33)
     aLsol160 = aLnuNu160 / (3.846*10**33)
 
-    #calculate mass associated with each annulus in solar units
+    #calculate mass associated with each annulus, based on individualized MLRs for each annulus, in solar units, based on individualized MLRs
     aM_BV_B = aLsol475*aMLR_BV_B
     aM_BV_V = aLsol814*aMLR_BV_V
     aM_BV_J = aLsol160*aMLR_BV_J
     amass = (aM_BV_B,aM_BV_V,aM_BV_J)
+
+    #calculate mass associated with each annulus in solar units, based on one MLR estimate for the entire galaxy
+    bM_BV_B = aLsol475*bMLR_BV_B
+    bM_BV_V = aLsol814*bMLR_BV_V
+    bM_BV_J = aLsol160*bMLR_BV_J
+    bmass = (bM_BV_B,bM_BV_V,bM_BV_J) 
 
     #making various calculations, including std, best value, etc.
     ave_mass475 = np.mean(mass[0])
@@ -235,21 +251,47 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     step2 = 1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2])
 
     best_value = step1/step2
-    print('J0905 mass best value:', best_value)
+    print('J0905 total mass best value:', best_value/1e11)
+
+    uncert = (1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2]))**-.5
+    print('J0905 total mass uncertainty:', uncert/1e11)
+
+    #for an individual annulus
+    #for j in range(0,len(collection)+1):
+        #amass_0 = amass[j][0]+amass[j+1][0]+amass[j+2][0]
 
     #plotting mass vs radius
-    colors = ['b', 'g', 'r']
+    acolors = ['b--','g--','r--']
+    bcolors = ['b', 'g', 'r']
     dot = ['bo','go','ro']
-    for k in range(0,len(colors)):
-        ax = fig.add_subplot(1,1,1)
-        ax.plot(radii,amass[k],colors[k], marker='o', label=str(collection[k]))
-        ax.plot(radii,amass[k],dot[k])
-    plt.xlabel('Radius (pixels)',fontsize=18)
-    plt.ylabel('Mass (solar masses)',fontsize=18)
-    plt.title('Mass vs. Radius, J0826',fontsize=20)
+    alabeling = ['annulus MLR F475W','annulus MLR F814W','annulus MLR 160W']
+    blabeling = ['single MLR F475W','single MLR 814W','single MLR 160W']
+
+    #plotting the specific annular (specific aMLR) mass
+    for k in range(0,len(acolors)):
+        ax = fig.add_subplot(2,1,1)
+        ax.plot(radii, amass[k], acolors[k], marker='o', label=str(alabeling[k]))
+        ax.plot(radii, amass[k], dot[k])
+        #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, amass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
+    plt.xlabel('Radius (pixels)',fontsize=14)
+    plt.ylabel('Mass (solar masses)',fontsize=14)
+    plt.title('J0905 Mass vs. Radius, annulus M/L ratios',fontsize=16)
+    plt.tight_layout()
+    legend = ax.legend(loc='upper right')
+        
+    #plotting the broad (single bMLR) annular mass, the 'light mass' as I call it
+    for k in range(0,len(bcolors)):
+        bx = fig.add_subplot(2,1,2)
+        bx.plot(radii, bmass[k], bcolors[k], marker='o', label=str(blabeling[k]))
+        bx.plot(radii, bmass[k], dot[k])
+        #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
+    plt.xlabel('Radius (pixels)',fontsize=14)
+    plt.ylabel('Mass (solar masses)',fontsize=14)
+    plt.tight_layout()
+    plt.title('J0905 Mass vs. Radius single M/L ratio',fontsize=16)
 
     #adding the legend
-    legend = ax.legend(loc='upper right')
+    legend = bx.legend(loc='upper right')
 
     pdf.savefig()
     plt.close()
