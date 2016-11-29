@@ -289,9 +289,22 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     plt.ylabel('Mass (solar masses)',fontsize=14)
     plt.tight_layout()
     plt.title('J0905 Mass vs. Radius single M/L ratio',fontsize=16)
-
     #adding the legend
     legend = bx.legend(loc='upper right')
+
+    #calculating the area under the curve for amass (F814W filter only)
+    atrap = np.zeros([len(radii)-1])
+    for j in range(0,39):
+        atrap[j] = .5*(amass[1][j]+amass[1][j+1])
+    aintegral = np.sum(atrap)
+    half_aintegral = aintegral / 2
+
+    #calculating the area under the curve for bmass (F814 filter only)
+    btrap = np.zeros([len(radii)-1])
+    for j in range(0,39):
+        btrap[j] = .5*(bmass[1][j]+bmass[1][j+1])
+    bintegral = np.sum(btrap)
+    half_bintegral = bintegral / 2
 
     pdf.savefig()
     plt.close()
