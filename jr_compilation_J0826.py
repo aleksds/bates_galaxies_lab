@@ -107,7 +107,7 @@ with PdfPages('jr_compilation_J0826.pdf') as pdf:
     tflux160 = flux[2,len(radii)-1]*(10**-23)
 
     #luminosity distance (in cm) for J0905, z = 0.603
-    LdJ0905 = 3551.4*3.08568*10**24
+    LdJ0826 = 3551.4*3.08568*10**24
 
     #finding magnitudes and color for M/L ratio
     mag475 = -2.5*np.log10(tflux475 / 3631)
@@ -127,9 +127,9 @@ with PdfPages('jr_compilation_J0826.pdf') as pdf:
 
     #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24), only three values depending on filter
     c = 299792458
-    LnuNu475 = (c/(475*10**-9))*tflux475*(4*math.pi*LdJ0905**2)
-    LnuNu814 = (c/(814*10**-9))*tflux814*(4*math.pi*LdJ0905**2)
-    LnuNu160 = (c/(1600*10**-9))*tflux160*(4*math.pi*LdJ0905**2)
+    LnuNu475 = (c/(475*10**-9))*tflux475*(4*math.pi*LdJ0826**2)
+    LnuNu814 = (c/(814*10**-9))*tflux814*(4*math.pi*LdJ0826**2)
+    LnuNu160 = (c/(1600*10**-9))*tflux160*(4*math.pi*LdJ0826**2)
 
     #convert luminosity to solar units
     Lsol475 = LnuNu475 / (3.846*10**33)
@@ -185,6 +185,7 @@ with PdfPages('jr_compilation_J0826.pdf') as pdf:
 
     #calculation of magnitudes and color for each annulus
     #I do not think I need to calculate 'acolorUV', but rather simply use the 'colorUV' calculation to determine MLR, however I have left this in the code in case we need to refer to it later. I did not comment it out since it isn't used later in the code.
+    #turns out that we do want to use this 'acolorUV', and compare it to the amass we get when using 'colorUV', so it is now my intention to use this and plot both on the same plot.
     amag475 = -2.5*np.log10(aflux475 / 3631)
     amag814 = -2.5*np.log10(aflux814 / 3631)
     amag160 = -2.5*np.log10(aflux160 / 3631)
@@ -205,9 +206,9 @@ with PdfPages('jr_compilation_J0826.pdf') as pdf:
 
     #calculating nu_e * L_nu_e luminosity in erg/s units for each annulus from Hogg eq (24)
     c = 299792458
-    aLnuNu475 = (c/(475*10**-9))*aflux475*(4*math.pi*LdJ0905**2)
-    aLnuNu814 = (c/(814*10**-9))*aflux814*(4*math.pi*LdJ0905**2)
-    aLnuNu160 = (c/(1600*10**-9))*aflux160*(4*math.pi*LdJ0905**2)
+    aLnuNu475 = (c/(475*10**-9))*aflux475*(4*math.pi*LdJ0826**2)
+    aLnuNu814 = (c/(814*10**-9))*aflux814*(4*math.pi*LdJ0826**2)
+    aLnuNu160 = (c/(1600*10**-9))*aflux160*(4*math.pi*LdJ0826**2)
 
     #convert luminosity for each annulus to solar units
     aLsol475 = aLnuNu475 / (3.846*10**33)
@@ -235,7 +236,10 @@ with PdfPages('jr_compilation_J0826.pdf') as pdf:
     step2 = 1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2])
 
     best_value = step1/step2
-    print('J0905 mass best value:', best_value)
+    print('J0826 total mass best value:', best_value/1e11)
+
+    uncert = (1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2]))**-.5
+    print('J0826 total mass uncertainty:', uncert/1e11)
 
     #plotting mass vs radius
     colors = ['b', 'g', 'r']
