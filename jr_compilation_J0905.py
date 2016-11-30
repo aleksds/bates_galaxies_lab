@@ -264,8 +264,8 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     acolors = ['b--','g--','r--']
     bcolors = ['b', 'g', 'r']
     dot = ['bo','go','ro']
-    alabeling = ['annulus MLR F475W','annulus MLR F814W','annulus MLR 160W']
-    blabeling = ['single MLR F475W','single MLR 814W','single MLR 160W']
+    alabeling = ['annular MLR F475W','annular MLR F814W','annular MLR F160W']
+    blabeling = ['single MLR F475W','single MLR F814W','single MLR F160W']
 
     #plotting the specific annular (specific aMLR) mass
     for k in range(0,len(acolors)):
@@ -275,7 +275,7 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
         #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, amass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
     plt.xlabel('Radius (pixels)',fontsize=14)
     plt.ylabel('Mass (solar masses)',fontsize=14)
-    plt.title('J0905 Mass vs. Radius, annulus M/L ratios',fontsize=16)
+    plt.title('J0905 Mass vs. Radius, annular M/L ratios',fontsize=16)
     plt.tight_layout()
     legend = ax.legend(loc='upper right')
         
@@ -288,23 +288,33 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     plt.xlabel('Radius (pixels)',fontsize=14)
     plt.ylabel('Mass (solar masses)',fontsize=14)
     plt.tight_layout()
-    plt.title('J0905 Mass vs. Radius single M/L ratio',fontsize=16)
+    plt.title('J0905 Mass vs. Radius, single M/L ratio',fontsize=16)
     #adding the legend
     legend = bx.legend(loc='upper right')
 
     #calculating the area under the curve for amass (F814W filter only)
-    atrap = np.zeros([len(radii)-1])
-    for j in range(0,39):
-        atrap[j] = .5*(amass[1][j]+amass[1][j+1])
-    aintegral = np.sum(atrap)
-    half_aintegral = aintegral / 2
+    #ended up not needing to do this, but leaving it in the code
+    #atrap = np.zeros([len(radii)-1])
+    #for j in range(0,39):
+        #atrap[j] = .5*(amass[1][j]+amass[1][j+1])
+    #aintegral = np.sum(atrap)
+    #half_aintegral = aintegral / 2
 
     #calculating the area under the curve for bmass (F814 filter only)
-    btrap = np.zeros([len(radii)-1])
-    for j in range(0,39):
-        btrap[j] = .5*(bmass[1][j]+bmass[1][j+1])
-    bintegral = np.sum(btrap)
-    half_bintegral = bintegral / 2
+    #ended up not needing to do this, but leaving it in the code
+    #btrap = np.zeros([len(radii)-1])
+    #for j in range(0,39):
+        #btrap[j] = .5*(bmass[1][j]+bmass[1][j+1])
+    #bintegral = np.sum(btrap)
+    #half_bintegral = bintegral / 2
+
+    #calculating total mass (amass) for annular MLR (814 filter only)
+    total_annular_amass_F814W = np.sum(amass[1])
+    print('total amass', total_annular_amass_F814W)
+
+    #calculating total mass (bmass) for single MLR (814 filter only)
+    total_singular_bmass_F814W = np.sum(bmass[1])
+    print('total bmass', total_singular_bmass_F814W)
 
     pdf.savefig()
     plt.close()
