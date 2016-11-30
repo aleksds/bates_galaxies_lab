@@ -26,8 +26,8 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-xcen = 3388.
-ycen = 3504.
+xcen = 3386.5
+ycen = 3503.2
 dx = 100
 dy = 100
 
@@ -91,13 +91,14 @@ with PdfPages('jr_color_color.pdf') as pdf:
 
     # set plot parameters
     cbar = fig.colorbar(cax)
-    cbar.set_label('radius [pixels]', fontsize=18)
+    cbar.set_label('Radius [pixels]', fontsize=18)
     #ax.set_yscale('log')
     #ax.set_xscale('log')
     #plt.ylim([10**(-1),1e1])
-    plt.ylabel('U-V', fontsize=18)
+    plt.title('U-V color vs. V-J color, J0905', fontsize=18)
+    plt.ylabel('U-V', fontsize=14)
     #plt.xlim([10**(-1),1e1])
-    plt.xlabel('V-J', fontsize=18)
+    plt.xlabel('V-J', fontsize=14)
 
     pdf.savefig()
     plt.close()
