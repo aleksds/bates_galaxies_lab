@@ -36,8 +36,8 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-xcen = 3628.7
-ycen = 4153.8
+xcen = 3579.2
+ycen = 3339.1
 dx = 100
 dy = 100
 
@@ -265,7 +265,7 @@ with PdfPages('jr_compilation_J1107.pdf') as pdf:
     bcolors = ['b', 'g', 'r']
     dot = ['bo','go','ro']
     alabeling = ['annulus MLR F475W','annulus MLR F814W','annulus MLR 160W']
-    blabeling = ['single MLR F475W','single MLR 814W','single MLR 160W']
+    blabeling = ['single MLR F475W','single MLR F814W','single MLR F160W']
 
     #plotting the specific annular (specific aMLR) mass
     for k in range(0,len(acolors)):
