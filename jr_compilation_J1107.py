@@ -36,7 +36,7 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-xcen = 3579.2
+xcen = 3572.9
 ycen = 3339.1
 dx = 100
 dy = 100
