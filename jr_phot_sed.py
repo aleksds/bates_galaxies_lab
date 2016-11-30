@@ -32,8 +32,8 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-xcen = 3388.
-ycen = 3504.
+xcen = 3386.5
+ycen = 3503.2
 dx = 100
 dy = 100
 
@@ -97,13 +97,14 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
 
     # set plot parameters
     cbar = fig.colorbar(cax)
-    cbar.set_label('radius [pixels]', fontsize=18)
+    cbar.set_label('Radius [pixels]', fontsize=14)
     ax.set_yscale('log')
     ax.set_xscale('log')
+    plt.title('Subflux vs. Wavelength, J0905', fontsize=18)
     #plt.ylim([1e4,6e5])
-    plt.ylabel('flux/area [Jy]', fontsize=18)
+    plt.ylabel('Flux/Area (Jy/pixel)', fontsize=14)
     plt.xlim([300.,2000.])
-    plt.xlabel(r'wavelength [$\AA$]', fontsize=18)
+    plt.xlabel(r'Wavelength [$\AA$]', fontsize=14)
 
     pdf.savefig()
     plt.close()
