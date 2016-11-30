@@ -80,7 +80,7 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
     ax = fig.add_subplot(2,3,1)
     plot_image(stamp475)
     plt.title('F475W')
-    plt.suptitle(header475['TARGNAME'])
+    plt.suptitle(str('Flux vs. Aperture Radius, ' + header475['TARGNAME']))
     plt.tick_params(axis='both', which='major', labelsize=8)
       
     # read in the F814W imagex
@@ -119,11 +119,12 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
         flux.append(phot_table['aperture_sum'][0])
     ax = fig.add_subplot(2,3,6)
     ax.plot(radii, flux, 'ro')
-    plt.ylim([0,4e6])
-    plt.xlabel('aperture radius')
-    plt.ylabel('flux')
+    plt.ylim([0,3e6])
+    plt.xlabel('Aperture Radius (pixels)')
+    plt.ylabel('Flux (data values)')
     plt.tick_params(axis='both', which='major', labelsize=8)
     fluxtot1 = flux[40]
+    plt.tight_layout()
 
     # plot F814W photometric curve of growth
     positions = [(xcen, ycen)]
@@ -135,11 +136,12 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
         flux.append(phot_table['aperture_sum'][0])
     ax = fig.add_subplot(2,3,5)
     ax.plot(radii, flux, 'ro')
-    plt.ylim([0,4e6])
-    plt.xlabel('aperture radius')
-    plt.ylabel('flux')
+    plt.ylim([0,3e6])
+    plt.xlabel('Aperture Radius (pixels)')
+    plt.ylabel('Flux (data values)')
     plt.tick_params(axis='both', which='major', labelsize=8)
     fluxtot8 = flux[40]
+    plt.tight_layout()
     
     # plot F475W photometric curve of growth
     positions = [(xcen, ycen)]
@@ -151,11 +153,12 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
         flux.append(phot_table['aperture_sum'][0])
     ax = fig.add_subplot(2,3,4)
     ax.plot(radii, flux, 'ro')
-    plt.ylim([0,4e6])
-    plt.xlabel('aperture radius')
-    plt.ylabel('flux')
+    plt.ylim([0,3e6])
+    plt.xlabel('Aperture Radius (pixels)')
+    plt.ylabel('Flux (data values)')
     plt.tick_params(axis='both', which='major', labelsize=8)
     fluxtot4 = flux[40]
+    plt.tight_layout()
     
     pdf.savefig()
     plt.close()
