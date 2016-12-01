@@ -316,6 +316,7 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     total_singular_bmass_F814W = np.sum(bmass[1])
     print('total bmass', total_singular_bmass_F814W)
 
+
     pdf.savefig()
     plt.close()
 
