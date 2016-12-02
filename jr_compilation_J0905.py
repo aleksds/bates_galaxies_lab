@@ -316,6 +316,14 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     total_singular_bmass_F814W = np.sum(bmass[1])
     print('total bmass', total_singular_bmass_F814W)
 
+    #calculating %amass and %bmass in first 5 annuli
+    afirst_5 = np.sum(amass[1][0:4])
+    pct_afirst_5 = afirst_5/total_annular_amass_F814W*100
+    bfirst_5 = np.sum(bmass[1][0:4])
+    pct_bfirst_5 = bfirst_5/total_singular_bmass_F814W*100
+    print('% afirst 5', pct_afirst_5)
+    print('% bfirst 5', pct_bfirst_5)
+
 
     pdf.savefig()
     plt.close()
