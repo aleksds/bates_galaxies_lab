@@ -268,13 +268,16 @@ with PdfPages('jr_overlays_J0905.pdf') as pdf:
     alabeling = ['annular MLR F475W','annular MLR F814W','annular MLR F160W']
     blabeling = ['single MLR F475W','single MLR F814W','single MLR F160W']
 
+    #putting radius into kpc
+    kpc_radius = radii*(0.05)*(7.194)
+
     #plotting the specific annular (specific aMLR) mass
     #for k in range(0,len(acolors)):
     ax = fig.add_subplot(2,1,1)
-    ax.plot(radii, amass[1], acolors[1], marker='s', label=str(alabeling[1]))
-    ax.plot(radii, amass[1], acolors[1])
+    ax.plot(kpc_radius, amass[1], acolors[1], marker='s', label=str(alabeling[1]))
+    ax.plot(kpc_radius, amass[1], acolors[1])
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, amass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
-    plt.xlabel('Radius (pixels)',fontsize=14)
+    plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass (solar masses)',fontsize=14)
     plt.title('J0905 Mass vs. Radius, annular M/L ratios',fontsize=16)
     plt.tight_layout()
@@ -283,10 +286,10 @@ with PdfPages('jr_overlays_J0905.pdf') as pdf:
     #plotting the broad (single bMLR) annular mass, the 'light mass' as I call it
     #for k in range(0,len(bcolors)):
     bx = fig.add_subplot(2,1,1)
-    bx.plot(radii, bmass[1], bcolors[1], marker='o', label=str(blabeling[1]))
-    bx.plot(radii, bmass[1], bdot[1])
+    bx.plot(kpc_radius, bmass[1], 'yellowgreen', marker='o', label=str(blabeling[1]))
+    bx.plot(kpc_radius, bmass[1], 'yellowgreen')
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
-    plt.xlabel('Radius (pixels)',fontsize=14)
+    plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass (solar masses)',fontsize=14)
     plt.tight_layout()
     plt.title('J0905 Mass vs. Radius, single and annular MLRs',fontsize=15)
@@ -309,8 +312,8 @@ with PdfPages('jr_overlays_J0905.pdf') as pdf:
     
     #now plotting amass1_ovr_area and bmass1_ovr_area vs radius in kpc
     ax = fig.add_subplot(2,1,2)
-    ax.plot(kpc_radius, amass1_ovr_area, acolors[1], marker='s', label=str(alabeling[1]))
-    ax.plot(kpc_radius, amass1_ovr_area, acolors[1])
+    ax.plot(kpc_radius, amass1_ovr_area, 'g--', marker='s', label=str(alabeling[1]))
+    ax.plot(kpc_radius, amass1_ovr_area, 'g--')
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
     plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
@@ -320,8 +323,8 @@ with PdfPages('jr_overlays_J0905.pdf') as pdf:
 
     #plotting bmass1_ovr_area vs radius in kpc
     bx = fig.add_subplot(2,1,2)
-    bx.plot(kpc_radius, bmass1_ovr_area, bcolors[1], marker='o', label=str(blabeling[1]))
-    bx.plot(kpc_radius, bmass1_ovr_area, bcolors[1])
+    bx.plot(kpc_radius, bmass1_ovr_area, 'yellowgreen', marker='o', label=str(blabeling[1]))
+    bx.plot(kpc_radius, bmass1_ovr_area, 'yellowgreen')
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
     plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
