@@ -26,8 +26,8 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-xcen = 3386.5
-ycen = 3503.2
+xcen = 3628.7
+ycen = 4153.8
 dx = 100
 dy = 100
 
@@ -57,7 +57,7 @@ with PdfPages('jr_color_color.pdf') as pdf:
     for i in range (0, len(collection)):
         
         # read in the images
-        file = glob.glob(dir+'J0905_final_'+collection[i]+'*sci.fits')
+        file = glob.glob(dir+'J0826_final_'+collection[i]+'*sci.fits')
         hdu = fits.open(file[0])
         data[i], header[i] = hdu[0].data, hdu[0].header
         fnu[i] = header[i]['PHOTFNU']
@@ -95,7 +95,7 @@ with PdfPages('jr_color_color.pdf') as pdf:
     #ax.set_yscale('log')
     #ax.set_xscale('log')
     #plt.ylim([10**(-1),1e1])
-    plt.title('U-V color vs. V-J color, J0905', fontsize=18)
+    plt.title('U-V color vs. V-J color, J0826', fontsize=18)
     plt.ylabel('U-V', fontsize=14)
     #plt.xlim([10**(-1),1e1])
     plt.xlabel('V-J', fontsize=14)
