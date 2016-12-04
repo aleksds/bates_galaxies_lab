@@ -148,6 +148,25 @@ with PdfPages('jr_overlays_J0826.pdf') as pdf:
 
     mass = (M_BV_Bk, M_BV_Vk, M_BV_Jk)
 
+    #calculating best values and uncertainties
+    mass = (M_BV_Bk, M_BV_Vk, M_BV_Jk)
+    Msic_475_BV = np.mean(mass[0])
+    Msic_814_BV = np.mean(mass[1])
+    Msic_160_BV = np.mean(mass[2])
+    
+    Msic_475_BV_std = np.std(mass[0])
+    Msic_814_BV_std = np.std(mass[1])
+    Msic_160_BV_std = np.std(mass[2])
+    
+    print('Msic,475W,B-V', Msic_475_BV/1e11)
+    print('Msic,475W,B-V std', Msic_475_BV_std/1e11)
+    
+    print('Msic,814W,B-V', Msic_814_BV/1e11)
+    print('Msic,814W,B-V std', Msic_814_BV_std/1e11)
+    
+    print('Msic,160W,B-V', Msic_160_BV/1e11)
+    print('Msic,160W,B-V std', Msic_160_BV_std/1e11)
+
     #determining M/L ratio using Table 1 of Bell & de Jong
     #MLR_BV_B = 10**(-.994+(1.804*colorUV))
     #MLR_BV_V = 10**(-.734+(1.404*colorUV))
@@ -206,6 +225,18 @@ with PdfPages('jr_overlays_J0826.pdf') as pdf:
     aMLR_BV_V = 10**(-.734+(1.404*acolorUV))
     aMLR_BV_J = 10**(-.621+(.794*acolorUV))
 
+    #setting up to calculate Msrc_814_BV_ab0-6
+    for k in range(len(Va)):
+        #aMLR_BV_Vk_ab0 = np.zeros(40)
+        aMLR_BV_Vk_ab0 = 10**(Va[0]+(Vb[0]*acolorUV))
+        aMLR_BV_Vk_ab1 = 10**(Va[1]+(Vb[1]*acolorUV))
+        aMLR_BV_Vk_ab2 = 10**(Va[2]+(Vb[2]*acolorUV))
+        aMLR_BV_Vk_ab3 = 10**(Va[3]+(Vb[3]*acolorUV))
+        aMLR_BV_Vk_ab4 = 10**(Va[4]+(Vb[4]*acolorUV))
+        aMLR_BV_Vk_ab5 = 10**(Va[5]+(Vb[5]*acolorUV))
+        aMLR_BV_Vk_ab6 = 10**(Va[6]+(Vb[6]*acolorUV))
+        aMLR_BV_Vk_ab = (aMLR_BV_Vk_ab0,aMLR_BV_Vk_ab1,aMLR_BV_Vk_ab2,aMLR_BV_Vk_ab3,aMLR_BV_Vk_ab4,aMLR_BV_Vk_ab5,aMLR_BV_Vk_ab6)
+
     #calculation of annular MLR based on one MLR for the entire galaxy, since we plan to overlay polots of both. this will be denoted 'bMLR...'
     bMLR_BV_B = 10**(-.994+(1.804*colorUV))
     bMLR_BV_V = 10**(-.734+(1.404*colorUV))
@@ -230,31 +261,89 @@ with PdfPages('jr_overlays_J0826.pdf') as pdf:
     aM_BV_J = aLsol160*aMLR_BV_J
     amass = (aM_BV_B,aM_BV_V,aM_BV_J)
 
+    #calculating the Msrc values for each annulus
+    aMsrc_814_BV_ab0 = aLsol814*aMLR_BV_Vk_ab[0]
+    aMsrc_814_BV_ab1 = aLsol814*aMLR_BV_Vk_ab[1]
+    aMsrc_814_BV_ab2 = aLsol814*aMLR_BV_Vk_ab[2]
+    aMsrc_814_BV_ab3 = aLsol814*aMLR_BV_Vk_ab[3]
+    aMsrc_814_BV_ab4 = aLsol814*aMLR_BV_Vk_ab[4]
+    aMsrc_814_BV_ab5 = aLsol814*aMLR_BV_Vk_ab[5]
+    aMsrc_814_BV_ab6 = aLsol814*aMLR_BV_Vk_ab[6]
+    aMsrc_814_BV_ab = (aMsrc_814_BV_ab0,aMsrc_814_BV_ab1,aMsrc_814_BV_ab2,aMsrc_814_BV_ab3,aMsrc_814_BV_ab4,aMsrc_814_BV_ab5,aMsrc_814_BV_ab6)
+
+    #calculating the 7 Msrc values, one from each set of ab values
+    Msrc_814_BV_ab0 = np.sum(aMsrc_814_BV_ab[0])
+    Msrc_814_BV_ab1 = np.sum(aMsrc_814_BV_ab[1])
+    Msrc_814_BV_ab2 = np.sum(aMsrc_814_BV_ab[2])
+    Msrc_814_BV_ab3 = np.sum(aMsrc_814_BV_ab[3])
+    Msrc_814_BV_ab4 = np.sum(aMsrc_814_BV_ab[4])
+    Msrc_814_BV_ab5 = np.sum(aMsrc_814_BV_ab[5])
+    Msrc_814_BV_ab6 = np.sum(aMsrc_814_BV_ab[6])
+    Msrc_814_BV_ab = (Msrc_814_BV_ab0,Msrc_814_BV_ab1,Msrc_814_BV_ab2,Msrc_814_BV_ab3,Msrc_814_BV_ab4,Msrc_814_BV_ab5,Msrc_814_BV_ab6)
+
+    #best value for each annulus
+    bestval_annular_Msrc = np.zeros(40)
+    for j in range(len(radii)):
+        bestval_annular_Msrc[j] = (aMsrc_814_BV_ab0[j]+aMsrc_814_BV_ab1[j]+aMsrc_814_BV_ab2[j]+aMsrc_814_BV_ab3[j]+aMsrc_814_BV_ab4[j]+aMsrc_814_BV_ab5[j]+aMsrc_814_BV_ab6[j])/7
+
+    #best value and std, printed
+    Msrc_814_BV = np.mean(Msrc_814_BV_ab)
+    Msrc_814_BV_std = np.std(Msrc_814_BV_ab)
+    print('Msrc,814W,B-V',Msrc_814_BV/1e11)
+    print('Msrc,814W,B-V std',Msrc_814_BV_std/1e11)
+
     #calculate mass associated with each annulus in solar units, based on one MLR estimate for the entire galaxy
     bM_BV_B = aLsol475*bMLR_BV_B
     bM_BV_V = aLsol814*bMLR_BV_V
     bM_BV_J = aLsol160*bMLR_BV_J
-    bmass = (bM_BV_B,bM_BV_V,bM_BV_J) 
+    bmass = (bM_BV_B,bM_BV_V,bM_BV_J)
+
+    #best values
+    annular_Msic_814_BV_ab0 = aLsol814*MLR_BV_Vk[0]
+    annular_Msic_814_BV_ab1 = aLsol814*MLR_BV_Vk[1]
+    annular_Msic_814_BV_ab2 = aLsol814*MLR_BV_Vk[2]
+    annular_Msic_814_BV_ab3 = aLsol814*MLR_BV_Vk[3]
+    annular_Msic_814_BV_ab4 = aLsol814*MLR_BV_Vk[4]
+    annular_Msic_814_BV_ab5 = aLsol814*MLR_BV_Vk[5]
+    annular_Msic_814_BV_ab6 = aLsol814*MLR_BV_Vk[6]
+    annular_Msic_814_BV_ab = (annular_Msic_814_BV_ab0,annular_Msic_814_BV_ab1,annular_Msic_814_BV_ab2,annular_Msic_814_BV_ab3,annular_Msic_814_BV_ab4,annular_Msic_814_BV_ab5,annular_Msic_814_BV_ab6)
+    
+    #best value for each annulus
+    bestval_annular_Msic = np.zeros(40)
+    for j in range(len(radii)):
+        bestval_annular_Msic = (annular_Msic_814_BV_ab[0]+annular_Msic_814_BV_ab[1]+annular_Msic_814_BV_ab[2]+annular_Msic_814_BV_ab[3]+annular_Msic_814_BV_ab[4]+annular_Msic_814_BV_ab[5]+annular_Msic_814_BV_ab[6])/7
+
+    #getting seven values for total mass of the galaxy
+    Msic_814_BV_ab0 = np.sum(annular_Msic_814_BV_ab0)
+    Msic_814_BV_ab1 = np.sum(annular_Msic_814_BV_ab1)
+    Msic_814_BV_ab2 = np.sum(annular_Msic_814_BV_ab2)
+    Msic_814_BV_ab3 = np.sum(annular_Msic_814_BV_ab3)
+    Msic_814_BV_ab4 = np.sum(annular_Msic_814_BV_ab4)
+    Msic_814_BV_ab5 = np.sum(annular_Msic_814_BV_ab5)
+    Msic_814_BV_ab6 = np.sum(annular_Msic_814_BV_ab6)
+    Msic_814_BV_ab = (Msic_814_BV_ab0,Msic_814_BV_ab1,Msic_814_BV_ab2,Msic_814_BV_ab3,Msic_814_BV_ab4,Msic_814_BV_ab5,Msic_814_BV_ab6)
+    #NOTE: taking the mean of Msic_814_BV_ab will give you the same thing as Msic_814_BV
 
     #making various calculations, including std, best value, etc.
-    ave_mass475 = np.mean(mass[0])
-    ave_mass814 = np.mean(mass[1])
-    ave_mass160 = np.mean(mass[2])
-    ave_mass = (ave_mass475,ave_mass814,ave_mass160)
+    #using a different method, but I'll just comment this out in case we need it later
+    #ave_mass475 = np.mean(mass[0])
+    #ave_mass814 = np.mean(mass[1])
+    #ave_mass160 = np.mean(mass[2])
+    #ave_mass = (ave_mass475,ave_mass814,ave_mass160)
     
-    std_mass475 = np.std(mass[0])
-    std_mass814 = np.std(mass[1])
-    std_mass160 = np.std(mass[2])
-    std_mass = (std_mass475,std_mass814,std_mass160)
+    #std_mass475 = np.std(mass[0])
+    #std_mass814 = np.std(mass[1])
+    #std_mass160 = np.std(mass[2])
+    #std_mass = (std_mass475,std_mass814,std_mass160)
 
-    step1 = ave_mass[0]/np.square(std_mass[0]) + ave_mass[1]/np.square(std_mass[1]) + ave_mass[2]/np.square(std_mass[2])
-    step2 = 1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2])
+    #step1 = ave_mass[0]/np.square(std_mass[0]) + ave_mass[1]/np.square(std_mass[1]) + ave_mass[2]/np.square(std_mass[2])
+    #step2 = 1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2])
 
-    best_value = step1/step2
-    print('J0826 total mass best value:', best_value/1e11)
+    #best_value = step1/step2
+    #print('J0826 total mass best value:', best_value/1e11)
 
-    uncert = (1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2]))**-.5
-    print('J0826 total mass uncertainty:', uncert/1e11)
+    #uncert = (1/np.square(std_mass[0]) + 1/np.square(std_mass[1]) + 1/np.square(std_mass[2]))**-.5
+    #print('J0826 total mass uncertainty:', uncert/1e11)
 
     #for an individual annulus
     #for j in range(0,len(collection)+1):
@@ -265,16 +354,19 @@ with PdfPages('jr_overlays_J0826.pdf') as pdf:
     bcolors = ['b', 'g', 'r']
     adot = ['b','g','r']
     bdot = ['bo','go','ro']
-    alabeling = ['annular MLR F475W','annular MLR F814W','annular MLR F160W']
-    blabeling = ['single MLR F475W','single MLR F814W','single MLR F160W']
+    alabeling = ['annular MLR F475W','mass F814W','annular MLR F160W']
+    blabeling = ['single MLR F475W','light mass F814W','single MLR F160W']
+
+    #putting radius into kpc
+    kpc_radius = radii*(0.05)*(6.701)
 
     #plotting the specific annular (specific aMLR) mass
     #for k in range(0,len(acolors)):
     ax = fig.add_subplot(2,1,1)
-    ax.plot(radii, amass[1], acolors[1], marker='s', label=str(alabeling[1]))
-    ax.plot(radii, amass[1], acolors[1])
+    ax.plot(kpc_radius, bestval_annular_Msrc, acolors[1], marker='s', label=str(alabeling[1]))
+    ax.plot(kpc_radius, bestval_annular_Msrc, acolors[1])
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, amass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
-    plt.xlabel('Radius (pixels)',fontsize=14)
+    plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass (solar masses)',fontsize=14)
     plt.title('J0826 Mass vs. Radius, annular M/L ratios',fontsize=16)
     plt.tight_layout()
@@ -283,10 +375,10 @@ with PdfPages('jr_overlays_J0826.pdf') as pdf:
     #plotting the broad (single bMLR) annular mass, the 'light mass' as I call it
     #for k in range(0,len(bcolors)):
     bx = fig.add_subplot(2,1,1)
-    bx.plot(radii, bmass[1], bcolors[1], marker='o', label=str(blabeling[1]))
-    bx.plot(radii, bmass[1], bdot[1])
+    bx.plot(kpc_radius, bestval_annular_Msic, 'yellowgreen', marker='o', label=str(blabeling[1]))
+    bx.plot(kpc_radius, bestval_annular_Msic, 'yellowgreen')
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
-    plt.xlabel('Radius (pixels)',fontsize=14)
+    plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass (solar masses)',fontsize=14)
     plt.tight_layout()
     plt.title('J0826 Mass vs. Radius, single and annular MLRs',fontsize=15)
@@ -309,8 +401,8 @@ with PdfPages('jr_overlays_J0826.pdf') as pdf:
     
     #now plotting amass1_ovr_area and bmass1_ovr_area vs radius in kpc
     ax = fig.add_subplot(2,1,2)
-    ax.plot(kpc_radius, amass1_ovr_area, acolors[1], marker='s', label=str(alabeling[1]))
-    ax.plot(kpc_radius, amass1_ovr_area, acolors[1])
+    ax.plot(kpc_radius, amass1_ovr_area, 'g--', marker='s', label=str(alabeling[1]))
+    ax.plot(kpc_radius, amass1_ovr_area, 'g--')
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
     plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
@@ -320,8 +412,8 @@ with PdfPages('jr_overlays_J0826.pdf') as pdf:
 
     #plotting bmass1_ovr_area vs radius in kpc
     bx = fig.add_subplot(2,1,2)
-    bx.plot(kpc_radius, bmass1_ovr_area, bcolors[1], marker='o', label=str(blabeling[1]))
-    bx.plot(kpc_radius, bmass1_ovr_area, bcolors[1])
+    bx.plot(kpc_radius, bmass1_ovr_area, 'yellowgreen', marker='o', label=str(blabeling[1]))
+    bx.plot(kpc_radius, bmass1_ovr_area, 'yellowgreen')
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
     plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
@@ -347,12 +439,20 @@ with PdfPages('jr_overlays_J0826.pdf') as pdf:
     #half_bintegral = bintegral / 2
 
     #calculating total mass (amass) for annular MLR (814 filter only)
-    total_annular_amass_F814W = np.sum(amass[1])
-    print('total amass', total_annular_amass_F814W)
+    total_annular_Msrc_F814W = np.sum(bestval_annular_Msrc)
+    print('Msrc,814,BV total', total_annular_Msrc_F814W/1e11)
 
     #calculating total mass (bmass) for single MLR (814 filter only)
-    total_singular_bmass_F814W = np.sum(bmass[1])
-    print('total bmass', total_singular_bmass_F814W)
+    total_singular_Msic_F814W = np.sum(bestval_annular_Msic)
+    print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
+
+    #calculating %amass and %bmass in first 5 annuli
+    Msrc_first_5 = np.sum(bestval_annular_Msrc[0:4])
+    pct_Msrc_first_5 = Msrc_first_5/total_annular_Msrc_F814W*100
+    Msic_first_5 = np.sum(bestval_annular_Msrc[0:4])
+    pct_Msic_first_5 = Msic_first_5/total_singular_Msic_F814W*100
+    print('% Msrc first 5', pct_Msrc_first_5)
+    print('% Msic first 5', pct_Msic_first_5)
 
 
     pdf.savefig()
