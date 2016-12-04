@@ -397,13 +397,13 @@ with PdfPages('jr_compilation_J0905.pdf') as pdf:
     #bintegral = np.sum(btrap)
     #half_bintegral = bintegral / 2
 
-    #calculating total mass (amass) for annular MLR (814 filter only)
-    total_annular_amass_F814W = np.sum(amass[1])
-    print('total amass', total_annular_amass_F814W)
+    #calculating total mass (Msrc) for annular MLR (814 filter only)
+    total_annular_Msrc_F814W = np.sum(bestval_annular_Msrc)
+    print('Msrc,814,BV total', total_annular_Msrc_F814W/1e11)
 
-    #calculating total mass (bmass) for single MLR (814 filter only)
-    total_singular_bmass_F814W = np.sum(bmass[1])
-    print('total bmass', total_singular_bmass_F814W)
+    #calculating total mass (Msic) for single MLR (814 filter only)
+    total_singular_Msic_F814W = np.sum(bestval_annular_Msic)
+    print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
 
     #calculating %amass and %bmass in first 3 annuli
     Msrc_first_3 = np.sum(bestval_annular_Msrc[0:2])
