@@ -438,21 +438,21 @@ with PdfPages('jr_overlays_J0905.pdf') as pdf:
     #bintegral = np.sum(btrap)
     #half_bintegral = bintegral / 2
 
-    #calculating total mass (amass) for annular MLR (814 filter only)
+    #calculating total mass (Msrc) for annular MLR (814 filter only)
     total_annular_Msrc_F814W = np.sum(bestval_annular_Msrc)
     print('Msrc,814,BV total', total_annular_Msrc_F814W/1e11)
 
-    #calculating total mass (bmass) for single MLR (814 filter only)
+    #calculating total mass (Msic) for single MLR (814 filter only)
     total_singular_Msic_F814W = np.sum(bestval_annular_Msic)
     print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
 
-    #calculating %amass and %bmass in first 3 annuli
-    Msrc_first_3 = np.sum(bestval_annular_Msrc[0:2])
-    pct_Msrc_first_3 = Msrc_first_3/total_annular_Msrc_F814W*100
-    Msic_first_3 = np.sum(bestval_annular_Msrc[0:2])
-    pct_Msic_first_3 = Msic_first_3/total_singular_Msic_F814W*100
-    print('% Msrc first 3', pct_Msrc_first_3)
-    print('% Msic first 3', pct_Msic_first_3)
+    #calculating %amass and %bmass in first 5 annuli
+    Msrc_first_5 = np.sum(bestval_annular_Msrc[0:4])
+    pct_Msrc_first_5 = Msrc_first_5/total_annular_Msrc_F814W*100
+    Msic_first_5 = np.sum(bestval_annular_Msrc[0:4])
+    pct_Msic_first_5 = Msic_first_5/total_singular_Msic_F814W*100
+    print('% Msrc first 5', pct_Msrc_first_5)
+    print('% Msic first 5', pct_Msic_first_5)
 
 
     pdf.savefig()
