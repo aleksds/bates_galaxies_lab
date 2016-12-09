@@ -101,13 +101,13 @@ with PdfPages('sg_comp_overlay_' + galaxies[0] +'.pdf') as pdf:
                 subflux[i,j] = flux[i,j]
             else:
                 subflux[i,j] = flux[i,j]-flux[i,j-1]
-        
 
     # calculating galaxy-wide
 # THIS IS WHERE GOTTLIEB STOPS UNDERSTANDING
 # Look up and define new variables
     # set up two-dimensional arrays for the a and b coefficients based on the luminosity and color
     # this will be in the same format ish as the table in Josh's blue notebook
+    # Bell 2001 Table 3
     Ba = [-1.019,-1.113,-1.026,-.990,-1.110,-.994,-.888]
     Bb = [1.937,2.065,1.954,1.883,2.018,1.804,1.758]
     B_coeff = [Ba,Bb]
@@ -126,10 +126,12 @@ with PdfPages('sg_comp_overlay_' + galaxies[0] +'.pdf') as pdf:
     # luminosity distance (in cm) for galaxy, z = 0.712
 # This will have to be specified for each galaxy
 # I don't understand where all of these numbers came from
+# From Ned Wright online Calculator
     LdJ0905 = 4348.9*3.08568*10**24
 
     # finding magnitudes and color for M/L ratio
 # What is this -2.5 and this 3631?
+# -2.5 
     mag475 = -2.5*np.log10(tflux475 / 3631)
     mag814 = -2.5*np.log10(tflux814 / 3631)
     mag160 = -2.5*np.log10(tflux160 / 3631)
@@ -264,11 +266,9 @@ with PdfPages('sg_comp_overlay_' + galaxies[0] +'.pdf') as pdf:
     kpc_radius = radii*(0.05)*(7.194)
 # COMP has something similar, but slightly different 
     #plotting the specific annular (specific aMLR) mass
-    #for k in range(0,len(acolors)):
     ax = fig.add_subplot(2,1,1)
     ax.plot(kpc_radius, amass[1], acolors[1], marker='s', label=str(alabeling[1]))
     ax.plot(kpc_radius, amass[1], acolors[1])
-    #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, amass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
     plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass (solar masses)',fontsize=14)
     plt.title('J0905 Mass vs. Radius, annular M/L ratios',fontsize=16)

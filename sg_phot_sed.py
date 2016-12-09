@@ -1,9 +1,6 @@
 # Edits made by Sophia Gottlieb include
 # Units from rando units to Jys.
-# Edits made by Drunk Sophia Gottlieb include
-# Putting this mother function in a loop.
-# #fuckyes.
-
+#
 # Aleks Diamond-Stanic
 # 20161014
 #
@@ -51,19 +48,20 @@ for i in range(1, len(bagel)):
 with PdfPages('sg_phot_sed.pdf') as pdf:
 
     fig = plt.figure()
-## HERE BE WHERE I FUCK SHIT UPP
 
     collection = ['F475W','F814W','F160W']
     # for i in collection:
     for i in range(0, len(collection)):
         
-        # read in image
+        # read in image, grab data, flux in lumonosity, and exposure time
         # how can I modify this code to work for a loop?
         file = glob.glob(dir+'final_' + collection[i] + '*sci.fits')
         print(file)
         hdu = fits.open(file[0])
         data[i], header[i] = hdu[0].data, hdu[0].header
+        # fnu is the flux in lumonosity
         fnu[i] = header[i]['PHOTFNU']
+        # exp is the exposure time
         exp[i] = header[i]['EXPTIME']
 
         # define photometry positions
@@ -72,15 +70,9 @@ with PdfPages('sg_phot_sed.pdf') as pdf:
         # do photometry
         flux[i] = [0.]
         for radius in radii:
-        #for bagelite in bagel:
-        #    aperture = CircularAperture(positions, radii[bagelite])
-        #    phot_table = aperture_photometry(data[i]*fnu[i]/(exp[i]*bagelite), aperture)
-        #    flux[i].append(phot_table['aperture_sum'][0])
             aperture = CircularAperture(positions, radius)
             phot_table = aperture_photometry(data[i]*fnu[i]/(bagel[i]*exp[i]), aperture)
             flux[i].append(phot_table['aperture_sum'][0])
-# HERE BE WHERE I STOP
-
 
     # set up the plot
     ax = fig.add_subplot(1,1,1)

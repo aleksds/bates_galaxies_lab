@@ -25,8 +25,6 @@ def objective_function(params):
     return np.sum((residuals)**2) / nbin
 
 # read in an image file
-# dir = '/Users/adiamond/data/20150203_HST/J0826+4305/coarse/F814W/'
-# file = glob.glob(dir+'final*sci.fits')
 dir = '/Users/sgottlie/data/test/'
 file = glob.glob(dir+'final_F*sci.fits')
 hdu = fits.open(file[0])

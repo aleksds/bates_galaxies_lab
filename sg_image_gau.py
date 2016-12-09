@@ -74,12 +74,13 @@ with PdfPages(filename) as pdf:
         stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
 
         # plot the "postage stamp"
-        # fig = plt.figure()
         ax = fig.add_subplot(2,3,i+1)
         plot_image()
         plt.title(collection[i])
         #plt.gcf().clear()
-# begin the gau
+
+        # begin the gau
+
         # select all pixels with meaningful information and put them into a
         # one-dimensional array
         pixels = data[(data==data)].ravel()
@@ -124,11 +125,7 @@ with PdfPages(filename) as pdf:
         plt.plot(bin_mids, model, color='red')
         # pull the axes to the correct scale, but doesn't flush out over the graph....
         plt.ylim([0,18000])
-        #plt.xlim([0,100])
-       # ax = fig.add_subplot(2,3,y+4)
-        #plot_image()
         plt.title(collection[i])
-        # plt.show()
         
     pdf.savefig()
     plt.close()
