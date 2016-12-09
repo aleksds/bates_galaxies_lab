@@ -1,5 +1,5 @@
 # Josh Rines
-# 20160920 -- 20161005
+# 20161005
 #
 # the preliminary goals of this code are to do the following:
 #
