@@ -12,6 +12,8 @@
 # (2) subtractive flux vs aperature radius
 # (3) flux vs wavelength
 
+#should add in making this able to analyze any galaxy
+
 
 # import relevant Python modules
 import os
