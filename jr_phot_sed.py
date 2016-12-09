@@ -5,9 +5,10 @@
 # apertures in three different images for a galaxy and then plots flux
 # vs wavelegnth (i.e., a spectral energy distribution) for each aperture
 
-#will be adding in conversion of flux from image units to Jy, NOT STARTED
-#will be adding in putting this into a loop, IN PROGRESS
-#will be adding in dividing flux by area, IN PROGRESS
+#includes conversion of flux from image units to Jy
+#includes dividing flux by area
+
+#would be good to make this compatible with any galaxy instead of needing to change the centroid values for each galaxy
 
 # import relevant Python modules
 import os
