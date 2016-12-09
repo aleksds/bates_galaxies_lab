@@ -32,17 +32,17 @@ with PdfPages('ad_phot_sed.pdf') as pdf:
     fig = plt.figure()
 
     # read in the F475W image
-    file = glob.glob(dir+'../F475W/final*sci.fits')
+    file = glob.glob(dir+'J0826*F475W*sci.fits')
     hdu = fits.open(file[0])
     data475, header475 = hdu[0].data, hdu[0].header
 
     # read in the F814W image
-    file = glob.glob(dir+'../F814W/final*sci.fits')
+    file = glob.glob(dir+'J0826*F814W*sci.fits')
     hdu = fits.open(file[0])
     data814, header814 = hdu[0].data, hdu[0].header
 
     # read in the F160W image
-    file = glob.glob(dir+'../F160W/final*sci.fits')
+    file = glob.glob(dir+'J0826*F160W*sci.fits')
     hdu = fits.open(file[0])
     data160, header160 = hdu[0].data, hdu[0].header
 

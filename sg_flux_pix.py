@@ -42,7 +42,7 @@ dy = 100.
 with PdfPages('sg_flux_pix.pdf') as pdf:
     fig = plt.figure()
 
-    
+    # set up collections for the number of filters, their names, and the associated color
     collection = ['F475W','F814W','F160W']
     filter = [475, 814, 1600]
     colors = ['bo', 'go', 'ro']
@@ -50,7 +50,6 @@ with PdfPages('sg_flux_pix.pdf') as pdf:
     for i in range(0, len(collection)):
         
         # read in image
-        # how can I modify this code to work for a loop?
         file = glob.glob(dir+'final_' + collection[i] + '*sci.fits')
         print(file)
         hdu = fits.open(file[0])
@@ -58,12 +57,13 @@ with PdfPages('sg_flux_pix.pdf') as pdf:
 
         plt.suptitle(header['TARGNAME'])
 
-        #plot the thing; do the stuff
+        # start mathematics for flux and plots
         positions = [(xcen, ycen)]
         radii = np.arange(dx)+1
         wavelength = np.arange(dx)+1
         areaflux = np.arange(dx)+1
 
+        # performs flux calculations
         flux = []
         for radius in radii:
             aperture = CircularAperture(positions, radius)
@@ -79,22 +79,22 @@ with PdfPages('sg_flux_pix.pdf') as pdf:
             wavelength[j] = filter[i]
             areaflux[j] = flux[j] - flux [j-1]
         cx.plot(wavelength, np.log10(areaflux), colors[i])
-        # ax.plot(wavelength, flux, 'ro')
-        # plt.ylim([0,4e6])
-        #plt.ylim([0,6])
+
+        # plot the culmulative flux as a function of wavelength
         plt.xlim([400,1675])
         plt.xlabel('wavelength in nm')
         plt.ylabel('mother fluxer')
         plt.tick_params(axis='both',which='major', labelsize = 8)
         fig.tight_layout()
                 
-        #do stuff
+        # plot the cumulative flux as a function of aperture radius
         ax.plot(radii, flux, colors[i])
         plt.xlabel('aperture radius')
         plt.ylabel('cumulative flux')
         plt.tick_params(axis='both',which='major', labelsize = 8)
         fig.tight_layout()
-        
+
+        # plot the subtractive flux as a function of aperture radius
         bx.plot(radii, areaflux, colors[i])
         plt.xlabel('aperture radius')
         plt.ylabel('subtractive flux')

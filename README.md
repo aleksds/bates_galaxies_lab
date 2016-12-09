@@ -8,6 +8,12 @@ include Aleks Diamond-Stanic (Assistant Professor of Physics and
 Astronomy), Sophia Gottlieb (senior physics major, class of 2017), and
 Joshua Rines (senior physics major, class of 2017).
 
+# ad_centroid.py
+
+# ad_compilation.py
+
+# ad_phot_sed.py
+
 # bgl_aper_phot.py
 
 This code makes "postage stamp" visualizations of a galaxy in three
@@ -36,11 +42,66 @@ different filters and then produces color-magntidue diagrams that show
 the relationship between flux in a given filter and the color measured
 with respect to an adjacent filter for all pixels in the postage stamps.
 
+# jr_*.py
+
+Aweseome code being developed by Josh Rines
+
+# jr_aper_phot.py
+
+# jr_color_color.py
+
+# jr_compilation.py
+
+# jr_compilation_J0826.py
+
+# jr_compilation_J0905.py
+
+# jr_compilation_J1107.py
+
+# jr_flux_plots.py
+
+# jr_flux_plots_dp.py
+
+# jr_flux_vs_wavelength.py
+
+# jr_gau_bkg.py
+
+# jr_image_gau.py
+
+# jr_image_stamp.py
+
+# jr_overlays_J0826.py
+
+# jr_overlays_J0905.py
+
+# jr_overlays_J1107.py
+
+# jr_phot_sed.py
+
+# jr_phot_sed_noloop.py
+
+# jr_phot_sed_noloop_figure3.py
+
+# jr_phot_sed_noloop_figure4.py
+
 # sg_*.py
 
 Awesome code being developed by Sophia Gottlieb
 
-# jr_*.py
+# sg_comp_overlay.py
 
-Aweseome code being developed by Josh Rines
+# sg_flux_pix.py
+
+# sg_gau_bkg.py
+
+# sg_image_gau.py
+
+# sg_image_stamp.py
+
+# sg_phot_sed.py
+
+
+
+
+
 

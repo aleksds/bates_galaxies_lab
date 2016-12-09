@@ -39,8 +39,8 @@ header = [0 for x in range(len(wavelengths))]
 fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
-xcen = 3629.
-ycen = 4153.
+xcen = 3386.5
+ycen = 3503.2
 dx = 5
 dy = 5
 
