@@ -36,8 +36,8 @@ dir = os.environ['HSTDIR']
 
 # specify the position of the science target and the size of the
 # region around the science target to consider
-xcen = 3386.5
-ycen = 3503.2
+xcen = 3572.9
+ycen = 3339.1
 dx = 100
 dy = 100
 
@@ -54,7 +54,7 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
     for i in range (0, len(collection)):
 
         # read in the images
-        file = glob.glob(dir+'J0905_final_'+collection[i]+'*sci.fits')
+        file = glob.glob(dir+'J1107_final_'+collection[i]+'*sci.fits')
         hdu = fits.open(file[0])
         data, header = hdu[0].data, hdu[0].header
     
@@ -90,7 +90,7 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
         # plot log of subflux vs wavelength for three filters  
         ax = fig.add_subplot(3,1,1)
         ax.plot(wavelength, np.log10(subflux), colors[i])
-        plt.title('Log Subflux vs. Wavelength (three filters), J0905')
+        plt.title('Log Subflux vs. Wavelength (three filters), J1107')
         plt.xlim([400,1700])
         plt.ylim([3,6])
         plt.xlabel('Wavelength (nm)')
@@ -101,7 +101,7 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
         # plot the subtractive flux vs aperature radius
         bx = fig.add_subplot(3,1,2)
         bx.plot(radii, subflux, colorz[i])
-        plt.title('Subtractive Flux vs. Aperture Radius, J0905')
+        plt.title('Subtractive Flux vs. Aperture Radius, J1107')
         plt.xlabel('Aperature Radius (pixels)')
         plt.ylabel('Subflux (dv)')
         plt.tick_params(axis='both', which='major', labelsize=8)
@@ -110,7 +110,7 @@ with PdfPages('jr_flux_plots.pdf') as pdf:
         # plot the flux vs radius
         cx = fig.add_subplot(3,1,3)
         cx.plot(radii, flux, colorz[i])
-        plt.title('Flux vs. Radius, J0905')
+        plt.title('Flux vs. Radius, J1107')
         plt.xlabel('Aperature Radius (pixels)')
         plt.ylabel('Flux (dv)')
         plt.tick_params(axis='both', which='major', labelsize=8)

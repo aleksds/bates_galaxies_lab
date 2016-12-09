@@ -354,8 +354,8 @@ with PdfPages('jr_overlays_J1107.pdf') as pdf:
     bcolors = ['b', 'g', 'r']
     adot = ['b','g','r']
     bdot = ['bo','go','ro']
-    alabeling = ['annular MLR F475W','mass F814W','annular MLR F160W']
-    blabeling = ['single MLR F475W','light mass F814W','single MLR F160W']
+    alabeling = ['annular MLR F475W','M_SRC F814W','annular MLR F160W']
+    blabeling = ['single MLR F475W','M_SIC F814W','single MLR F160W']
 
     #putting radius into kpc
     kpc_radius = radii*(0.05)*(5.881)
@@ -381,7 +381,7 @@ with PdfPages('jr_overlays_J1107.pdf') as pdf:
     plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass (solar masses)',fontsize=14)
     plt.tight_layout()
-    plt.title('J1107 Mass vs. Radius, single and annular MLRs',fontsize=15)
+    plt.title('J1107 Mass vs. Radius, M_SRC and M_SIC',fontsize=15)
     legend = bx.legend(loc='upper right')
 
     
@@ -389,36 +389,36 @@ with PdfPages('jr_overlays_J1107.pdf') as pdf:
     
     #first creating an array with areas of shells in proper units of kpc
     kpc_area = np.zeros(len(area))
-    amass1_ovr_area = np.zeros(len(area))
-    bmass1_ovr_area = np.zeros(len(area))
+    bestval_annular_Msrc_ovr_area = np.zeros(len(area))
+    bestval_annular_Msic_ovr_area = np.zeros(len(area))
     for j in range(0,len(area)):
        kpc_area[j] = area[j]*(0.05**2)*(5.881**2)
        
-    #now calculating mass/area (mass surface density) in units of solar masses/kpc for amass and bmass and also radius in kpc units
-    amass1_ovr_area = amass[1]/kpc_area
-    bmass1_ovr_area = bmass[1]/kpc_area
+    #now calculating mass/area (mass surface density) in units of solar masses/kpc for bestval_annular_Msrc and bestval_annular_Msic and also radius in kpc units
+    bestval_annular_Msrc_ovr_area = bestval_annular_Msrc/kpc_area
+    bestval_annular_Msic_ovr_area = bestval_annular_Msic/kpc_area
     kpc_radius = radii*(0.05)*(5.881)
     
-    #now plotting amass1_ovr_area and bmass1_ovr_area vs radius in kpc
+    #now plotting bestval_annular_Msrc_ovr_area and bestval_annular_Msic_ovr_area vs radius in kpc
     ax = fig.add_subplot(2,1,2)
-    ax.plot(kpc_radius, amass1_ovr_area, 'g--', marker='s', label=str(alabeling[1]))
-    ax.plot(kpc_radius, amass1_ovr_area, 'g--')
+    ax.plot(kpc_radius, bestval_annular_Msrc_ovr_area, 'g--', marker='s', label=str(alabeling[1]))
+    ax.plot(kpc_radius, bestval_annular_Msrc_ovr_area, 'g--')
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
     plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
     plt.tight_layout()
-    plt.title('J1107 Mass Density vs. Radius, single and annular MLRs',fontsize=15)
+    plt.title('J1107 Mass Density vs. Radius, M_SRC and M_SIC',fontsize=15)
     legend = bx.legend(loc='upper right')
 
-    #plotting bmass1_ovr_area vs radius in kpc
+    #plotting bestval_annular_Msic_ovr_area vs radius in kpc
     bx = fig.add_subplot(2,1,2)
-    bx.plot(kpc_radius, bmass1_ovr_area, 'yellowgreen', marker='o', label=str(blabeling[1]))
-    bx.plot(kpc_radius, bmass1_ovr_area, 'yellowgreen')
+    bx.plot(kpc_radius, bestval_annular_Msic_ovr_area, 'yellowgreen', marker='o', label=str(blabeling[1]))
+    bx.plot(kpc_radius, bestval_annular_Msic_ovr_area, 'yellowgreen')
     #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
     plt.xlabel('Radius (kpc)',fontsize=14)
     plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
     plt.tight_layout()
-    plt.title('J1107 Mass Density vs. Radius, single and annular MLRs',fontsize=15)
+    plt.title('J1107 Mass Density vs. Radius, M_SRC and M_SIC',fontsize=15)
     legend = bx.legend(loc='upper right')
     
     

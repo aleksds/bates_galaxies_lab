@@ -32,8 +32,8 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-xcen = 3386.5
-ycen = 3503.2
+xcen = 3572.9
+ycen = 3339.1
 dx = 100
 dy = 100
 
@@ -63,7 +63,7 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
     for i in range (0, len(collection)):
         
         # read in the images
-        file = glob.glob(dir+'J0905_final_'+collection[i]+'*sci.fits')
+        file = glob.glob(dir+'J1107_final_'+collection[i]+'*sci.fits')
         hdu = fits.open(file[0])
         data[i], header[i] = hdu[0].data, hdu[0].header
         fnu[i] = header[i]['PHOTFNU']
@@ -100,7 +100,7 @@ with PdfPages('jr_phot_sed.pdf') as pdf:
     cbar.set_label('Radius [pixels]', fontsize=14)
     ax.set_yscale('log')
     ax.set_xscale('log')
-    plt.title('Subflux vs. Wavelength, J0905', fontsize=18)
+    plt.title('Subflux vs. Wavelength, J1107', fontsize=18)
     #plt.ylim([1e4,6e5])
     plt.ylabel('Flux/Area (Jy/pixel)', fontsize=14)
     plt.xlim([300.,2000.])

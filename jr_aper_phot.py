@@ -57,8 +57,8 @@ dir = os.environ['HSTDIR']
 
 # specify the position of the science target and the size of the
 # region around the science target to consider
-xcen = 3388.
-ycen = 3504.
+xcen = 3572.9
+ycen = 3339.1
 dx = 100
 dy = 100
 
@@ -69,7 +69,7 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
     fig = plt.figure()
 
     # read in the F475W image
-    file = glob.glob(dir+'J0905_final_F4*sci.fits')
+    file = glob.glob(dir+'J1107_final_F4*sci.fits')
     hdu = fits.open(file[0])
     data475, header475 = hdu[0].data, hdu[0].header
     
@@ -84,7 +84,7 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
     plt.tick_params(axis='both', which='major', labelsize=8)
       
     # read in the F814W imagex
-    file = glob.glob(dir+'J0905_final_F8*sci.fits')
+    file = glob.glob(dir+'J1107_final_F8*sci.fits')
     hdu = fits.open(file[0])
     data814, header814 = hdu[0].data, hdu[0].header
     
@@ -97,7 +97,7 @@ with PdfPages('jr_aper_phot.pdf') as pdf:
     plt.title('F814W')
 
     # read in the F160W image
-    file = glob.glob(dir+'J0905_final_F1*sci.fits')
+    file = glob.glob(dir+'J1107_final_F1*sci.fits')
     hdu = fits.open(file[0])
     data160, header160 = hdu[0].data, hdu[0].header
     
