@@ -1,14 +1,19 @@
 # Joshua Rines
-# 20161122
+# 20161128
 #
 #the goal of this script is to take our flux values, whether it be in annulus form or total flux form, and calculate a few things:
 # 1. luminosity distance using Ned Wright's calculator (use calc. online, then write code for it later)
 # 2. measure total flux in galaxy
 # 3. compute luminosity using Hogg equation 24
-# 4. compute mass-to-light ratio using Bell & de Jong Table 1
-# 5. compute mass of galaxy
+# 4. compute mass-to-light ratio using Bell & de Jong Table 3
+    #using 7 a,b value sets to get a best average for masses
+# 5. compute mass of galaxy and annular-based mass
+    #Msic and Msrc calculations based on spatially-integrated and spatially-reolved MLR
 # 6. for galaxy J0826, measure flux, color, luminosity, mass-to-light ratio and mass for each annulus
-# 7. make plots of flux vs. radius, color vs. radius, and mass vs. radius for a galaxy
+# 7. make plots of spatially-resolved mass vs. radius and spatially-integrated mass vs. radius for J0826
+    #include dividing out by the area of the annnulus, and making conversion from pixels to kpc
+    #also only considering the 'green' filter (F814W) here so we can make better use of the best value MLRs
+    #overlay of the Msrc and Msic plots for mass vs. radius and mass/area vs. radius (kpc)
 
 # import relevant Python modules
 import os
