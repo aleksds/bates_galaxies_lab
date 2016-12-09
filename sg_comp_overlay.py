@@ -22,6 +22,9 @@
 # Things that my brain is thinking to do.....
 # 1. find and replace J0905 with galaxy[0].
 # 2. find the discrepancies between comp and overlay to create a successful merge.
+# 3. take out all hard coded numbers, replace with descriptive variable names
+# 4. run this mother function in a loop.
+# 5. Maybe cut this up into functions?
 #
 # import relevant Python modules
 import os
@@ -186,11 +189,6 @@ with PdfPages('sg_comp_overlay_' + galaxies[0] +'.pdf') as pdf:
     amag160 = -2.5*np.log10(aflux160 / 3631)
     acolorUV = amag475-amag814
     acolorVJ = amag814-amag160
-
-    #determining M/L ratio using Table 1 of Bell & de Jong
-    #need to set up a 2d array with values which will be done later, for now just using Table 1 coefficients
-    #aMLR_BV_Bk = np.zeros([len(Ba)])
-    #aMLR_BV_Bk = 10**(Ba[k]+(Bb[k]*colorUV))
 
     #I THINK I FIGURED IT OUT: I only need the ML ratio for the entire galaxy, NOT for each specific annulus...that somehow seems to mess up the total mass.  THUS: I am essentially using the same MLR as MLR_BV_X , so the 'acolor' things were not necessary I dont think...but if need be, I will put the 'acolorUV' code back in place of the 'colorUV' code below.
     
