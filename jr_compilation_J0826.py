@@ -6,9 +6,10 @@
 # 2. measure total flux in galaxy
 # 3. compute luminosity using Hogg equation 24
 # 4. compute mass-to-light ratio using Bell & de Jong Table 3
-    # using 7 a,b value sets to get a best average for masses
+    #using 7 a,b value sets to get a best average for masses
+    #only considered a,b value from Table 1 for these plots, with intention of making best values in future
 # 5. compute mass of galaxy and annular-based mass
-    # Msic and Msrc calculations based on spatially-integrated and spatially-reolved MLR
+    #Msic and Msrc calculations based on spatially-integrated and spatially-reolved MLR
 # 6. for galaxy J0826, measure flux, color, luminosity, mass-to-light ratio and mass for each annulus
 # 7. make plots of spatially-resolved mass vs. radius and spatially-integrated mass vs. radius for J0826
 
