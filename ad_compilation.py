@@ -64,7 +64,7 @@ with PdfPages('ad_compilation.pdf') as pdf:
     for i in range (0, len(collection)):
         
         # read in the images
-        file = glob.glob(dir+'final_'+collection[i]+'*sci.fits')
+        file = glob.glob(dir+'J0826_final_'+collection[i]+'*sci.fits')
         hdu = fits.open(file[0])
         data[i], header[i] = hdu[0].data, hdu[0].header
         fnu[i] = header[i]['PHOTFNU']
@@ -83,11 +83,6 @@ with PdfPages('ad_compilation.pdf') as pdf:
                 subflux[i,j] = flux[i,j]
             else:
                 subflux[i,j] = flux[i,j]-flux[i,j-1]
-        
-        #set up the plot
-        #ax = fig.add_subplot(1,1,1)
-        #cax = ax.scatter(-2.5*np.log10(subflux[1] / subflux[2]), -2.5*np.log10(subflux[0] / subflux[1]), c=radii, vmin=radii[0], vmax=radii[-1], cmap=cm.coolwarm, s=25, lw=0.2,)
-
         
     #calculating galaxy-wide
     
@@ -135,8 +130,6 @@ with PdfPages('ad_compilation.pdf') as pdf:
     print('M_BV_B', M_BV_B/1e11, 'M_BV_V', M_BV_V/1e11, 'M_BV_J', M_BV_J/1e11, 'M_VJ_B', M_VJ_B/1e11, 'M_VJ_V', M_VJ_V/1e11, 'M_VJ_J', M_VJ_J/1e11)
     
 
-    #calculation annulus-based
-
     #calculation of flux for each annulus, in erg/s units
     aflux475 = subflux[0]*10**-23
     aflux814 = subflux[1]*10**-23
@@ -171,18 +164,7 @@ with PdfPages('ad_compilation.pdf') as pdf:
     aM_BV_J = aLsol160*aML_BV_J
             
 
-    # set plot parameters
-    #cbar = fig.colorbar(cax)
-    #cbar.set_label('radius [pixels]', fontsize=18)
-    #ax.set_yscale('log')
-    #ax.set_xscale('log')
-    #plt.ylim([10**(-1),1e1])
-    #plt.ylabel('U-V', fontsize=18)
-    #plt.xlim([10**(-1),1e1])
-    #plt.xlabel('V-J', fontsize=18)
-
     pdf.savefig()
     plt.close()
 
-    
     #os.system('open %s &' % 'ad_compilation.pdf')
