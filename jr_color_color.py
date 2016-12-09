@@ -2,6 +2,9 @@
 # 20161029
 #
 # the main goal of this code is to create color vs color plots comparing subtractive flux annuli in three filters
+# the plot generated with this code will plot U-V color vs V-J color
+    #it is our hope to use this plot for comparison to Williams (2009) to make determinations regarding the SFR processes in different regions of the galaxy
+#it would also be good in the future to include code to create these plots for any galaxy. it is currently set up to only run for one galaxy, and we can change the galaxy being analyzed by changing the centroid locations.  this would be a simple update
 
 # import relevant Python modules
 import os
