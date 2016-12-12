@@ -25,6 +25,11 @@ J0905.
 
 # ad_phot_sed.py
 
+This code performs photometry on three images
+using circular apertures and then plots the spectral energy
+distribution for each aperture.  The current version uses 13 different
+apertures for the galaxy J0826 and includes an SED for each annulus.  
+
 # bgl_aper_phot.py
 
 This code makes "postage stamp" visualizations of a galaxy in three
