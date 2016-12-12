@@ -1,10 +1,22 @@
 # Aleks Diamond-Stanic
 # 20161014
 #
+# Quick description: This code performs photometry on three images
+# using circular apertures and then plots the spectral energy
+# distribution for each aperture
+#
+# Current status: The current version uses 13 different apertures for
+# the galaxy J0826 and includes an SED for each annulus.  
+#
+# Future developments: This could be updated and expanded to reflect
+# the content of jr_phot_sed*py.  This could be left in its current
+# form for reference purposes.  
+#
+# Original description:
 # the main goal of this code is to perform photometry in different
 # apertures in three different images for a galaxy and then plots flux
 # vs wavelegnth (i.e., a spectral energy distribution) for each aperture
-
+#
 # import relevant Python modules
 import os
 import numpy as np
@@ -20,8 +32,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 dir = os.environ['HSTDIR']
 
 # specify the position of the science target
-xcen = 3629.
-ycen = 4153.
+xcen = 3628.7
+ycen = 4153.8
 
 # define the radii to be used for aperture photometry
 radii = np.array([1,2,3,4,5,8,10,15,20,25,30,35,40])
