@@ -17,6 +17,12 @@ stamp image for the galaxy J0905.
 
 # ad_compilation.py
 
+This is a version of the jr_compilation*py code that calculates
+fluxes, luminosities, colors, mass-to-light ratios, and stellar
+masses.  This is an outdated piece of code was used to check the
+mass-to-light ratios and total stellar mass estimate for the galaxy
+J0905.
+
 # ad_phot_sed.py
 
 # bgl_aper_phot.py

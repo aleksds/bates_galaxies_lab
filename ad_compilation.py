@@ -1,6 +1,21 @@
 # Aleks Diamond-Stanic
 # 20161122
 #
+# Quick description: This is a version of the jr_compilation*py code
+# that calculates fluxes, luminosities, colors, mass-to-light ratios,
+# and stellar masses
+#
+# Current status: This is an outdated piece of code was used to check
+# the mass-to-light ratios and total stellar mass estimate for the
+# galaxy J0905.
+#
+# Future developments: This could be updated and expanded to reflect
+# the content of jr_compilation*py.  This could be left in its current
+# form for reference purposes.  This could be removed from the
+# repository.
+#
+# original notes from Josh Rines:
+# 
 #the goal of this script is to take our flux values, whether it be in annulus form or total flux form, and calculate a few things:
 # 1. luminosity distance using Ned Wright's calculator (use calc. online, then write code for it later)
 # 2. measure total flux in galaxy
@@ -8,7 +23,6 @@
 # 4. compute mass-to-light ratio using Bell & de Jong Table 1
 # 5. compute mass of galaxy
 # 6. for one galaxy, measure flux, color, luminosity, mass-to-light ratio and mass for each annulus
-# 7. make plots of flux vs. radius, color vs. radius, and mass vs. radius for a galaxy
 
 # import relevant Python modules
 import os
