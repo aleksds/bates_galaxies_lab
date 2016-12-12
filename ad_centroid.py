@@ -1,7 +1,16 @@
 # Aleks Diamond-Stanic
 # 20161109
 #
-
+# Quick description: This code compares centroid values based on three
+# routines from photutils: centroid_com, centroid_1dg, centroid_2dg.
+#
+# Current status: The current version of the code plots these centroid
+# values on top of a postage stamp image for the galaxy J0905.
+#
+# Future developments: Could avoid repetitive code for each filter and
+# make a for loop.  Could turn this into a function that returns the
+# coordinates of the best centroid location.
+#
 # import relevant Python modules
 import numpy as np
 from astropy.io import fits
@@ -32,13 +41,8 @@ def plot_image():
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
 
-#setting up arrays with three elements, all zeros - placeholders
-wavelengths = [4,8,1]
-data = [0 for x in range(len(wavelengths))]
-header = [0 for x in range(len(wavelengths))]
-fnu = [0 for x in range(len(wavelengths))]
-exp = [0 for x in range(len(wavelengths))]
-
+# parameters for the initial guess at the galaxy centroid and the size
+# of the postage stamps
 xcen = 3386.5
 ycen = 3503.2
 dx = 5

@@ -10,6 +10,11 @@ Joshua Rines (senior physics major, class of 2017).
 
 # ad_centroid.py
 
+This code compares centroid values based on three routines from
+photutils: centroid_com, centroid_1dg, centroid_2dg.  The current
+version of the code plots these centroid values on top of a postage
+stamp image for the galaxy J0905.
+
 # ad_compilation.py
 
 # ad_phot_sed.py
