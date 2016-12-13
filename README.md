@@ -41,8 +41,9 @@ J0826.
 # bgl_gau_bkg.py
 
 This code analyzes the distribution of pixel values for an entire
-image and quantifies the mean background flux and its dispersion
-by fitting a Gaussian function to a binned histogram of pixel values.
+image and quantifies the mean background flux and its dispersion by
+fitting a Gaussian function to a binned histogram of pixel values.
+The current version analyzes the F814W image for the galaxy J0826.
 
 # bgl_image_stamp.py
 

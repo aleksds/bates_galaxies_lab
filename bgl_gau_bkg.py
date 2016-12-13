@@ -1,6 +1,19 @@
 # Aleks Diamond-Stanic
 # 20160915 -- 20160921
 #
+# Quick description: This code analyzes the distribution of pixel
+# values for an entire image and quantifies the mean background flux
+# and its dispersion by fitting a Gaussian function to a binned
+# histogram of pixel values.
+#
+# Current status: The current version analyzes the F814W image for the
+# galaxy J0826.
+#
+# Future developments: Could expand to analyze all three filters for
+# any individual galaxy.  Could loop over all galaxies.
+#
+# Original notes:
+#
 # written with the following goals:
 # (1) quantify the distribution of pixel values in an image
 # (2) estimate the mean and standard deviation of the sky background
@@ -30,7 +43,7 @@ with PdfPages('bgl_gau_bkg.pdf') as pdf:
 
     # read in an image file
     dir = os.environ['HSTDIR']
-    file = glob.glob(dir+'final_F814W*sci.fits')
+    file = glob.glob(dir+'J0826*final_F814W*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
