@@ -1,6 +1,20 @@
 # Aleks Diamond-Stanic
 # 20160920 -- 20161005
 #
+# Quick description: This code makes "postage stamp" visualizations of
+# a galaxy in three different filters, performs aperture photometry on
+# each image, and plots the flux (energy/area/time) in circular
+# apertures centered on the galaxy.
+#
+# Current status: The current version is set up to work for the galaxy
+# J0826
+#
+# Future developments: Could include a for loop to avoid repetitive
+# code for each filter.  Could turn this into a function that produces
+# plots like these for any input galaxy
+#
+# Original notes:
+#
 # the preliminary goals of this code are to do the following:
 #
 # (1) read in three images taken in three different filters

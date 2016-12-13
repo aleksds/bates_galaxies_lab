@@ -35,7 +35,8 @@ apertures for the galaxy J0826 and includes an SED for each annulus.
 This code makes "postage stamp" visualizations of a galaxy in three
 different filters, performs aperture photometry on each image, and
 plots the flux (energy/area/time) in circular apertures centered on
-the galaxy.
+the galaxy.  The current version is set up to work for the galaxy
+J0826.
 
 # bgl_gau_bkg.py
 
