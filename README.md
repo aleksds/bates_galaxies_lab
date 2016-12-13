@@ -59,7 +59,8 @@ set up to work for the galaxy J0826.
 The code makes "postage stamp" visualizations of a galaxy in three
 different filters and then produces color-magntidue diagrams that show
 the relationship between flux in a given filter and the color measured
-with respect to an adjacent filter for all pixels in the postage stamps.
+with respect to an adjacent filter for all pixels in the postage
+stamps.  The current version is set up to work for the galaxy J0905.
 
 # jr_*.py
 

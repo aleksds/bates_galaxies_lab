@@ -1,6 +1,20 @@
 # Aleks Diamond-Stanic
 # 20160919 -- 20161005
 #
+# Quick description: The code makes "postage stamp" visualizations of
+# a galaxy in three different filters and then produces
+# color-magntidue diagrams that show the relationship between flux in
+# a given filter and the color measured with respect to an adjacent
+# filter for all pixels in the postage stamps.
+#
+# Current status: The current version is set up to work for the galaxy
+# J0905.
+#
+# Future developments: Could tighten up the code with functions and
+# for loops.  Could expand to loop over all galaxies.  Could add
+# customized apertures.  Could show the location of customized
+# apertures on the postage stamp images.
+#
 # the preliminary goals of this code include the following:
 #
 # (1) read in three images taken in three different filters
@@ -40,7 +54,7 @@ def plot_image(stamp):
     plt.tick_params(axis='both', which='major', labelsize=8)
 
 # define the directory that contains the images
-dir = '/Users/jrines/data/test/'
+dir = os.environ['HSTDIR']
 
 # specify the position of the science target and the size of the
 # region around the science target to consider
@@ -51,12 +65,12 @@ dy = 30.
 
 
 # create a PDF file for the plots    
-with PdfPages('jr_pix_vis.pdf') as pdf:
+with PdfPages('bgl_pix_vis.pdf') as pdf:
 
     fig = plt.figure()
 
     # read in the F475W image
-    file = glob.glob(dir+'final_F4*sci.fits')
+    file = glob.glob(dir+'J0905*F4*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -70,7 +84,7 @@ with PdfPages('jr_pix_vis.pdf') as pdf:
     plt.suptitle(header['TARGNAME'])
       
     # read in the F814W image
-    file = glob.glob(dir+'final_F8*sci.fits')
+    file = glob.glob(dir+'J0905*F8*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -83,7 +97,7 @@ with PdfPages('jr_pix_vis.pdf') as pdf:
     plt.title('F814W')
 
     # read in the F160W image
-    file = glob.glob(dir+'final_F1*sci.fits')
+    file = glob.glob(dir+'J0905*F1*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
@@ -127,4 +141,4 @@ with PdfPages('jr_pix_vis.pdf') as pdf:
     plt.close()
 
     
-    os.system('open %s &' % 'jr_pix_vis.pdf')
+    os.system('open %s &' % 'bgl_pix_vis.pdf')
