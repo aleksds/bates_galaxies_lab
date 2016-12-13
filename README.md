@@ -19,7 +19,7 @@ stamp image for the galaxy J0905.
 
 This is a version of the jr_compilation*py code that calculates
 fluxes, luminosities, colors, mass-to-light ratios, and stellar
-masses.  This is an outdated piece of code was used to check the
+masses.  This is an outdated piece of code that was used to check the
 mass-to-light ratios and total stellar mass estimate for the galaxy
 J0905.
 
@@ -51,7 +51,8 @@ This code reads in images of the same galaxy in three filters and
 makes "postage stamp" visualizations with the goal of providing a
 qualitative sense for how the morphology of the galaxy and its
 luminosity change as a function of wavelength.  This code is expanded
-upon in bgl_aper_phot.py and bgl_pix_vis.py.
+upon in bgl_aper_phot.py and bgl_pix_vis.py.  The current version is
+set up to work for the galaxy J0826.
 
 # bgl_pix_vis.py
 

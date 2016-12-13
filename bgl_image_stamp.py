@@ -1,6 +1,21 @@
 # Aleks Diamond-Stanic
 # 20160916
 #
+# Quick description: This code reads in images of the same galaxy in
+# three filters and makes "postage stamp" visualizations with the goal
+# of providing a qualitative sense for how the morphology of the
+# galaxy and its luminosity change as a function of wavelength. This
+# code is expanded upon in bgl_aper_phot.py and bgl_pix_vis.py.
+#
+# Current status: The current version is set up to work for the galaxy
+# J0826.
+#
+# Future developments: Could tighten up the code with functions and
+# for loops.  Could expand to loop over all galaxies.  Could produce
+# three-color images.  
+#
+# Original notes:
+#
 # the goals of this code are to do the following:
 # (1) read in three images taken in three different filters
 # (2) plot a "postage stamp" version of each image, centered on the
@@ -15,7 +30,7 @@
 #
 #     (B) "Making a publication quality image"
 #     https://python4astronomers.github.io/intro/quick-tour.html
-
+#
 # import relevant Python modules
 import numpy as np
 from astropy.io import fits
@@ -31,7 +46,11 @@ def plot_image():
     plt.tick_params(axis='both', which='major', labelsize=8)
 
 # define the directory that contains the images
-dir = '/Users/adiamond/data/20150203_HST/J0826+4305/coarse/'
+dir = os.environ['HSTDIR']
+xcen = 3629.
+ycen = 4153.
+dx = 500
+dy = 500
 
 # create a PDF file for the plots    
 with PdfPages('bgl_image_stamp.pdf') as pdf:
@@ -39,15 +58,11 @@ with PdfPages('bgl_image_stamp.pdf') as pdf:
     fig = plt.figure()
 
     # read in the F475W image
-    file = glob.glob(dir+'F475W/final*sci.fits')
+    file = glob.glob(dir+'J0826*F475W*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
     # create a "postage stamp" image centered on the science target
-    xcen = 3629.
-    ycen = 4153.
-    dx = 500
-    dy = 500
     stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
 
     # plot the "postage stamp"
@@ -56,15 +71,11 @@ with PdfPages('bgl_image_stamp.pdf') as pdf:
     plt.title('F475W')
       
     # read in the F814W image
-    file = glob.glob(dir+'F814W/final*sci.fits')
+    file = glob.glob(dir+'J0826*F814W*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
     # create a "postage stamp" image centered on the science target
-    xcen = 3629.
-    ycen = 4153.
-    dx = 500
-    dy = 500
     stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
 
     # plot the "postage stamp"
@@ -73,15 +84,11 @@ with PdfPages('bgl_image_stamp.pdf') as pdf:
     plt.title('F814W')
 
     # read in the F160W image
-    file = glob.glob(dir+'F160W/final*sci.fits')
+    file = glob.glob(dir+'J0826*F160W*sci.fits')
     hdu = fits.open(file[0])
     data, header = hdu[0].data, hdu[0].header
     
     # create a "postage stamp" image centered on the science target
-    xcen = 3629.
-    ycen = 4153.
-    dx = 500
-    dy = 500
     stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
 
     # plot the "postage stamp"
@@ -92,5 +99,5 @@ with PdfPages('bgl_image_stamp.pdf') as pdf:
     pdf.savefig()
     plt.close()
 
-    os.system('open %s &' % 'bgl_image_stamp.pdf')
+os.system('open %s &' % 'bgl_image_stamp.pdf')
     
