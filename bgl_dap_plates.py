@@ -168,7 +168,7 @@ with PdfPages(filename) as pdf:
                        interpolation='nearest',
                        cmap=cm.coolwarm)
             plt.colorbar()
-            plt.title('vertical distance [fsk]', fontsize=10)
+            plt.title('vertical distance [kpc]', fontsize=10)
             plt.suptitle(name)
 
             # plot 2/3: emission-line flux vs vertical distance
