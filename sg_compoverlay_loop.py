@@ -59,7 +59,7 @@ for w in range (0, len(galaxies)):
     cucumber = 1
 #w = 0
 # create a PDF file for the plots    
-    with PdfPages('sg_compilation_'+galaxies[w]+'.pdf') as pdf:
+    with PdfPages('sg_compover_'+galaxies[w]+'.pdf') as pdf:
     
         fig = plt.figure()
     
@@ -273,27 +273,29 @@ for w in range (0, len(galaxies)):
     
         #plotting the specific annular (specific aMLR) mass
         for k in range(0,len(acolors)):
-            ax = fig.add_subplot(4,1gi,1)
+            ax = fig.add_subplot(3,1,1)
             ax.plot(radii, amass[k], acolors[k], marker='o', label=str(alabeling[k]))
             ax.plot(radii, amass[k], dot[k])
         plt.xlabel('Radius (pixels)',fontsize=14)
         plt.ylabel('Mass (solar masses)',fontsize=14)
         plt.title(galaxies[w] + ' Mass vs. Radius, annular M/L ratios',fontsize=16)
         plt.tight_layout()
-        legend = ax.legend(loc='upper right')
+        #plt.gca().invert_yaxis()
+        #legend = ax.legend(loc='upper right')
             
         #plotting the broad (single bMLR) annular mass, the 'light mass' as I call it
         for k in range(0,len(bcolors)):
-            bx = fig.add_subplot(4,1,2)
+            bx = fig.add_subplot(3,1,2)
             bx.plot(radii, bmass[k], bcolors[k], marker='o', label=str(blabeling[k]))
             bx.plot(radii, bmass[k], dot[k])
             
         plt.xlabel('Radius (pixels)',fontsize=14)
-        plt.ylabel('Mass (solar masses)',fontsize=14)
+        #plt.ylabel('Mass (solar masses)',fontsize=14)
         plt.tight_layout()
+        #plt.gca().invert_yaxis()
         plt.title(galaxies[w] + ' Mass vs. Radius, single M/L ratio',fontsize=16)
         #adding the legend
-        legend = bx.legend(loc='upper right')
+        #legend = bx.legend(loc='upper right')
         
         #plotting the mass/area vs radius, converting radius units from pixels to kpc to get mass surface density units
         
@@ -302,33 +304,33 @@ for w in range (0, len(galaxies)):
         bestval_annular_Msrc_ovr_area = np.zeros(len(area))
         bestval_annular_Msic_ovr_area = np.zeros(len(area))
         for j in range(0,len(area)):
-           kpc_area[j] = area[j]*(0.05**2)*(7.194**2)
+            kpc_area[j] = area[j]*radToKpc**2
            
         #now calculating mass/area (mass surface density) in units of solar masses/kpc for bestval_annular_Msrc and bestval_annular_Msic and also radius in kpc units
         bestval_annular_Msrc_ovr_area = bestval_annular_Msrc/kpc_area
         bestval_annular_Msic_ovr_area = bestval_annular_Msic/kpc_area
-        kpc_radius = radii*(0.05)*(7.194)
+        kpc_radius = radii*radToKpc
         
         #now plotting bestval_annular_Msrc_ovr_area and bestval_annular_Msic_ovr_area vs radius in kpc
-        ax = fig.add_subplot(4,1,3)
+        ax = fig.add_subplot(3,1,3)
         ax.plot(kpc_radius, bestval_annular_Msrc_ovr_area, 'g--', marker='s', label=str(alabeling[1]))
         ax.plot(kpc_radius, bestval_annular_Msrc_ovr_area, 'g--')
-        #plt.plot(np.unique(radii), np.poly1d(np.polyfit(radii, bmass[k], 192))(np.unique(radii)),bcolors[k], label=str(alabeling[k]))
         plt.xlabel('Radius (kpc)',fontsize=14)
-        plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
+        #plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
         plt.tight_layout()
+        #plt.gca().invert_yaxis()
         plt.title(galaxies[w] + ' Mass Density vs. Radius, M_SRC and M_SIC',fontsize=15)
-        legend = bx.legend(loc='upper right')
+        #legend = bx.legend(loc='upper right')
     
         #plotting bestval_annular_Msic_ovr_area vs radius in kpc
-        bx = fig.add_subplot(4,1,4)
-        bx.plot(kpc_radius, bestval_annular_Msic_ovr_area, 'yellowgreen', marker='o', label=str(blabeling[1]))
-        bx.plot(kpc_radius, bestval_annular_Msic_ovr_area, 'yellowgreen')
+        ax.plot(kpc_radius, bestval_annular_Msic_ovr_area, 'yellowgreen', marker='o', label=str(blabeling[1]))
+        ax.plot(kpc_radius, bestval_annular_Msic_ovr_area, 'yellowgreen')
         plt.xlabel('Radius (kpc)',fontsize=14)
-        plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
+        #plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
         plt.tight_layout()
+        #plt.gca().invert_yaxis()
         plt.title(galaxies[0] + ' Mass Density vs. Radius, M_SRC and M_SIC',fontsize=15)
-        legend = bx.legend(loc='upper right')
+        #legend = ax.legend(loc='upper right')
             
         #calculating total mass (Msrc) for annular MLR (814 filter only)
         total_annular_Msrc_F814W = np.sum(bestval_annular_Msrc)
@@ -350,7 +352,7 @@ for w in range (0, len(galaxies)):
         pdf.savefig()
         plt.close()
     
-    os.system('open %s &' % 'sg_compilation_J0905.pdf')
-    os.system('open %s &' % 'sg_compilation_J0826.pdf')
-    os.system('open %s &' % 'sg_compilation_J1107.pdf')    
+    os.system('open %s &' % 'sg_compover_J0905.pdf')
+    os.system('open %s &' % 'sg_compover_J0826.pdf')
+    os.system('open %s &' % 'sg_compover_J1107.pdf')    
         #os.system('open %s &' % 'sg_compilation_'+galaxies[0]+'.pdf')
