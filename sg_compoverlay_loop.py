@@ -17,12 +17,16 @@ import math
 import matplotlib.lines as mlines
 from matplotlib.legend_handler import HandlerLine2D
 from scipy import integrate
+from astropy.cosmology import WMAP9 as cosmo
+from astropy import units as u
+from astropy import constants as const
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
 
 # set up variables for use
-c = 299792458               #c is the speed of light in m/s
+#c = 299792458               #c is the speed of light in m/s
+#these are not what you want
 solarMass = 3.846*10**33    #solar Mass is the mass of the sun in kg
 radToKpc = 0.05*7.194       #converts radius to kpc
 
@@ -34,12 +38,17 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-filters = np.array([475, 814, 1600])
+filters = np.array([475, 814, 1600])*u.nm
 galaxies = ['J0905', 'J0826', 'J1107']
+#galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
 xcen = [3386.5, 3628.7, 3572.9]
 ycen = [3503.2, 4153.8, 3339.1]
-LdJ0905 = [1.3419313751999997e+28,1.0958483952e+28, 8.05516764e+27]
-
+#this can be renamed
+#Ldcm = [1.3419313751999997e+28,1.0958483952e+28, 8.05516764e+27]
+zs = [0.712,0.603,0.467]
+#zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
+#Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
+Ldcm = cosmo.luminosity_distance(zs)*3.08568*10**24 / u.Mpc
 # define the radii to be used for aperture photometry
 radii = np.arange(40)+1
 
@@ -55,9 +64,6 @@ for i in range(0, len(area)):
 # Now, we loop through all galaxies
 
 for w in range (0, len(galaxies)):
-    #things go here
-    cucumber = 1
-#w = 0
 # create a PDF file for the plots    
     with PdfPages('sg_compover_'+galaxies[w]+'.pdf') as pdf:
     
@@ -65,7 +71,7 @@ for w in range (0, len(galaxies)):
     
         collection = ['F475W','F814W','F160W']
     
-        flux = np.zeros([len(collection),len(radii)])
+        flux = np.zeros([len(collection),len(radii)])*u.Jy
         subflux = np.zeros([len(collection),len(radii)])
     
         for i in range (0, len(collection)):
@@ -124,10 +130,11 @@ for w in range (0, len(galaxies)):
             MLR_BV_Jk[k] = 10**(Ja[k]+(Jb[k]*colorUV))
     
         #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24), only three values depending on filter
-        LnuNu = (c/(filters*10**-9))*tflux*(4*math.pi*LdJ0905[w]**2)
+        LnuNu = (const.c/(filters*10**-9))*tflux*(4*math.pi*Ldcm[w]**2)
         
         #convert luminosity to solar units
-        Lsol = LnuNu / solarMass
+        Lsol = LnuNu / const.L_sun
+        #Lsol = LnuNu / solarMass
     
         #calculate mass of galaxy in solar units, 3 arrays of masses for each coefficient for 3 different filters will yield a total of 21 galaxy masses, 7 values for each luminosity in the BV color
         M_BV_Bk = np.zeros([len(Ba)])
@@ -191,7 +198,7 @@ for w in range (0, len(galaxies)):
     
         #calculating nu_e * L_nu_e luminosity in erg/s units for each annulus from Hogg eq (24)
         for i in range (0, len(filters)):
-            aLnuNu = (c/(filters[i]*10**-9))*aflux[i,:]*(4*math.pi*LdJ0905[w]**2)
+            aLnuNu = (const.c/(filters[i]*10**-9))*aflux[i,:]*(4*math.pi*Ldcm[w]**2)
         
         #convert luminosity for each annulus to solar units
         aLsol814 = aLnuNu[1] / solarMass
@@ -279,7 +286,7 @@ for w in range (0, len(galaxies)):
         plt.xlabel('Radius (pixels)',fontsize=14)
         plt.ylabel('Mass (solar masses)',fontsize=14)
         plt.title(galaxies[w] + ' Mass vs. Radius, annular M/L ratios',fontsize=16)
-        plt.tight_layout()
+        #plt.tight_layout()
         #plt.gca().invert_yaxis()
         #legend = ax.legend(loc='upper right')
             
@@ -295,7 +302,7 @@ for w in range (0, len(galaxies)):
         #plt.gca().invert_yaxis()
         plt.title(galaxies[w] + ' Mass vs. Radius, single M/L ratio',fontsize=16)
         #adding the legend
-        #legend = bx.legend(loc='upper right')
+        legend = bx.legend(loc='upper right')
         
         #plotting the mass/area vs radius, converting radius units from pixels to kpc to get mass surface density units
         
@@ -329,7 +336,7 @@ for w in range (0, len(galaxies)):
         #plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
         plt.tight_layout()
         #plt.gca().invert_yaxis()
-        plt.title(galaxies[0] + ' Mass Density vs. Radius, M_SRC and M_SIC',fontsize=15)
+        plt.title(galaxies[w] + ' Mass Density vs. Radius, M_SRC and M_SIC',fontsize=15)
         #legend = ax.legend(loc='upper right')
             
         #calculating total mass (Msrc) for annular MLR (814 filter only)
@@ -352,7 +359,9 @@ for w in range (0, len(galaxies)):
         pdf.savefig()
         plt.close()
     
-    os.system('open %s &' % 'sg_compover_J0905.pdf')
-    os.system('open %s &' % 'sg_compover_J0826.pdf')
-    os.system('open %s &' % 'sg_compover_J1107.pdf')    
+    #os.system('open %s &' % 'sg_compover_J0905.pdf')
+    #os.system('open %s &' % 'sg_compover_J0826.pdf')
+    #os.system('open %s &' % 'sg_compover_J1107.pdf')
+    #os.system('open %s &' % 'sg_compover_J0901.pdf')
+    #os.system('open %s &' % 'sg_compover_J0944.pdf')    
         #os.system('open %s &' % 'sg_compilation_'+galaxies[0]+'.pdf')
