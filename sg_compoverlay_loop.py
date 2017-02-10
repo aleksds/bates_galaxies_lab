@@ -38,15 +38,17 @@ fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
-filters = np.array([475, 814, 1600])*u.nm
-galaxies = ['J0905', 'J0826', 'J1107']
-#galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
-xcen = [3386.5, 3628.7, 3572.9]
-ycen = [3503.2, 4153.8, 3339.1]
+filters = np.array([475, 814, 1600]) #*u.nm
+#galaxies = ['J0905', 'J0826', 'J1107']
+galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
+#xcen = [3386.5, 3628.7, 3572.9]
+#ycen = [3503.2, 4153.8, 3339.1]
+xcen = [3628.7, 3934, 3386.5, 3477.539, 3572.9, 3801.2, 3885.6, 4149.15, 3772.626, 3825.895, 3566.9, 4067]
+ycen = [4153.8, 4137, 3503.2, 3404.342, 3339.1, 4171.6, 4164.336, 3921.748, 4179.821, 4451.805, 3435.9, 4054.4]
 #this can be renamed
 #Ldcm = [1.3419313751999997e+28,1.0958483952e+28, 8.05516764e+27]
-zs = [0.712,0.603,0.467]
-#zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
+#zs = [0.712,0.603,0.467]
+zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 #Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
 Ldcm = cosmo.luminosity_distance(zs)*3.08568*10**24 / u.Mpc
 # define the radii to be used for aperture photometry
@@ -71,7 +73,7 @@ for w in range (0, len(galaxies)):
     
         collection = ['F475W','F814W','F160W']
     
-        flux = np.zeros([len(collection),len(radii)])*u.Jy
+        flux = np.zeros([len(collection),len(radii)]) #*u.Jy
         subflux = np.zeros([len(collection),len(radii)])
     
         for i in range (0, len(collection)):
@@ -231,7 +233,7 @@ for w in range (0, len(galaxies)):
         #best value for each annulus
         bestval_annular_Msrc = np.zeros(40)
         for j in range(len(radii)):
-            bestval_annular_Msrc[j] = (aMsrc_814_BV_ab0[j]+aMsrc_814_BV_ab1[j]+aMsrc_814_BV_ab2[j]+aMsrc_814_BV_ab3[j]+aMsrc_814_BV_ab4[j]+aMsrc_814_BV_ab5[j]+aMsrc_814_BV_ab6[j])/7
+            bestval_annular_Msrc[j] = ((aMsrc_814_BV_ab0[j]+aMsrc_814_BV_ab1[j]+aMsrc_814_BV_ab2[j]+aMsrc_814_BV_ab3[j]+aMsrc_814_BV_ab4[j]+aMsrc_814_BV_ab5[j]+aMsrc_814_BV_ab6[j])/7) #*u.s * u.nm / u.m
     
         #best value and std, printed
         Msrc_814_BV = np.mean(Msrc_814_BV_ab)
