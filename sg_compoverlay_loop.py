@@ -24,8 +24,6 @@ from astropy import constants as const
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
 
-# set up variables for use
-#c = 299792458               #c is the speed of light in m/s
 #these are not what you want
 solarMass = 3.846*10**33    #solar Mass is the mass of the sun in kg
 radToKpc = 0.05*7.194       #converts radius to kpc
@@ -39,15 +37,12 @@ exp = [0 for x in range(len(wavelengths))]
 
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600]) #*u.nm
-#galaxies = ['J0905', 'J0826', 'J1107']
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
-#xcen = [3386.5, 3628.7, 3572.9]
-#ycen = [3503.2, 4153.8, 3339.1]
-xcen = [3628.7, 3934, 3386.5, 3477.539, 3572.9, 3801.2, 3885.6, 4149.15, 3772.626, 3825.895, 3566.9, 4067]
-ycen = [4153.8, 4137, 3503.2, 3404.342, 3339.1, 4171.6, 4164.336, 3921.748, 4179.821, 4451.805, 3435.9, 4054.4]
-#this can be renamed
-#Ldcm = [1.3419313751999997e+28,1.0958483952e+28, 8.05516764e+27]
-#zs = [0.712,0.603,0.467]
+#xcen = [3628.7, 3934, 3386.5, 3477.539, 3572.9, 3801.2, 3885.6, 4149.15, 3772.626, 3825.895, 3566.9, 4067]
+#ycen = [4153.8, 4137, 3503.2, 3404.342, 3339.1, 4171.6, 4164.336, 3921.748, 4179.821, 4451.805, 3435.9, 4054.4]
+xcen = [3628.7, 3934, 3386.5, 3477.539, 3572.9, 3801.2, 3885.6, 4149.15, 3787, 3825.89, 3566.9, 4067]
+ycen = [4153.8, 4137, 3503.2, 3404.342, 3339.1, 4171.6, 4164.336, 3921.748, 4187, 4451.805, 3435.9, 4054.4]
+
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 #Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
 Ldcm = cosmo.luminosity_distance(zs)*3.08568*10**24 / u.Mpc
@@ -66,6 +61,7 @@ for i in range(0, len(area)):
 # Now, we loop through all galaxies
 
 for w in range (0, len(galaxies)):
+    print(galaxies[w])
 # create a PDF file for the plots    
     with PdfPages('sg_compover_'+galaxies[w]+'.pdf') as pdf:
     
@@ -132,7 +128,7 @@ for w in range (0, len(galaxies)):
             MLR_BV_Jk[k] = 10**(Ja[k]+(Jb[k]*colorUV))
     
         #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24), only three values depending on filter
-        LnuNu = (const.c/(filters*10**-9))*tflux*(4*math.pi*Ldcm[w]**2)
+        LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*(4*math.pi*Ldcm[w]**2)
         
         #convert luminosity to solar units
         Lsol = LnuNu / const.L_sun
@@ -200,7 +196,7 @@ for w in range (0, len(galaxies)):
     
         #calculating nu_e * L_nu_e luminosity in erg/s units for each annulus from Hogg eq (24)
         for i in range (0, len(filters)):
-            aLnuNu = (const.c/(filters[i]*10**-9))*aflux[i,:]*(4*math.pi*Ldcm[w]**2)
+            aLnuNu = (const.c*u.s/u.m/(filters[i]*10**-9))*aflux[i,:]*(4*math.pi*Ldcm[w]**2)
         
         #convert luminosity for each annulus to solar units
         aLsol814 = aLnuNu[1] / solarMass
@@ -279,29 +275,32 @@ for w in range (0, len(galaxies)):
         dot = ['bo','go','ro']
         alabeling = ['annular MLR F475W','annular MLR F814W','annular MLR F160W']
         blabeling = ['single MLR F475W','single MLR F814W','single MLR F160W']
-    
+        
+        ax = fig.add_subplot(1,1,1)
+        
         #plotting the specific annular (specific aMLR) mass
         for k in range(0,len(acolors)):
-            ax = fig.add_subplot(3,1,1)
             ax.plot(radii, amass[k], acolors[k], marker='o', label=str(alabeling[k]))
             ax.plot(radii, amass[k], dot[k])
         plt.xlabel('Radius (pixels)',fontsize=14)
         plt.ylabel('Mass (solar masses)',fontsize=14)
         plt.title(galaxies[w] + ' Mass vs. Radius, annular M/L ratios',fontsize=16)
-        #plt.tight_layout()
-        #plt.gca().invert_yaxis()
-        #legend = ax.legend(loc='upper right')
+        plt.tight_layout()
+        legend = ax.legend(loc='upper right')
+        # here is some new stuff for you
+        pdf.savefig()
+        plt.close()
             
         #plotting the broad (single bMLR) annular mass, the 'light mass' as I call it
+        fig = plt.figure()
+        bx = fig.add_subplot(1,1,1)
         for k in range(0,len(bcolors)):
-            bx = fig.add_subplot(3,1,2)
             bx.plot(radii, bmass[k], bcolors[k], marker='o', label=str(blabeling[k]))
             bx.plot(radii, bmass[k], dot[k])
             
         plt.xlabel('Radius (pixels)',fontsize=14)
-        #plt.ylabel('Mass (solar masses)',fontsize=14)
+        plt.ylabel('Mass (solar masses)',fontsize=14)
         plt.tight_layout()
-        #plt.gca().invert_yaxis()
         plt.title(galaxies[w] + ' Mass vs. Radius, single M/L ratio',fontsize=16)
         #adding the legend
         legend = bx.legend(loc='upper right')
@@ -319,27 +318,28 @@ for w in range (0, len(galaxies)):
         bestval_annular_Msrc_ovr_area = bestval_annular_Msrc/kpc_area
         bestval_annular_Msic_ovr_area = bestval_annular_Msic/kpc_area
         kpc_radius = radii*radToKpc
-        
+        pdf.savefig()
+        plt.close()
+
+        fig = plt.figure()
         #now plotting bestval_annular_Msrc_ovr_area and bestval_annular_Msic_ovr_area vs radius in kpc
-        ax = fig.add_subplot(3,1,3)
+        ax = fig.add_subplot(1,1,1)
         ax.plot(kpc_radius, bestval_annular_Msrc_ovr_area, 'g--', marker='s', label=str(alabeling[1]))
         ax.plot(kpc_radius, bestval_annular_Msrc_ovr_area, 'g--')
         plt.xlabel('Radius (kpc)',fontsize=14)
-        #plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
+        plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
         plt.tight_layout()
-        #plt.gca().invert_yaxis()
         plt.title(galaxies[w] + ' Mass Density vs. Radius, M_SRC and M_SIC',fontsize=15)
-        #legend = bx.legend(loc='upper right')
+        legend = bx.legend(loc='upper right')
     
         #plotting bestval_annular_Msic_ovr_area vs radius in kpc
         ax.plot(kpc_radius, bestval_annular_Msic_ovr_area, 'yellowgreen', marker='o', label=str(blabeling[1]))
         ax.plot(kpc_radius, bestval_annular_Msic_ovr_area, 'yellowgreen')
         plt.xlabel('Radius (kpc)',fontsize=14)
-        #plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
+        plt.ylabel('Mass Density (M_sol/area)',fontsize=14)
         plt.tight_layout()
-        #plt.gca().invert_yaxis()
         plt.title(galaxies[w] + ' Mass Density vs. Radius, M_SRC and M_SIC',fontsize=15)
-        #legend = ax.legend(loc='upper right')
+        legend = ax.legend(loc='upper right')
             
         #calculating total mass (Msrc) for annular MLR (814 filter only)
         total_annular_Msrc_F814W = np.sum(bestval_annular_Msrc)
