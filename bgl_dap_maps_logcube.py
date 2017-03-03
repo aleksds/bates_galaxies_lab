@@ -8,7 +8,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 # This is a bitmask handling object from the DAP source code
 from mangadap.dapcube import DAPCubeBitMask
 
-dir = '/Users/adiamond/data/MPL-5/dap/SPX-GAU-MILESHC/7977/12704/'
+dapdir = os.environ['DAPDIR']
+
+dir = dapdir+'SPX-GAU-MILESHC/7977/12704/'
 
 # Open the fits file
 hdu_maps = fits.open(dir+'manga-7977-12704-MAPS-SPX-GAU-MILESHC.fits.gz')
