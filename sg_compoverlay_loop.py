@@ -59,10 +59,11 @@ ycen = [4153.8, 4137, 3503.2, 3404.342, 3339.1, 4171.6, 4164.336, 3921.748, 4187
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 #Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
 Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
+
 # define the radii to be used for aperture photometry
 radii = np.arange(40)+1
 aMLR_BV_Vk_ab = [[0 for x in range(40)] for y in range(7)]
-aLnuNu = [[0 for x in range(len(wavelengths))] for y in range(len(radii))]
+aLnuNu = [0 for x in range(len(wavelengths))]
 #make an array for the calculation of the area of each bagel (annulus)
 area = [0 for x in range(len(radii))]
 
@@ -74,8 +75,7 @@ for i in range(0, len(area)):
         area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 # Now, we loop through all galaxies
 
-#for w in range (0, len(galaxies)):
-for w in range (0, 1):
+for w in range (0, len(galaxies)):
     print(galaxies[w])
 # create a PDF file for the plots    
     with PdfPages('sg_compover_'+galaxies[w]+'.pdf') as pdf:
@@ -113,8 +113,8 @@ for w in range (0, 1):
     
         #calculating galaxy-wide
         
-        #finding total flux in galaxy in erg/s/cm^2
-        tflux = np.array([flux[0,len(radii)-1]*(10**-23),flux[1,len(radii)-1]*(10**-23),flux[2,len(radii)-1]*(10**-23)])
+        #finding total flux in galaxy in Jy 19 mag. 
+        tflux = np.array([flux[0,len(radii)-1],flux[1,len(radii)-1],flux[2,len(radii)-1]])
     
         #finding magnitudes and color for M/L ratio
         mag = -2.5*np.log10(tflux / 3631)
@@ -130,12 +130,10 @@ for w in range (0, 1):
             MLR_BV_Vk[k] = 10**(Va[k]+(Vb[k]*colorUV))
             MLR_BV_Jk[k] = 10**(Ja[k]+(Jb[k]*colorUV))
     
-        #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24), only three values depending on filter
-        #LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*(4*math.pi*Ldcm[w]**2)
-        LnuNu = (299792458/(filters*10**-9))*tflux*(4*math.pi*Ldcm[w]**2)
+        #calculating nu_e * L_nu_e luminosity in erg Hz units from Hogg eq (24), only three values depending on filter
+        LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2)
         
         #convert luminosity to solar units
-        #Lsol = LnuNu / const.L_sun
         Lsol = LnuNu / solarLum
         
         #calculate mass of galaxy in solar units, 3 arrays of masses for each coefficient for 3 different filters will yield a total of 21 galaxy masses, 7 values for each luminosity in the BV color
@@ -193,8 +191,8 @@ for w in range (0, 1):
     
         #calculating nu_e * L_nu_e luminosity in erg/s units for each annulus from Hogg eq (24)
         for i in range (0, len(filters)):
-            #aLnuNu[i] = (const.c*u.s/u.m/(filters[i]*10**-9))*aflux[i,:]*(4*math.pi*Ldcm[w]**2)
-            aLnuNu[i] = (299792458/(filters[i]*10**-9))*aflux[i,:]*(4*math.pi*Ldcm[w]**2)
+            aLnuNu[i] = (const.c*u.s/u.m/(filters[i]*10**-9))*aflux[i,:]*(4*math.pi*Ldcm[w]**2)
+            
         
         #convert luminosity for each annulus to solar units
         aLsol814 = aLnuNu[1] / solarLum
@@ -202,8 +200,7 @@ for w in range (0, 1):
     
         #calculate mass associated with each annulus, based on individualized MLRs for each annulus, in solar units, based on individualized MLRs
         aMLR_BV = (aMLR_BV_B, aMLR_BV_V, aMLR_BV_J)
-        #amass = aLsol*aMLR_BV
-        amass = (aLnuNu[0]*aMLR_BV[0],aLnuNu[1]*aMLR_BV[1],aLnuNu[2]*aMLR_BV[2])
+        amass = (aLsol[0]*aMLR_BV[0],aLsol[1]*aMLR_BV[1],aLsol[2]*aMLR_BV[2])
         
         #calculating the Msrc values for each annulus
         aMsrc_814_BV_ab0 = aLsol814*aMLR_BV_Vk_ab[0]
@@ -237,9 +234,9 @@ for w in range (0, 1):
         print('Msrc,814W,B-V std',Msrc_814_BV_std/1e11)
     
         #calculate mass associated with each annulus in solar units, based on one MLR estimate for the entire galaxy
-        bM_BV_B = aLsol*bMLR_BV_B
-        bM_BV_V = aLsol*bMLR_BV_V
-        bM_BV_J = aLsol*bMLR_BV_J
+        bM_BV_B = aLsol[0]*bMLR_BV_B
+        bM_BV_V = aLsol[1]*bMLR_BV_V
+        bM_BV_J = aLsol[2]*bMLR_BV_J
         bmass = (bM_BV_B,bM_BV_V,bM_BV_J)
     
         #best values
@@ -294,6 +291,7 @@ for w in range (0, 1):
         fig = plt.figure()
         bx = fig.add_subplot(1,1,1)
         for k in range(0,len(bcolors)):
+            #we changed from bmass[k] to bmass[0][k] to fix dimensions, it may not be what we actually we want to plot
             bx.plot(radii, bmass[k], bcolors[k], marker='o', label=str(blabeling[k]))
             bx.plot(radii, bmass[k], dot[k])
             
@@ -316,10 +314,8 @@ for w in range (0, 1):
         # now calculating mass/area (mass surface density) in units of solar masses/kpc for bestval_annular_Msrc and bestval_annular_Msic and also radius in kpc units
         # THIS MIGHT BE WRONG BUT WE ARENT SURE AND IT SEEMS TO BE THE BEST FOR THE MOMENT. WHEN WE FIGURE OUT WHAT IS ACTUALLY WRONG, WE WILL NEED TO MAKE ADJUSTMENTS
         #WE ARE HAVING ISSUES WITH MSRC, NOT MSIC. 
-        bestval_annular_Msrc_ovr_area = bestval_annular_Msrc /kpc_area #/kpc_area
+        bestval_annular_Msrc_ovr_area = bestval_annular_Msrc /kpc_area
         bestval_annular_Msic_ovr_area = bestval_annular_Msic /kpc_area
-        #bestval_annular_Msrc_ovr_area = amass[1]/kpc_area
-        #bestval_annular_Msic_ovr_area = bmass[1]/kpc_area
         kpc_radius = radii*radToKpc
         pdf.savefig()
         plt.close()
