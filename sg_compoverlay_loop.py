@@ -75,8 +75,7 @@ for i in range(0, len(area)):
         area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 # Now, we loop through all galaxies
 
-#for w in range (0, len(galaxies)):
-for w in range (0, 1):
+for w in range (0, len(galaxies)):
     print(galaxies[w])
 # create a PDF file for the plots    
     with PdfPages('sg_compover_'+galaxies[w]+'.pdf') as pdf:
@@ -114,8 +113,8 @@ for w in range (0, 1):
     
         #calculating galaxy-wide
         
-        #finding total flux in galaxy in erg/s/cm^2
-        tflux = np.array([flux[0,len(radii)-1]*(10**-23),flux[1,len(radii)-1]*(10**-23),flux[2,len(radii)-1]*(10**-23)])
+        #finding total flux in galaxy in Jy 19 mag. 
+        tflux = np.array([flux[0,len(radii)-1],flux[1,len(radii)-1],flux[2,len(radii)-1]])
     
         #finding magnitudes and color for M/L ratio
         mag = -2.5*np.log10(tflux / 3631)
@@ -131,8 +130,8 @@ for w in range (0, 1):
             MLR_BV_Vk[k] = 10**(Va[k]+(Vb[k]*colorUV))
             MLR_BV_Jk[k] = 10**(Ja[k]+(Jb[k]*colorUV))
     
-        #calculating nu_e * L_nu_e luminosity in erg/s units from Hogg eq (24), only three values depending on filter
-        LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*(4*math.pi*Ldcm[w]**2)
+        #calculating nu_e * L_nu_e luminosity in erg Hz units from Hogg eq (24), only three values depending on filter
+        LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2)
         
         #convert luminosity to solar units
         Lsol = LnuNu / solarLum
