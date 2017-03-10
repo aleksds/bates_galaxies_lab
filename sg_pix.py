@@ -66,12 +66,12 @@ zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.72
 Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
 
 # define the radii to be used for aperture photometry
-radii = np.arange(3)+1
-aMLR_BV_Vk_ab = [[0 for x in range(40)] for y in range(7)]
+radii = np.arange(width)+1
+aMLR_BV_Vk_ab = [[0 for x in range(width)] for y in range(7)]
 aLnuNu = [0 for x in range(len(wavelengths))]
 #make an array for the calculation of the area of each bagel (annulus)
 area = [0 for x in range(len(radii))]
-
+filflux = []
 #calculate area of each bagel
 for i in range(0, len(area)):
     if i == 0:
@@ -90,11 +90,11 @@ for w in range (0, 1):
     
         collection = ['F475W','F814W','F160W']
     
-        flux = np.zeros([len(collection),len(radii)]) #*u.Jy
-        subflux = np.zeros([len(collection),len(radii)])
+        flux = np.zeros([len(collection), width, width]) #*u.Jy
+        subflux = np.zeros([len(collection), width, width])
         
-        for i in range (0, 1):
-        #for i in range (0, len(collection)):
+        #for i in range (0, 1):
+        for i in range (0, len(collection)):
             
             # read in the images
             file = glob.glob(dir+galaxies[w]+'_final_'+collection[i]+'*sci.fits')
@@ -106,18 +106,18 @@ for w in range (0, 1):
             #define positions for photometry
             positions = [(xcen[w], ycen[w])]
 
-            flux = np.zeros((width,width))
+            #flux = np.zeros((width,width))
 
             for j in range (0,width):
                 for k in range (0,width):
-                    flux[j,k] = data[i][k+ycen[w]-pixr][j+xcen[w]-pixr]*fnu[i]/exp[i]
-                    subflux[j,k] = data[i][k+ycen[w]-pixr][j+xcen[w]-pixr]*fnu[i]/exp[i]
+                    flux[i,j,k] = data[i][k+ycen[w]-pixr][j+xcen[w]-pixr]*fnu[i]/exp[i]
+                    aflux[i,j,k] = data[i][k+ycen[w]-pixr][j+xcen[w]-pixr]*fnu[i]/exp[i]
 
     
         #calculating galaxy-wide
         
         #finding total flux in galaxy in Jy 19 mag. 
-        tflux = np.array([flux[0,len(radii)-1],flux[1,len(radii)-1],flux[2,len(radii)-1]])
+        tflux = np.array([np.sum(flux[0]),np.sum(flux[1]),np.sum(flux[2])])
     
         #finding magnitudes and color for M/L ratio
         mag = -2.5*np.log10(tflux / 3631)
@@ -167,11 +167,9 @@ for w in range (0, 1):
         print('Msic,160W,B-V', Msic_160_BV/1e11)
         print('Msic,160W,B-V std', Msic_160_BV_std/1e11)
         
-        #calculation annulus-based
+        #calculation by pixel
     
-        #calculation of flux for each annulus, given in an array, for each filter, in erg/s units
-        aflux = subflux*10**-23
-        #calculation of magnitudes and color for each annulus
+        #calculation of magnitudes and color for each pixel
         #I do not think I need to calculate 'acolorUV', but rather simply use the 'colorUV' calculation to determine MLR, however I have left this in the code in case we need to refer to it later. I did not comment it out since it isn't used later in the code.
         amag = -2.5*np.log10(aflux / 3631)
         acolorUV = amag[0]-amag[1]
@@ -194,7 +192,7 @@ for w in range (0, 1):
     
         #calculating nu_e * L_nu_e luminosity in erg/s units for each annulus from Hogg eq (24)
         for i in range (0, len(filters)):
-            aLnuNu[i] = (const.c*u.s/u.m/(filters[i]*10**-9))*aflux[i,:]*(4*math.pi*Ldcm[w]**2)
+            aLnuNu[i] = (const.c*u.s/u.m/(filters[i]*10**-9))*aflux[i,:]*10**-23*(4*math.pi*Ldcm[w]**2)
             
         
         #convert luminosity for each annulus to solar units
@@ -226,7 +224,7 @@ for w in range (0, 1):
         Msrc_814_BV_ab = (Msrc_814_BV_ab0,Msrc_814_BV_ab1,Msrc_814_BV_ab2,Msrc_814_BV_ab3,Msrc_814_BV_ab4,Msrc_814_BV_ab5,Msrc_814_BV_ab6)
     
         #best value for each annulus
-        bestval_annular_Msrc = np.zeros(40)
+        bestval_annular_Msrc = np.zeros(width)
         for j in range(len(radii)):
             bestval_annular_Msrc[j] = ((aMsrc_814_BV_ab0[j]+aMsrc_814_BV_ab1[j]+aMsrc_814_BV_ab2[j]+aMsrc_814_BV_ab3[j]+aMsrc_814_BV_ab4[j]+aMsrc_814_BV_ab5[j]+aMsrc_814_BV_ab6[j])/7)
     
@@ -253,7 +251,7 @@ for w in range (0, 1):
         annular_Msic_814_BV_ab = (annular_Msic_814_BV_ab0,annular_Msic_814_BV_ab1,annular_Msic_814_BV_ab2,annular_Msic_814_BV_ab3,annular_Msic_814_BV_ab4,annular_Msic_814_BV_ab5,annular_Msic_814_BV_ab6)
         
         #best value for each annulus
-        bestval_annular_Msic = np.zeros(40)
+        bestval_annular_Msic = np.zeros(width)
         for j in range(len(radii)):
             bestval_annular_Msic = (annular_Msic_814_BV_ab[0]+annular_Msic_814_BV_ab[1]+annular_Msic_814_BV_ab[2]+annular_Msic_814_BV_ab[3]+annular_Msic_814_BV_ab[4]+annular_Msic_814_BV_ab[5]+annular_Msic_814_BV_ab[6])/7
     
