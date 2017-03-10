@@ -2,6 +2,10 @@
 # 20170125
 #
 # This code is the general, optimal version of jr_compilation
+# 
+# This code produces three graphs: Mass in an annulus as a function of radius for annular MLRs, and for a broad MLR, and mass density as a function of radius (the more important graph)
+# It also prints out several different estimates of mass for each galaxy (though it mass / 1e11)
+# This is hopefully the last version of this code. We will begin a new code for the pixel by pixel analysis.
 #
 # import relevant Python modules
 import os
