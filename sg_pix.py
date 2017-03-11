@@ -53,6 +53,7 @@ V_coeff = [Va,Vb]
 Ja = [-.540,-.658,-.527,-.514,-.659,-.621,-.550]
 Jb = [.757,.907,.741,.704,.878,.794,.801]
 J_coeff = [Ja,Jb]
+BdJ = [B_coeff, V_coeff, J_coeff]
 
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600])
@@ -91,7 +92,7 @@ for w in range (0, 1):
         collection = ['F475W','F814W','F160W']
     
         flux = np.zeros([len(collection), width, width]) #*u.Jy
-        subflux = np.zeros([len(collection), width, width])
+        aflux = np.zeros([len(collection), width, width])
         
         #for i in range (0, 1):
         for i in range (0, len(collection)):
@@ -106,19 +107,22 @@ for w in range (0, 1):
             #define positions for photometry
             positions = [(xcen[w], ycen[w])]
 
-            #flux = np.zeros((width,width))
-
             for j in range (0,width):
                 for k in range (0,width):
                     flux[i,j,k] = data[i][k+ycen[w]-pixr][j+xcen[w]-pixr]*fnu[i]/exp[i]
                     aflux[i,j,k] = data[i][k+ycen[w]-pixr][j+xcen[w]-pixr]*fnu[i]/exp[i]
 
-    
         #calculating galaxy-wide
         
         #finding total flux in galaxy in Jy 19 mag. 
         tflux = np.array([np.sum(flux[0]),np.sum(flux[1]),np.sum(flux[2])])
-    
+
+        #calculating nu_e * L_nu_e luminosity in erg Hz units from Hogg eq (24), only three values depending on filter
+        LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2)
+        
+        #convert luminosity to solar units
+        Lsol = LnuNu / solarLum
+        
         #finding magnitudes and color for M/L ratio
         mag = -2.5*np.log10(tflux / 3631)
         colorUV = mag[0]-mag[1]
@@ -128,28 +132,14 @@ for w in range (0, 1):
         MLR_BV_Bk = np.zeros([len(Ba)])
         MLR_BV_Vk = np.zeros([len(Va)])
         MLR_BV_Jk = np.zeros([len(Ja)])
-        for k in range(0,len(Ba)):
-            MLR_BV_Bk[k] = 10**(Ba[k]+(Bb[k]*colorUV))
-            MLR_BV_Vk[k] = 10**(Va[k]+(Vb[k]*colorUV))
-            MLR_BV_Jk[k] = 10**(Ja[k]+(Jb[k]*colorUV))
-    
-        #calculating nu_e * L_nu_e luminosity in erg Hz units from Hogg eq (24), only three values depending on filter
-        LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2)
-        
-        #convert luminosity to solar units
-        Lsol = LnuNu / solarLum
+        mass =(MLR_BV_Bk,MLR_BV_Vk,MLR_BV_Jk)
+        for i in range (0, len(collection)):
+            for j in range(0,len(Ba)):
+                mass[i][j] = Lsol[i]*10**(BdJ[i][0][j]+(BdJ[i][1][j]*colorUV))
         
         #calculate mass of galaxy in solar units, 3 arrays of masses for each coefficient for 3 different filters will yield a total of 21 galaxy masses, 7 values for each luminosity in the BV color
-        M_BV_Bk = np.zeros([len(Ba)])
-        M_BV_Vk = np.zeros([len(Va)])
-        M_BV_Jk = np.zeros([len(Ja)])
-        
-        M_BV_Bk = Lsol[0]*MLR_BV_Bk
-        M_BV_Vk = Lsol[1]*MLR_BV_Vk
-        M_BV_Jk = Lsol[2]*MLR_BV_Jk
     
         #calculating best values and uncertainties
-        mass = (M_BV_Bk, M_BV_Vk, M_BV_Jk)
         Msic_475_BV = np.mean(mass[0])
         Msic_814_BV = np.mean(mass[1])
         Msic_160_BV = np.mean(mass[2])
@@ -225,8 +215,9 @@ for w in range (0, 1):
     
         #best value for each annulus
         bestval_annular_Msrc = np.zeros(width)
-        for j in range(len(radii)):
-            bestval_annular_Msrc[j] = ((aMsrc_814_BV_ab0[j]+aMsrc_814_BV_ab1[j]+aMsrc_814_BV_ab2[j]+aMsrc_814_BV_ab3[j]+aMsrc_814_BV_ab4[j]+aMsrc_814_BV_ab5[j]+aMsrc_814_BV_ab6[j])/7)
+        for j in range(width):
+            #bestval_annular_Msrc[j] = ((aMsrc_814_BV_ab0[j]+aMsrc_814_BV_ab1[j]+aMsrc_814_BV_ab2[j]+aMsrc_814_BV_ab3[j]+aMsrc_814_BV_ab4[j]+aMsrc_814_BV_ab5[j]+aMsrc_814_BV_ab6[j])/7)
+            bestval_annular_Msrc = np.sum(aMsrc_814_BV_ab
     
         #best value and std, printed
         Msrc_814_BV = np.mean(Msrc_814_BV_ab)
