@@ -103,14 +103,11 @@ for w in range (0, 1):
             data[i], header[i] = hdu[0].data, hdu[0].header
             fnu[i] = header[i]['PHOTFNU']
             exp[i] = header[i]['EXPTIME']
-    
-            #define positions for photometry
-            positions = [(xcen[w], ycen[w])]
 
             for j in range (0,width):
                 for k in range (0,width):
-                    flux[i,j,k] = data[i][k+ycen[w]-pixr][j+xcen[w]-pixr]*fnu[i]/exp[i]
-                    aflux[i,j,k] = data[i][k+ycen[w]-pixr][j+xcen[w]-pixr]*fnu[i]/exp[i]
+                    flux[i,j,k] = data[i][k+ycen[w]-pixr+1][j+xcen[w]-pixr+1]*fnu[i]/exp[i]
+                    aflux[i,j,k] = data[i][k+ycen[w]-pixr+1][j+xcen[w]-pixr+1]*fnu[i]/exp[i]
 
         #calculating galaxy-wide
         
@@ -118,10 +115,11 @@ for w in range (0, 1):
         tflux = np.array([np.sum(flux[0]),np.sum(flux[1]),np.sum(flux[2])])
 
         #calculating nu_e * L_nu_e luminosity in erg Hz units from Hogg eq (24), only three values depending on filter
-        LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2)
+        #LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2)
+        Lsol = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2) / solarLum
         
         #convert luminosity to solar units
-        Lsol = LnuNu / solarLum
+        #Lsol = LnuNu / solarLum
         
         #finding magnitudes and color for M/L ratio
         mag = -2.5*np.log10(tflux / 3631)
@@ -186,6 +184,7 @@ for w in range (0, 1):
             
         
         #convert luminosity for each annulus to solar units
+        # aLsol is a filter x width x width array of 
         aLsol814 = aLnuNu[1] / solarLum
         aLsol = (aLnuNu[0]/ solarLum,aLnuNu[1]/ solarLum,aLnuNu[2]/ solarLum) 
     
@@ -217,7 +216,7 @@ for w in range (0, 1):
         bestval_annular_Msrc = np.zeros(width)
         for j in range(width):
             #bestval_annular_Msrc[j] = ((aMsrc_814_BV_ab0[j]+aMsrc_814_BV_ab1[j]+aMsrc_814_BV_ab2[j]+aMsrc_814_BV_ab3[j]+aMsrc_814_BV_ab4[j]+aMsrc_814_BV_ab5[j]+aMsrc_814_BV_ab6[j])/7)
-            bestval_annular_Msrc = np.sum(aMsrc_814_BV_ab
+            bestval_annular_Msrc = np.sum(aMsrc_814_BV_ab)
     
         #best value and std, printed
         Msrc_814_BV = np.mean(Msrc_814_BV_ab)
@@ -341,15 +340,6 @@ for w in range (0, 1):
         #calculating total mass (Msic) for single MLR (814 filter only)
         total_singular_Msic_F814W = np.sum(bestval_annular_Msic)
         print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
-    
-        #calculating %amass and %bmass in first 5 annuli
-        Msrc_first_5 = np.sum(bestval_annular_Msrc[0:4])
-        pct_Msrc_first_5 = Msrc_first_5/total_annular_Msrc_F814W*100
-        Msic_first_5 = np.sum(bestval_annular_Msrc[0:4])
-        pct_Msic_first_5 = Msic_first_5/total_singular_Msic_F814W*100
-        print('% Msrc first 5', pct_Msrc_first_5)
-        print('% Msic first 5', pct_Msic_first_5)
-    
     
         pdf.savefig()
         plt.close()
