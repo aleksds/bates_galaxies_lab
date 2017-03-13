@@ -159,14 +159,14 @@ for w in range (0, len(galaxies)):
         Msic_814_BV_std = np.std(mass[1])
         Msic_160_BV_std = np.std(mass[2])
         
-        print('Msic,475W,B-V', Msic_475_BV/1e11)
-        print('Msic,475W,B-V std', Msic_475_BV_std/1e11)
+        #print('Msic,475W,B-V', Msic_475_BV/1e11)
+        #print('Msic,475W,B-V std', Msic_475_BV_std/1e11)
         
-        print('Msic,814W,B-V', Msic_814_BV/1e11)
-        print('Msic,814W,B-V std', Msic_814_BV_std/1e11)
+        #print('Msic,814W,B-V', Msic_814_BV/1e11)
+        #print('Msic,814W,B-V std', Msic_814_BV_std/1e11)
         
-        print('Msic,160W,B-V', Msic_160_BV/1e11)
-        print('Msic,160W,B-V std', Msic_160_BV_std/1e11)
+        #print('Msic,160W,B-V', Msic_160_BV/1e11)
+        #print('Msic,160W,B-V std', Msic_160_BV_std/1e11)
         
         #calculation annulus-based
     
@@ -234,8 +234,8 @@ for w in range (0, len(galaxies)):
         #best value and std, printed
         Msrc_814_BV = np.mean(Msrc_814_BV_ab)
         Msrc_814_BV_std = np.std(Msrc_814_BV_ab)
-        print('Msrc,814W,B-V',Msrc_814_BV/1e11)
-        print('Msrc,814W,B-V std',Msrc_814_BV_std/1e11)
+        #print('Msrc,814W,B-V',Msrc_814_BV/1e11)
+        #print('Msrc,814W,B-V std',Msrc_814_BV_std/1e11)
     
         #calculate mass associated with each annulus in solar units, based on one MLR estimate for the entire galaxy
         bM_BV_B = aLsol[0]*bMLR_BV_B
@@ -348,20 +348,21 @@ for w in range (0, len(galaxies)):
             
         #calculating total mass (Msrc) for annular MLR (814 filter only)
         total_annular_Msrc_F814W = np.sum(bestval_annular_Msrc)
-        print('Msrc,814,BV total', total_annular_Msrc_F814W/1e11)
+        print('Msrc,814,BV total', np.round(total_annular_Msrc_F814W/1e11,2),'+/-', np.round(Msrc_814_BV_std/1e11,2))
     
         #calculating total mass (Msic) for single MLR (814 filter only)
         total_singular_Msic_F814W = np.sum(bestval_annular_Msic)
-        print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
+        print('Msic,814,BV total', np.round(total_singular_Msic_F814W/1e11,2), '+/-', np.round(Msic_814_BV_std/1e11,2))
     
         #calculating %amass and %bmass in first 5 annuli
         Msrc_first_5 = np.sum(bestval_annular_Msrc[0:4])
         pct_Msrc_first_5 = Msrc_first_5/total_annular_Msrc_F814W*100
-        Msic_first_5 = np.sum(bestval_annular_Msrc[0:4])
+        Msic_first_5 = np.sum(bestval_annular_Msic[0:4])
         pct_Msic_first_5 = Msic_first_5/total_singular_Msic_F814W*100
-        print('% Msrc first 5', pct_Msrc_first_5)
-        print('% Msic first 5', pct_Msic_first_5)
-    
+        #print('% Msrc first 5', pct_Msrc_first_5)
+        #print('% Msic first 5', pct_Msic_first_5)
+        print('% Msrc first 5', round(pct_Msrc_first_5,2))
+        print('% Msic first 5', np.round(pct_Msic_first_5,2))
     
         pdf.savefig()
         plt.close()
