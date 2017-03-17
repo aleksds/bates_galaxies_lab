@@ -13,9 +13,7 @@ dapdir = os.environ['DAPDIR']
 
 
 # define plate and ifu
-#plate = 7443
-#ifu = 12704
-
+redshift = [0.01874, 0.0284]
 plate = [7443, 7495]
 ifu = [12704, 12702]
 
@@ -84,19 +82,23 @@ for i in range(0, len(plate)):
         plt.close()
         fig=plt.figure()
         
+        lambda_zero=3727*(1.+redshift[i])
+        lmin = lambda_zero-30
+        lmax = lambda_zero+30
+        ymax = np.max(model[(wave > lmin) & (wave < lmax)])
         
         ax = fig.add_subplot(3,1,1)
         ax.step(wave, flux, where='mid', color='k', lw=0.5)
         ax.plot(wave, model, color='r', lw=1)
         ax.plot(wave, stellarcontinuum, color='g', lw=1)
         ax.plot(wave, emlines, color='b', lw=1)
-        plt.xlim([3800,3860])
-        plt.ylim([-.05,np.max(model)])
+        plt.xlim([lambda_zero-30,lambda_zero+30])
+        plt.ylim([-.05,ymax])
         plt.xlabel('Wavelength [$\AA$]',fontsize=10)
         plt.ylabel('$f_{\lambda}$ [$10^{-17}$ erg s$^{-1}$ cm$^{-2}$ $\AA^{-1}$]',fontsize=8)
         ax.text(3835,0.08,str(i)+','+str(j))
         
-        lambda_zero=3830
+        
         ax = fig.add_subplot(3,1,3)
         vel=3E5*(wave-lambda_zero)/lambda_zero
         ax.step(vel, flux, where='mid', color='k', lw=0.5)
@@ -104,7 +106,7 @@ for i in range(0, len(plate)):
         ax.plot(vel, stellarcontinuum, color='g', lw=1)
         ax.plot(vel, emlines, color='b', lw=1)
         plt.xlim([-1000,1000])
-        plt.ylim([-.05,np.max(model)])
+        plt.ylim([-.05,ymax])
         plt.xlabel('Velocity (km s$^{-1}$)',fontsize=10)
         plt.ylabel('$f_{\lambda}$ [$10^{-17}$ erg s$^{-1}$ cm$^{-2}$ $\AA^{-1}$]',fontsize=8)
         ax.text(100,0.08,str(i)+','+str(j))
