@@ -15,6 +15,7 @@ from photutils import aperture_photometry
 import glob
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import matplotlib.colors as colors
 from matplotlib.backends.backend_pdf import PdfPages
 import math
 import matplotlib.lines as mlines
@@ -37,10 +38,16 @@ data = [0 for x in range(len(wavelengths))]
 header = [0 for x in range(len(wavelengths))]
 fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
-pixr = 1
-width = pixr*2+1
-# width = 3
-# pixr = (width-1)/2
+#pixr = 1
+#width = pixr*2+1
+width = 15
+pixr = (width-1)/2
+
+radii = np.zeros([width,width])
+
+for i in range(width):
+    for j in range (width):
+        radii[i,j] = np.sqrt((i-pixr)**2+(j-pixr)**2)
 
 #set up two-dimensional arrays for the a and b coefficients based on the luminosity and color
 #this will be in the same format ish as the table in Josh's blue notebook
@@ -220,6 +227,7 @@ for w in range (0, 1):
     
         #best value and std, printed
         Msrc_814_BV = np.mean(Msrc_814_BV_ab)
+        Msrc = Msrc_814_BV
         Msrc_814_BV_std = np.std(Msrc_814_BV_ab)
         print('Msrc,814W,B-V',Msrc_814_BV/1e11)
         print('Msrc,814W,B-V std',Msrc_814_BV_std/1e11)
@@ -303,7 +311,8 @@ for w in range (0, 1):
             kpc_area[j] = area[j]*radToKpc**2
            
         # now calculating mass/area (mass surface density) in units of solar masses/kpc for bestval_annular_Msrc and bestval_annular_Msic and also radius in kpc units
-        # THIS MIGHT BE WRONG BUT WE ARENT SURE AND IT SEEMS TO BE THE BEST FOR THE MOMENT. WHEN WE FIGURE OUT WHAT IS ACTUALLY WRONG, WE WILL NEED TO MAKE ADJUSTMENTS
+        # THIS MIGHT BE WRONG BUT WE ARENT SURE AND IT SEEMS TO BE THE BEST FOR THE MOMENT.
+        # WHEN WE FIGURE OUT WHAT IS ACTUALLY WRONG, WE WILL NEED TO MAKE ADJUSTMENTS
         #WE ARE HAVING ISSUES WITH MSRC, NOT MSIC. 
         bestval_annular_Msrc_ovr_area = bestval_annular_Msrc /kpc_area
         bestval_annular_Msic_ovr_area = bestval_annular_Msic /kpc_area
@@ -340,7 +349,18 @@ for w in range (0, 1):
         #calculating total mass (Msic) for single MLR (814 filter only)
         total_singular_Msic_F814W = np.sum(bestval_annular_Msic)
         print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
-    
+
+
+        
+        pdf.savefig()
+        plt.close()
+        fig = plt.figure()
+        plt.imshow(aMsrc_814_BV_ab[5])
+        #plt.imshow(amass[1], cmap = cm.coolwarm, clim = (1e5, 5e9))
+        #plt.imshow(amass[1],norm=colors.LogNorm(vmin=1e6, vmax=1e11), cmap = cm.coolwarm)
+        #plt.imshow(amass[1],origin='lower', interpolation='nearest', norm=colors.LogNorm(vmin=1e6, vmax=1e11), cmap = cm.coolwarm)
+        plt.colorbar()
+
         pdf.savefig()
         plt.close()
     
