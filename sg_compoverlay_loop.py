@@ -372,4 +372,4 @@ for w in range (0, len(galaxies)):
     #os.system('open %s &' % 'sg_compover_J1107.pdf')
     #os.system('open %s &' % 'sg_compover_J0901.pdf')
     #os.system('open %s &' % 'sg_compover_J0944.pdf')    
-        #os.system('open %s &' % 'sg_compilation_'+galaxies[0]+'.pdf')
+        #os.system('open %s &' % 'sg_compover_'+galaxies[0]+'.pdf')
