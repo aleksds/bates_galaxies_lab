@@ -41,14 +41,14 @@ exp = [0 for x in range(len(wavelengths))]
 #pixr = 1
 #width = pixr*2+1
 # WIDTH HAS TO BE ODD.
-width = 9
+width = 15
 pixr = (width-1)/2
 
 radii = np.zeros([width,width])
 
 for i in range(width):
     for j in range (width):
-        radii[i,j] = np.sqrt((i-pixr)**2+(j-pixr)**2)
+        radii[i,j] = np.sqrt((i-pixr)**2+(j-pixr)**2)*radToKpc
 
 #set up two-dimensional arrays for the a and b coefficients based on the luminosity and color
 #this will be in the same format ish as the table in Josh's blue notebook
@@ -105,9 +105,10 @@ for w in range (0, len(galaxies)):
             exp[i] = header[i]['EXPTIME']
 
             for j in range (0,width):
-                for k in range (0,width):
-                    flux[i,j,k] = data[i][k+ycen[w]-pixr+1][j+xcen[w]-pixr+1]*fnu[i]/exp[i]
-                    aflux[i,j,k] = data[i][k+ycen[w]-pixr+1][j+xcen[w]-pixr+1]*fnu[i]/exp[i]
+                for k in range (0, width):
+                    # changing j to k and k to -j
+                    flux[i,j,k] = data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]*fnu[i]/exp[i]
+                    aflux[i,j,k] = data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]*fnu[i]/exp[i]
 
         #calculating galaxy-wide
         
@@ -256,13 +257,6 @@ for w in range (0, len(galaxies)):
         Msic_814_BV_ab6 = np.sum(annular_Msic_814_BV_ab6)
         Msic_814_BV_ab = (Msic_814_BV_ab0,Msic_814_BV_ab1,Msic_814_BV_ab2,Msic_814_BV_ab3,Msic_814_BV_ab4,Msic_814_BV_ab5,Msic_814_BV_ab6)
         #NOTE: taking the mean of Msic_814_BV_ab will give you the same thing as Msic_814_BV
-    
-        #plotting mass vs radius
-        acolors = ['b--','g--','r--']
-        bcolors = ['b', 'g', 'r']
-        dot = ['bo','go','ro']
-        alabeling = ['annular MLR F475W','annular MLR F814W','annular MLR F160W']
-        blabeling = ['single MLR F475W','single MLR F814W','single MLR F160W']
 
         kpc_radius = radii*radToKpc
        
@@ -277,14 +271,23 @@ for w in range (0, len(galaxies)):
         total_singular_Msic_F814W = np.sum(bestval_annular_Msic)
         print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
 
+        
         fig = plt.figure()
-        plt.imshow(aMsrc_814_BV_ab[5], clim = (1e8, 1e10))
+        plt.imshow(aMsrc_814_BV_ab[5], clim = (1e5,5e10))
         #plt.imshow(amass[1], cmap = cm.coolwarm, clim = (1e5, 5e9))
         #plt.imshow(amass[1],norm=colors.LogNorm(vmin=1e6, vmax=1e11), cmap = cm.coolwarm)
         #plt.imshow(amass[1],origin='lower', interpolation='nearest', norm=colors.LogNorm(vmin=1e6, vmax=1e11), cmap = cm.coolwarm)
         plt.colorbar()
         plt.title(galaxies[w] + ' pixel analysis for width ' + str(width) +' pixels')
 
+        pdf.savefig()
+        plt.close()
+
+        fig = plt.figure()
+        plt.plot(radii, aMsrc_814_BV_ab[5],marker='D', linestyle = 'None', color = '#3e1264')
+        plt.title('Mass as a Function of Radius for '+galaxies[w]) # + ', width of ' + str(width) + ' pixels')
+        plt.xlabel('Radius in kPc')
+        plt.ylabel('Mass in Solar Masses')
         pdf.savefig()
         plt.close()
     
