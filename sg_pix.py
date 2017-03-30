@@ -42,7 +42,8 @@ exp = [0 for x in range(len(wavelengths))]
 #width = pixr*2+1
 # WIDTH HAS TO BE ODD.
 width = 15
-pixr = (width-1)/2
+
+pixr = int((width-1)/2)
 
 radii = np.zeros([width,width])
 
@@ -80,6 +81,11 @@ aMLR_BV_Vk_ab = [[0 for x in range(width)] for y in range(7)]
 aLnuNu = [0 for x in range(len(wavelengths))]
 
 # Now, we loop through all galaxies
+duhh = np.arange(0, len(galaxies))
+PixIntMass = np.zeros( len(galaxies))
+PixResMass = np.zeros( len(galaxies))
+AnnIntMass = np.zeros( len(galaxies))
+AnnResMass = np.zeros( len(galaxies))
 
 #for w in range (0, 1):
 for w in range (0, len(galaxies)):
@@ -107,8 +113,11 @@ for w in range (0, len(galaxies)):
             for j in range (0,width):
                 for k in range (0, width):
                     # changing j to k and k to -j
-                    flux[i,j,k] = data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]*fnu[i]/exp[i]
-                    aflux[i,j,k] = data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]*fnu[i]/exp[i]
+                    flux[i,width-j-1,k] = (data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*fnu[i]/exp[i]
+                    aflux[i,width-j-1,k] = (data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*fnu[i]/exp[i]
+                    #if (flux[i,width-j-1,k] < 0):
+                    #    flux[i,width-j-1,k] = 1e-30
+                    #    aflux[i,width-j-1,k] = 1e-30
 
         #calculating galaxy-wide
         
@@ -131,9 +140,11 @@ for w in range (0, len(galaxies)):
         MLR_BV_Bk = np.zeros([len(Ba)])
         MLR_BV_Vk = np.zeros([len(Va)])
         MLR_BV_Jk = np.zeros([len(Ja)])
-        mass =(MLR_BV_Bk,MLR_BV_Vk,MLR_BV_Jk)
+        MLR =(MLR_BV_Bk,MLR_BV_Vk,MLR_BV_Jk)
+        mass =(np.zeros([len(Ba)]),np.zeros([len(Ba)]),np.zeros([len(Ba)]))
         for i in range (0, len(collection)):
             for j in range(0,len(Ba)):
+                MLR[i][j] = 10**(BdJ[i][0][j]+(BdJ[i][1][j]*colorUV))
                 mass[i][j] = Lsol[i]*10**(BdJ[i][0][j]+(BdJ[i][1][j]*colorUV))
         
         #calculate mass of galaxy in solar units, 3 arrays of masses for each coefficient for 3 different filters will yield a total of 21 galaxy masses, 7 values for each luminosity in the BV color
@@ -147,14 +158,14 @@ for w in range (0, len(galaxies)):
         Msic_814_BV_std = np.std(mass[1])
         Msic_160_BV_std = np.std(mass[2])
         
-        print('Msic,475W,B-V', Msic_475_BV/1e11)
-        print('Msic,475W,B-V std', Msic_475_BV_std/1e11)
+        #print('Msic,475W,B-V', Msic_475_BV/1e11)
+        #print('Msic,475W,B-V std', Msic_475_BV_std/1e11)
         
-        print('Msic,814W,B-V', Msic_814_BV/1e11)
+        print('Msic,814W,B-V    ', Msic_814_BV/1e11)
         print('Msic,814W,B-V std', Msic_814_BV_std/1e11)
         
-        print('Msic,160W,B-V', Msic_160_BV/1e11)
-        print('Msic,160W,B-V std', Msic_160_BV_std/1e11)
+        #print('Msic,160W,B-V', Msic_160_BV/1e11)
+        #print('Msic,160W,B-V std', Msic_160_BV_std/1e11)
         
         #calculation by pixel
     
@@ -223,7 +234,7 @@ for w in range (0, len(galaxies)):
         Msrc_814_BV = np.mean(Msrc_814_BV_ab)
         Msrc = Msrc_814_BV
         Msrc_814_BV_std = np.std(Msrc_814_BV_ab)
-        print('Msrc,814W,B-V',Msrc_814_BV/1e11)
+        print('Msrc,814W,B-V    ',Msrc_814_BV/1e11)
         print('Msrc,814W,B-V std',Msrc_814_BV_std/1e11)
     
         #calculate mass associated with each annulus in solar units, based on one MLR estimate for the entire galaxy
@@ -260,34 +271,64 @@ for w in range (0, len(galaxies)):
 
         kpc_radius = radii*radToKpc
        
-            
-        #This is where I took that massive code chunk out
+        PixIntMass[w] = Msic_814_BV
+        PixResMass[w] = Msrc_814_BV
+        AnnIntMass[w] = 8
+        AnnResMass[w] =   8  
+
        
         #calculating total mass (Msrc) for annular MLR (814 filter only)
         total_annular_Msrc_F814W = np.sum(bestval_annular_Msrc)
-        print('Msrc,814,BV total', total_annular_Msrc_F814W/1e11)
+        #print('Msrc,814,BV total', total_annular_Msrc_F814W/1e11)
     
         #calculating total mass (Msic) for single MLR (814 filter only)
         total_singular_Msic_F814W = np.sum(bestval_annular_Msic)
-        print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
+        #print('Msic,814,BV total', total_singular_Msic_F814W/1e11)
 
         
         fig = plt.figure()
-        plt.imshow(aMsrc_814_BV_ab[5], clim = (1e5,5e10))
+        
+        plt.imshow(aMsrc_814_BV_ab[5],cmap='gray')
         #plt.imshow(amass[1], cmap = cm.coolwarm, clim = (1e5, 5e9))
         #plt.imshow(amass[1],norm=colors.LogNorm(vmin=1e6, vmax=1e11), cmap = cm.coolwarm)
         #plt.imshow(amass[1],origin='lower', interpolation='nearest', norm=colors.LogNorm(vmin=1e6, vmax=1e11), cmap = cm.coolwarm)
         plt.colorbar()
-        plt.title(galaxies[w] + ' pixel analysis for width ' + str(width) +' pixels')
-
+        plt.title(galaxies[w] + ' Pixel Mass Profile for width ' + str(width) +' pixels')
+        plt.xlabel('Pixels')
+        plt.ylabel('Pixels')
         pdf.savefig()
         plt.close()
 
         fig = plt.figure()
-        plt.plot(radii, aMsrc_814_BV_ab[5],marker='D', linestyle = 'None', color = '#3e1264')
-        plt.title('Mass as a Function of Radius for '+galaxies[w]) # + ', width of ' + str(width) + ' pixels')
-        plt.xlabel('Radius in kPc')
+        plt.imshow(annular_Msic_814_BV_ab5,cmap='gray')
+        plt.colorbar()
+        plt.title(galaxies[w] + ' Pixel Light Profile for width ' + str(width) +' pixels')
+        plt.xlabel('Pixels')
+        plt.ylabel('Pixels')
+        pdf.savefig()
+        plt.close()
+
+        
+        fig = plt.figure()
+        plt.plot(kpc_radius, aMsrc_814_BV_ab[5],marker='D', linestyle = 'None', color = '#3e1264', label='Mass  Profile')
+        plt.plot(kpc_radius, annular_Msic_814_BV_ab5,marker='D', linestyle = 'None', color = '#d5c8ff', label='Light Profile')
+        plt.title('Mass and Light Profiles for '+galaxies[w]) # + ', width of ' + str(width) + ' pixels')
+        plt.xlabel('Radius in kpc')
+        #plt.ylim((0,1e11))
         plt.ylabel('Mass in Solar Masses')
+        #legend = plt.legend(loc='upper right')
+        
         pdf.savefig()
         plt.close()
     
+with PdfPages('sg_pix_total.pdf') as pdf:
+    fig = plt.figure()
+    plt.plot(duhh, PixResMass/PixIntMass,marker='D', linestyle = 'None', color = '#3e1264', label='Mass  Profile')
+    #plt.plot(kpc_radius, annular_Msic_814_BV_ab5,marker='D', linestyle = 'None', color = '#d5c8ff', label='Light Profile')
+    plt.title('Total Mass vs. Total Light Mass')
+    plt.xlabel('Spatially Integrated Mass ("Light Mass")')
+    plt.ylabel('Spatially Resolved Mass ("Mass Mass")')
+    #legend = plt.legend(loc='upper right')
+        
+    pdf.savefig()
+    plt.close()
