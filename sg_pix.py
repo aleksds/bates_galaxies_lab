@@ -67,8 +67,8 @@ BdJ = [B_coeff, V_coeff, J_coeff]
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600])
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
-xcen = [3628, 3934, 3386, 3477, 3572, 3801, 3885, 4149, 3787, 3825, 3566, 4067]
-ycen = [4153, 4137, 3503, 3404, 3339, 4171, 4164, 3921, 4187, 4451, 3435, 4054]
+xcen = [3628, 3933, 3385, 3476, 3572, 3802, 3882, 4146, 3786, 4174, 3565, 4064]
+ycen = [4153, 4136, 3502, 3404, 3338, 4169, 4164, 3921, 4185, 3826, 3434, 4052]
 
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 
@@ -87,6 +87,7 @@ PixResMass = np.zeros( len(galaxies))
 AnnIntMass = np.zeros( len(galaxies))
 AnnResMass = np.zeros( len(galaxies))
 
+#for w in range (9, 10):
 #for w in range (0, 1):
 for w in range (0, len(galaxies)):
     print(galaxies[w])
@@ -287,47 +288,58 @@ for w in range (0, len(galaxies)):
 
         
         fig = plt.figure()
-        
+
+        # PLOTTING Mass Profile Heat Map
         plt.imshow(aMsrc_814_BV_ab[5],cmap='gray')
-        #plt.imshow(amass[1], cmap = cm.coolwarm, clim = (1e5, 5e9))
-        #plt.imshow(amass[1],norm=colors.LogNorm(vmin=1e6, vmax=1e11), cmap = cm.coolwarm)
-        #plt.imshow(amass[1],origin='lower', interpolation='nearest', norm=colors.LogNorm(vmin=1e6, vmax=1e11), cmap = cm.coolwarm)
         plt.colorbar()
-        plt.title(galaxies[w] + ' Pixel Mass Profile for width ' + str(width) +' pixels')
+        plt.title(galaxies[w] + ' Mass Profile (in Solar Masses): ' + str(width) +' p wide')
         plt.xlabel('Pixels')
         plt.ylabel('Pixels')
         pdf.savefig()
         plt.close()
 
+        # PLOTTING Light profile heat map
         fig = plt.figure()
         plt.imshow(annular_Msic_814_BV_ab5,cmap='gray')
         plt.colorbar()
-        plt.title(galaxies[w] + ' Pixel Light Profile for width ' + str(width) +' pixels')
+        plt.title(galaxies[w] + ' Light Profile (in Solar Masses): ' + str(width) +' p wide')
         plt.xlabel('Pixels')
         plt.ylabel('Pixels')
         pdf.savefig()
         plt.close()
 
-        
+        # PLOTTING Mass and light profiles as  a function of radius
         fig = plt.figure()
-        plt.plot(kpc_radius, aMsrc_814_BV_ab[5],marker='D', linestyle = 'None', color = '#3e1264', label='Mass  Profile')
-        plt.plot(kpc_radius, annular_Msic_814_BV_ab5,marker='D', linestyle = 'None', color = '#d5c8ff', label='Light Profile')
-        plt.title('Mass and Light Profiles for '+galaxies[w]) # + ', width of ' + str(width) + ' pixels')
+        plt.plot(kpc_radius.flatten(), aMsrc_814_BV_ab[5].flatten()/radToKpc**2,marker='D', linestyle = 'None', color = '#3e1264', label='Mass  Profile')
+        plt.plot(kpc_radius.flatten(), annular_Msic_814_BV_ab5.flatten()/radToKpc**2,marker='D', linestyle = 'None', color = '#d5c8ff', label='Light Profile')
+        plt.title('Mass and Light Profiles for '+galaxies[w])
         plt.xlabel('Radius in kpc')
-        #plt.ylim((0,1e11))
-        plt.ylabel('Mass in Solar Masses')
-        #legend = plt.legend(loc='upper right')
+        plt.ylabel('Mass Density in Solar Masses/kpc^2')
+        legend = plt.legend(loc='upper right')
         
+        pdf.savefig()
+        plt.close()
+        
+        # PLOTTING Mass / light over and under estimates of the light profile
+        fig = plt.figure()
+        plt.plot(kpc_radius.flatten(), aMsrc_814_BV_ab[5].flatten()/annular_Msic_814_BV_ab5.flatten(),marker='D', linestyle = 'None', color = '#3e1264', label='Mass  Profile')
+        plt.title('Mass/Light Profiles for '+galaxies[w])
+        plt.xlabel('Radius in kpc')
+        plt.ylabel('MSRC/MSIC [unitless]')
+        legend = plt.legend(loc='upper right')
+        plt.semilogy()
         pdf.savefig()
         plt.close()
     
 with PdfPages('sg_pix_total.pdf') as pdf:
     fig = plt.figure()
-    plt.plot(duhh, PixResMass/PixIntMass,marker='D', linestyle = 'None', color = '#3e1264', label='Mass  Profile')
+    plt.plot(PixResMass, PixResMass/PixIntMass,marker='D', linestyle = 'None', color = '#3e1264', label='Mass  Profile')
     #plt.plot(kpc_radius, annular_Msic_814_BV_ab5,marker='D', linestyle = 'None', color = '#d5c8ff', label='Light Profile')
-    plt.title('Total Mass vs. Total Light Mass')
-    plt.xlabel('Spatially Integrated Mass ("Light Mass")')
-    plt.ylabel('Spatially Resolved Mass ("Mass Mass")')
+    plt.xlabel('Resolved Mass')
+    plt.ylabel('MR/MI')
+    #plt.title('Total Mass vs. Total Light Mass')
+    #plt.xlabel('Spatially Integrated Mass ("Light Mass")')
+    #plt.ylabel('Spatially Resolved Mass ("Mass Mass")')
     #legend = plt.legend(loc='upper right')
         
     pdf.savefig()
