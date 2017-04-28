@@ -1,6 +1,6 @@
 # Aleks Diamond-Stanic
 # 17-Jan-2017: copied over from dap_plot_plates.py
-
+# 20170428 first edit by Jose Ruiz
 # Imports
 import os
 import numpy as np
