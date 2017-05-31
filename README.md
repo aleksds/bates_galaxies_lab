@@ -1,3 +1,4 @@
+We did this
 # bates_galaxies_lab
 
 This repository includes code developed by members of the Bates
