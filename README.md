@@ -1,3 +1,4 @@
+Eve King and Kwamae == HIRES
 We did this
 # bates_galaxies_lab
 
