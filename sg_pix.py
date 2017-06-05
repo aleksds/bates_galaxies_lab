@@ -29,7 +29,7 @@ from astropy import constants as const
 dir = os.environ['HSTDIR']
 
 #these are not what you want
-solarLum = 3.846*10**33    #solar Mass is the mass of the sun in kg
+solarLum = 3.846*10**33     #solar Mass is the mass of the sun in kg
 radToKpc = 0.05*7.194       #converts radius to kpc
 
 #setting up arrays with three elements, all zeros - placeholders
@@ -87,7 +87,7 @@ PixResMass = np.zeros( len(galaxies))
 AnnIntMass = np.zeros( len(galaxies))
 AnnResMass = np.zeros( len(galaxies))
 
-#for w in range (9, 10):
+#for w in range (9, 10): #these codes are for trouble shooting particular
 #for w in range (0, 1):
 for w in range (0, len(galaxies)):
     print(galaxies[w])
@@ -116,9 +116,6 @@ for w in range (0, len(galaxies)):
                     # changing j to k and k to -j
                     flux[i,width-j-1,k] = (data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*fnu[i]/exp[i]
                     aflux[i,width-j-1,k] = (data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*fnu[i]/exp[i]
-                    #if (flux[i,width-j-1,k] < 0):
-                    #    flux[i,width-j-1,k] = 1e-30
-                    #    aflux[i,width-j-1,k] = 1e-30
 
         #calculating galaxy-wide
         
@@ -126,11 +123,7 @@ for w in range (0, len(galaxies)):
         tflux = np.array([np.sum(flux[0]),np.sum(flux[1]),np.sum(flux[2])])
 
         #calculating nu_e * L_nu_e luminosity in erg Hz units from Hogg eq (24), only three values depending on filter
-        #LnuNu = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2)
         Lsol = (const.c*u.s/u.m/(filters*10**-9))*tflux*10**-23*(4*math.pi*Ldcm[w]**2) / solarLum
-        
-        #convert luminosity to solar units
-        #Lsol = LnuNu / solarLum
         
         #finding magnitudes and color for M/L ratio
         mag = -2.5*np.log10(tflux / 3631)
@@ -228,7 +221,6 @@ for w in range (0, len(galaxies)):
         #best value for each annulus
         bestval_annular_Msrc = np.zeros(width)
         for j in range(width):
-            #bestval_annular_Msrc[j] = ((aMsrc_814_BV_ab0[j]+aMsrc_814_BV_ab1[j]+aMsrc_814_BV_ab2[j]+aMsrc_814_BV_ab3[j]+aMsrc_814_BV_ab4[j]+aMsrc_814_BV_ab5[j]+aMsrc_814_BV_ab6[j])/7)
             bestval_annular_Msrc = np.sum(aMsrc_814_BV_ab)
     
         #best value and std, printed
@@ -276,7 +268,6 @@ for w in range (0, len(galaxies)):
         PixResMass[w] = Msrc_814_BV
         AnnIntMass[w] = 8
         AnnResMass[w] =   8  
-
        
         #calculating total mass (Msrc) for annular MLR (814 filter only)
         total_annular_Msrc_F814W = np.sum(bestval_annular_Msrc)
@@ -334,13 +325,9 @@ for w in range (0, len(galaxies)):
 with PdfPages('sg_pix_total.pdf') as pdf:
     fig = plt.figure()
     plt.plot(PixResMass, PixResMass/PixIntMass,marker='D', linestyle = 'None', color = '#3e1264', label='Mass  Profile')
-    #plt.plot(kpc_radius, annular_Msic_814_BV_ab5,marker='D', linestyle = 'None', color = '#d5c8ff', label='Light Profile')
     plt.xlabel('Resolved Mass')
     plt.ylabel('MR/MI')
-    #plt.title('Total Mass vs. Total Light Mass')
-    #plt.xlabel('Spatially Integrated Mass ("Light Mass")')
-    #plt.ylabel('Spatially Resolved Mass ("Mass Mass")')
-    #legend = plt.legend(loc='upper right')
+
         
     pdf.savefig()
     plt.close()
