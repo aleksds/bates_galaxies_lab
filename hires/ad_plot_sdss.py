@@ -14,13 +14,16 @@ file = dir + 'spec-0761-54524-0409.fits'
 hdulist = fits.open(file)
 
 # define the coefficients that are used to define the wavelength array
+"""For information about how to determine wavelength associated with each pixel: http://classic.sdss.org/dr5/products/spectra/read_spSpec.html""" 
 coeff0 = hdulist[0].header['COEFF0']
 coeff1 = hdulist[0].header['COEFF1']
 
 # define the flux and wavelength arrays
+#To do: figure out how to find elements besides flux (i.e 'loglam', 'ivar' 'model')
 flux = hdulist[1].data
 npix = len(flux)
 index = np.arange(npix)
+#To do: check whether this wavelength definition is correct and whether it's in air or vacuum
 wavelength = 10.**(coeff0 + coeff1*index)
 
 # create a PDF file for plot output
