@@ -28,7 +28,7 @@ dir = os.environ['HIRESDIR']
 c = const.c.to('AA/s')
 c_kms = const.c.to('km/s')
 #mass of electron
-mass_e = 9.11**(-31)
+mass_e = 9.11**(-28)
 
 # wavelengths of relevant absorption lines
 mgi2852 = 2852.96328 * u.AA
@@ -83,8 +83,8 @@ for j in range(0, len(lines)):
 col_dens = np.zeros([len(lines), len(flux)])
 #calculating column dens, again how many values should this be?? 
 for i in range(0, len(fosc)):
-    col_dens[i] = mass_e * c * tau[i] / (np.pi * np.exp(2) * fosc[i] * wave**2)
-    
+    #col_dens[i] = mass_e * c * tau[i] / (np.pi * np.exp(2) * fosc[i] * wave**2)
+    col_dens[i] = tau[i] / (2.654E-15 * fosc[i] * (wave/(1+zem[0])) * fosc[i]) 
 #now to find the ratio???  There are 15 ratios to find, that compare Mg to Fe
 #index values for above arrays for Mg and Fe:
 Mg = [0, 1, 7]
