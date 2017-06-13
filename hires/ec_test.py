@@ -61,14 +61,14 @@ gal = gal_info['gal']
 zem = gal_info['zem']
 vcen = gal_info['vcen']
 
-for i in range(0, len(gal)):
+for i in range(0, 1):#len(gal)):
     # read in the spectrum
     datafile = dir+gal[i]+'/'+gal[i]+'_stitched_v1.txt'
     data = ascii.read(datafile)
     wave = data['wv'] * u.AA
     flux = data['norm']  #intensity of the light you obseved   ;  normalized means you check observed light from expected light
 
-vel_kms = np.zeros([len(lines),50515])
+vel_kms = np.zeros([len(lines),len(wave)])
 # define the velocity scale [km / s]
 for i in range(0, len(lines)):
     vel_kms[i] = ((wave-lines[i]*(1+zem[0]))/(lines[i]*(1+zem[0]))) * c_kms
@@ -104,13 +104,18 @@ with PdfPages(filename) as pdf:
     for i in range(0, len(Mg)):
         for j in range(0, len(Fe)):
             fig = plt.figure()
-            ax = fig.add_subplot(1,1,1)
+            ax = fig.add_subplot(1,2,1)
             ax.set_xlim(-3000,500)
             ymax = 3.e12
             ax.set_ylim(0., ymax)
             plt.title("Comparing %s and %s" % (names[Mg[i]], names[Fe[j]]))
             ax.plot(vel_kms[Fe[j]], col_dens[Fe[j]])
             ax.plot(vel_kms[Mg[i]], col_dens[Mg[i]])
+            ax = fig.add_subplot(1,2,2)
+            ax.plot(vel_kms[Fe[j]], flux)
+            ax.plot(vel_kms[Mg[i]], flux)
+            ax.set_xlim(-3000,500)
+            ax.set_ylim(-0.5, 2.)
             pdf.savefig()
             plt.close()
     #here we will try and create a scatter plot for each Mg value with the 5 Fe values (still ratio/wavelength)
