@@ -13,7 +13,7 @@ from astropy import units as u
 dir = os.environ['SDSSDIR']
 file = dir + 'spec-0761-54524-0409.fits'
 hdulist = fits.open(file)
-
+hdulist.info()
 coeff0 = hdulist[0].header['COEFF0']
 coeff1 = hdulist[0].header['COEFF1']
 
