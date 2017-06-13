@@ -9,6 +9,7 @@
 #
 #Then: make graphs
 #
+#SOMETHING I IGNORED: THERE ARE 14 DIFFERENT GALAXIES, I THINK MY CODE ONLY RUNS THROUGH J0826
 
 
 import numpy as np
@@ -23,14 +24,9 @@ from matplotlib.ticker import AutoMinorLocator
 # define the data directory
 dir = os.environ['HIRESDIR']
 
-# arrays of galaxy names, redshifts, approximate centroid velocities
-gal_info = ascii.read(dir+'gal_info.txt')
-gal = gal_info['gal']
-zem = gal_info['zem']
-vcen = gal_info['vcen']
-
 # speed of light in Angstroms per second
 c = const.c.to('AA/s')
+c_kms = const.c.to('km/s')
 #mass of electron
 mass_e = 9.11**(-31)
 
@@ -44,7 +40,7 @@ feii2382 = 2382.7641781 * u.AA
 feii2374 = 2374.4603294 * u.AA
 feii2344 = 2344.2129601 * u.AA
  
-#oscillator strengths (f_ij)
+#oscillator strengths (fosc)
 f2852 = 1.83
 f2803 = 0.3058
 f2796 = 0.6155
@@ -59,6 +55,12 @@ names = ['Mg II 2796', 'Mg II 2803', 'Fe II 2586', 'Fe II 2600', 'Fe II 2374', '
 lines = [mgii2796, mgii2803, feii2586, feii2600, feii2374, feii2382, feii2344, mgi2852]
 fosc = [f2796, f2803, f2586, f2600, f2374, f2382, f2344, f2852]
 
+# arrays of galaxy names, redshifts, approximate centroid velocities
+gal_info = ascii.read(dir+'gal_info.txt')
+gal = gal_info['gal']
+zem = gal_info['zem']
+vcen = gal_info['vcen']
+
 for i in range(0, len(gal)):
     # read in the spectrum
     datafile = dir+gal[i]+'/'+gal[i]+'_stitched_v1.txt'
@@ -66,6 +68,11 @@ for i in range(0, len(gal)):
     wave = data['wv'] * u.AA
     flux = data['norm']  #intensity of the light you obseved   ;  normalized means you check observed light from expected light
 
+
+vel_kms = np.zeros([len(lines),50515])
+# define the velocity scale [km / s]
+for i in range(0, len(lines)):
+    vel_kms[i] = ((wave-lines[i]*(1+zem[0]))/lines[i]*(1+zem[0])) * c_kms
 
 #Question: how long shuold tau be?  1 value for each line, same # as flux for each line, just the same # as flux in total?
 tau = np.zeros([len(lines),len(flux)])
@@ -95,18 +102,6 @@ for i in range(0, len(Mg)):
 minorLocator = AutoMinorLocator()
 filename = 'Ratio.pdf'
 with PdfPages(filename) as pdf:
-    #This creates a single line: we're assuming it is wrong
-    # for i in range(0, len(Ratio)):
-    #     fig = plt.figure()
-    #     ax = fig.add_subplot(1,1,1)
-    #     ax.plot(wave, Ratio[i])
-    #     plt.xlabel('Wavelength')
-    #     plt.ylabel('Ratio')
-    #     #ax.set_ylim(0., 15.)
-    #     #ax.set_xlim(3800,9000)
-    #     pdf.savefig()
-    #     plt.close()
-
     #here we will try and create a scatter plot for each Mg value with the 5 Fe values (still ratio/wavelength)
     counter = 0
     for i in range(0, len(Mg)):
