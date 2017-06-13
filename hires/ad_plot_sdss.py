@@ -14,17 +14,20 @@ file = dir + 'spec-0761-54524-0409.fits'
 hdulist = fits.open(file)
 
 # define the coefficients that are used to define the wavelength array
-"""For information about how to determine wavelength associated with each pixel: http://classic.sdss.org/dr5/products/spectra/read_spSpec.html""" 
+# For information about how to determine wavelength associated with each pixel: http://classic.sdss.org/dr5/products/spectra/read_spSpec.html
 coeff0 = hdulist[0].header['COEFF0']
 coeff1 = hdulist[0].header['COEFF1']
 
 # define the flux and wavelength arrays
-#To do: figure out how to find elements besides flux (i.e 'loglam', 'ivar' 'model')
-flux = hdulist[1].data
+flux = hdulist[1].data['flux']
+loglam = hdulist[1].data['loglam']
+model = hdulist[1].data['model']
+ivar = hdulist[1].data['ivar']
 npix = len(flux)
 index = np.arange(npix)
 #To do: check whether this wavelength definition is correct and whether it's in air or vacuum
-wavelength = 10.**(coeff0 + coeff1*index)
+#wavelength = 10.**(coeff0 + coeff1*index)
+wavelength = 10.**loglam
 
 # create a PDF file for plot output
 filename = 'J0826_sdss.pdf'
@@ -38,7 +41,9 @@ with PdfPages(filename) as pdf:
 
     # plot flux vs wavelength
     ax.plot(wavelength, flux, linewidth=0.1)
-
+    ax.plot(wavelength, model, linewidth=0.1, color='red')
+    ax.plot(wavelength, 1./np.sqrt(ivar), linewidth=0.1)
+    
     # set the limits for the x and y axes
     ax.set_ylim(0., 15.)
     ax.set_xlim(3600., 9400)
