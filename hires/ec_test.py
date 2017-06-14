@@ -104,16 +104,19 @@ with PdfPages(filename) as pdf:
     for i in range(0, len(Mg)):
         for j in range(0, len(Fe)):
             fig = plt.figure()
-            ax = fig.add_subplot(1,2,1)
+            ax = fig.add_subplot(2,1,1)
             ax.set_xlim(-3000,500)
             ymax = 3.e12
             ax.set_ylim(0., ymax)
             plt.title("Comparing %s and %s" % (names[Mg[i]], names[Fe[j]]))
             ax.plot(vel_kms[Fe[j]], col_dens[Fe[j]])
             ax.plot(vel_kms[Mg[i]], col_dens[Mg[i]])
-            ax = fig.add_subplot(1,2,2)
+            plt.ylabel('Column Density')
+            ax = fig.add_subplot(2,1,2)
             ax.plot(vel_kms[Fe[j]], flux)
             ax.plot(vel_kms[Mg[i]], flux)
+            plt.xlabel('Velocity')
+            plt.ylabel('Flux')
             ax.set_xlim(-3000,500)
             ax.set_ylim(-0.5, 2.)
             pdf.savefig()
