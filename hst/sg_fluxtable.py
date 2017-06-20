@@ -1,14 +1,5 @@
 # Sophia C W Gottlieb I
-# 20170125
-#
-# This code is the general, optimal version of jr_compilation
-# 
-# This code produces three graphs: Mass in an annulus as a function of radius for annular MLRs, and for a broad MLR, and mass density as a function of radius (the more important graph)
-# It also prints out several different estimates of mass for each galaxy (though it mass / 1e11)
-# This is hopefully the last version of this code. We will begin a new code for the pixel by pixel analysis.
-#
-# Sophia C W Gottlieb I
-# 20170612 edits to produce table of flux values
+# 20170612 produce table of flux values in a txt file
 # This code was originally the sg_compoverlay_loop.py, but I am going to take all of that code out right about now.
 #
 # import relevant Python modules
@@ -18,27 +9,14 @@ from astropy.io import fits
 from photutils import CircularAperture
 from photutils import aperture_photometry
 import glob
-import matplotlib.pyplot as plt
-from matplotlib import cm
-from matplotlib.backends.backend_pdf import PdfPages
 import math
-import matplotlib.lines as mlines
-from matplotlib.legend_handler import HandlerLine2D
 from scipy import integrate
 from astropy.cosmology import WMAP9 as cosmo
 from astropy import units as u
 from astropy import constants as const
-#import csv
-#with open('') as fluxFile:
-
- #   anFlux = csv.writer(fluxFile)
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
-
-#these are not what you want
-solarLum = 3.846*10**33    #solar Mass is the mass of the sun in kg
-radToKpc = 0.05*7.194       #converts radius to kpc
 
 #setting up arrays with three elements, all zeros - placeholders
 wavelengths = [4,8,1]
@@ -69,6 +47,10 @@ aLnuNu = [0 for x in range(len(wavelengths))]
 #make an array for the calculation of the area of each bagel (annulus)
 area = [0 for x in range(len(radii))]
 
+# res specifies the percent of variation we expect from systematic error... 
+# For now, we have chosen 0.05, or 5%.
+res = 0.05
+
 #calculate area of each bagel
 for i in range(0, len(area)):
     if i == 0:
@@ -78,6 +60,8 @@ for i in range(0, len(area)):
 # Now, we loop through all galaxies
 
 for w in range (0, len(galaxies)):
+    # Mostly just for our own benefit, we print the galaxy's name so we know what 
+    # works and what doesn't when the code breaks.
     print(galaxies[w])
     
     collection = ['F475W','F814W','F160W']
@@ -110,6 +94,34 @@ for w in range (0, len(galaxies)):
 
         fluxvalues[w]=subflux
         
-      
-       
-        
+# Now that fluxvalues is full, we have to start making a new table.....
+# the table has 8 columns: ID, f475, iv475, f814, iv814, f1600, iv1600, and z
+# ID is GalaxyName_Aperature.
+
+# we create or open our txt file
+f = open("sg_fluxvalues.txt","w+")
+
+# we write our column titles - unsure if these need to stay, just thought it would be nice.
+f.write('ID\t\tf_475\t\t\tivar_475\t\tf_814\t\t\tivar_814\t\tf_1600\t\t\tivar_1600\t\tz\n')
+
+# we shift through the data by galaxy and then by aperture.
+for w in range(0,len(galaxies)):
+    for i in range(0,len(radii)):
+        # Building the ID name using if/else for those with single digits.
+        ID = galaxies[w]+'_'
+        if i < 10:
+            ID = ID + '0' + str(i)
+        else:
+            ID = ID + str(i)
+        # writing data divided by tabs (\t character)
+        f.write(ID+'\t')
+        # we loop through the filters because i am lazy and it is technically good form.
+        # at the same time, we grab the inverse variance (squared) which is 1/(flux*res)^2.
+        for j in range(0,len(collection)):
+            f.write(str(fluxvalues[w][j][i])+'\t')
+            ivar = (fluxvalues[w][j][i]*res)**(-2)
+            f.write(str(ivar)+'\t')
+        # to conclude the line, we include the z value for the galaxy before calling for a new line (\n).
+        f.write(str(zs[w])+'\n')
+
+f.close()
