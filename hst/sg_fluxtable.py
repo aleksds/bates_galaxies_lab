@@ -9,7 +9,13 @@ from astropy.io import fits
 from photutils import CircularAperture
 from photutils import aperture_photometry
 import glob
+import matplotlib.pyplot as plt
+from matplotlib import cm
+import matplotlib.colors as colors
+from matplotlib.backends.backend_pdf import PdfPages
 import math
+import matplotlib.lines as mlines
+from matplotlib.legend_handler import HandlerLine2D
 from scipy import integrate
 from astropy.cosmology import WMAP9 as cosmo
 from astropy import units as u
@@ -24,6 +30,11 @@ data = [0 for x in range(len(wavelengths))]
 header = [0 for x in range(len(wavelengths))]
 fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
+gain = [0 for x in range(len(wavelengths))]
+
+#width MUST be odd.
+width = 21
+pixr = int((width-1)/2)
 
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600]) #*u.nm
@@ -33,18 +44,12 @@ ycen = [4153, 4136, 3503.2, 3404.3, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 40
 
 fluxvalues = [[0 for x in range(len(wavelengths))] for y in range(len(galaxies))]
 
-#xcen = [3628.7, 3934, 3386.5, 3477.539, 3572.9, 3801.2, 3885.6, 4149.15, 3787, 3825.89, 3566.9, 4067]
-#ycen = [4153.8, 4137, 3503.2, 3404.342, 3339.1, 4171.6, 4164.336, 3921.748, 4187, 4451.805, 3435.9, 4054.4]
-
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 #Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
 Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
-
+totalphotons = 0
 # define the radii to be used for aperture photometry
 radii = np.arange(40)+1
-aMLR_BV_Vk_ab = [[0 for x in range(40)] for y in range(7)]
-aLnuNu = [0 for x in range(len(wavelengths))]
-#make an array for the calculation of the area of each bagel (annulus)
 area = [0 for x in range(len(radii))]
 
 # res specifies the percent of variation we expect from systematic error... 
@@ -63,46 +68,65 @@ for w in range (0, len(galaxies)):
     # Mostly just for our own benefit, we print the galaxy's name so we know what 
     # works and what doesn't when the code breaks.
     print(galaxies[w])
+    with PdfPages('sg_flux_'+galaxies[w]+'.pdf') as pdf: 
+        fig = plt.figure()
+        collection = ['F475W','F814W','F160W']
     
-    collection = ['F475W','F814W','F160W']
-    
-    flux = np.zeros([len(collection),len(radii)]) #*u.Jy
-    subflux = np.zeros([len(collection),len(radii)])
-    
-    for i in range (0, len(collection)):
+        flux = np.zeros([len(collection),len(radii)]) #*u.Jy
+        subflux = np.zeros([len(collection),len(radii)])
+        fluxpix = np.zeros([len(collection), width, width])
+        for i in range (0, len(collection)):
             
-        # read in the images
-        file = glob.glob(dir+galaxies[w]+'_final_'+collection[i]+'*sci.fits')
-        hdu = fits.open(file[0])
-        data[i], header[i] = hdu[0].data, hdu[0].header
-        fnu[i] = header[i]['PHOTFNU']
-        exp[i] = header[i]['EXPTIME']
+            # read in the images
+            file = glob.glob(dir+galaxies[w]+'_final_'+collection[i]+'*sci.fits')
+            hdu = fits.open(file[0])
+            data[i], header[i] = hdu[0].data, hdu[0].header
+            fnu[i] = header[i]['PHOTFNU']
+            exp[i] = header[i]['EXPTIME']
+            gain[i] = header[i]['CCDGAIN']
     
-        #define positions for photometry
-        positions = [(xcen[w], ycen[w])]
+            #define positions for photometry
+            positions = [(xcen[w], ycen[w])]
     
-        #do photometry on images
-        #convert to proper units
-        for j in range(0,len(radii)):
-            aperture = CircularAperture(positions, radii[j])
-            phot_table = aperture_photometry(data[i], aperture)
-            flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])
-            if j == 0:
-                subflux[i,j] = flux[i,j]
-            else:
-                subflux[i,j] = flux[i,j]-flux[i,j-1]
-
-        fluxvalues[w]=subflux
+            # do pixel analysis
+            for j in range(0,width):
+                for k in range(0,width):
+                    fluxpix[i,width-j-1,k] = math.log10((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*gain[i]*exp[i])
+                    totalphotons = totalphotons +  (data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*gain[i]*exp[i]
         
+                    #do photometry on images
+                    #convert to proper units
+
+            plt.imshow(fluxpix[i],cmap='gray')
+            plt.colorbar()
+            plt.title(galaxies[w]+' photon count: '+str(totalphotons) +' ('+ collection[i] + ')')
+            plt.xlabel('Pixels')
+            plt.ylabel('Pixels')
+            pdf.savefig()
+            plt.close()
+
+            for j in range(0,len(radii)):
+                aperture = CircularAperture(positions, radii[j])
+                phot_table = aperture_photometry(data[i], aperture)
+                # flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])
+                flux[i,j] = phot_table['aperture_sum'][0]*gain[i]*exp[i]
+                if j == 0:
+                    subflux[i,j] = flux[i,j]
+                else:
+                    subflux[i,j] = flux[i,j]-flux[i,j-1]
+
+            fluxvalues[w]=subflux
+#pdf.savefig()
+#plt.close()
 # Now that fluxvalues is full, we have to start making a new table.....
 # the table has 8 columns: ID, f475, iv475, f814, iv814, f1600, iv1600, and z
 # ID is GalaxyName_Aperature.
 
 # we create or open our txt file
-f = open("sg_fluxvalues.txt","w+")
+f = open("sg_photontable.txt","w+")
 
 # we write our column titles - unsure if these need to stay, just thought it would be nice.
-f.write('ID\t\tf_475\t\t\tivar_475\t\tf_814\t\t\tivar_814\t\tf_1600\t\t\tivar_1600\t\tz\n')
+f.write('ID\t\tf_475\t\tivar_475\t\tf_814\t\tivar_814\t\tf_1600\t\tivar_1600\t\tz\n')
 
 # we shift through the data by galaxy and then by aperture.
 for w in range(0,len(galaxies)):
