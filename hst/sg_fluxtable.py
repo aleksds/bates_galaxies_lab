@@ -33,7 +33,7 @@ exp = [0 for x in range(len(wavelengths))]
 gain = [0 for x in range(len(wavelengths))]
 
 #width MUST be odd.
-width = 21
+width = 15
 pixr = int((width-1)/2)
 
 # specify the position of the science target and the size of the region around the science target to consider
@@ -45,16 +45,18 @@ ycen = [4153, 4136, 3503.2, 3404.3, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 40
 fluxvalues = [[0 for x in range(len(wavelengths))] for y in range(len(galaxies))]
 
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
+
 #Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
 Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
 totalphotons = 0
+
 # define the radii to be used for aperture photometry
 radii = np.arange(40)+1
 area = [0 for x in range(len(radii))]
 
-# res specifies the percent of variation we expect from systematic error... 
+# percunc specifies the percent of variation we expect from systematic error... 
 # For now, we have chosen 0.05, or 5%.
-res = 0.05
+percUnc = 0.05
 
 #calculate area of each bagel
 for i in range(0, len(area)):
@@ -62,9 +64,10 @@ for i in range(0, len(area)):
         area[i] = math.pi*math.pow(radii[0],2)
     else:
         area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
-# Now, we loop through all galaxies
 
+# Now, we loop through all galaxies
 for w in range (0, len(galaxies)):
+#for w in range (2,3):
     # Mostly just for our own benefit, we print the galaxy's name so we know what 
     # works and what doesn't when the code breaks.
     print(galaxies[w])
@@ -90,12 +93,14 @@ for w in range (0, len(galaxies)):
     
             # do pixel analysis
             for j in range(0,width):
+                
                 for k in range(0,width):
+                    #print(i,j,k)
+                    #fluxpix[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*gain[i]*exp[i])
                     fluxpix[i,width-j-1,k] = math.log10((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*gain[i]*exp[i])
                     totalphotons = totalphotons +  (data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*gain[i]*exp[i]
-        
-                    #do photometry on images
-                    #convert to proper units
+                    #converts units to Jy and then to nanomaggys: Jy is data * fnu / exp and 1 nm = 3.631e-6 Jy
+                    #fluxnmaggys[i,width-j-1,k] = data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*fnu[i]/exp[i]/(3.631*10**-6)
 
             plt.imshow(fluxpix[i],cmap='gray')
             plt.colorbar()
@@ -104,26 +109,26 @@ for w in range (0, len(galaxies)):
             plt.ylabel('Pixels')
             pdf.savefig()
             plt.close()
-
+# NANOMAGGYS
             for j in range(0,len(radii)):
                 aperture = CircularAperture(positions, radii[j])
                 phot_table = aperture_photometry(data[i], aperture)
-                # flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])
-                flux[i,j] = phot_table['aperture_sum'][0]*gain[i]*exp[i]
+                # CONVERT UNITS TO JY TO nMy
+                flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])/(3.631*10**-6)
+                #flux[i,j] = phot_table['aperture_sum'][0]*gain[i]*exp[i]
                 if j == 0:
                     subflux[i,j] = flux[i,j]
                 else:
                     subflux[i,j] = flux[i,j]-flux[i,j-1]
 
             fluxvalues[w]=subflux
-#pdf.savefig()
-#plt.close()
+
 # Now that fluxvalues is full, we have to start making a new table.....
 # the table has 8 columns: ID, f475, iv475, f814, iv814, f1600, iv1600, and z
-# ID is GalaxyName_Aperature.
+# ID is GalaxyName_Aperature and all data is in nanomaggys
 
 # we create or open our txt file
-f = open("sg_photontable.txt","w+")
+f = open("sg_fluxtable_nm.txt","w+")
 
 # we write our column titles - unsure if these need to stay, just thought it would be nice.
 f.write('ID\t\tf_475\t\tivar_475\t\tf_814\t\tivar_814\t\tf_1600\t\tivar_1600\t\tz\n')
@@ -143,7 +148,7 @@ for w in range(0,len(galaxies)):
         # at the same time, we grab the inverse variance (squared) which is 1/(flux*res)^2.
         for j in range(0,len(collection)):
             f.write(str(fluxvalues[w][j][i])+'\t')
-            ivar = (fluxvalues[w][j][i]*res)**(-2)
+            ivar = (fluxvalues[w][j][i]*percUnc)**(-2)
             f.write(str(ivar)+'\t')
         # to conclude the line, we include the z value for the galaxy before calling for a new line (\n).
         f.write(str(zs[w])+'\n')
