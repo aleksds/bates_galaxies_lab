@@ -23,6 +23,10 @@ c_kms = const.c.to('km/s')
 #mass of electron
 mass_e = 9.11**(-28)
 
+# define velocity ranges to plot the profile
+vb = -3500.
+vr = 1500.
+
 # wavelengths of relevant absorption lines
 mgii2803 = 2803.5314853 * u.AA
 mgii2796 = 2796.3542699 * u.AA
@@ -45,14 +49,14 @@ gal_info = ascii.read(dir+'gal_info.txt')
 gal = gal_info['gal']
 zem = gal_info['zem']
 vcen = gal_info['vcen']
+vmax = gal_info['vmax']
+vflip = gal_info['vflip'] 
 
 def column(vel, col_dens):
     cor_col = np.array([])
     for i in range(0, len(vel)):
         if (vel[i] >= -3000 and vel[i] <= 500):
             cor_col = np.append(cor_col, col_dens[i])
-#if len(cor_col) < 1352:
-        #cor_col = np.append(cor_col, cor_col[1350])
     return cor_col
 
 def velocity(vel, col_dens):
@@ -60,12 +64,7 @@ def velocity(vel, col_dens):
     for i in range(0, len(vel)):
         if (vel[i] >= -3000 and vel[i] <= 500):
             cor_vel = np.append(cor_vel, vel[i])
-    #if len(cor_vel) < 1352:
-     #   cor_vel = np.append(cor_vel, cor_vel[1350])
     return cor_vel
-
-Mg = [0, 1]
-Fe = [2, 3]
 
 counter1 = 0
 minorLocator = AutoMinorLocator()
@@ -81,21 +80,18 @@ with PdfPages(filename) as pdf:
         vel_kms = np.zeros([len(lines),len(wave)])
         # define the velocity scale [km / s]
         for i in range(0, len(lines)):
-            vel_kms[i] = ((wave-lines[i]*(1+zem[0]))/(lines[i]*(1+zem[0]))) * c_kms
+            vel_kms[i] = ((wave-lines[i]*(1+zem[h]))/(lines[i]*(1+zem[h]))) * c_kms
         tau = np.zeros([len(lines),len(flux)])
         # loop over each spectral line-tau is an 8 by 50515 array, with 50515 values of tau for each spectral line
         for j in range(0, len(lines)):
             blah = np.log(1/flux)
             tau[j] = blah
-            
+        #graphs for the iron absorption lines(flux):    
         col_dens = np.zeros([len(lines), len(flux)])
         #calculating column density
-        for i in range(0, len(fosc)):
-            col_dens[i] = tau[i] / (2.654E-15 * fosc[i] * (wave/(1+zem[0])) * fosc[i])
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
-        for k in range(0, len(names)):
-            cor_col = column(vel_kms[k], col_dens[k])
+        for k in range(2, 4):
             f = interp1d(vel_kms[k], flux)
             vel_new = np.linspace(-3000, 500, num = 3501, endpoint = True)
             flux_king = f(vel_new)
@@ -103,9 +99,41 @@ with PdfPages(filename) as pdf:
             plt.ylabel('Flux')
             ax.set_xlim(-3000, 500)
             ax.set_ylim(0, 2)
-            plt.title("%s" % gal[h])
+            plt.title("Flux of %s" % gal[h])
+
+        #graphs for magnesium absorption lines:
+        # define the regions to use the 2796 profile and the regions to use the 2803 profile
+        g2796 = (vel_kms[0] > vb) & (vel_kms[0] < vflip[h])
+        g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < vr)
+        # plot the profiles using the 2796 profile on the blue side
+        # and the 2803 profile on the red side
+        ax.plot(vel_kms[0][g2796], flux[g2796], linewidth=1, label = names[0])
+        ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1])
+        #plt.text(xmin+0.03*(xmax-xmin), 0.15, gal[indx])
+        plt.legend(loc = 1)
+        pdf.savefig()
+        plt.close()
+        
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        #column density graphs
+        for k in range(0, 4):
+            col_dens[k] = tau[k] / (2.654E-15 * fosc[k] * (wave/(1+zem[h])) * fosc[k])
+            cor_col = column(vel_kms[k], col_dens[k])
+            #f = interp1d(vel_kms[k], col_dens[k])
+            vel_new = np.linspace(-3000, 500, num = len(cor_col), endpoint = True)
+            #col_d = f(vel_new)
+            ax.plot(vel_new, cor_col, lw = .9, label = names[k])
+            plt.ylabel('Column Density')
+            ax.set_xlim(-3000, 500)
+            #ax.set_ylim(0, 2)
+            plt.title("Column Density of %s" % gal[h])
+            
         plt.legend(loc = 1)
         pdf.savefig()
         plt.close()
             
 os.system("open %s &" % filename)
+
+
+
