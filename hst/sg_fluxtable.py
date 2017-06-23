@@ -1,6 +1,6 @@
 # Sophia C W Gottlieb I
-# 20170612 produce table of flux values in a txt file
-# This code was originally the sg_compoverlay_loop.py, but I am going to take all of that code out right about now.
+# 20170612 produce table of flux values in nanomaggies in a txt file
+# and graphs of the log of photons per pixel
 #
 # import relevant Python modules
 import os
