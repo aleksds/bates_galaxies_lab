@@ -1,6 +1,6 @@
 #Kwamo 06/20/17
 # Attaching Voigt Profile to Galaxy J0905 to Wavelengths of Interest Fe2600 and Mg2796
-
+Chill
 import os
 import numpy as np
 from astropy.io import fits
