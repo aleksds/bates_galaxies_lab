@@ -13,6 +13,8 @@ from astropy.io import ascii
 from matplotlib.ticker import AutoMinorLocator
 from scipy.interpolate import interp1d
 import random
+import math
+
 
 # define the data directory
 dir = os.environ['HIRESDIR']
@@ -76,7 +78,15 @@ with PdfPages(filename) as pdf:
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
         data = ascii.read(datafile)
         wave = data['wv'] * u.AA
-        flux = data['norm'] 
+        flux = data['norm']
+        fx = data['fx']
+        var = data['var']
+
+        sigma = np.zeros([len(flux)])
+        for i in range(0, len(flux)):
+            sigma[i] = flux[i] * math.sqrt(var[i])/fx[i]
+
+        
         vel_kms = np.zeros([len(lines),len(wave)])
         # define the velocity scale [km / s]
         for i in range(0, len(lines)):
@@ -90,12 +100,14 @@ with PdfPages(filename) as pdf:
         col_dens = np.zeros([len(lines), len(flux)])
         #calculating column density
         fig = plt.figure()
+        
         ax = fig.add_subplot(1,1,1)
         for k in range(2, 4):
             f = interp1d(vel_kms[k], flux)
             vel_new = np.linspace(-3000, 500, num = 3501, endpoint = True)
             flux_king = f(vel_new)
             ax.plot(vel_new, flux_king, lw = .9, label = names[k])
+            
             plt.ylabel('Flux')
             ax.set_xlim(-3000, 500)
             ax.set_ylim(0, 2)
@@ -111,6 +123,15 @@ with PdfPages(filename) as pdf:
         ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1])
         #plt.text(xmin+0.03*(xmax-xmin), 0.15, gal[indx])
         plt.legend(loc = 1)
+        pdf.savefig()
+        plt.close()
+
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        plt.errorbar(vel_kms[0], flux, yerr = sigma, label = 'error', fmt = 'rs--')
+        plt.title("Uncertainty")
+        ax.set_xlim(-3000, 500)
+        ax.set_ylim(0, 1)
         pdf.savefig()
         plt.close()
         
