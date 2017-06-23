@@ -1,4 +1,4 @@
-# Jose Ruiz 20170621, goal is to add more plots
+# Jose Ruiz 20170623, goal is to add more plots
 from marvin.tools.maps import Maps
 import os
 import marvin.utils.plot.map as mapplot
@@ -96,7 +96,8 @@ with PdfPages(filename) as pdf:
         ax = fig.add_subplot(2,2,4)
         s2d = maps['emline_gsigma_sii_6718']
         mapplot.plot(dapmap=s2d, fig=fig, ax=ax)
-        
+        #5 blank page
+        fig=plt.figure()
         
         pdf.savefig()
         plt.close()
