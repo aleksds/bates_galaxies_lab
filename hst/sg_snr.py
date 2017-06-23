@@ -1,0 +1,204 @@
+#Sophia C W Gottlieb I
+#June 23 2017
+#
+# SNR code... The objective is to plot flux v radius with
+# error bars using SNR from the PDF in the summer folder
+
+#import relavent packages
+import os
+import numpy as np
+from astropy.io import fits
+from photutils import CircularAperture
+from photutils import aperture_photometry
+import glob
+import matplotlib.pyplot as plt
+from matplotlib import cm
+import matplotlib.colors as colors
+from matplotlib.backends.backend_pdf import PdfPages
+import math
+import matplotlib.lines as mlines
+from matplotlib.legend_handler import HandlerLine2D
+from scipy import integrate
+from astropy.cosmology import WMAP9 as cosmo
+from astropy import units as u
+from astropy import constants as const
+
+# define the directory that contains the images
+dir = os.environ['HSTDIR']
+
+#setting up arrays with three elements, all zeros - placeholders
+wavelengths = ['F475W','F814W','F160W']
+
+data = [0 for x in range(len(wavelengths))]
+header = [0 for x in range(len(wavelengths))]
+fnu = [0 for x in range(len(wavelengths))]
+exp = [0 for x in range(len(wavelengths))]
+gain = [0 for x in range(len(wavelengths))]
+darkt = [0 for x in range(len(wavelengths))]
+
+#width MUST be odd.
+width = 15
+pixr = int((width-1)/2)
+
+# specify the position of the science target and the size of the region around the science target to consider
+filters = np.array([475, 814, 1600]) #*u.nm
+galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
+xcen = [3628, 3933, 3386.5, 3477.5, 3573, 3802, 3886, 4149, 3787, 4174, 3565, 4067]
+ycen = [4153, 4136, 3503.2, 3404.3, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 4054]
+
+flux = np.zeros([len(wavelengths),len(radii)]) #*u.Jy
+subflux = np.zeros([len(wavelengths),len(radii)])
+fluxpix = np.zeros([len(wavelengths), width, width])
+
+#fluxvalues = [[0 for x in range(len(wavelengths))] for y in range(len(galaxies))]
+pixsnr = np.zeros([len(wavelengths), width, width])
+annsnr = np.zeros([len(wavelengths),len(radii)])
+zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
+
+#Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
+Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
+totalphotons = 0
+
+# define the radii to be used for aperture photometry
+radii = np.arange(40)+1
+area = [0 for x in range(len(radii))]
+
+# percunc specifies the percent of variation we expect from systematic error... 
+# For now, we have chosen 0.05, or 5%.
+percUnc = 0.05
+
+#calculate area of each bagel
+for i in range(0, len(area)):
+    if i == 0:
+        area[i] = math.pi*math.pow(radii[0],2)
+    else:
+        area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
+
+# Now, we loop through all galaxies
+for w in range (0, len(galaxies)):
+    print(galaxies[w])
+    with PdfPages('sg_SNR_'+galaxies[w]+'.pdf') as pdf: 
+        fig = plt.figure()
+                
+        for i in range (0, len(wavelengths)):
+            
+            # read in the images
+            file = glob.glob(dir+galaxies[w]+'_final_'+ wavelengths[i]+'*sci.fits')
+            hdu = fits.open(file[0])
+            data[i], header[i] = hdu[0].data, hdu[0].header
+            fnu[i] = header[i]['PHOTFNU']
+            exp[i] = header[i]['EXPTIME']
+            gain[i] = header[i]['CCDGAIN']
+            darkt[i] = header[i]['DARKTIME']
+darkt = [0 for x in range(len(wavelengths))]
+
+#width MUST be odd.
+width = 15
+pixr = int((width-1)/2)
+
+# specify the position of the science target and the size of the region around the science target to consider
+filters = np.array([475, 814, 1600]) #*u.nm
+galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
+xcen = [3628, 3933, 3386.5, 3477.5, 3573, 3802, 3886, 4149, 3787, 4174, 3565, 4067]
+ycen = [4153, 4136, 3503.2, 3404.3, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 4054]
+
+flux = np.zeros([len(wavelengths),len(radii)]) #*u.Jy
+subflux = np.zeros([len(wavelengths),len(radii)])
+fluxpix = np.zeros([len(wavelengths), width, width])
+
+#fluxvalues = [[0 for x in range(len(wavelengths))] for y in range(len(galaxies))]
+pixsnr = np.zeros([len(wavelengths), width, width])
+annsnr = np.zeros([len(wavelengths),len(radii)])
+zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
+
+#Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
+Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
+totalphotons = 0
+
+# define the radii to be used for aperture photometry
+radii = np.arange(40)+1
+area = [0 for x in range(len(radii))]
+
+# percunc specifies the percent of variation we expect from systematic error... 
+# For now, we have chosen 0.05, or 5%.
+percUnc = 0.05
+
+#calculate area of each bagel
+for i in range(0, len(area)):
+    if i == 0:
+        area[i] = math.pi*math.pow(radii[0],2)
+    else:
+        area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
+
+# Now, we loop through all galaxies
+for w in range (0, len(galaxies)):
+    print(galaxies[w])
+    with PdfPages('sg_SNR_'+galaxies[w]+'.pdf') as pdf: 
+        fig = plt.figure()
+                
+        for i in range (0, len(wavelengths)):
+            
+            # read in the images
+            file = glob.glob(dir+galaxies[w]+'_final_'+ wavelengths[i]+'*sci.fits')
+            hdu = fits.open(file[0])
+            data[i], header[i] = hdu[0].data, hdu[0].header
+            fnu[i] = header[i]['PHOTFNU']
+            exp[i] = header[i]['EXPTIME']
+            gain[i] = header[i]['CCDGAIN']
+            darkt[i] = header[i]['DARKTIME']
+darkt = [0 for x in range(len(wavelengths))]
+
+#width MUST be odd.
+width = 15
+pixr = int((width-1)/2)
+
+# specify the position of the science target and the size of the region around the science target to consider
+filters = np.array([475, 814, 1600]) #*u.nm
+galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
+xcen = [3628, 3933, 3386.5, 3477.5, 3573, 3802, 3886, 4149, 3787, 4174, 3565, 4067]
+ycen = [4153, 4136, 3503.2, 3404.3, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 4054]
+
+flux = np.zeros([len(wavelengths),len(radii)]) #*u.Jy
+subflux = np.zeros([len(wavelengths),len(radii)])
+fluxpix = np.zeros([len(wavelengths), width, width])
+
+#fluxvalues = [[0 for x in range(len(wavelengths))] for y in range(len(galaxies))]
+pixsnr = np.zeros([len(wavelengths), width, width])
+annsnr = np.zeros([len(wavelengths),len(radii)])
+zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
+
+#Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
+Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
+totalphotons = 0
+
+# define the radii to be used for aperture photometry
+radii = np.arange(40)+1
+area = [0 for x in range(len(radii))]
+
+# percunc specifies the percent of variation we expect from systematic error... 
+# For now, we have chosen 0.05, or 5%.
+percUnc = 0.05
+
+#calculate area of each bagel
+for i in range(0, len(area)):
+    if i == 0:
+        area[i] = math.pi*math.pow(radii[0],2)
+    else:
+        area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
+
+# Now, we loop through all galaxies
+for w in range (0, len(galaxies)):
+    print(galaxies[w])
+    with PdfPages('sg_SNR_'+galaxies[w]+'.pdf') as pdf: 
+        fig = plt.figure()
+                
+        for i in range (0, len(wavelengths)):
+            
+            # read in the images
+            file = glob.glob(dir+galaxies[w]+'_final_'+ wavelengths[i]+'*sci.fits')
+            hdu = fits.open(file[0])
+            data[i], header[i] = hdu[0].data, hdu[0].header
+            fnu[i] = header[i]['PHOTFNU']
+            exp[i] = header[i]['EXPTIME']
+            gain[i] = header[i]['CCDGAIN']
+            darkt[i] = header[i]['DARKTIME']
