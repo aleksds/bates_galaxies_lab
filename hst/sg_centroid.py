@@ -47,7 +47,7 @@ def plot_image():
 dir = os.environ['HSTDIR']
 
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
-w = 1
+w = 2
 
 #I THINK THESE NEED TO BE CHANGED
 # parameters for the initial guess at the galaxy centroid and the size

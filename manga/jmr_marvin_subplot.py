@@ -1,4 +1,4 @@
-# Jose Ruiz 20170621, goal is to add more plots
+# Jose Ruiz 20170623, goal is to add more plots
 from marvin.tools.maps import Maps
 import os
 import marvin.utils.plot.map as mapplot
@@ -25,7 +25,7 @@ with PdfPages(filename) as pdf:
     for i in range(0, len(maps_file)):
         maps = Maps(filename=maps_file[i])
         print(maps)
-      
+        # page one plots multiple things, which we will plot multiple examples for each in the next pages
         fig = plt.figure()
         # h-alpha emission-gas
         ax = fig.add_subplot(2,2,1)
@@ -49,11 +49,58 @@ with PdfPages(filename) as pdf:
         pdf.savefig()
         plt.close()
         # page 2
+        #All of this figures represent gas emission
         fig=plt.figure()
         ax = fig.add_subplot(2,2,1)
-        haf = maps['emline_sflux_hb_4862']
-
-        mapplot.plot(dapmap=haf, fig=fig, ax=ax)
+        hbf = maps['emline_sflux_hb_4862']
+        mapplot.plot(dapmap=hbf, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,2)
+        o1f = maps['emline_sflux_oi_6302']
+        mapplot.plot(dapmap=o1f, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,3)
+        n2f= maps['emline_sflux_nii_6549']
+        mapplot.plot(dapmap=n2f, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,4)
+        s2f = maps['emline_sflux_sii_6718']
+        mapplot.plot(dapmap=s2f, fig=fig, ax=ax)
         pdf.savefig()
         plt.close()
-os.system("evince %s &" % filename)
+        #page 3
+        # All the following figures represent velocities corresponding to each gas emission above
+        fig=plt.figure()
+        ax = fig.add_subplot(2,2,1)
+        hbv = maps['emline_gvel_hb_4862']
+        mapplot.plot(dapmap=hbv, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,2)
+        o1v = maps['emline_gvel_oi_6302']
+        mapplot.plot(dapmap=o1v, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,3)
+        n2v = maps['emline_gvel_nii_6549']
+        mapplot.plot(dapmap=n2v, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,4)
+        s2v = maps['emline_gvel_sii_6718']
+        mapplot.plot(dapmap=s2v, fig=fig, ax=ax)
+        pdf.savefig()
+        plt.close()
+        #4 All the following figures represent the velocity dispersion
+        fig=plt.figure()
+        ax = fig.add_subplot(2,2,1)
+        hbd = maps['emline_gsigma_hb_4862']
+        mapplot.plot(dapmap=hbd, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,2)
+        o1d = maps['emline_gsigma_oi_6302']
+        mapplot.plot(dapmap=o1d, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,3)
+        n2d = maps['emline_gsigma_nii_6549']
+        mapplot.plot(dapmap=n2d, fig=fig, ax=ax)
+        ax = fig.add_subplot(2,2,4)
+        s2d = maps['emline_gsigma_sii_6718']
+        mapplot.plot(dapmap=s2d, fig=fig, ax=ax)
+        #5 blank page
+        fig=plt.figure()
+        
+        pdf.savefig()
+        plt.close()
+
+        
+os.system("open %s &" % filename)
