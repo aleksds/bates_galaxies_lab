@@ -46,7 +46,7 @@ with PdfPages(filename) as pdf:
         # velocity dispersion [O II]
         ax = fig.add_subplot(2,2,4)
         o2s = maps['emline_gsigma_oiid_3728']
-        mapplot.plot(dapmap=o2s, fig=fig, ax=ax, cb_kws=cb_kws, log_cb=1) #cbrange=(0.1,100)) #the range gives a very weird yellow plot
+        mapplot.plot(dapmap=o2s, fig=fig, ax=ax, cb_kws=cb_kws, log_cb=1) #cbrange=(0.1,100)) #the range gives a very weird full yellow plot
         plt.suptitle(maps_file[i])
         # the number corresponds to their wavelength in A*
         fig.tight_layout()
