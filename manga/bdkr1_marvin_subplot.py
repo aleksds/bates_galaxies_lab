@@ -12,7 +12,7 @@ plate = input('Enter plate:')
 maps_file = glob.glob(sas_dir+'/mangawork/manga/spectro/analysis/v2_0_1/SPX-GAU-MILESHC/'+plate+'/*/manga-*MAPS-SPX-GAU*')
 
 
-filename=plate+'_bkr1_marvin_subplot.pdf'
+filename=plate+'_bdkr1_marvin_subplot.pdf'
 with PdfPages(filename) as pdf:
 
     for i in range(0, len(maps_file)):
@@ -24,6 +24,7 @@ with PdfPages(filename) as pdf:
         cb_kws={}
         junk={}
         trash['size']=10
+        trash['label']='[O II]/H-alpha'
         junk['labelsize']=10
         cb_kws['tick_params_kws']=junk
         cb_kws['label_kws']=trash
@@ -114,11 +115,11 @@ with PdfPages(filename) as pdf:
         # ha_6564:oiid_3728 normal plot
         fig = plt.figure()
         ax = fig.add_subplot(2, 2, 1)
-        h_o_ratio = Maps.getMapRatio(maps,'emline_sflux','ha_6564','oiid_3728')
+        h_o_ratio = Maps.getMapRatio(maps,'emline_sflux','oiid_3728','ha_6564')
         mapplot.plot(dapmap=h_o_ratio, fig=fig, ax=ax, cb_kws=cb_kws)
         # ha_6564:oiid_3728 logarithmic plot
         ax = fig.add_subplot(2, 2, 2)
-        h_o_ratio = Maps.getMapRatio(maps,'emline_sflux','ha_6564','oiid_3728')
+        h_o_ratio = Maps.getMapRatio(maps,'emline_sflux','oiid_3728','ha_6564')
         mapplot.plot(dapmap=h_o_ratio, fig=fig, ax=ax, cb_kws=cb_kws, log_cb=1, cbrange=(0.1,100))
         fig.tight_layout()
         pdf.savefig()
