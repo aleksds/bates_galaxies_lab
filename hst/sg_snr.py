@@ -74,10 +74,11 @@ percUnc = 0.05
 
 #calculate area of each bagel
 for i in range(0, len(area)):
-    if i == 0:
-        area[i] = math.pi*math.pow(radii[0],2)
-    else:
-        area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
+    area[i] = math.pi*math.pow(radii[0],2)
+    #if i == 0:
+    #    area[i] = math.pi*math.pow(radii[0],2)
+    #else:
+    #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 # Now, we loop through all galaxies
 #for w in range (0, len(galaxies)):
@@ -108,13 +109,13 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
                 aperture = CircularAperture(positions, radii[j])
                 phot_table = aperture_photometry(data[i], aperture)
                 #flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])/(3.631*10**-6)
-                flux[i,j] = phot_table['aperture_sum'][0]*gain[i]*exp[i]
+                flux[i,j] = phot_table['aperture_sum'][0]#*gain[i]*exp[i]
                 if j == 0:
                     subflux[i,j] = flux[i,j]
                 else:
                     subflux[i,j] = flux[i,j]-flux[i,j-1]
                 annNoise[i,j] = math.sqrt(flux[i][j]+(RN[i]**2+(gain[i]/2)**2)*area[j]+dark[i]*area[j]*exp[i])
-
+        print(flux/annNoise)
         acolors = ['b--','g--','r--']
         bcolors = ['b', 'g', 'r']
         dot = ['bo','go','ro']
