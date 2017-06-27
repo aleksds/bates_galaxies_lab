@@ -1,6 +1,6 @@
 #Kwamo 06/20/17
 # Attaching Voigt Profile to Galaxy J0905 to Wavelengths of Interest Fe2600 and Mg2796
-Chill
+
 import os
 import numpy as np
 from astropy.io import fits
@@ -33,6 +33,7 @@ model = hdulist[1].data['model']
 ivar = hdulist[1].data['ivar']
 npix = len(flux)
 index = np.arange(npix)
+
 #To do: check whether this wavelength definition is correct and whether it's in air or vacuum
 #wavelength = 10.**(coeff0 + coeff1*index)
 
@@ -60,7 +61,7 @@ for i in range(0, len(wavelength)):
 
 ## Gaussian function where alpha is the half-width at half-max(Gaussian) and x is the width
 def Gaussian(x, alpha):
-    return np.sqrt(np.log(2)/np.pi)/alpha *np.exp(-(x/alpha**2*np.log(2)))
+    return np.sqrt(np.log(2)/np.pi)/alpha *np.exp(-(x/alpha)**2*np.log(2))
 
 
 ## Lorentzian function where gamma is the half-width at half-max (Lorentzian) and x is the width
@@ -74,57 +75,33 @@ def Voigt(x,alpha, gamma):
 
 
 
-# alpha for Gaussian Function    Formula is sigma * sqrt (2* ln(2) ) ,  where sigma is std dev
-alpha = np.std(flux) * np.sqrt(2*np.log(2))
+# Random Values to see if code works
+alpha, gamma = 0.1, 0.1
+x = np.linspace(-0.8,0.8,1000)
 
-# gamma for Lorentzian Function    Formula is 
-#gamma = 
-
-# x accounts for the width of the curve based on error/deviations
-# for i in velo_int:
-#     x = ((np.std(velocity) *3 + velo_int)  - velo_int) #(Ask Aleks about frequency in this case)
-
-x = velocity
+## Gotta find real values for alpha, gamma, and x with Aleks
 
 
+# graphs Gaussian, Lorentzian, and Voigt
+pylab.plot(x, Gaussian(x, alpha), ls=':', c='k', label='Gaussian')
+pylab.plot(x, Lorentzian(x, gamma), ls='--', c='k', label='Lorentzian')
+pylab.plot(x, Voigt(x, alpha, gamma), c='k', label='Voigt')
+pylab.xlim(-0.8,0.8)
+pylab.legend()
+pylab.show()
 
 # # create a PDF file for plot output
 # filename = 'J0905_sdss.pdf'
 # with PdfPages(filename) as pdf:
+#     print('i am working')
+#     # fig = plt.figure
+   
 
-# #     # fig = plt.figure
-# #     pylab.plot(x, Gaussian(x, alpha), ls=':', c='k', label='Gaussian')
-# #     pylab.plot(x, Lorentzian(x, gamma), ls='--', c='k', label='Lorentzian')
-# #     pylab.plot(x, Voigt(x, alpha, gamma), c='k', label='Voigt')
-# #     pylab.xlim(np.min(velocity),np.max(velocity))
-# #     pylab.legend()
-# #     pylab.show()
-#     # ## Gaussian Wavelength
-
-#     # fig = plt.figure()
-#     # ax = fig.add_subplot (1,1,1)
-#     # ax.plot(wavelength,g_wave(wavelength), label = 'Gaussian Fit of Wavelength')
-#     # plt.xlabel('Wavelength')
-#     # plt.ylabel('Flux')
-#     # plt.legend(loc=2)
-
-#     # # save the figure
-#     # pdf.savefig()
-#     # plt.close()
-
-#     # ##Gaussian Velocity
-    
-#     # fig = plt.figure()
-#     # ax = fig.add_subplot (1,1,1)
-#     # ax.plot(velocity,g_velo(velocity), label = 'Gaussian Fit of Velocity')
-#     # plt.xlabel('Velocity')
-#     # plt.ylabel('Flux')
-#     # plt.legend(loc=2)
 
 #     # save the figure
 #     pdf.savefig()
 #     plt.close()
     
 #     # open the PDF file
-#     os.system("open %s &" % filename)
+# os.system("open %s &" % filename)
 
