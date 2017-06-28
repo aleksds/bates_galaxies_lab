@@ -44,7 +44,7 @@ def objective_function(params):
     return np.sum((residuals)**2) / nbin
 
 # define the directory that contains the images
-dir = '/Users/sgottlie/data/test/'
+dir = os.environ['HSTDIR']#'/Users/sgottlie/data/test/'
 filename = 'sg_gau_stamp.pdf'
 
 # create a PDF file for the plots    
