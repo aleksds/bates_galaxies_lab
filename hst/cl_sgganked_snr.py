@@ -34,13 +34,12 @@ header = [0 for x in range(len(wavelengths))]
 fnu = [0 for x in range(len(wavelengths))]
 exp = [0 for x in range(len(wavelengths))]
 gain = [0 for x in range(len(wavelengths))]
-dark = [0.0022,0.0022,0.045]
+darkt = [0 for x in range(len(wavelengths))]
 RN = [0 for x in range(len(wavelengths))]
 
 #width MUST be odd.
 width = 15
 pixr = int((width-1)/2)
-rSky = [ 7.50788545,  7.58130161,  8.27527023,  9.03878993,  8.67763722, 7.62254201,  7.70920672,  6.74143006,  6.87375846,  7.46983987, 7.83102976,  8.10811507]
 
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600]) #*u.nm
@@ -57,36 +56,25 @@ subflux = np.zeros([len(wavelengths),len(radii)])
 fluxpix = np.zeros([len(wavelengths), width, width])
 
 #fluxvalues = [[0 for x in range(len(wavelengths))] for y in range(len(galaxies))]
-pixNoise = np.zeros([len(wavelengths), width, width])
-annNoise = np.zeros([len(wavelengths),len(radii)])
+pixsnr = np.zeros([len(wavelengths), width, width])
+annsnr = np.zeros([len(wavelengths),len(radii)])
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 
 #Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
 Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
 totalphotons = 0
 
-# define the radii to be used for aperture photometry
-radii = np.arange(40)+1
-area = [0 for x in range(len(radii))]
-
-# percunc specifies the percent of variation we expect from systematic error... 
-# For now, we have chosen 0.05, or 5%.
-percUnc = 0.05
-
 #calculate area of each bagel
 for i in range(0, len(area)):
-    area[i] = math.pi*math.pow(radii[0],2)
     #if i == 0:
-    #    area[i] = math.pi*math.pow(radii[0],2)
+    area[i] = math.pi*math.pow(radii[i],2)
     #else:
     #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 # Now, we loop through all galaxies
-#for w in range (0, len(galaxies)):
-with PdfPages('sg_SNR_err.pdf') as pdf:
+with PdfPages('sg_SNR.pdf') as pdf:
     for w in range (0, len(galaxies)):
         print(galaxies[w])
-   # with PdfPages('sg_SNR_'+galaxies[w]+'.pdf') as pdf: 
         fig = plt.figure()
                 
         for i in range (0, len(wavelengths)):
@@ -98,8 +86,8 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
             fnu[i] = header[i]['PHOTFNU']
             exp[i] = header[i]['EXPTIME']
             gain[i] = header[i]['CCDGAIN']
+            D = [0.0022,0.0022,0.045]
             RN[i] = header[i]['READNSEA']
-            #dark[i] = header[i]['DARKTIME']
 
             #define positions for photometry
             positions = [(xcen[w], ycen[w])]
@@ -109,29 +97,28 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
             for j in range(0,len(radii)):
                 aperture = CircularAperture(positions, radii[j])
                 phot_table = aperture_photometry(data[i], aperture)
-                #flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])/(3.631*10**-6)
-                flux[i,j] = phot_table['aperture_sum'][0]#*gain[i]*exp[i]
+                #flux[i,j] = (phot_table['aperture_sum'][0]*(fnu[i]/exp[i]))/(3.631*10**-6)
+                flux[i,j] = (phot_table['aperture_sum'][0])*fnu[i]*exp[i]
                 if j == 0:
                     subflux[i,j] = flux[i,j]
                 else:
                     subflux[i,j] = flux[i,j]-flux[i,j-1]
-                annNoise[i,j] = math.sqrt((rSky[w]*area[j])**2+flux[i][j]+(RN[i]**2+(gain[i]/2)**2)*area[j]+dark[i]*area[j]*exp[i])
-        acolors = ['b--','g--','r--']
-        bcolors = ['b', 'g', 'r']
-        dot = ['bo','go','ro']
-        labeling = ['475 nm','814 nm','1600 nm']
-        ax = fig.add_subplot(1,1,1)
+                signal = flux[i,j]*exp[i]
+                noise = ((flux[i,j]*exp[i]) + (RN[i]**2+(gain[i]**2)/2 + area[i]) + (area[i]*exp[i]*D[i]))**0.5
+                SNR = signal/noise
+                print(SNR)
+            acolors = ['b--','g--','r--']
+            bcolors = ['b', 'g', 'r']
+            dot = ['bo','go','ro']
+            labeling = ['475 nm','814 nm','1600 nm']
+            ax = fig.add_subplot(1,1,1)
         for k in range(0,len(acolors)):
-            #ax.plot(annNoise[k], flux[k], acolors[k], marker='o', label=str(labeling[k]))
-            #ax.errorbar(radii, annNoise[k]/flux[k], yerr = annNoise[k], fmt = 'p')
-            ax.plot(radii, annNoise[k]/flux[k]*100, acolors[k], marker='o', label=str(labeling[k]))
-            #ax.plot(radii, flux[k], dot[k])
+            ax.plot(radii, flux[k], acolors[k], marker='o', label=str(labeling[k]))
+            ax.plot(radii, flux[k], dot[k])
         plt.xlabel('Radius (pixels)',fontsize=14)
-        
-        plt.ylabel('Percent Uncertainty',fontsize=14)
-        plt.title(galaxies[w] + ' Percent Uncertainty vs. Radius',fontsize=16)
+        plt.ylabel('flux (photons)',fontsize=14)
+        plt.title(galaxies[w] + ' Flux vs. Radius',fontsize=16)
         plt.tight_layout()
-        #legend = plt.legend(loc='upper right')
         legend = ax.legend(loc='upper right')
         # here is some new stuff for you
         pdf.savefig()
