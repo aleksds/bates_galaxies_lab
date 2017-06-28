@@ -40,6 +40,7 @@ RN = [0 for x in range(len(wavelengths))]
 #width MUST be odd.
 width = 15
 pixr = int((width-1)/2)
+rSky = [ 7.50788545,  7.58130161,  8.27527023,  9.03878993,  8.67763722, 7.62254201,  7.70920672,  6.74143006,  6.87375846,  7.46983987, 7.83102976,  8.10811507]
 
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600]) #*u.nm
@@ -114,8 +115,7 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
                     subflux[i,j] = flux[i,j]
                 else:
                     subflux[i,j] = flux[i,j]-flux[i,j-1]
-                annNoise[i,j] = math.sqrt(flux[i][j]+(RN[i]**2+(gain[i]/2)**2)*area[j]+dark[i]*area[j]*exp[i])
-        print(flux/annNoise)
+                annNoise[i,j] = math.sqrt((rSky[w]*area[j])**2+flux[i][j]+(RN[i]**2+(gain[i]/2)**2)*area[j]+dark[i]*area[j]*exp[i])
         acolors = ['b--','g--','r--']
         bcolors = ['b', 'g', 'r']
         dot = ['bo','go','ro']
@@ -128,8 +128,8 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
             #ax.plot(radii, flux[k], dot[k])
         plt.xlabel('Radius (pixels)',fontsize=14)
         
-        plt.ylabel('number of photons',fontsize=14)
-        plt.title(galaxies[w] + ' Flux vs. Radius',fontsize=16)
+        plt.ylabel('Percent Uncertainty',fontsize=14)
+        plt.title(galaxies[w] + ' Percent Uncertainty vs. Radius',fontsize=16)
         plt.tight_layout()
         #legend = plt.legend(loc='upper right')
         legend = ax.legend(loc='upper right')
