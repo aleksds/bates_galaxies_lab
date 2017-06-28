@@ -1,15 +1,14 @@
 # Aleks Diamond-Stanic
 # 20161109
 #
-#Senyo Ohene
+# Senyo Ohene
 # Quick description: This code compares centroid values based on three
 # routines from photutils: centroid_com, centroid_1dg, centroid_2dg.
 #
 # Current status: The current version of the code plots these centroid
-# values on top of a postage stamp image for the galaxy J0905.
+# values on top of a postage stamp image for all 12 galaxies.
 #
-# Future developments: Could avoid repetitive code for each filter and
-# make a for loop.  Could turn this into a function that returns the
+# Future developments: Could turn this into a function that returns the
 # coordinates of the best centroid location.
 #
 # import relevant Python modules
@@ -47,6 +46,7 @@ dir = os.environ['HSTDIR']
 dx = 5
 dy = 5
 
+# Arrays for galaxies, estimated centers, filenames and titles
 Galaxies = [['J0826', 3628.7, 4153.8], ['J0901', 3934, 4137], ['J0905', 3386.5, 3503.2], ['J0944', 3477.5, 3404.3], ['J1107', 3572.9, 3339.1], ['J1219', 3803., 4170.], ['J1341', 3885.6, 4164.3], ['J1506', 4149.2, 3921.7], ['J1558', 3787., 4186.], ['J1613', 4175., 3827.], ['J2116', 3566.9, 3435.9], ['J2140', 4067, 4054.4]]
 Filters = ['_final_F4*sci.fits', '_final_F8*sci.fits', '_final_F1*sci.fits']
 Titles = ['F475W', 'F814W', 'F160W']

@@ -40,6 +40,7 @@ RN = [0 for x in range(len(wavelengths))]
 #width MUST be odd.
 width = 15
 pixr = int((width-1)/2)
+rSky = [ 7.50788545,  7.58130161,  8.27527023,  9.03878993,  8.67763722, 7.62254201,  7.70920672,  6.74143006,  6.87375846,  7.46983987, 7.83102976,  8.10811507]
 
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600]) #*u.nm
@@ -74,10 +75,11 @@ percUnc = 0.05
 
 #calculate area of each bagel
 for i in range(0, len(area)):
-    if i == 0:
-        area[i] = math.pi*math.pow(radii[0],2)
-    else:
-        area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
+    area[i] = math.pi*math.pow(radii[0],2)
+    #if i == 0:
+    #    area[i] = math.pi*math.pow(radii[0],2)
+    #else:
+    #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 # Now, we loop through all galaxies
 #for w in range (0, len(galaxies)):
@@ -108,13 +110,12 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
                 aperture = CircularAperture(positions, radii[j])
                 phot_table = aperture_photometry(data[i], aperture)
                 #flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])/(3.631*10**-6)
-                flux[i,j] = phot_table['aperture_sum'][0]*gain[i]*exp[i]
+                flux[i,j] = phot_table['aperture_sum'][0]#*gain[i]*exp[i]
                 if j == 0:
                     subflux[i,j] = flux[i,j]
                 else:
                     subflux[i,j] = flux[i,j]-flux[i,j-1]
-                annNoise[i,j] = math.sqrt(flux[i][j]+(RN[i]**2+(gain[i]/2)**2)*area[j]+dark[i]*area[j]*exp[i])
-
+                annNoise[i,j] = math.sqrt((rSky[w]*area[j])**2+flux[i][j]+(RN[i]**2+(gain[i]/2)**2)*area[j]+dark[i]*area[j]*exp[i])
         acolors = ['b--','g--','r--']
         bcolors = ['b', 'g', 'r']
         dot = ['bo','go','ro']
@@ -127,8 +128,8 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
             #ax.plot(radii, flux[k], dot[k])
         plt.xlabel('Radius (pixels)',fontsize=14)
         
-        plt.ylabel('number of photons',fontsize=14)
-        plt.title(galaxies[w] + ' Flux vs. Radius',fontsize=16)
+        plt.ylabel('Percent Uncertainty',fontsize=14)
+        plt.title(galaxies[w] + ' Percent Uncertainty vs. Radius',fontsize=16)
         plt.tight_layout()
         #legend = plt.legend(loc='upper right')
         legend = ax.legend(loc='upper right')
