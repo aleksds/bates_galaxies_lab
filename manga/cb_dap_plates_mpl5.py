@@ -43,7 +43,7 @@ all_plates = [f for f in os.listdir(mpl5_dir+'SPX-GAU-MILESHC/') if isdir(join(m
 print('List of plates: \n',all_plates,'\n')
 plate = int(input('Please enter plate number: '))
 lines = glob.glob(mpl5_dir+'SPX-GAU-MILESHC/*/*/*'+ str(plate) +'*MAPS-SPX-GAU-MILESHC.fits*')
-filename = 'dap_multi_'+str(plate)+'_quicklook.pdf'
+filename = 'MLP5_dap_multi_'+str(plate)+'_quicklook.pdf'
 
 # for bookkeeping purposes, here's an array of emission-line names
 eml = ['OIId---3728', 'Hb-----4862', 'OIII---4960', 'OIII---5008', 'OI-----6302', 'OI-----6365', 'NII----6549', 'Ha-----6564', 'NII----6585', 'SII----6718', 'SII----6732']
