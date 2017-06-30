@@ -39,9 +39,10 @@ def plot_image():
     x3, y3 = centroid_2dg(stamp)
     circle3 = plt.Circle((x3,y3),0.1,color='g')
     ax.add_artist(circle3)
-    print(x1, x2, x3)
-    print('now some y values')
-    print(y1, y2, y3)
+    return ((x1, y1),(x2, y2),(x3, y3))
+    #print(x1, x2, x3)
+    #print('now some y values')
+    #print(y1, y2, y3)
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
@@ -52,58 +53,40 @@ w = 2
 #I THINK THESE NEED TO BE CHANGED
 # parameters for the initial guess at the galaxy centroid and the size
 # of the postage stamps
-xcen = 3386.5
-ycen = 3503.2
+#add 
+xcens = [3629, 3933, 3386, 3477, 3573, 3802, 3886, 4149, 3787, 4174, 3565, 4067]
+ycens = [4154, 4136, 3503, 3404, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 4054]
+
+xadds = [0,1, 0, 0, 0,2.0,-2.2,-1.5,-0.5, 1.7,1,0]
+yadds = [0,0,-1,-2, 1,1.5, 1.0, 1.5,-0.6, 1  ,1,0]
 dx = 5
 dy = 5
-
-for w in range(0,len(galaxies)):
+collection = ['F475W','F814W','F160W']
+with PdfPages('sg_centroid.pdf') as pdf:
     # create a PDF file for the plots    
-    with PdfPages('sg_centroid_'+galaxies[w]+'.pdf') as pdf:
-
+    for w in range(0,len(galaxies)):
+    #for w in range(11,12):
         fig = plt.figure()
-
-        # read in the F475W image
-        file = glob.glob(dir+galaxies[w]+'_final_F4*sci.fits')
-        hdu = fits.open(file[0])
-        data, header = hdu[0].data, hdu[0].header
+        plt.suptitle(galaxies[w])
+        xcen = xcens[w]+xadds[w]
+        ycen = ycens[w]+yadds[w]
+        
+        for i in range(0,len(collection)):
+            # read in the F814W image
+            file = glob.glob(dir+galaxies[w]+'_final_'+collection[i]+'*sci.fits')
+            hdu = fits.open(file[0])
+            data, header = hdu[0].data, hdu[0].header
     
-        # create a "postage stamp" image centered on the science target
-        stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
+            # create a "postage stamp" image centered on the science target
+            stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
 
-        # plot the "postage stamp"
-        ax = fig.add_subplot(1,3,1)
-        plot_image()
-        plt.title('F475W')
-      
-        # read in the F814W image
-        file = glob.glob(dir+galaxies[w]+'_final_F8*sci.fits')
-        hdu = fits.open(file[0])
-        data, header = hdu[0].data, hdu[0].header
-    
-        # create a "postage stamp" image centered on the science target
-        stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
-
-        # plot the "postage stamp"
-        ax = fig.add_subplot(1,3,2)
-        plot_image()
-        plt.title('F814W')
-
-        # read in the F160W image
-        file = glob.glob(dir+galaxies[w]+'_final_F1*sci.fits')
-        hdu = fits.open(file[0])
-        data, header = hdu[0].data, hdu[0].header
-    
-        # create a "postage stamp" image centered on the science target
-        stamp = data[round(ycen-dy):round(ycen+dy), round(xcen-dx):round(xcen+dx)]
-
-        # plot the "postage stamp"
-        ax = fig.add_subplot(1,3,3)
-        plot_image()
-        plt.title('F160W')    
+            # plot the "postage stamp"
+            ax = fig.add_subplot(1,3,i+1)
+            plot_image()
+            plt.title(collection[i])    
     
         pdf.savefig()
         plt.close()
 
-    #os.system('open %s &' % 'sg_centroid.pdf')
+    os.system('open %s &' % 'sg_centroid.pdf')
     
