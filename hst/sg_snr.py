@@ -38,15 +38,15 @@ dark = [0.0022,0.0022,0.045]
 RN = [0 for x in range(len(wavelengths))]
 
 #width MUST be odd.
-width = 15
+width = 31
 pixr = int((width-1)/2)
 rSky = [ 7.50788545,  7.58130161,  8.27527023,  9.03878993,  8.67763722, 7.62254201,  7.70920672,  6.74143006,  6.87375846,  7.46983987, 7.83102976,  8.10811507]
 
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600]) #*u.nm
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
-xcen = [3628, 3933, 3386.5, 3477.5, 3573, 3802, 3886, 4149, 3787, 4174, 3565, 4067]
-ycen = [4153, 4136, 3503.2, 3404.3, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 4054]
+xcen = [3628, 3933, int(3386.5), 3477, 3573, 3802, 3886, 4149, 3787, 4174, 3565, 4067]
+ycen = [4153, 4136, int(3503.2), 3404, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 4054]
 
 # define the radii to be used for aperture photometry
 radii = np.arange(40)+1
@@ -103,7 +103,17 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
 
             #define positions for photometry
             positions = [(xcen[w], ycen[w])]
-    
+            # do pixel analysis
+            for j in range(0,width):
+                
+                for k in range(0,width):
+                    #print(i,j,k)
+                    #fluxpix[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*gain[i]*exp[i])
+                    fluxpix[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]))#*gain[i]*exp[i])
+                    #totalphotons = totalphotons +  (data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])#*gain[i]*exp[i]
+                    pixNoise[i,width-j-1,k] =  math.sqrt((rSky[w]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i]) 
+                    #converts units to Jy and then to nanomaggys: Jy is data * fnu / exp and 1 nm = 3.631e-6 Jy
+                    #fluxnmaggys[i,width-j-1,k] = data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*fnu[i]/exp[i]/(3.631*10**-6)    
             #do photometry on images
             #convert to proper units
             for j in range(0,len(radii)):
@@ -135,4 +145,18 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
         legend = ax.legend(loc='upper right')
         # here is some new stuff for you
         pdf.savefig()
-        plt.close()            
+        plt.close()   
+        #fig = plt.figure()
+        
+        for i in range(0,len(acolors)):
+            fig = plt.figure()
+            bx = fig.add_subplot(1,1,1)
+            plt.imshow((fluxpix[i]/pixNoise[i]),vmin = 1, vmax = 10,cmap='gray')
+            plt.colorbar()
+            #plt.imshow(pixNoise[i]/fluxpix[i])
+            plt.title(galaxies[w]+ ' SNR at ' +str(wavelengths[i]))
+            plt.xlabel('Pixels')
+            plt.ylabel('Pixels')
+            pdf.savefig()
+            plt.close()
+        
