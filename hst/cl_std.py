@@ -1,5 +1,21 @@
 #standard deviation of calculated centroid values
 
+# 20170705 thoughts from Aleks
+#
+# (1) Could define a numpy array up front (and not append lists incrementally) with something like the following
+# ngal = len(Galaxies)
+# nmet = 3
+# nfil = 3
+# xcen = np.zeros([ngal, nmet, nfil])
+# ycen = np.zeros([ngal, nmet, nfil])
+# (2) then in the loop
+# xcen[i] = ... output from function ...
+# this would give us all the values in a way that would be useful for asking questions like:
+# is the standard deviation smaller if you exclude the com values?
+# is the standard deviation smaller if you exclude one of the filters?
+# (3) then could calcualte standard deviation in one line of code (or whatever other quantities you wanted to look at)
+# (4) then could make a plot with one or two lines of code
+# (5) you could use plt.text() to put the name of the galaxy next to its point in the sigma_x vs sigma_y plot
 import numpy as np
 from astropy.io import fits
 import os
