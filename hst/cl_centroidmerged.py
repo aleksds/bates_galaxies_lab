@@ -13,7 +13,9 @@
 # 20170705 thoughts from Aleks:
 # (1) In the legend, labels are shown for different methods, but they're actually for different filters
 # (2) Given all the whitespace on the figures, we could make the xlim and ylim ranges narrower (e.g., 1 rather than 3)
-# (3) If possible, it would be useful to include text on the plot that says "sigma_x = X.XX" and sigma_y="Y.YY"
+# (3) It would be useful to include text on the plot that says "sigma_x = X.XX" and sigma_y="Y.YY"
+# (4) It would be useful to have the code make a decision about what the best centroid values are
+# (5) I would recommend have the inital guess for each galaxy be rounded to the nearest integer
 #
 # import relevant Python modules
 import numpy as np
