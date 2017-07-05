@@ -87,6 +87,5 @@ with PdfPages('cl_std.pdf') as pdf:
         plt.xlabel('xstd')
         plt.ylabel('ystd')
         plt.title('Standard Deviations of Centroid Calculations')
-       # legend = plt.legend(loc='lower right',prop={'size':7})
     pdf.savefig()
     plt.close()

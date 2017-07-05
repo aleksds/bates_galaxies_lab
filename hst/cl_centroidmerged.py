@@ -11,12 +11,12 @@
 # coordinates of the best centroid location.
 #
 # 20170705 thoughts from Aleks:
-# (1) In the legend, labels are shown for different methods, but they're actually for different filters
+# (1) In the legend, labels are shown for different methods, but they're actually for different filters (add markers to legend for filters)
 # (2) Given all the whitespace on the figures, we could make the xlim and ylim ranges narrower (e.g., 1 rather than 3)
 # (3) It would be useful to include text on the plot that says "sigma_x = X.XX" and sigma_y="Y.YY"
 # (4) It would be useful to have the code make a decision about what the best centroid values are
 # (5) I would recommend have the inital guess for each galaxy be rounded to the nearest integer
-#
+# 
 # import relevant Python modules
 import numpy as np
 from astropy.io import fits
@@ -44,15 +44,23 @@ Galaxies = [['J0826', 3629, 4154], ['J0901', 3934, 4137], ['J0905', 3387, 3503],
 dx = 5
 dy = 5
 
-# create a PDF file for the plots
 methods = ['centroid_com','centroid_1dg','centroid_2dg']
 foureightone = [4,8,1]
 filters = ['F475W','F814W','F160W']
 colors = ['blue','green','red']
+markers = ('o','+','d')
+xstds = [0.06,  0.03,  0.09,  0.06,  0.07, 0.09,  0.08,  0.04,  0.04,  0.16, 0.06,  0.06]
+ystds = [0.07,  0.05,  0.11 ,  0.08,  0.08, 0.10,  0.06,  0.08,  0.08,  0.11, 0.14,  0.10]
+
 filename = 'cl_centroid.pdf'
 with PdfPages(filename) as pdf:
     for j in range(0,len(Galaxies)):
         fig = plt.figure()
+        plt.text(Galaxies[j][1]+0.36,Galaxies[j][2]-.05, xstds[j])
+        plt.text(Galaxies[j][1]+0.2,Galaxies[j][2]-.05, 'sigma_x =')
+
+        plt.text(Galaxies[j][1]+0.36,Galaxies[j][2]-0.1, ystds[j])
+        plt.text(Galaxies[j][1]+0.2,Galaxies[j][2]-.1, 'sigma_y =')
         plt.scatter(Galaxies[j][1],Galaxies[j][2], label='current',color='black')
         for i in range(0,len(filters)):
             for m in range(0,len(methods)):
@@ -64,21 +72,17 @@ with PdfPages(filename) as pdf:
                 if i==0:
                     plt.scatter(coor[0][m]+Galaxies[j][1]-dx,coor[1][m]+Galaxies[j][2]-dy,label = methods[m],color=colors[m])
                 else:
-                    plt.scatter(coor[0][m]+Galaxies[j][1]-dx,coor[1][m]+Galaxies[j][2]-dy,color=colors[m])
+                    plt.scatter(coor[0][m]+Galaxies[j][1]-dx,coor[1][m]+Galaxies[j][2]-dy,color=colors[m],marker=markers[i])
             plt.xlabel('x')
             plt.ylabel('y')
-            plt.xlim(Galaxies[j][1]-1.5,Galaxies[j][1]+1.5)
-            plt.ylim(Galaxies[j][2]-1.5,Galaxies[j][2]+1.5)
+            plt.xlim(Galaxies[j][1]-.5,Galaxies[j][1]+.5)
+            plt.ylim(Galaxies[j][2]-.5,Galaxies[j][2]+.5)
             plt.title(Galaxies[j][0] + ' Centroid Calculations')
             legend = plt.legend(loc='upper left')
-        
+            plt.text(Galaxies[j][1]+0.2,Galaxies[j][2]+0.15, r'Circle = F475W')
+            plt.text(Galaxies[j][1]+0.2,Galaxies[j][2]+0.1, r'Plus = F814W')
+            plt.text(Galaxies[j][1]+0.2,Galaxies[j][2]+0.05, r'Diamond = F160W')
+            
         pdf.savefig()
         plt.close()
-
-        #fig = plt.figure()
-        #std = np.std(stamp[stamp==stamp])
-        #plt.imshow(stamp, interpolation='nearest', origin = 'lower', vmin = -1.*std, vmax = 3.*std, cmap='bone')
-        #pdf.savefig()
-        #plt.close()
-
     os.system('open %s &' % filename)
