@@ -110,6 +110,6 @@ for gal in range(0,len(galaxies)):
             for m in range(0,7):
                 mlr = mLR(coeff[i][0][m],coeff[i][1][m], colors[c])
                 mass = lum*mlr
-                print('mass calculation')
+                #print('mass calculation')
         # Up next we need to figure out how to graph all 102010483857205203948 calcualtions we made of the mass. 
-        #mass(mLR(a,b,color), luminosity(wavelength[i],flux, lDcm))
+
