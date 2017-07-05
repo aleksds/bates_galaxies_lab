@@ -10,6 +10,11 @@
 # Future developments: Could turn this into a function that returns the
 # coordinates of the best centroid location.
 #
+# 20170705 thoughts from Aleks:
+# (1) In the legend, labels are shown for different methods, but they're actually for different filters
+# (2) Given all the whitespace on the figures, we could make the xlim and ylim ranges narrower (e.g., 1 rather than 3)
+# (3) If possible, it would be useful to include text on the plot that says "sigma_x = X.XX" and sigma_y="Y.YY"
+#
 # import relevant Python modules
 import numpy as np
 from astropy.io import fits
