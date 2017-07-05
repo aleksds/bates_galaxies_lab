@@ -42,7 +42,7 @@ def plot_imageY(xcen,ycen):
 dir = os.environ['HSTDIR']
 
 # parameters for the initial guess at the galaxy centroid and the size
-Galaxies = [['J0826', 3628.7, 4153.8], ['J0901', 3934, 4137], ['J0905', 3386.5, 3503.2], ['J0944', 3477.5, 3404.3], ['J1107', 3572.9, 3339.1], ['J1219', 3803., 4170.], ['J1341', 3885.6, 4164.3], ['J1506', 4149.2, 3921.7], ['J1558', 3787., 4186.], ['J1613', 4175., 3827.], ['J2116', 3566.9, 3435.9], ['J2140', 4067, 4054.4]]
+Galaxies = [['J0826', 3629, 4154], ['J0901', 3934, 4137], ['J0905', 3387, 3503], ['J0944', 3477., 3405.], ['J1107', 3573, 3339.], ['J1219', 3803., 4170.], ['J1341', 3884, 4165], ['J1506', 4147., 3922.], ['J1558', 3787., 4186.], ['J1613', 4175., 3827.], ['J2116', 3567, 3436], ['J2140', 4067, 4054]]
 
 dx = 5
 dy = 5
@@ -75,3 +75,18 @@ for j in range(0,len(Galaxies)):
                 ycen[j][i][m] = ycoor[m]
         xstds[j] = np.std(xcen[j])
         ystds[j] = np.std(ycen[j])
+
+with PdfPages('cl_std.pdf') as pdf:
+    plt.figure()
+    for q in range (0,len(Galaxies)):
+        plt.scatter(xstds,ystds)
+        if q==8 or q==0:
+            plt.text(xstds[q]-0.0055,ystds[q]-0.006, Galaxies[q][0])
+        else:
+            plt.text(xstds[q]-0.0055,ystds[q]+0.002, Galaxies[q][0])
+        plt.xlabel('xstd')
+        plt.ylabel('ystd')
+        plt.title('Standard Deviations of Centroid Calculations')
+       # legend = plt.legend(loc='lower right',prop={'size':7})
+    pdf.savefig()
+    plt.close()
