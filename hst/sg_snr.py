@@ -3,6 +3,10 @@
 #
 # SNR code... The objective is to plot flux v radius with
 # error bars using SNR from the PDF in the summer folder
+# it also analyzes this on a pixel to pixel basis and applies
+# a mask for SNR < 10 to be killed. 
+# I would like to apply the mask to the MLR code... more to 
+# come on that later.... 
 
 #import relavent packages
 import os
@@ -101,7 +105,6 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
             exp[i] = header[i]['EXPTIME']
             gain[i] = header[i]['CCDGAIN']
             RN[i] = header[i]['READNSEA']
-            #dark[i] = header[i]['DARKTIME']
 
             #define positions for photometry
             positions = [(xcen[w], ycen[w])]
@@ -163,3 +166,7 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
             pdf.savefig()
             plt.close()
         
+# so I think I could make a call like:
+# n = np.ma.masked_where(SNR<10, Mass)
+# and it would grab all the mass values that work!!!! 
+#so let's run this into the other code, and see what falls out!!!!!!!
