@@ -19,6 +19,7 @@ import math
 import matplotlib.lines as mlines
 from matplotlib.legend_handler import HandlerLine2D
 from scipy import integrate
+from scipy.spatial import Voronoi, voronoi_plot_2d
 from astropy.cosmology import WMAP9 as cosmo
 from astropy import units as u
 from astropy import constants as const
@@ -38,7 +39,7 @@ dark = [0.0022,0.0022,0.045]
 RN = [0 for x in range(len(wavelengths))]
 
 #width MUST be odd.
-width = 31
+width = 81
 pixr = int((width-1)/2)
 rSky = [ 7.50788545,  7.58130161,  8.27527023,  9.03878993,  8.67763722, 7.62254201,  7.70920672,  6.74143006,  6.87375846,  7.46983987, 7.83102976,  8.10811507]
 
@@ -58,6 +59,7 @@ fluxpix = np.zeros([len(wavelengths), width, width])
 
 #fluxvalues = [[0 for x in range(len(wavelengths))] for y in range(len(galaxies))]
 pixNoise = np.zeros([len(wavelengths), width, width])
+SNR = np.zeros([len(wavelengths), width, width])
 annNoise = np.zeros([len(wavelengths),len(radii)])
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 
@@ -107,10 +109,9 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
             for j in range(0,width):
                 
                 for k in range(0,width):
-                    #print(i,j,k)
-                    #fluxpix[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*gain[i]*exp[i])
                     fluxpix[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]))#*gain[i]*exp[i])
                     #totalphotons = totalphotons +  (data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])#*gain[i]*exp[i]
+                    SNR[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]))/(math.sqrt((rSky[w]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i]))
                     pixNoise[i,width-j-1,k] =  math.sqrt((rSky[w]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i]) 
                     #converts units to Jy and then to nanomaggys: Jy is data * fnu / exp and 1 nm = 3.631e-6 Jy
                     #fluxnmaggys[i,width-j-1,k] = data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1])*fnu[i]/exp[i]/(3.631*10**-6)    
@@ -147,11 +148,13 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
         pdf.savefig()
         plt.close()   
         #fig = plt.figure()
-        
+        m = np.ma.masked_where(SNR<10,SNR)
         for i in range(0,len(acolors)):
             fig = plt.figure()
             bx = fig.add_subplot(1,1,1)
-            plt.imshow((fluxpix[i]/pixNoise[i]),vmin = 1, vmax = 10,cmap='gray')
+            plt.imshow(m[i])
+            #plt.imshow(SNR[i], cmap='gray')
+            #plt.imshow((fluxpix[i]/pixNoise[i]),vmin = 1, vmax = 10,cmap='gray')
             plt.colorbar()
             #plt.imshow(pixNoise[i]/fluxpix[i])
             plt.title(galaxies[w]+ ' SNR at ' +str(wavelengths[i]))
