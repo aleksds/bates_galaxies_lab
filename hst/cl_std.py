@@ -83,7 +83,7 @@ with PdfPages('cl_std.pdf') as pdf:
         if q==8 or q==0:
             plt.text(xstds[q]-0.0055,ystds[q]-0.006, Galaxies[q][0])
         else:
-            plt.text(xstds[q]-0.0055,ystds[q]+0.002, Galaxies[q][0])
+            plt.text(xstds[q]-0.0055,ystds[q]+0.0021, Galaxies[q][0])
         plt.xlabel('xstd')
         plt.ylabel('ystd')
         plt.title('Standard Deviations of Centroid Calculations')
