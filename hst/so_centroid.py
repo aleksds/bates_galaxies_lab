@@ -47,13 +47,14 @@ dx = 5
 dy = 5
 
 # Arrays for galaxies, estimated centers, filenames and titles
-Galaxies = [['J0826', 3628.7, 4153.8], ['J0901', 3934, 4137], ['J0905', 3386.5, 3503.2], ['J0944', 3477.5, 3404.3], ['J1107', 3572.9, 3339.1], ['J1219', 3803., 4170.], ['J1341', 3885.6, 4164.3], ['J1506', 4149.2, 3921.7], ['J1558', 3787., 4186.], ['J1613', 4175., 3827.], ['J2116', 3566.9, 3435.9], ['J2140', 4067, 4054.4]]
+Galaxies = [['J0826', 3628.7, 4153.8], ['J0901', 3934, 4137], ['J0905', 3386.5, 3503.2], ['J0944', 3477., 3405.4], ['J1107', 3572.9, 3339.1], ['J1219', 3803., 4170.], ['J1341', 3883.6, 4165.3], ['J1506', 4147., 3922.], ['J1558', 3787., 4186.], ['J1613', 4175., 3827.], ['J2116', 3566.9, 3435.9], ['J2140', 4067, 4054.4]]
 Filters = ['_final_F4*sci.fits', '_final_F8*sci.fits', '_final_F1*sci.fits']
 Titles = ['F475W', 'F814W', 'F160W']
 # create a PDF file for the plots    
 with PdfPages('so_centroid.pdf') as pdf:
-    # for each galaxy    
+    # for each galaxy
     for j in range(len(Galaxies)):
+    #for j in range(6,7):
         fig = plt.figure()
         # for each filter
         for i in range(len(Filters)):

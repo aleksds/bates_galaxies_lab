@@ -2,6 +2,8 @@
 # ft. Sophia CW Gottlieb I
 # 20160915
 #
+# Sophia edits 20170627 for all galaxies, no more plotting
+#
 # written with the following goals:
 # (1) quantify the distribution of pixel values in an image
 # (2) estimate the mean and standard deviation of the sky background
@@ -65,19 +67,5 @@ for w in range(0,len(galaxies)):
     params_fit = results.x
     model = gaussian(bin_mids, *params_fit)
     
-    # print the mean and median values for pixels in the image
-    #print('mean pixel value in the image: ', np.mean(pixels))
-    #print('median pixel value in the image: ', np.median(pixels))
-    
-    # print the parameters of the best-fit gaussian function
-    #print('background value from gaussian fit: {0:6.3f}'.format(params_fit[1]))
-    #print('sigma from gaussian fit: {0:6.3f}'.format(params_fit[2]))
     sigmas[w]= params_fit[2]
-    # visualize the histogram and the fit
-    #plt.plot(bin_mids, hist)
-    #plt.plot(bin_mids[use], hist[use], color='green')
-    #plt.plot(bin_mids, model, color='red')
-    
-    #plt.show()
 
-#rSky(file)

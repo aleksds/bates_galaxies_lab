@@ -163,7 +163,7 @@ with PdfPages(filename) as pdf:
             dap_sflux = hdu_dap['EMLINE_SFLUX'].data[j,:,:]
             dap_smask = hdu_dap['EMLINE_SFLUX_MASK'].data[j,:,:]
             dap_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[j,:,:]
-            dap_serr = np.sqrt(1./dap_sivar)*1.e-4
+            dap_serr = np.sqrt(1./dap_sivar)#*1.e-4
 
             # plot 1: galaxy coordinates in kpc
             fig = plt.figure()
