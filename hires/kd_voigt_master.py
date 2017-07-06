@@ -76,32 +76,53 @@ def Voigt(x,alpha, gamma):
 
 
 # Random Values to see if code works
-alpha, gamma = 0.1, 0.1
-x = np.linspace(-0.8,0.8,1000)
-
+alpha, gamma = 200, 200
+#x = np.linspace(-0.8,0.8,1000)
+x = np.linspace(-3000,500,3500)
 ## Gotta find real values for alpha, gamma, and x with Aleks
 
 
 # graphs Gaussian, Lorentzian, and Voigt
-pylab.plot(x, Gaussian(x, alpha), ls=':', c='k', label='Gaussian')
-pylab.plot(x, Lorentzian(x, gamma), ls='--', c='k', label='Lorentzian')
-pylab.plot(x, Voigt(x, alpha, gamma), c='k', label='Voigt')
-pylab.xlim(-0.8,0.8)
-pylab.legend()
-pylab.show()
+# pylab.plot(x, Gaussian(x, alpha), ls=':', c='k', label='Gaussian')
+# pylab.plot(x, Lorentzian(x, gamma), ls='--', c='k', label='Lorentzian')
+# pylab.plot(x, Voigt(x, alpha, gamma), c='k', label='Voigt')
+# pylab.xlim(-0.8,0.8)
+# pylab.legend()
+# pylab.show()
 
-# # create a PDF file for plot output
-# filename = 'J0905_sdss.pdf'
-# with PdfPages(filename) as pdf:
-#     print('i am working')
-#     # fig = plt.figure
-   
-
-
-#     # save the figure
-#     pdf.savefig()
-#     plt.close()
+# create a PDF file for plot output
+filename = 'J0905_sdss.pdf'
+with PdfPages(filename) as pdf:
     
-#     # open the PDF file
-# os.system("open %s &" % filename)
+    fig = plt.figure()
+    
+    ax = fig.add_subplot(4,1,1)
+    ax.plot(x, Gaussian(x, alpha), ls=':', c='k', label='Gaussian')
+    ax.set_xlim(-3000,500)
+    plt.legend(loc=2)
+
+    ax = fig.add_subplot(4,1,2)
+    ax.plot(x, Lorentzian(x, gamma), ls='--', c='k', label='Lorentzian')
+    ax.set_xlim(-3000,500)
+    plt.legend(loc=2)
+
+    ax = fig.add_subplot(4,1,3)
+    ax.plot(x, Voigt(x, alpha, gamma), c='k', label='Voigt')
+    ax.set_xlim(-3000,500)
+    plt.legend(loc=2)
+
+    ax = fig.add_subplot(4,1,4)
+    ax.plot(x, Gaussian(x, alpha), ls=':', c='k', label='Gaussian')
+    ax.plot(x, Lorentzian(x, gamma), ls='--', c='k', label='Lorentzian')
+    ax.plot(x, Voigt(x, alpha, gamma), c='k', label='Voigt')
+    ax.set_xlim(-3000,500)
+    plt.legend(loc=2)
+
+    fig.tight_layout()
+    # save the figure
+    pdf.savefig()
+    plt.close()
+    
+    # open the PDF file
+os.system("open %s &" % filename)
 
