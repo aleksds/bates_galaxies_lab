@@ -96,7 +96,7 @@ with PdfPages(filename) as pdf:
         #plt.legend(loc = 1)
         plt.title("Uncertainty of Flux in %s" %(gal[h]))
         plt.xlabel("Velocity(km/s)")
-        plt.ylabel("Continuum Normalized Flux)
+        plt.ylabel("Continuum Normalized Flux")
         #handles, labels = ax.get_legend_handles_labels()
         #ax.legend(handles, labels)
         
