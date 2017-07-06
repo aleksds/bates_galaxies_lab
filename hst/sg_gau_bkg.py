@@ -36,7 +36,7 @@ sigmas = np.zeros(len(galaxies))
 for w in range(0,len(galaxies)):
     print(galaxies[w])
     file = glob.glob(dir+galaxies[w]+'_final_F*sci.fits')
-    hdu = fits.open(file[0])
+    hdu = fits.open(file[2])
     data, header = hdu[0].data, hdu[0].header
 
     # select all pixels with meaningful information and put them into a
