@@ -64,6 +64,7 @@ minorLocator = AutoMinorLocator()
 filename = 'Error_calculation.pdf'
 with PdfPages(filename) as pdf:
     for h in range(0, len(gal)):
+    #for h in range(0,1):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
         data = ascii.read(datafile)
         wave = data['wv'] 
@@ -132,20 +133,28 @@ with PdfPages(filename) as pdf:
         ax.set_xlim(-3000,500)
         plt.legend(loc = 1)
 
+
+        f = interp1d(vel_kms[0], flux)
+        vel_new = np.linspace(-3000, 500, num = 3501, endpoint = True)
+        flux_king = f(vel_new)
+
         voi = Voigt1D(amplitude_L=-0.5, x_0=0.0, fwhm_L=5.0, fwhm_G=5.0)
         #xarr = np.linspace(,5.0,num=40)
-        xarr = vel_kms[0]
+        #xarr = vel_kms[0]
+        xarr = vel_new
         #yarr = voi(xarr)
-        yarr = flux
-    
-        voi_init = Voigt1D(amplitude_L=-1.0, x_0=1.0, fwhm_L=5.0, fwhm_G=5.0)
+        #yarr = flux[good]
+        yarr = flux_king - 1.
+
+        voi_init = Voigt1D(amplitude_L=-1.0, x_0=-1000, fwhm_L=200, fwhm_G=200)
         fitter = fitting.LevMarLSQFitter()
         voi_fit = fitter(voi_init, xarr, yarr)
         print(voi_fit)
 
         ax = fig.add_subplot(3,1,3)
-        ax.plot(xarr,yarr)
-        ax.plot(xarr,voi_fit(xarr))
+        ax.plot(xarr,yarr+1, color='magenta')
+        ax.plot(xarr,voi_fit(xarr)+1, color='red')
+        ax.plot(xarr, voi_init(xarr)+1, color='orange')
         plt.xlabel("Velocity(km/s)")
         plt.ylabel("Continuum Normalized Flux")
         ax.set_ylim (0,2)
@@ -154,7 +163,7 @@ with PdfPages(filename) as pdf:
         fig.tight_layout()
         pdf.savefig()
         plt.close()
-os.system("open  %s &" % 'Error_calculation.pdf')
+os.system("evince  %s &" % 'Error_calculation.pdf')
 
 
 
