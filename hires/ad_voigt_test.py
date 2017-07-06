@@ -5,6 +5,7 @@ import numpy as np
 import os
 from astropy.modeling.models import Voigt1D
 import matplotlib.pyplot as plt
+from astropy.modeling import fitting
 from matplotlib.backends.backend_pdf import PdfPages
 
 filename = 'ad_voigt_test.pdf'
@@ -24,4 +25,22 @@ with PdfPages(filename) as pdf:
     pdf.savefig()
     plt.close()
             
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+
+    voi = Voigt1D(amplitude_L=-0.5, x_0=0.0, fwhm_L=5.0, fwhm_G=5.0)
+    xarr = np.linspace(-5.0,5.0,num=40)
+    yarr = voi(xarr)
+    
+    voi_init = Voigt1D(amplitude_L=-1.0, x_0=1.0, fwhm_L=5.0, fwhm_G=5.0)
+    fitter = fitting.LevMarLSQFitter()
+    voi_fit = fitter(voi_init, xarr, yarr)
+    print(voi_fit)
+
+    ax.plot(xarr,yarr)
+    ax.plot(xarr,voi_fit(xarr))
+
+    pdf.savefig()
+    plt.close()
+
 os.system("evince %s &" % filename)    
