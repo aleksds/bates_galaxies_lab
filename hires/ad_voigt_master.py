@@ -1,6 +1,13 @@
 #Kwamo 06/20/17
 # Attaching Voigt Profile to Galaxy J0905 to Wavelengths of Interest Fe2600 and Mg2796
 
+# 20170707 notes from Aleks about things to do:
+# (1) figure out how to perform fits with some parameters fixed
+# (2) test out having customized parameters for each galaxy (that can be implemented in for loop)
+# (3) convert the voigt profile fitting results into column density estimates
+# (4) implement fits that are for both Mg II lines simulataneously (with velocity parameters tied together)
+# (5) use qualitative and quantitative information from absorption-line profiles and fits to identify trends in the sample
+
 # import relevant packages
 import os
 import numpy as np
@@ -13,14 +20,6 @@ from astropy.modeling import models, fitting
 from astropy.modeling.models import Voigt1D
 from scipy.interpolate import interp1d
 
-
-# function to append column density arrays
-def column(vel, col_dens):
-    cor_col = np.array([])
-    for i in range(0, len(vel)):
-        if (vel[i] >= -3000 and vel[i] <= 500):
-            cor_col = np.append(cor_col, col_dens[i])
-    return cor_col
 
 # define the data directory
 dir = os.environ['HIRESDIR']
@@ -90,11 +89,11 @@ with PdfPages(filename) as pdf:
         # and the 2803 profile on the red side
         fig = plt.figure()
         
-        ax = fig.add_subplot(3,1,3)
-        plt.errorbar(vel_kms[0][g2796], flux[g2796], yerr = sigma[g2796], label = 'error', color = '#99ccff', markevery = 10, linewidth = .1)
-        plt.errorbar(vel_kms[1][g2803], flux[g2803], yerr = sigma[g2803], label = '_nolegend_',  color = '#99ccff', markevery = 10, linewidth = .1)
-        ax.plot(vel_kms[0][g2796], flux[g2796], linewidth=1, label = names[0], color = '#2CA14B')
-        ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
+        ax = fig.add_subplot(3,1,2)
+        #plt.errorbar(vel_kms[0], flux, yerr = sigma, label = 'error', color = '#99ccff', markevery = 10, linewidth = .1)
+        #plt.errorbar(vel_kms[1][g2803], flux[g2803], yerr = sigma[g2803], label = '_nolegend_',  color = '#99ccff', markevery = 10, linewidth = .1)
+        ax.plot(vel_kms[0], flux, linewidth=1, label = names[0], color = '#2CA14B')
+        #ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
         ax.set_xlim(-3000, 500)
         ax.set_ylim(0, 2)
         #plt.legend(loc = 1)
@@ -104,20 +103,6 @@ with PdfPages(filename) as pdf:
         #handles, labels = ax.get_legend_handles_labels()
         #ax.legend(handles, labels)
         
-        ax = fig.add_subplot(3,1,2)
-        col_2796 = column(vel_kms[0],tau/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
-        col_2803 = column(vel_kms[1],tau/(2.654E-15*fosc[1]**2 *(wave/(1+zem[h]))))
-        sigma_tau2796 = column(vel_kms[0], sigma_tau/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
-        sigma_tau2803 = column(vel_kms[1], sigma_tau/(2.654E-15*fosc[1]**2 *(wave/(1+zem[h]))))
-
-        vel_2796 = np.linspace(-3000,500, num = len(col_2796), endpoint = 'True')
-        vel_2803 = np.linspace(-3000,500, num = len(col_2803), endpoint = 'True')
-
-        g2796 = (vel_2796 > vb) & (vel_2796 < vflip[h])
-        g2803 = (vel_2803 > vflip[h]) & (vel_2803 < vr)
-
-        plt.errorbar(vel_2796, col_2796, yerr = sigma_tau2796, linewidth = 0.1, color = '#99ccff', label = 'error')
-        plt.errorbar(vel_2803, col_2803, yerr = sigma_tau2803, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
 
         f = interp1d(vel_kms[0], flux)
         test = (vel_kms[0] > -3000) & (vel_kms[0] < 500) & (flux < 0.5)
@@ -142,7 +127,7 @@ with PdfPages(filename) as pdf:
         voi_fit = fitter(voi_init, xarr, yarr)
         print(voi_fit)
 
-        ax = fig.add_subplot(3,1,3)
+        #ax = fig.add_subplot(3,1,3)
         ax.plot(xarr,voi_fit(xarr)+1, color='red')
         plt.xlabel("Velocity(km/s)")
         plt.ylabel("Continuum Normalized Flux")
@@ -152,7 +137,7 @@ with PdfPages(filename) as pdf:
         fig.tight_layout()
         pdf.savefig()
         plt.close()
-os.system("open  %s &" % 'Error_calculation.pdf')
+os.system("evince  %s &" % filename)
 
 
 
