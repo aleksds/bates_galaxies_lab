@@ -20,6 +20,7 @@ from scipy import integrate
 from astropy.cosmology import WMAP9 as cosmo
 from astropy import units as u
 from astropy import constants as const
+from astropy.cosmology import FlatLambdaCDM
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
@@ -46,6 +47,9 @@ fluxvalues = [[0 for x in range(len(wavelengths))] for y in range(len(galaxies))
 
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 
+conv = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
+radToKpc = conv.arcsec_per_kpc_proper(zs)*0.05/u.arcsec*u.kpc
+
 #Ldcm is the luminosity distance in cm, even though astropy thinks it is in Mpc. 
 Ldcm = cosmo.luminosity_distance(zs)*u.Mpc.to(u.cm) / u.Mpc
 totalphotons = 0
@@ -66,12 +70,15 @@ for i in range(0, len(area)):
         area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 # Now, we loop through all galaxies
-for w in range (0, len(galaxies)):
+with PdfPages('sg_FLUX.pdf') as pdf: 
+
 #for w in range (2,3):
     # Mostly just for our own benefit, we print the galaxy's name so we know what 
     # works and what doesn't when the code breaks.
-    print(galaxies[w])
-    with PdfPages('sg_flux_'+galaxies[w]+'.pdf') as pdf: 
+    
+    for w in range (0, len(galaxies)):
+        
+        print(galaxies[w])
         fig = plt.figure()
         collection = ['F475W','F814W','F160W']
     
@@ -89,8 +96,8 @@ for w in range (0, len(galaxies)):
             gain[i] = header[i]['CCDGAIN']
     
             #define positions for photometry
-            positions = [(xcen[w], ycen[w])]
-    
+            positions = [(int(xcen[w]), int(ycen[w]))]
+            totalphotons = 0
             # do pixel analysis
             for j in range(0,width):
                 
@@ -104,11 +111,12 @@ for w in range (0, len(galaxies)):
 
             plt.imshow(fluxpix[i],cmap='gray')
             plt.colorbar()
-            plt.title(galaxies[w]+' photon count: '+str(totalphotons) +' ('+ collection[i] + ')')
+            plt.title(galaxies[w]+' photon count: '+str(np.log10(totalphotons)) +' ('+ collection[i] + ')')
             plt.xlabel('Pixels')
             plt.ylabel('Pixels')
             pdf.savefig()
             plt.close()
+            print(str(np.log10(totalphotons)))
 # NANOMAGGYS
             for j in range(0,len(radii)):
                 aperture = CircularAperture(positions, radii[j])
