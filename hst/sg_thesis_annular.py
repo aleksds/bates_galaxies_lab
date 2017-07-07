@@ -63,11 +63,7 @@ subflux = np.zeros([len(collection),len(radii)])
 
 colorUV, colorVJ = np.zeros([len(collection)-1, len(radii)])
 colors = [colorUV, colorVJ]
-#colorUV = np.zeros([len(collection)-1, len(radii)])
-#colors = [colorUV]
 
-#flux = np.zeros([len(radii)])
-#subflux = np.zeros([len(radii)])
 dir = os.environ['HSTDIR']
 
 # set up lots of data structures
