@@ -1,26 +1,20 @@
 #Kwamo 06/20/17
 # Attaching Voigt Profile to Galaxy J0905 to Wavelengths of Interest Fe2600 and Mg2796
 
+# import relevant packages
 import os
 import numpy as np
-from astropy.io import fits
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import AutoMinorLocator
-from astropy import units as u
 from astropy import constants as const
 from astropy.io import ascii
 from astropy.modeling import models, fitting
 from astropy.modeling.models import Voigt1D
-from scipy.special import wofz
-import pylab
-from scipy.interpolate import spline
-import math
 from scipy.interpolate import interp1d
-import matplotlib._color_data as mcd
-import matplotlib.patches as mpatch
 
 
+# function to append column density arrays
 def column(vel, col_dens):
     cor_col = np.array([])
     for i in range(0, len(vel)):
@@ -61,10 +55,10 @@ vr = 500.
 
 
 minorLocator = AutoMinorLocator()
-filename = 'Error_calculation.pdf'
+filename = 'voigt_profile_fits.pdf'
 with PdfPages(filename) as pdf:
-    #for h in range(0, len(gal)):
-    for h in range(0,1):
+    for h in range(0, len(gal)):
+    #for h in range(0,1):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
         data = ascii.read(datafile)
         wave = data['wv'] 
@@ -74,7 +68,7 @@ with PdfPages(filename) as pdf:
 
         sigma = np.zeros([len(flux)])
         for i in range(0, len(flux)):
-            sigma[i] = flux[i] * math.sqrt(var[i])/fx[i]
+            sigma[i] = flux[i] * np.sqrt(var[i])/fx[i]
 
         vel_kms = np.zeros([len(lines),len(wave)])
         # define the velocity scale [km / s]
@@ -124,48 +118,41 @@ with PdfPages(filename) as pdf:
 
         plt.errorbar(vel_2796, col_2796, yerr = sigma_tau2796, linewidth = 0.1, color = '#99ccff', label = 'error')
         plt.errorbar(vel_2803, col_2803, yerr = sigma_tau2803, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
-        # ax.plot(vel_2796, col_2796, color = '#2CA14B', label = names[0])
-        # ax.plot(vel_2803, col_2803, color = '#2C6EA1', label = names[1])
-        # plt.title("Uncertainty of Column Density in %s" %(gal[h]))
-        # plt.xlabel("Velocity (km/s)")
-        # #plt.ylabel("Column Density (Particle/cm^2)")
-        # ax.set_ylim(0, 5E12)
-        # ax.set_xlim(-3000,500)
-        # plt.legend(loc = 1)
-
 
         f = interp1d(vel_kms[0], flux)
-        #vel_new = np.linspace(-3000, 500, num = 3501, endpoint = True)
-        #vel_new = np.linspace(-2000, -800, num = 1201, endpoint = True)
-        while vel_kms >= -3000 & vel_kms <= -500:
-            if flux <= .5:
-                vel_new = np.linspace(vel_kms(flux) - 600, vel_kms[0](flux)+600), num = 1201, endpoint = True)
-                # To proceed, make smart for loops that plots voigt profile based on height of line or manually look at code and plot regions where it looks like code has dip
-            else False
+        test = (vel_kms[0] > -3000) & (vel_kms[0] < 500) & (flux < 0.5)
+        vel_median = np.median(vel_kms[0][test])
+        print(gal[h],vel_median)
+        vel_new = np.linspace(vel_median-1000, vel_median+1000, num=2001, endpoint=True)
 
-                flux_king = f(vel_new)
 
-                xarr = vel_new
-                yarr = flux_king - 1.
+        blah = len(vel_kms[0][test])
+        one = vel_kms[0][test][round(blah*0.2)]
+        two = vel_kms[0][test][round(blah*0.4)]
+        thr = vel_kms[0][test][round(blah*0.6)]
+        fou = vel_kms[0][test][round(blah*0.8)]
 
-                voi_init = Voigt1D(amplitude_L=-1.0, x_0=-1300, fwhm_L=200, fwhm_G=200)
-                fitter = fitting.LevMarLSQFitter()
-                voi_fit = fitter(voi_init, xarr, yarr)
-                print(voi_fit)
+        flux_king = f(vel_new)
 
-                ax = fig.add_subplot(3,1,3)
-                #ax.plot(xarr,yarr+1, color='magenta')
-                ax.plot(xarr,voi_fit(xarr)+1, color='red')
-                #ax.plot(xarr, voi_init(xarr)+1, color='orange')
-                plt.xlabel("Velocity(km/s)")
-                plt.ylabel("Continuum Normalized Flux")
-                ax.set_ylim (0,2)
-                ax.set_xlim(-3000,500)
+        xarr = vel_new
+        yarr = flux_king - 1.
+
+        voi_init = Voigt1D(amplitude_L=-1.0, x_0=one, fwhm_L=two-one, fwhm_G=two-one)+Voigt1D(amplitude_L=-1.0, x_0=two, fwhm_L=thr-two, fwhm_G=thr-two)+Voigt1D(amplitude_L=-1.0, x_0=thr, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=fou, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=vel_median, fwhm_L=200, fwhm_G=200)
+        fitter = fitting.LevMarLSQFitter()
+        voi_fit = fitter(voi_init, xarr, yarr)
+        print(voi_fit)
+
+        ax = fig.add_subplot(3,1,3)
+        ax.plot(xarr,voi_fit(xarr)+1, color='red')
+        plt.xlabel("Velocity(km/s)")
+        plt.ylabel("Continuum Normalized Flux")
+        ax.set_ylim (0,2)
+        ax.set_xlim(-3000,500)
         
-                fig.tight_layout()
-                pdf.savefig()
-                plt.close()
-            os.system("open  %s &" % 'Error_calculation.pdf')
+        fig.tight_layout()
+        pdf.savefig()
+        plt.close()
+os.system("open  %s &" % 'Error_calculation.pdf')
 
 
 
