@@ -30,7 +30,7 @@ from astropy import constants as const
 from astropy.cosmology import FlatLambdaCDM 
 
 # define the directory that contains the images
-#dir = os.environ['HSTDIR']
+dir = os.environ['HSTDIR']
 #dir = 'aaw/data/'
 
 #setting up arrays with three elements, all zeros - placeholders
