@@ -154,7 +154,7 @@ with PdfPages('sg_THESIS.pdf') as pdf:
                     mlr = mLR(coeff[i][0][m],coeff[i][1][m], colors[c])
                     mass = lum*mlr
                     ax.plot(radii*radToKpc[gal], mass[i]/kpcArea,linestyle = 'None',  marker = pltmarker[c], color = pltcolors[i], label = desc)
-                    legent = ax.legend(loc='upper right')
+                    legend = ax.legend(loc='upper right')
         pdf.savefig()
         plt.close()
                 #print('mass calculation')
