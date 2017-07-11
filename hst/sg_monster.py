@@ -9,6 +9,8 @@
 # But to begin, we will do SNR and MLR because those are mine....
 # currently does SNR and MLR in pixel mode....
 # need to talk to aleks about SNR restrictions via filter vs color....
+# Also now includes GAU code for rSky term.
+# Up next we will include the cl_centroidmerged.py
 
 #import relavent packages
 import os
@@ -17,6 +19,7 @@ from astropy.io import fits
 #from photutils import CircularAperture
 #from photutils import aperture_photometry
 import glob
+from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.colors as colors
@@ -31,6 +34,20 @@ from astropy import units as u
 from astropy import constants as const
 from astropy.cosmology import FlatLambdaCDM 
 
+### THINGS FOR RSKY #######
+
+# define a function for the gaussian model
+def gaussian(x, peak, center, sigma):
+    return peak * np.exp(((x-center)/sigma)**2*(-0.5))
+
+# define a least squares objective function
+def objective_function(params):
+    peak, center, sigma = params
+    residuals = (gaussian(bin_mids[use], peak, center, sigma) - hist[use]) / errors[use]
+    return np.sum((residuals)**2) / nbin
+
+
+### THINGS FOR MLR #######
 # flux makes magnitude of a given flux in janskys.
 def mag(val):
     return -2.5*np.log10(val/3631)
@@ -43,7 +60,7 @@ def luminosity(wavelength,flux,lDcm):
 # as defined by Bell and DeJong 2000
 def mLR(a,b,color):
     return 10**(a+b*color)
-
+##### ACTUAL PROGRAM BITS #####
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
@@ -75,10 +92,6 @@ RN = [0 for x in range(len(wavelengths))]
 #width MUST be odd.
 width = 81
 pixr = int((width-1)/2)
-rSky = np.zeros([len(wavelengths),12])
-rSky[0]= (10.31036745,  10.5783909 ,  11.77636022,  11.28425007,11.90782971,  10.62194407,  10.62821474,  10.94261798, 11.35125336,  10.58044017, 9.08922928,  11.18114582)
-rSky[1]= (10.64816775,  13.35756601,  10.54219567,  12.25892311,13.34688468,  10.75379768,  10.88078454,  10.26098238, 9.69418394,  10.592764, 10.57481831, 8.79336163)
-rSky[2]= (7.50788545,  7.58130161,  8.27527023,  9.03878993,  8.67763722, 7.62254201,  7.70920672,  6.74143006, 6.87375846,  7.46983987, 7.83102976,  8.10811507)
 
 solarLum = 3.846*10**33
 
@@ -102,6 +115,7 @@ conv = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 radToKpc = conv.arcsec_per_kpc_proper(zs)*0.05/u.arcsec*u.kpc
 totalphotons = 0
 
+rSky = np.zeros([len(galaxies),len(wavelengths)])
 
 #calculate area of each bagel
 #for i in range(0, len(area)):
@@ -114,17 +128,45 @@ totalphotons = 0
 with PdfPages('sg_MONSTER.pdf') as pdf:
     #for w in range(0,1):
     for w in range(0,len(galaxies)):
-        # for w in range(0,len(galaxies)):
         for i in range(0, len(wavelengths)):
             file = glob.glob(dir+galaxies[w]+'_final_'+wavelengths[i]+'*sci.fits')
-            #print(file)
+            
             hdu = fits.open(file[0])
             data[i], header[i] = hdu[0].data, hdu[0].header
             fnu[i] = header[i]['PHOTFNU']
             exp[i] = header[i]['EXPTIME']
             gain[i] = header[i]['CCDGAIN']
             RN[i] = header[i]['READNSEA']
+# GAU IMG BKG TO FIND RSKY TERM: 
+            # select all pixels with meaningful information and put them into a
+            # one-dimensional array
+            pixels = data[i][(data[i]==data[i])].ravel()
 
+            # generate a histogram of pixel values for this array
+            bin_lo = -100
+            bin_hi = 100
+            bin_edges = np.linspace(bin_lo, bin_hi, 5000)
+            hist, edges = np.histogram(pixels, bins=bin_edges)
+            bin_mids = (bin_edges[0:-1] +  bin_edges[1:]) / 2.
+    
+            # decide on range of pixel values for gaussian fit
+            rlo = -5
+            rhi = 5
+            use = (bin_mids > rlo) & (bin_mids < rhi)
+            nbin = len(use)
+    
+            # estimate the errors in each bin by assuming poisson statistics: sqrt(n)
+            errors = np.sqrt(hist)
+    
+            # decide on initial parameters for the gaussian
+            params_initial = [1e4, 0, 10]
+    
+            # find the best-fit gaussian
+            results = minimize(objective_function, params_initial, method='Powell')
+            params_fit = results.x
+            model = gaussian(bin_mids, *params_fit)
+            rSky[w][i]= params_fit[2]
+# BEGINNING SNR CODE: 
             #define positions for photometry
             positions = [(xcen[w], ycen[w])]
             # do pixel analysis
@@ -133,15 +175,15 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
                 for k in range(0,width):
                     # In data numbers? In electrons?
                     fluxpix[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]))#*gain[i]*exp[i])
-                    SNR[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]))/(math.sqrt((rSky[i][w]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i]))
-                    pixNoise[i,width-j-1,k] =  math.sqrt((rSky[i][w]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
-
+                    SNR[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]))/(math.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i]))
+                    pixNoise[i,width-j-1,k] =  math.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
 
         m = np.ma.masked_where(SNR<10,SNR)
         n = np.ma.masked_where(SNR<10,fluxpix)
+# BEGINNING MLR CODE: 
         for i in range(0,len(filters)):
             n[i]=n[i]*fnu[i]/exp[i]
-
+        # making uv color
         colorUV = mag(n[0])-mag(n[1])
         for i in range (0,len(filters)):
             lum = luminosity(filters[i], n, lDcm[w])
@@ -154,7 +196,7 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
                 plt.title(galaxies[w]+' Mass Profile in Solar Masses at ' + wavelengths[i], fontsize = 12)
                 pdf.savefig()
                 plt.close()
-                            
+        # Plotting UV color map and pixel restrictions.                     
         fig = plt.figure()
         plt.imshow(colorUV)
         plt.colorbar()
