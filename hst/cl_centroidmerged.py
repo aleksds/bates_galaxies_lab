@@ -35,6 +35,7 @@ def plot_image():
     x3, y3 = centroid_2dg(stamp)
     return np.array([[x1,x2,x3] , [y1,y2,y3]])
 
+
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
 
@@ -49,6 +50,8 @@ foureightone = [4,8,1]
 filters = ['F475W','F814W','F160W']
 colors = ['blue','green','red']
 markers = ('o','+','d')
+
+#results from other codes
 xstds = [0.06,  0.03,  0.09,  0.06,  0.07, 0.09,  0.08,  0.04,  0.04,  0.16, 0.06,  0.06]
 ystds = [0.07,  0.05,  0.11 ,  0.08,  0.08, 0.10,  0.06,  0.08,  0.08,  0.11, 0.14,  0.10]
 
@@ -58,10 +61,10 @@ with PdfPages(filename) as pdf:
         fig = plt.figure()
         plt.text(Galaxies[j][1]+0.36,Galaxies[j][2]-.05, xstds[j])
         plt.text(Galaxies[j][1]+0.2,Galaxies[j][2]-.05, 'sigma_x =')
-
         plt.text(Galaxies[j][1]+0.36,Galaxies[j][2]-0.1, ystds[j])
         plt.text(Galaxies[j][1]+0.2,Galaxies[j][2]-.1, 'sigma_y =')
-        plt.scatter(Galaxies[j][1],Galaxies[j][2], label='current',color='black')
+        
+        plt.scatter(Galaxies[j][1],Galaxies[j][2], label='brightness center',color='black')
         for i in range(0,len(filters)):
             for m in range(0,len(methods)):
                 file = glob.glob(dir+Galaxies[j][0]+'_final_F'+str(foureightone[i])+'*sci.fits')
