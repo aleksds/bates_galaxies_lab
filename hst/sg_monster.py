@@ -16,8 +16,8 @@
 import os
 import numpy as np
 from astropy.io import fits
-#from photutils import CircularAperture
-#from photutils import aperture_photometry
+from photutils import CircularAperture
+from photutils import aperture_photometry
 import glob
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
@@ -39,11 +39,12 @@ from astropy.cosmology import FlatLambdaCDM
 dx = 5
 dy = dx
 
-# Maybe we could make a weighted average? Idk. 
-def plot_image(xcen,ycen, count, dx):
-    print('fitting for ' + str(xcen) + ' and ' + str(ycen))
+# Maybe we could make a weighted average? Idk.
+def plot_image(posx,posy, count, prevstds):
+    stamp = data[i][int(round(posy-dy)):int(round(posy+dy)), int(round(posx-dx)):int(round(posx+dx))]
+    #print('fitting for ' + str(posx) + ' and ' + str(posy))
     count = count +1
-    print(str(count))
+    #print(str(count))
     std = np.std(stamp[stamp==stamp])
     x1, y1 = centroid_com(stamp)
     x2, y2 = centroid_1dg(stamp)
@@ -52,13 +53,13 @@ def plot_image(xcen,ycen, count, dx):
     yavg = np.average([y1,y2,y3])
     xstd = np.std([x1,x2,x3])
     ystd = np.std([y1,y2,y3])
-    print(xstd, ystd)
+    #print(xstd, ystd)
     # RECURSION BITCH
-    if count < 100 and (xstd > 0.1 or ystd > 0.1):
-        return plot_image(xavg, yavg, count, dx)
+    if count < 100 and (xstd > 0.1 or ystd > 0.1) and (xstd <= prevstds[0] and ystd <= prevstds[1]):
+        print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
+        return plot_image(posx-dx+xavg, posy-dy+yavg, count, [xstd,ystd])
     else:
         return xavg, yavg, 1/(xstd**2), 1/(ystd**2), count
-    #return xavg, yavg, 1/(xstd**2), 1/(ystd**2), count
 
 ### THINGS FOR RSKY #######
 
@@ -89,8 +90,8 @@ def mLR(a,b,color):
 ##### ACTUAL PROGRAM BITS #####
 
 # define the directory that contains the images
-#dir = os.environ['HSTDIR']
-dir = '/Users/aaw/data/'
+dir = os.environ['HSTDIR']
+#dir = '/Users/aaw/data/'
 
 Ba = [-1.019,-1.113,-1.026,-.990,-1.110,-.994,-.888]
 Bb = [1.937,2.065,1.954,1.883,2.018,1.804,1.758]
@@ -152,8 +153,8 @@ rSky = np.zeros([len(galaxies),len(wavelengths)])
     #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 with PdfPages('sg_MONSTER.pdf') as pdf:
-    for w in range(0,1):
-    #for w in range(0,len(galaxies)):
+    #for w in range(0,1):
+    for w in range(0,len(galaxies)):
         mxs = [0,0,0]
         mys = [0,0,0]
         mstdx = [0,0,0]
@@ -171,8 +172,7 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
             #define positions for photometry
             positions = [xcen[w], ycen[w]]
             
-            stamp = data[i][round(positions[1]-dy):round(positions[1]+dy), round(positions[0]-dx):round(positions[0]+dx)]
-            mxs[i], mys[i], mstdx[i], mstdy[i], count = plot_image(positions[0], positions[1], 0, dx)
+            mxs[i], mys[i], mstdx[i], mstdy[i], count = plot_image(positions[0], positions[1], 0, [100,100])
         xcen[w] = xcen[w]-dx+np.average(mxs, weights = mstdx)
         ycen[w] = ycen[w]-dy+np.average(mys, weights = mstdy)
         ###    ##I now think i may need to exit and reenter the program? no that's not right.. we could do a different center for each wavelength? i'll ask aleks.
