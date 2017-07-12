@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import matplotlib.colors as colors
 from matplotlib.backends.backend_pdf import PdfPages
+from photutils import centroid_com, centroid_1dg, centroid_2dg
 import math
 import matplotlib.lines as mlines
 from matplotlib.legend_handler import HandlerLine2D
@@ -33,6 +34,31 @@ from astropy.cosmology import WMAP9 as cosmo
 from astropy import units as u
 from astropy import constants as const
 from astropy.cosmology import FlatLambdaCDM 
+
+### THINGS FOR CENTROID ###
+dx = 5
+dy = dx
+
+# Maybe we could make a weighted average? Idk. 
+def plot_image(xcen,ycen, count, dx):
+    print('fitting for ' + str(xcen) + ' and ' + str(ycen))
+    count = count +1
+    print(str(count))
+    std = np.std(stamp[stamp==stamp])
+    x1, y1 = centroid_com(stamp)
+    x2, y2 = centroid_1dg(stamp)
+    x3, y3 = centroid_2dg(stamp)
+    xavg = np.average([x1,x2,x3])
+    yavg = np.average([y1,y2,y3])
+    xstd = np.std([x1,x2,x3])
+    ystd = np.std([y1,y2,y3])
+    print(xstd, ystd)
+    # RECURSION BITCH
+    if count < 100 and (xstd > 0.1 or ystd > 0.1):
+        return plot_image(xavg, yavg, count, dx)
+    else:
+        return xavg, yavg, 1/(xstd**2), 1/(ystd**2), count
+    #return xavg, yavg, 1/(xstd**2), 1/(ystd**2), count
 
 ### THINGS FOR RSKY #######
 
@@ -63,8 +89,8 @@ def mLR(a,b,color):
 ##### ACTUAL PROGRAM BITS #####
 
 # define the directory that contains the images
-dir = os.environ['HSTDIR']
-#dir = '/Users/aaw/data/'
+#dir = os.environ['HSTDIR']
+dir = '/Users/aaw/data/'
 
 Ba = [-1.019,-1.113,-1.026,-.990,-1.110,-.994,-.888]
 Bb = [1.937,2.065,1.954,1.883,2.018,1.804,1.758]
@@ -98,8 +124,8 @@ solarLum = 3.846*10**33
 # specify the position of the science target and the size of the region around the science target to consider
 filters = np.array([475, 814, 1600]) #*u.nm
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
-xcen = [3628, 3933, int(3386.5), 3477, 3573, 3802, 3886, 4149, 3787, 4174, 3565, 4067]
-ycen = [4153, 4136, int(3503.2), 3404, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 4054]
+xcen = [3629, 3933, int(3386.5), 3477, 3573, 3802, 3886, 4149, 3787, 4174, 3565, 4067]
+ycen = [4154, 4136, int(3503.2), 3404, 3339, 4169, 4164, 3921, 4187, 3826, 3434, 4054]
 zs = [0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752]
 
 #flux = np.zeros([len(wavelengths),len(radii)]) #*u.Jy
@@ -126,8 +152,12 @@ rSky = np.zeros([len(galaxies),len(wavelengths)])
     #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 with PdfPages('sg_MONSTER.pdf') as pdf:
-    #for w in range(0,1):
-    for w in range(0,len(galaxies)):
+    for w in range(0,1):
+    #for w in range(0,len(galaxies)):
+        mxs = [0,0,0]
+        mys = [0,0,0]
+        mstdx = [0,0,0]
+        mstdy = [0,0,0]
         for i in range(0, len(wavelengths)):
             file = glob.glob(dir+galaxies[w]+'_final_'+wavelengths[i]+'*sci.fits')
             
@@ -137,6 +167,16 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
             exp[i] = header[i]['EXPTIME']
             gain[i] = header[i]['CCDGAIN']
             RN[i] = header[i]['READNSEA']
+# CENTROID STUFF AKA SG STEAL YO BIIIITCH
+            #define positions for photometry
+            positions = [xcen[w], ycen[w]]
+            
+            stamp = data[i][round(positions[1]-dy):round(positions[1]+dy), round(positions[0]-dx):round(positions[0]+dx)]
+            mxs[i], mys[i], mstdx[i], mstdy[i], count = plot_image(positions[0], positions[1], 0, dx)
+        xcen[w] = xcen[w]-dx+np.average(mxs, weights = mstdx)
+        ycen[w] = ycen[w]-dy+np.average(mys, weights = mstdy)
+        ###    ##I now think i may need to exit and reenter the program? no that's not right.. we could do a different center for each wavelength? i'll ask aleks.
+        for i in range(0,len(wavelengths)):
 # GAU IMG BKG TO FIND RSKY TERM: 
             # select all pixels with meaningful information and put them into a
             # one-dimensional array
@@ -167,16 +207,17 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
             model = gaussian(bin_mids, *params_fit)
             rSky[w][i]= params_fit[2]
 # BEGINNING SNR CODE: 
-            #define positions for photometry
-            positions = [(xcen[w], ycen[w])]
+            
             # do pixel analysis
             for j in range(0,width):
                 
                 for k in range(0,width):
                     # In data numbers? In electrons?
-                    fluxpix[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]))#*gain[i]*exp[i])
-                    SNR[i,width-j-1,k] = ((data[i][j+ycen[w]-pixr+1][k+xcen[w]-pixr+1]))/(math.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i]))
+        ### NEED TO ROUND YCEN ETC ####
+                    fluxpix[i,width-j-1,k] = data[i][int(j+round(ycen[w])-pixr+1)][int(k+round(xcen[w])-pixr+1)]
                     pixNoise[i,width-j-1,k] =  math.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
+                                              
+                    SNR[i,width-j-1,k] = fluxpix[i,width-j-1,k]/pixNoise[i,width-j-1,k]
 
         m = np.ma.masked_where(SNR<10,SNR)
         n = np.ma.masked_where(SNR<10,fluxpix)
