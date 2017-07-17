@@ -81,15 +81,20 @@ def plot_image(posx,posy, count, prevstds):
     x1, y1 = centroid_com(stamp)
     x2, y2 = centroid_1dg(stamp)
     x3, y3 = centroid_2dg(stamp)
-    xavg = np.average([x1,x2,x3])
-    yavg = np.average([y1,y2,y3])
-    xstd = np.std([x1,x2,x3])
-    ystd = np.std([y1,y2,y3])
-    
+    xavg = np.average([x2,x3])
+    yavg = np.average([y2,y3])
+    xstd = np.std([x2,x3])
+    ystd = np.std([y2,y3])
+    #xavg = np.average([x1,x2,x3])
+    #yavg = np.average([y1,y2,y3])
+    #xstd = np.std([x1,x2,x3])
+    #ystd = np.std([y1,y2,y3])
+    print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
     # RECURSION BITCH limit 100 times, while either std is higher than our 0.1 threshold
     # and as long as the std is getting smaller
+    if (xstd + ystd > prevstds[0]+prevstds[1]):
+        return posx, posy, prevstds[0]**(-2), prevstds[1]**(-2), count-1
     if count < 100 and (xstd > 0.1 or ystd > 0.1) and (xstd <= prevstds[0] and ystd <= prevstds[1]):
-        print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
         return plot_image(posx-dx+xavg, posy-dy+yavg, count, [xstd,ystd])
     else:
         return posx-dx+xavg, posy-dy+yavg, 1/(xstd**2), 1/(ystd**2), count
@@ -123,11 +128,13 @@ def mLR(a,b,color):
 ##### ACTUAL PROGRAM BITS #####
 
 # define the directory that contains the images
-#dir = os.environ['HSTDIR']
-dir = '/Users/aaw/data/'
+dir = os.environ['HSTDIR']
 
-# coefficients from Bell & de Jong 2001, hopefully will be replaced with k-corrections?
-# not totally sure. will ask aleks
+
+# coefficients from Bell & de Jong 2001, note: our photometry does not correspond exactly with restframe B, V, and J.
+# We could apply k-corrections to estimate restframe magnitudes at these wavelengths but are not doing so currently. 
+# The plan going forward is to use uhm... models that do not require k-corrections. 
+# Don't uhm me. Aleks is the best. Those models are iSEDfit ft. Moustakas and Prospector. 
 Ba = [-1.019,-1.113,-1.026,-.990,-1.110,-.994,-.888]
 Bb = [1.937,2.065,1.954,1.883,2.018,1.804,1.758]
 B_coeff = [Ba,Bb]
@@ -180,8 +187,9 @@ rSky = np.zeros([len(galaxies),len(wavelengths)])
     #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 with PdfPages('sg_MONSTER.pdf') as pdf:
-    for w in range(0,1):
-    #for w in range(0,len(galaxies)):
+    #for w in range(0,1):
+    for w in range(0,len(galaxies)):
+        print(galaxies[w].name)
         mxs = [0,0,0]
         mys = [0,0,0]
         mstdx = [0,0,0]
@@ -202,6 +210,7 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
             mxs[i], mys[i], mstdx[i], mstdy[i], count = plot_image(positions[0], positions[1], 0, [100,100])
         galaxies[w].x = np.average(mxs, weights = mstdx)
         galaxies[w].y = np.average(mys, weights = mstdy)
+        print(galaxies[w].x, galaxies[w].y)
         ###    ##I now think i may need to exit and reenter the program? no that's not right.. we could do a different center for each wavelength? i'll ask aleks.
         for i in range(0,len(wavelengths)):
 # GAU IMG BKG TO FIND RSKY TERM: 
