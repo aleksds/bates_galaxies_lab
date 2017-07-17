@@ -53,8 +53,8 @@ def plot_image(posx,posy, count, prevstds):
 
 
 # define the directory that contains the images
-#dir = os.environ['HSTDIR']
-dir = '/Users/aaw/data/'
+dir = os.environ['HSTDIR']
+
 
 # parameters for the initial guess at the galaxy centroid and the size
 #Galaxies = [['J0826', 3629, 4154], ['J0901', 3934, 4137], ['J0905', 3387, 3503], ['J0944', 3477., 3405.], ['J1107', 3573, 3339.], ['J1219', 3803., 4170.], ['J1341', 3884, 4165], ['J1506', 4147., 3922.], ['J1558', 3787., 4186.], ['J1613', 4175., 3827.], ['J2116', 3567, 3436], ['J2140', 4067, 4054]]
@@ -73,8 +73,8 @@ ycen = np.zeros([len(Galaxies)])
 xstds = np.zeros([len(Galaxies)])
 ystds = np.zeros([len(Galaxies)])
 
-for j in range(0,1):
-#for j in range(0,len(Galaxies)):
+
+for j in range(0,len(Galaxies)):
     #xstds[j] = 1
     #ystds[j] = 1
         mxs = [0,0,0]
