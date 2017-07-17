@@ -45,16 +45,16 @@ from xlrd import open_workbook
 
 #Define Galaxy class to hold name, redshift, x and y positions, and
 # Have functions for luminosity distance in cms and rad to kpc conversion
+# Okay so i checked and the functions don't work and I hate them. Anyway,
+# I saved them as fields and it's working fine now
 class Galaxy:
     def __init__(self, name, z, x, y):
         self.name = name
         self.z = z
         self.x = x
         self.y = y
-    def lDcm(self):
-        return cosmo.luminosity_distance(self.z)*u.Mpc.to(u.cm) / u.Mpc
-    def radToKpc(self):
-        return conv.arcsec_per_kpc_proper(self.z)*0.05/u.arcsec*u.kpc
+        self.lDcm = cosmo.luminosity_distance(self.z)*u.Mpc.to(u.cm) / u.Mpc
+        self.radToKpc = conv.arcsec_per_kpc_proper(self.z)*0.05/u.arcsec*u.kpc
 
 # Grabbing and filling galaxy data
 wb = open_workbook('galaxydata.xlsx')
@@ -92,7 +92,7 @@ def plot_image(posx,posy, count, prevstds):
         print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
         return plot_image(posx-dx+xavg, posy-dy+yavg, count, [xstd,ystd])
     else:
-        return xavg, yavg, 1/(xstd**2), 1/(ystd**2), count
+        return posx-dx+xavg, posy-dy+yavg, 1/(xstd**2), 1/(ystd**2), count
 
 ### THINGS FOR RSKY #######
 
@@ -113,8 +113,8 @@ def mag(val):
     return -2.5*np.log10(val/3631)
 
 # flux makes luminosity defined by Hogg 1999??
-def luminosity(wavelength,flux,lDcm):
-    return const.c*u.s/u.m/(wavelength*10**-9)*flux*10**-23*(4*math.pi*lDcm**2)/solarLum
+def luminosity(wavelength,flux,lDistcm):
+    return const.c*u.s/u.m/(wavelength*10**-9)*flux*10**-23*(4*math.pi*lDistcm**2)/solarLum
 
 # Given two coefficients and the color will return the mass-to-light ratio
 # as defined by Bell and DeJong 2000
@@ -123,8 +123,8 @@ def mLR(a,b,color):
 ##### ACTUAL PROGRAM BITS #####
 
 # define the directory that contains the images
-dir = os.environ['HSTDIR']
-#dir = '/Users/aaw/data/'
+#dir = os.environ['HSTDIR']
+dir = '/Users/aaw/data/'
 
 # coefficients from Bell & de Jong 2001, hopefully will be replaced with k-corrections?
 # not totally sure. will ask aleks
@@ -180,8 +180,8 @@ rSky = np.zeros([len(galaxies),len(wavelengths)])
     #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 with PdfPages('sg_MONSTER.pdf') as pdf:
-    #for w in range(0,1):
-    for w in range(0,len(galaxies)):
+    for w in range(0,1):
+    #for w in range(0,len(galaxies)):
         mxs = [0,0,0]
         mys = [0,0,0]
         mstdx = [0,0,0]
@@ -200,8 +200,8 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
             positions = [galaxies[w].x, galaxies[w].y]
             
             mxs[i], mys[i], mstdx[i], mstdy[i], count = plot_image(positions[0], positions[1], 0, [100,100])
-        galaxies[w].x = positions[0]-dx+np.average(mxs, weights = mstdx)
-        galaxies[w].y = positions[1]-dy+np.average(mys, weights = mstdy)
+        galaxies[w].x = np.average(mxs, weights = mstdx)
+        galaxies[w].y = np.average(mys, weights = mstdy)
         ###    ##I now think i may need to exit and reenter the program? no that's not right.. we could do a different center for each wavelength? i'll ask aleks.
         for i in range(0,len(wavelengths)):
 # GAU IMG BKG TO FIND RSKY TERM: 
@@ -253,8 +253,8 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
         # making uv color
         colorUV = mag(n[0])-mag(n[1])
         for i in range (0,len(filters)):
-            lDcm = galaxies[w].lDcm
-            lum = luminosity(filters[i], n, lDcm)
+            lD = galaxies[w].lDcm
+            lum = luminosity(filters[i], n, lD)
             # model is fixed to star formation epoch with bursts
             for mod in range(5,6):
                 fig = plt.figure()
