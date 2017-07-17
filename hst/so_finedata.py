@@ -11,8 +11,8 @@ from photutils import centroid_com, centroid_1dg, centroid_2dg
 from mmap import mmap,ACCESS_READ
 from xlrd import open_workbook
 
-dir = '/Volumes/physics/linux-lab/data/hst/'
-
+# dir = '/Volumes/physics/linux-lab/data/hst/'
+dir = os.environ['HSTDIR']
 
 # defines a galaxy to have a name, redshift z, and initial x and y coordinates
 class Galaxy:
