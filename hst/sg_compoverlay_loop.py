@@ -79,12 +79,12 @@ for i in range(0, len(area)):
     else:
         area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 # Now, we loop through all galaxies
+with PdfPages('sg_compover.pdf') as pdf:
 
-for w in range (0, len(galaxies)):
-    print(galaxies[w])
 # create a PDF file for the plots    
-    with PdfPages('sg_compover_'+galaxies[w]+'.pdf') as pdf:
     
+    for w in range (0, len(galaxies)):
+        print(galaxies[w])
         fig = plt.figure()
     
         collection = ['F475W','F814W','F160W']
