@@ -24,12 +24,6 @@ from scipy.interpolate import interp1d
 # define the data directory
 dir = os.environ['HIRESDIR']
 
-# speed of light in Angstroms per second
-c = const.c.to('AA/s')
-c_kms = 3E5
-#mass of electron
-mass_e = 9.11**(-28)
-
 # wavelengths of relevant absorption lines
 mgii2803 = 2803.5314853
 mgii2796 = 2796.3542699
@@ -49,8 +43,6 @@ vcen = gal_info['vcen']
 vmax = gal_info['vmax']
 vflip = gal_info['vflip']
 # define velocity ranges to plot the profile
-vb = -3000.
-vr = 500.
 
 
 minorLocator = AutoMinorLocator()
@@ -65,44 +57,30 @@ with PdfPages(filename) as pdf:
         fx = data['fx']
         var = data['var']
 
-        sigma = np.zeros([len(flux)])
-        for i in range(0, len(flux)):
-            sigma[i] = flux[i] * np.sqrt(var[i])/fx[i]
-
         vel_kms = np.zeros([len(lines),len(wave)])
         # define the velocity scale [km / s]
         for i in range(0, len(lines)):
-            vel_kms[i] = ((wave-lines[i]*(1+zem[h]))/(lines[i]*(1+zem[h]))) * c_kms
+            vel_kms[i] = ((wave-lines[i]*(1+zem[h]))/(lines[i]*(1+zem[h]))) * 3E5
         tau = np.zeros([len(flux)])
         # loop over each spectral line-tau is an 8 by 50515 array, with 50515 values of tau for each spectral line
         blah = np.log(1/flux)
         tau = blah
-        sigma_tau = np.zeros([len(flux)])
-        for i in range(0, len(flux)):
-            sigma_tau[i] = (sigma[i]/flux[i])
                 
         #graphs for magnesium absorption lines:
         # define the regions to use the 2796 profile and the regions to use the 2803 profile
-        g2796 = (vel_kms[0] > vb) & (vel_kms[0] < vflip[h])
-        g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < vr)
+        g2796 = (vel_kms[0] > -3000) & (vel_kms[0] < vflip[h])
+        g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < 500)
         # plot the profiles using the 2796 profile on the blue side
         # and the 2803 profile on the red side
         fig = plt.figure()
         
-        ax = fig.add_subplot(3,1,2)
-        #plt.errorbar(vel_kms[0], flux, yerr = sigma, label = 'error', color = '#99ccff', markevery = 10, linewidth = .1)
-        #plt.errorbar(vel_kms[1][g2803], flux[g2803], yerr = sigma[g2803], label = '_nolegend_',  color = '#99ccff', markevery = 10, linewidth = .1)
+        ax = fig.add_subplot(2,1,1)
         ax.plot(vel_kms[0], flux, linewidth=1, label = names[0], color = '#2CA14B')
-        #ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
         ax.set_xlim(-3000, 500)
         ax.set_ylim(0, 2)
-        #plt.legend(loc = 1)
-        plt.title("Voigt Profile : Velocity vs Flux in %s" %(gal[h]))
+        plt.title("Mg II 2796 Voigt Profile : Velocity vs Flux in %s" %(gal[h]))
         plt.xlabel("Velocity(km/s)")
         plt.ylabel("Continuum Normalized Flux")
-        #handles, labels = ax.get_legend_handles_labels()
-        #ax.legend(handles, labels)
-        
 
         f = interp1d(vel_kms[0], flux)
         test = (vel_kms[0] > -3000) & (vel_kms[0] < 500) & (flux < 0.5)
@@ -127,7 +105,7 @@ with PdfPages(filename) as pdf:
         voi_fit = fitter(voi_init, xarr, yarr)
         print(voi_fit)
 
-        #ax = fig.add_subplot(3,1,3)
+        # ax = fig.add_subplot(2,1,2)
         ax.plot(xarr,voi_fit(xarr)+1, color='red')
         plt.xlabel("Velocity(km/s)")
         plt.ylabel("Continuum Normalized Flux")
@@ -137,7 +115,7 @@ with PdfPages(filename) as pdf:
         fig.tight_layout()
         pdf.savefig()
         plt.close()
-os.system("evince  %s &" % filename)
+os.system("open %s &" % filename)
 
 
 
