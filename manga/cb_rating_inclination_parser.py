@@ -17,6 +17,7 @@ import astropy.units as u
 
 
 def main(plate_rec, min_p, max_p):
+    global oii_flux
     min_par = float(min_p)
     max_par = float(max_p)
 
@@ -177,40 +178,60 @@ def main(plate_rec, min_p, max_p):
                 # Galaxy rating
                 oii_to_ha = (dap_sflux / dap_ha_sflux)
 
-                for subarr in oii_to_ha:
-                    for element in subarr:
-                        if element < 0:
-                            element = 0
+                # for subarr in oii_to_ha:
+                #     for element in subarr:
+                #         if element < 0:
+                #             element = 0
+
+                bad = (oii_to_ha < 1)
+                oii_to_ha[bad] = 0
+                nans = np.isnan(oii_to_ha)
+                oii_to_ha[nans] = 0
+
 
                 filt_parm = (90/(inc*180/np.pi))**3
-                vertical_distance_map = zproj_kpc_map
+                vertical_distance_map = copy.deepcopy(zproj_kpc_map)
 
-                for subarr in vertical_distance_map:
-                    for element in subarr:
-                        if np.abs(element) < filt_parm:
-                            element = 0
+                # for subarr in vertical_distance_map:
+                #     vert_max = 0
+                #     for element in subarr:
+                #         if vert_max < element:
+                #             vert_max = element
 
-                oii_flux = dap_sflux
-                for subarr in oii_flux:
-                    for element in subarr:
-                        if element < 0:
-                            element = 0
+                # for subarr in vertical_distance_map:
+                #     for element in subarr:
+                #         if np.abs(element) < filt_parm:
+                #             element = 0
+
+                bad = (np.abs(vertical_distance_map) < filt_parm)
+                vertical_distance_map[bad] = 0
+
+                oii_flux = copy.deepcopy(dap_sflux)
+                # for subarr in oii_flux:
+                #     for element in subarr:
+                #         if element < 0:
+                #             element = 0
+
+                bad = (oii_flux < 0)
+                oii_flux[bad] = 0
 
                 # bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * oii_flux) * ((vertical_distance_map ** 2) * oii_to_ha) *
                 #                        (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * oii_flux / 1e17)  # removed * ((inc*180/np.pi) ** 5)
 
-                bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * oii_flux) * ((vertical_distance_map ** 2) * oii_to_ha) *
-                                       (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * oii_flux / 1e17)  # removed * ((inc*180/np.pi) ** 5)
+                bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * (oii_flux ** 2)) * ((vertical_distance_map ** 2) * oii_to_ha) *
+                                       (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * oii_flux / 1e20)  # removed * ((inc*180/np.pi) ** 5)
 
                 # param = (bradna_index > 0)
-                param = ((bradna_index > 0) & (dap_sflux > 0))
+                param = (bradna_index > 0)
                 bradna_index_sum = np.sum(bradna_index[param])
+                if bradna_index_sum == 0:
+                    bradna_index_sum = 10
 
                 if min_par < (inc * 180 / np.pi) < max_par:
                     state = '>>>>>>>>>>>>>>>>Interesting'
                 else:
                     state = 'Not Interesting'
-                print(plate, galaxy, 'Rating:', math.log(bradna_index_sum, 10), state, '\n')
+                print(plate, galaxy, 'Rating:', math.log(bradna_index_sum, 10), state) # math.log(bradna_index_sum, 10)
                 print("OIId flux", np.sum(oii_flux), '\n')
 
                 # Plotting interesting galaxies
@@ -288,11 +309,48 @@ def main(plate_rec, min_p, max_p):
 
                     pdf.savefig()
                     plt.close()
+
+                    #Plotting the new arrays
+                    fig = plt.figure()
+                    # plot 1: galaxy coordinates in kpc but without filtered values
+                    fig = plt.figure()
+                    ax = fig.add_subplot(2, 2, 1)
+                    ax.set_xlim(0, size)
+                    ax.set_ylim(0, size)
+                    ax.set_xticklabels(())
+                    ax.set_yticklabels(())
+                    plt.imshow(vertical_distance_map,
+                               origin='lower',
+                               interpolation='nearest',
+                               cmap=cm.coolwarm)
+                    plt.colorbar()
+                    plt.title('filtered vertical distance', fontsize=10)
+                    plt.suptitle(name)
+
+                    # plot 4: flux times vertical distance
+                    ax = fig.add_subplot(2, 2, 2)
+                    daplot(oii_flux * np.abs(vertical_distance_map) / np.abs(vertical_distance_map) * 1.e-17, fmin, fmax)
+                    plt.title(eml[j] + ' SFLUX', fontsize=10)
+
+                    # plot 7: oii/ha times vertical distance
+                    ax = fig.add_subplot(2, 2, 3)
+                    daplot(oii_to_ha * np.abs(vertical_distance_map) / np.abs(vertical_distance_map), 0.1, 10.)
+                    plt.title(eml[j] + '/HA', fontsize=10)
+
+
+                    pdf.savefig()
+                    plt.close()
+
+
+
+
     return (current_p)
 
 
 mpl5_dir = os.environ['MANGADIR_MPL5']
 from PyPDF2 import PdfFileMerger
+import copy
+from copy import deepcopy
 
 interst = []
 from os.path import isdir, join
