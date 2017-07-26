@@ -73,6 +73,8 @@ with PdfPages(filename) as pdf:
         # plot the profiles using the 2796 profile on the blue side
         # and the 2803 profile on the red side
         fig = plt.figure()
+
+#Mg II 2796 Voigt Spectrum
         
         ax = fig.add_subplot(2,1,1)
         ax.plot(vel_kms[0], flux, linewidth=1, label = names[0], color = '#2CA14B')
@@ -83,9 +85,9 @@ with PdfPages(filename) as pdf:
         plt.ylabel("Continuum Normalized Flux")
 
         f = interp1d(vel_kms[0], flux)
+        #Tells code to make voigt profile in velocity range -3000 to 500 when flux is below .5
         test = (vel_kms[0] > -3000) & (vel_kms[0] < 500) & (flux < 0.5)
         vel_median = np.median(vel_kms[0][test])
-        print(gal[h],vel_median)
         vel_new = np.linspace(vel_median-1000, vel_median+1000, num=2001, endpoint=True)
 
 
@@ -101,9 +103,11 @@ with PdfPages(filename) as pdf:
         yarr = flux_king - 1.
 
         voi_init = Voigt1D(amplitude_L=-1.0, x_0=one, fwhm_L=two-one, fwhm_G=two-one)+Voigt1D(amplitude_L=-1.0, x_0=two, fwhm_L=thr-two, fwhm_G=thr-two)+Voigt1D(amplitude_L=-1.0, x_0=thr, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=fou, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=vel_median, fwhm_L=200, fwhm_G=200)
+
+                   ## Write function that combines cover fraction code with Voigt profile code ??????????? ##
+                   ##Correlation between amplitude and cover frac could be key##
         fitter = fitting.LevMarLSQFitter()
         voi_fit = fitter(voi_init, xarr, yarr)
-        print(voi_fit)
 
         # ax = fig.add_subplot(2,1,2)
         ax.plot(xarr,voi_fit(xarr)+1, color='red')
@@ -111,7 +115,47 @@ with PdfPages(filename) as pdf:
         plt.ylabel("Continuum Normalized Flux")
         ax.set_ylim (0,2)
         ax.set_xlim(-3000,500)
+
+
+#Mg II 2803 Voigt Spectrum
         
+        ax = fig.add_subplot(2,1,2)
+        ax.plot(vel_kms[1], flux, linewidth=1, label = names[0], color = '#2C6EA1')
+        ax.set_xlim(-3000, 500)
+        ax.set_ylim(0, 2)
+        plt.title("Mg II 2803 Voigt Profile : Velocity vs Flux in %s" %(gal[h]))
+        plt.xlabel("Velocity(km/s)")
+        plt.ylabel("Continuum Normalized Flux")
+
+        f = interp1d(vel_kms[1], flux)
+        test = (vel_kms[1] > -3000) & (vel_kms[1] < 500) & (flux < 0.5)
+        vel_median = np.median(vel_kms[1][test])
+        vel_new = np.linspace(vel_median-1000, vel_median+1000, num=2001, endpoint=True)
+
+
+        blah = len(vel_kms[1][test])
+        one = vel_kms[1][test][round(blah*0.2)]
+        two = vel_kms[1][test][round(blah*0.4)]
+        thr = vel_kms[1][test][round(blah*0.6)]
+        fou = vel_kms[1][test][round(blah*0.8)]
+
+        flux_king = f(vel_new)
+
+        xarr = vel_new
+        yarr = flux_king - 1.
+
+        voi_init = Voigt1D(amplitude_L=-1.0, x_0=one, fwhm_L=two-one, fwhm_G=two-one)+Voigt1D(amplitude_L=-1.0, x_0=two, fwhm_L=thr-two, fwhm_G=thr-two)+Voigt1D(amplitude_L=-1.0, x_0=thr, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=fou, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=vel_median, fwhm_L=200, fwhm_G=200)
+        fitter = fitting.LevMarLSQFitter()
+        voi_fit = fitter(voi_init, xarr, yarr)
+
+        # ax = fig.add_subplot(2,1,2)
+        ax.plot(xarr,voi_fit(xarr)+1, color='red')
+        plt.xlabel("Velocity(km/s)")
+        plt.ylabel("Continuum Normalized Flux")
+        ax.set_ylim (0,2)
+        ax.set_xlim(-3000,500)
+
+
         fig.tight_layout()
         pdf.savefig()
         plt.close()
