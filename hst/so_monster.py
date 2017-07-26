@@ -37,7 +37,7 @@ from astropy.cosmology import WMAP9 as cosmo
 from astropy import units as u
 from astropy import constants as const
 from astropy.cosmology import FlatLambdaCDM 
-### THINGS FOR READING IN GALAXY DATA FROM galaxydata.xlsx
+### THINGS FOR READING IN GALAXY DATA FROM finedata.xlsx
 
 conv = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
@@ -188,7 +188,7 @@ rSky = np.zeros([len(galaxies),len(wavelengths)])
     #else:
     #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
-with PdfPages('sg_MONSTER.pdf') as pdf:
+with PdfPages('so_MONSTER_fine.pdf') as pdf:
     #for w in range(0,1):
     for w in range(0,len(galaxies)):
         print(galaxies[w].name)
@@ -284,3 +284,5 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
         plt.title(galaxies[w].name+'ColorUV map and constrictions')
         pdf.savefig()
         plt.close()
+
+os.system('open %s &' % 'so_MONSTER_fine.pdf')
