@@ -19,7 +19,9 @@ class Galaxy:
         self.x = x
         self.y = y
         
-wb = open_workbook('galaxydata.xlsx')
+
+res = ['fine','coarse']
+wb = open_workbook(res[1]+'data.xlsx')
 
 for sheet in wb.sheets():
     numr = sheet.nrows
@@ -56,9 +58,6 @@ def plot_image(posx,posy, count, prevstds):
 dir = os.environ['HSTDIR']
 
 
-# parameters for the initial guess at the galaxy centroid and the size
-#Galaxies = [['J0826', 3629, 4154], ['J0901', 3934, 4137], ['J0905', 3387, 3503], ['J0944', 3477., 3405.], ['J1107', 3573, 3339.], ['J1219', 3803., 4170.], ['J1341', 3884, 4165], ['J1506', 4147., 3922.], ['J1558', 3787., 4186.], ['J1613', 4175., 3827.], ['J2116', 3567, 3436], ['J2140', 4067, 4054]]
-
 dx = 5
 dy = 5
 
@@ -73,8 +72,8 @@ ycen = np.zeros([len(Galaxies)])
 xstds = np.zeros([len(Galaxies)])
 ystds = np.zeros([len(Galaxies)])
 
-
-for j in range(0,len(Galaxies)):
+for j in range(0,1):
+#for j in range(0,len(Galaxies)):
     #xstds[j] = 1
     #ystds[j] = 1
         mxs = [0,0,0]
@@ -82,7 +81,7 @@ for j in range(0,len(Galaxies)):
         mstdx = [0,0,0]
         mstdy = [0,0,0]
         for i in range(0,len(filters)):
-            file = glob.glob(dir+Galaxies[j].name+'_final_F'+str(foureightone[i])+'*sci.fits')
+            file = glob.glob(dir+Galaxies[j].name+'/'+res[1]+'/'+str(filters[i])+'/final_'+str(filters[i])+'*sci.fits')
             hdu = fits.open(file[0])
             data, header = hdu[0].data, hdu[0].header
 
