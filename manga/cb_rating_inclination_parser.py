@@ -17,7 +17,7 @@ import astropy.units as u
 
 
 def main(plate_rec, min_p, max_p):
-    global oii_flux
+    global oii_flux, denomination, denomination
     min_par = float(min_p)
     max_par = float(max_p)
 
@@ -77,6 +77,7 @@ def main(plate_rec, min_p, max_p):
             gal1 = plt2 + 1
             galaxy = int(name[gal1:gal2])
             print(plate, galaxy)
+            denomination = str(plate) + "-" + str(galaxy)
 
             # find the index of this galaxy in the drpall file
             match = np.where((drpdata.field('plate') == plate) & (drpdata.field('ifudsgn') == str(galaxy)))
@@ -176,6 +177,8 @@ def main(plate_rec, min_p, max_p):
                 dap_serr = np.sqrt(1. / dap_sivar)  # *1.e-4
 
                 # Galaxy rating
+
+                # Masking out ratio plot. Removing x < 1 (and nans).
                 oii_to_ha = (dap_sflux / dap_ha_sflux)
 
                 # for subarr in oii_to_ha:
@@ -188,8 +191,9 @@ def main(plate_rec, min_p, max_p):
                 nans = np.isnan(oii_to_ha)
                 oii_to_ha[nans] = 0
 
+                # Filtering values nearest to the galaxy disk according to a filtering parameter
 
-                filt_parm = (90/(inc*180/np.pi))**3
+                filt_parm = (90/(inc*180/np.pi))**2.5
                 vertical_distance_map = copy.deepcopy(zproj_kpc_map)
 
                 # for subarr in vertical_distance_map:
@@ -206,33 +210,40 @@ def main(plate_rec, min_p, max_p):
                 bad = (np.abs(vertical_distance_map) < filt_parm)
                 vertical_distance_map[bad] = 0
 
+                # Filtering values of flux < 0.1
+
                 oii_flux = copy.deepcopy(dap_sflux)
                 # for subarr in oii_flux:
                 #     for element in subarr:
                 #         if element < 0:
                 #             element = 0
 
-                bad = (oii_flux < 0)
+                bad = (oii_flux < 0.1)
                 oii_flux[bad] = 0
 
                 # bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * oii_flux) * ((vertical_distance_map ** 2) * oii_to_ha) *
                 #                        (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * oii_flux / 1e17)  # removed * ((inc*180/np.pi) ** 5)
 
+
+                # Actual formula for a rating
                 bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * (oii_flux ** 2)) * ((vertical_distance_map ** 2) * oii_to_ha) *
                                        (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * oii_flux / 1e20)  # removed * ((inc*180/np.pi) ** 5)
 
-                # param = (bradna_index > 0)
+                # Calculating and printing stuff
                 param = (bradna_index > 0)
                 bradna_index_sum = np.sum(bradna_index[param])
                 if bradna_index_sum == 0:
                     bradna_index_sum = 10
 
-                if min_par < (inc * 180 / np.pi) < max_par:
+                if (min_par < (inc * 180 / np.pi) < max_par) & (np.sum(oii_flux) > 540):
                     state = '>>>>>>>>>>>>>>>>Interesting'
                 else:
                     state = 'Not Interesting'
-                print(plate, galaxy, 'Rating:', math.log(bradna_index_sum, 10), state) # math.log(bradna_index_sum, 10)
-                print("OIId flux", np.sum(oii_flux), '\n')
+                b_index = math.log(bradna_index_sum, 10)
+                print(plate, galaxy, 'B_index:', b_index, state, 'Rating: ', b_index*(100/57)) # math.log(bradna_index_sum, 10)
+                print("OIId flux", np.sum(oii_flux), '\n', 'Flux sum to rating ratio: ', (np.sum(oii_flux)/b_index), '\n' )
+                denom_and_rating = str(denomination) + ' Rating: ' + str(b_index*(100/57)) + ' Flux/rating ratio: ' + str((np.sum(oii_flux)/b_index))
+
 
                 # Plotting interesting galaxies
                 if state == '>>>>>>>>>>>>>>>>Interesting':
@@ -249,7 +260,7 @@ def main(plate_rec, min_p, max_p):
                                cmap=cm.coolwarm)
                     plt.colorbar()
                     plt.title('vertical distance [kpc]', fontsize=10)
-                    plt.suptitle(name)
+                    plt.suptitle(denom_and_rating, fontsize = 10)
 
                     # plot 2/3: emission-line flux vs vertical distance
                     ax = fig.add_subplot(4, 2, 2)
@@ -325,14 +336,14 @@ def main(plate_rec, min_p, max_p):
                                cmap=cm.coolwarm)
                     plt.colorbar()
                     plt.title('filtered vertical distance', fontsize=10)
-                    plt.suptitle(name)
+                    plt.suptitle(denom_and_rating, fontsize = 10)
 
-                    # plot 4: flux times vertical distance
+                    # plot 4: flux
                     ax = fig.add_subplot(2, 2, 2)
                     daplot(oii_flux * np.abs(vertical_distance_map) / np.abs(vertical_distance_map) * 1.e-17, fmin, fmax)
                     plt.title(eml[j] + ' SFLUX', fontsize=10)
 
-                    # plot 7: oii/ha times vertical distance
+                    # plot 7: oii/ha
                     ax = fig.add_subplot(2, 2, 3)
                     daplot(oii_to_ha * np.abs(vertical_distance_map) / np.abs(vertical_distance_map), 0.1, 10.)
                     plt.title(eml[j] + '/HA', fontsize=10)
