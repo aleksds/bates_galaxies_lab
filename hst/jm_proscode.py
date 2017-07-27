@@ -14,7 +14,28 @@ from time import time, asctime
 import numpy as np
 import fitsio
 
+
+# need to have prospect in python path
+# https://github.com/bd-j/prospector
+import sys
+sys.path.append('/home/adiamond/github/prospector')
+
+# need to have sedpy
+# https://github.com/bd-j/sedpy
+sys.path.append('/home/adiamond/github/sedpy')
+
+# need to have fsps
+# https://github.com/cconroy20/fsps
+# https://github.com/dfm/python-fsps
+# sys.path.append('/home/adiamond/github/fsps')
+# need to have SPS_HOME enviromental variable
+# ad170727 -- not yet working
+sys.path.append('/home/adiamond/github/python-fsps')
+#import fsps
+
 from prospect.sources import CSPSpecBasis
+
+
 
 #unnecessary
 def datadir():
