@@ -23,7 +23,8 @@ def daplot(quantity, qmin, qmax):
         ax.set_yticklabels(())
         plt.imshow(quantity, origin='lower', interpolation='nearest',
                    norm=colors.LogNorm(vmin=qmin, vmax=qmax), cmap=cm.coolwarm)
-        plt.colorbar()
+        cbar = plt.colorbar()
+        cbar.ax.tick_params(labelsize=14)
 
 # minimum and maximum emission-line fluxes for plot ranges
 fmin = 1e-19
@@ -196,8 +197,8 @@ with PdfPages(filename) as pdf:
             fig=plt.figure()
             ax = fig.add_subplot(2,2,1)
             daplot(dap_sflux*1.e-17, fmin, fmax)
-            plt.title(eml[j]+'[Emission-line Sflux]', fontsize=10)
-
+            #plt.title(eml[j]+'[Emission-line Sflux]', fontsize=10)
+            plt.title('[O II] emission-line flux', fontsize=14)
             # plot 5: emission-line SFLUX serror
             #ax = fig.add_subplot(3,3,5)
             #daplot(dap_serr*1.e-17, fmin, fmax)
@@ -211,7 +212,7 @@ with PdfPages(filename) as pdf:
             # plot 7: emission-line flux / Halpha flux
             ax = fig.add_subplot(2,2,2)
             daplot(dap_sflux/dap_ha_sflux, 0.1, 10.)
-            plt.title(eml[j]+'/[Oxygen to HA ratio]', fontsize=10)
+            plt.title('[O II] to Halpha ratio', fontsize=14)
 
             #plot 8: emission-line velocity
             ax = fig.add_subplot(2,2,3)
@@ -222,8 +223,9 @@ with PdfPages(filename) as pdf:
             plt.imshow(dap_vel, origin='lower',
                        interpolation='nearest',
                        cmap=cm.coolwarm, vmin=-250, vmax=250)
-            plt.colorbar()
-            plt.title(eml[j]+'[Emission-line Velocity]', fontsize=10)
+            cbar = plt.colorbar()
+            cbar.ax.tick_params(labelsize=14)
+            plt.title('[O II] velocity', fontsize=14)
 
             # plot 9: emission-line dispersion
             ax = fig.add_subplot(2,2,4)
@@ -234,8 +236,9 @@ with PdfPages(filename) as pdf:
             plt.imshow(dap_sig, origin='lower',
                        interpolation='nearest',
                        cmap=cm.YlOrRd, vmin=0, vmax=250)
-            plt.colorbar()
-            plt.title(eml[j]+'[Emission-Line Dispersion]', fontsize=10)
+            cbar = plt.colorbar()
+            cbar.ax.tick_params(labelsize=14)
+            plt.title('[O II] velocity dispersion', fontsize=14)
 
             pdf.savefig()
             plt.close()
