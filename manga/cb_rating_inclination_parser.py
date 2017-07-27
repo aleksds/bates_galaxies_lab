@@ -226,8 +226,8 @@ def main(plate_rec, min_p, max_p):
 
 
                 # Actual formula for a rating
-                bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * (oii_flux ** 2)) * ((vertical_distance_map ** 2) * oii_to_ha) *
-                                       (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * oii_flux / 1e20)  # removed * ((inc*180/np.pi) ** 5)
+                bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * ((10*oii_flux)**2)) * ((vertical_distance_map ** 2) * oii_to_ha) *
+                                       (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * (oii_flux) / 1e20)  # removed * ((inc*180/np.pi) ** 5)
 
                 # Calculating and printing stuff
                 param = (bradna_index > 0)
@@ -240,9 +240,9 @@ def main(plate_rec, min_p, max_p):
                 else:
                     state = 'Not Interesting'
                 b_index = math.log(bradna_index_sum, 10)
-                print(plate, galaxy, 'B_index:', b_index, state, 'Rating: ', b_index*(100/57)) # math.log(bradna_index_sum, 10)
+                print(plate, galaxy, 'B_index:', b_index, state, 'Rating: ', b_index*(100/62)) # math.log(bradna_index_sum, 10)
                 print("OIId flux", np.sum(oii_flux), '\n', 'Flux sum to rating ratio: ', (np.sum(oii_flux)/b_index), '\n' )
-                denom_and_rating = str(denomination) + ' Rating: ' + str(b_index*(100/57)) + ' Flux/rating ratio: ' + str((np.sum(oii_flux)/b_index))
+                denom_and_rating = str(denomination) + ' Rating: ' + str(b_index*(100/62)) + ' Flux/rating ratio: ' + str((np.sum(oii_flux)/b_index))
 
 
                 # Plotting interesting galaxies
