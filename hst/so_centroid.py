@@ -54,7 +54,6 @@ Titles = ['F475W', 'F814W', 'F160W']
 with PdfPages('so_centroid.pdf') as pdf:
     # for each galaxy
     for j in range(len(Galaxies)):
-    #for j in range(6,7):
         fig = plt.figure()
         # for each filter
         for i in range(len(Filters)):
