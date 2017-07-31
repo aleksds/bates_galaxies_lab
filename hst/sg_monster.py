@@ -71,8 +71,8 @@ t=0
 #type = ['convolved_image', 'convolved_image', 'final']
 type = ['convolved_image', 'final']
 
-wbo = open_workbook(res[t]+'data.xlsx')
-#wbo = open_workbook('galaxydata.xlsx')
+#wbo = open_workbook(res[t]+'data.xlsx')
+wbo = open_workbook('galaxydata.xlsx')
 #wbo = open_workbook('update.xls')
 for sheet in wbo.sheets():
     numr = sheet.nrows
@@ -175,8 +175,8 @@ J_coeff = [Ja,Jb]
 coeff = [B_coeff, V_coeff, J_coeff]
 
 #setting up arrays with three elements, all zeros - placeholders
-#filters = ['F475W','F814W','F160W']
-filters = ['F475W','F814W']
+filters = ['F475W','F814W','F160W']
+#filters = ['F475W','F814W']
 
 data = [0 for x in range(len(filters))]
 header = [0 for x in range(len(filters))]
@@ -199,8 +199,8 @@ annSNR = np.zeros([len(filters),len(radii)])
 solarLum = 3.846*10**33
 
 # specify the position of the science target and the size of the region around the science target to consider
-#wavelengths = np.array([475, 814, 1600]) #*u.nm
-wavelengths = np.array([475, 814])
+wavelengths = np.array([475, 814, 1600]) #*u.nm
+#wavelengths = np.array([475, 814])
 
 flux = np.zeros([len(filters),len(radii)]) #*u.Jy
 subflux = np.zeros([len(filters),len(radii)])
@@ -223,9 +223,9 @@ for i in range(0, len(area)):
 
 
 with PdfPages('sg_MONSTER.pdf') as pdf:
-    for w in range(0,1):
+    #for w in range(0,1):
 
-    #for w in range(0,len(galaxies)):
+    for w in range(0,len(galaxies)):
         print(galaxies[w].name)
         mxs = [0,0,0]
         mys = [0,0,0]
@@ -233,7 +233,7 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
         mstdy = [0,0,0]
         for i in range(0, len(filters)):
             #file = glob.glob(dir+galaxies[w].name+'_final_'+filters[i]+'*sci.fits')
-            file = glob.glob(dir+galaxies[w].name+'/'+res[t]+'/'+str(filters[i])+'/'+type[i]+'_'+str(filters[i])+'*sci.fits')
+            file = glob.glob(dir+galaxies[w].name+'*/'+res[1]+'/'+str(filters[i])+'/'+type[1]+'_'+str(filters[i])+'*sci.fits')
 
             hdu = fits.open(file[0])
             data[i], header[i] = hdu[0].data, hdu[0].header
@@ -309,7 +309,7 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
                 else:
                     subflux[i,j] = flux[i,j]-flux[i,j-1]
         
-                annNoise[i,j] = math.sqrt((rSky[i][w]*area[j])**2+flux[i][j]+(RN[i]**2)*area[j]+dark[i]*area[j]*exp[i])
+                annNoise[i,j] = np.sqrt((rSky[w][i]*area[j])**2+flux[i][j]+(RN[i]**2)*area[j]+dark[i]*area[j]*exp[i])
                 annSNR[i,j] = flux[i,j]/annNoise[i,j]
 
         m = np.ma.masked_where(SNR<10,SNR)
@@ -344,4 +344,14 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
         pdf.savefig()
         plt.close()
         wb.save('updated.xlsx')
-
+        
+        colorVJ = mag(n[1])-mag(n[2])
+        # Plotting VJ color map and pixel restrictions.                     
+        fig = plt.figure()
+        plt.imshow(colorVJ)
+        plt.colorbar()
+        plt.title(galaxies[w].name+'ColorVJ map and constrictions')
+        pdf.savefig()
+        plt.close()
+        
+os.system('open %s &' % 'sg_MONSTER.pdf')
