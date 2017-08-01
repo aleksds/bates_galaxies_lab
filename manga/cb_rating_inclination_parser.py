@@ -17,7 +17,7 @@ import astropy.units as u
 
 
 def main(plate_rec, min_p, max_p):
-    global oii_flux, denomination, denomination
+    global oii_flux, denomination, denomination, vertical_distance_map
     min_par = float(min_p)
     max_par = float(max_p)
 
@@ -179,21 +179,24 @@ def main(plate_rec, min_p, max_p):
                 # Galaxy rating
 
                 # Masking out ratio plot. Removing x < 1 (and nans).
-                oii_to_ha = (dap_sflux / dap_ha_sflux)
 
                 # for subarr in oii_to_ha:
                 #     for element in subarr:
                 #         if element < 0:
                 #             element = 0
-
-                bad = (oii_to_ha < 1)
+                oii_to_ha = (dap_sflux / dap_ha_sflux)
+                bad = (oii_to_ha < 0.7)
                 oii_to_ha[bad] = 0
                 nans = np.isnan(oii_to_ha)
                 oii_to_ha[nans] = 0
+                infs = np.isinf(oii_to_ha)
+                oii_to_ha[infs] = 0
+                unreas = oii_to_ha > ((np.mean(oii_to_ha))**3)
+                oii_to_ha[unreas] = 0
 
                 # Filtering values nearest to the galaxy disk according to a filtering parameter
 
-                filt_parm = (90/(inc*180/np.pi))**2.5
+                filt_parm = ((90 / (inc * 180 / np.pi)) ** 2) * (np.amax(zproj_kpc_map) / ((inc * 180 / np.pi) ** 0.4))
                 vertical_distance_map = copy.deepcopy(zproj_kpc_map)
 
                 # for subarr in vertical_distance_map:
@@ -226,8 +229,10 @@ def main(plate_rec, min_p, max_p):
 
 
                 # Actual formula for a rating
-                bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * ((10*oii_flux)**2)) * ((vertical_distance_map ** 2) * oii_to_ha) *
-                                       (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * (oii_flux) / 1e20)  # removed * ((inc*180/np.pi) ** 5)
+                # bradna_index = np.abs( (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 4) * ((10*oii_flux)**2)) * ((vertical_distance_map ** 2) * oii_to_ha) *
+                #                        (((vertical_distance_map * ((inc*180/np.pi) ** 6)) ** 2) * (oii_flux / dap_serr)) * (oii_flux) / 1e20)  # removed * ((inc*180/np.pi) ** 5)
+                normalize_vdist = (inc * 180 / np.pi) / (2 * np.amax(zproj_kpc_map))
+                bradna_index = np.abs((10 * oii_flux ** 2) * (oii_to_ha ** 2) * (oii_flux / dap_serr) * (vertical_distance_map ** .5)) # * (normalize_vdist ** 2))
 
                 # Calculating and printing stuff
                 param = (bradna_index > 0)
@@ -240,9 +245,9 @@ def main(plate_rec, min_p, max_p):
                 else:
                     state = 'Not Interesting'
                 b_index = math.log(bradna_index_sum, 10)
-                print(plate, galaxy, 'B_index:', b_index, state, 'Rating: ', b_index*(100/62)) # math.log(bradna_index_sum, 10)
-                print("OIId flux", np.sum(oii_flux), '\n', 'Flux sum to rating ratio: ', (np.sum(oii_flux)/b_index), '\n' )
-                denom_and_rating = str(denomination) + ' Rating: ' + str(b_index*(100/62)) + ' Flux/rating ratio: ' + str((np.sum(oii_flux)/b_index))
+                print(plate, galaxy, 'B_index: ', b_index, state, 'Rating: ', b_index*(100/57)) # math.log(bradna_index_sum, 10)
+                print("OIId flux", np.sum(oii_flux), '\n', 'Flux sum to rating ratio: ', (np.sum(oii_flux)/b_index), 'Sum', bradna_index_sum, '\n' )
+                denom_and_rating = str(denomination) + ' Rating: ' + str(b_index*(100/57)) + ' Flux/rating ratio: ' + str((np.sum(oii_flux)/b_index))
 
 
                 # Plotting interesting galaxies
@@ -351,6 +356,7 @@ def main(plate_rec, min_p, max_p):
 
                     pdf.savefig()
                     plt.close()
+                    plt.close(fig)
 
 
 
