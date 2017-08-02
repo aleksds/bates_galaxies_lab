@@ -191,7 +191,7 @@ def COMB_FLUX(velocityy, fluxx, namess, hue, limit):
 
     
 minorLocator = AutoMinorLocator()
-filename = 'Tau_Flux_Coldens_Comparison.pdf'
+filename = 'Mg_Tau_Flux_Coldens_Comparison.pdf'
 with PdfPages(filename) as pdf:
     for h in range(0, len(gal)):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
@@ -260,14 +260,6 @@ with PdfPages(filename) as pdf:
         sigma_coldens2852 = column(vel_kms[2], sigma_coldens/(2.654E-15*fosc[2]**2 *(wave/(1+zem[h]))))
         
 
-
-
-
-
-
-
-
-        
 
                                                ## PLOTTING BEGINS ##
     
