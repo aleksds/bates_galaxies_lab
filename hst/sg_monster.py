@@ -89,7 +89,7 @@ def plot_image(posx,posy, count, prevstds):
     #yavg = np.average([y1,y2,y3])
     #xstd = np.std([x1,x2,x3])
     #ystd = np.std([y1,y2,y3])
-    print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
+    #print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
     # RECURSION BITCH limit 100 times, while either std is higher than our 0.1 threshold
     # and as long as the std is getting smaller
     if (xstd + ystd > prevstds[0]+prevstds[1]):
@@ -189,7 +189,7 @@ rSky = np.zeros([len(galaxies),len(wavelengths)])
 with PdfPages('sg_MONSTER.pdf') as pdf:
     #for w in range(0,1):
     for w in range(0,len(galaxies)):
-        print(galaxies[w].name)
+        #print(galaxies[w].name)
         mxs = [0,0,0]
         mys = [0,0,0]
         mstdx = [0,0,0]
