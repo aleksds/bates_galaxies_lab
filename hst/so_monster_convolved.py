@@ -1,7 +1,8 @@
 # Sophia Gottlieb
 # 20170710
 
-# sg_monster.py
+# so_monster.py
+# Senyo Ohene
 # This code will pull out all the stops
 # If possible, it will begin with centroid code.
 # Then, SNR for pixel
@@ -13,7 +14,7 @@
 # Up next we will include the cl_centroidmerged.py
 # It now reads in a file, and stores them as Galaxies
 # Next i have to make it do annular stuff.
-# I guess I am now trying to incorporate the centroid stuff into 
+
 #import relavent packages
 import os
 import numpy as np
@@ -43,9 +44,6 @@ conv = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 from mmap import mmap,ACCESS_READ
 from xlrd import open_workbook
 
-# for writing into the xl file
-import xlwt
-
 #Define Galaxy class to hold name, redshift, x and y positions, and
 # Have functions for luminosity distance in cms and rad to kpc conversion
 # Okay so i checked and the functions don't work and I hate them. Anyway,
@@ -58,48 +56,24 @@ class Galaxy:
         self.y = y
         self.lDcm = cosmo.luminosity_distance(self.z)*u.Mpc.to(u.cm) / u.Mpc
         self.radToKpc = conv.arcsec_per_kpc_proper(self.z)*0.05/u.arcsec*u.kpc
-# setting up final xl file
-wb = xlwt.Workbook()
-ws = wb.add_sheet('Galaxy Data')
 
 # Grabbing and filling galaxy data
-res = ['fine','coarse']
-t=0
-
-#type = ['final','final','final']
-#type = ['final','final']
-#type = ['convolved_image', 'convolved_image', 'final']
-type = ['convolved_image', 'final']
-
-#wbo = open_workbook(res[t]+'data.xlsx')
-wbo = open_workbook('galaxydata.xlsx')
-#wbo = open_workbook('update.xls')
-for sheet in wbo.sheets():
+wb = open_workbook('galaxydata.xlsx')
+for sheet in wb.sheets():
     numr = sheet.nrows
     galaxies = []
-    
-    ws.write(0, 0, 'name')
-    ws.write(0, 1, 'z')
-    ws.write(0, 2, 'x')
-    ws.write(0, 3, 'y')
-    
+
     for row in range(1,numr):
         galaxies.append(Galaxy(sheet.cell(row,0).value,sheet.cell(row,1).value,sheet.cell(row,2).value,sheet.cell(row,3).value))
-        ws.write(row,0,sheet.cell(row,0).value)
-        ws.write(row,1,sheet.cell(row,1).value)
-
 
 ###
 ### THINGS FOR CENTROID ###
-dx = 5
+dx = 10
 dy = dx
 
 # Maybe we could make a weighted average? Idk.
-# plot_image is our centroid code. I have defined it to be recursive, but it
-# seems that we don't need it. we give plot image the estimated position in x and y
-# in relation to the whole image
 def plot_image(posx,posy, count, prevstds):
-    #We have to redefine the stamp every time, otherwise the program doesn't woek
+    #We have to redefine the stamp every time, otherwise the program doesn't work
     stamp = data[i][int(round(posy-dy)):int(round(posy+dy)), int(round(posx-dx)):int(round(posx+dx))]
     #this is just to keep track of how much recursing we do
     count = count +1
@@ -116,7 +90,7 @@ def plot_image(posx,posy, count, prevstds):
     #yavg = np.average([y1,y2,y3])
     #xstd = np.std([x1,x2,x3])
     #ystd = np.std([y1,y2,y3])
-    #print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
+    print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
     # RECURSION BITCH limit 100 times, while either std is higher than our 0.1 threshold
     # and as long as the std is getting smaller
     if (xstd + ystd > prevstds[0]+prevstds[1]):
@@ -175,66 +149,60 @@ J_coeff = [Ja,Jb]
 coeff = [B_coeff, V_coeff, J_coeff]
 
 #setting up arrays with three elements, all zeros - placeholders
-filters = ['F475W','F814W','F160W']
-#filters = ['F475W','F814W']
+wavelengths = ['F475W','F814W', 'F160W']
 
-data = [0 for x in range(len(filters))]
-header = [0 for x in range(len(filters))]
-fnu = [0 for x in range(len(filters))]
-exp = [0 for x in range(len(filters))]
-gain = [0 for x in range(len(filters))]
+data = [0 for x in range(len(wavelengths))]
+header = [0 for x in range(len(wavelengths))]
+fnu = [0 for x in range(len(wavelengths))]
+exp = [0 for x in range(len(wavelengths))]
+gain = [0 for x in range(len(wavelengths))]
 dark = [0.0022,0.0022,0.045]
-RN = [0 for x in range(len(filters))]
+RN = [0 for x in range(len(wavelengths))]
 
 #width MUST be odd.
 width = 81
 pixr = int((width-1)/2)
-radii = np.arange(40)+1
-area = [0 for x in range(len(radii))]
-area = [0 for x in range(len(radii))]
-annNoise = np.zeros([len(filters),len(radii)])
-annSNR = np.zeros([len(filters),len(radii)])
-
 
 solarLum = 3.846*10**33
 
 # specify the position of the science target and the size of the region around the science target to consider
-wavelengths = np.array([475, 814, 1600]) #*u.nm
-#wavelengths = np.array([475, 814])
+filters = np.array([475, 814, 1600]) #*u.nm
 
-flux = np.zeros([len(filters),len(radii)]) #*u.Jy
-subflux = np.zeros([len(filters),len(radii)])
-fluxpix = np.zeros([len(filters), width, width])
+#filters = np.array([475, 814]) #*u.nm
+#flux = np.zeros([len(wavelengths),len(radii)]) #*u.Jy
+#subflux = np.zeros([len(wavelengths),len(radii)])
+fluxpix = np.zeros([len(wavelengths), width, width])
 
-pixNoise = np.zeros([len(filters), width, width])
-SNR = np.zeros([len(filters), width, width])
+pixNoise = np.zeros([len(wavelengths), width, width])
+SNR = np.zeros([len(wavelengths), width, width])
 
 totalphotons = 0
 
-rSky = np.zeros([len(galaxies),len(filters)])
+rSky = np.zeros([len(galaxies),len(wavelengths)])
 
 #calculate area of each bagel
-for i in range(0, len(area)):
-    area[i] = math.pi*math.pow(radii[i],2)
-    if i == 0:
-        area[i] = math.pi*math.pow(radii[0],2)
-    else:
-        area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
+#for i in range(0, len(area)):
+ #   area[i] = math.pi*math.pow(radii[i],2)
+    #if i == 0:
+    #    area[i] = math.pi*math.pow(radii[0],2)
+    #else:
+    #    area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
-
-with PdfPages('sg_MONSTER.pdf') as pdf:
+with PdfPages('so_MONSTER_convolved.pdf') as pdf:
     #for w in range(0,1):
-
     for w in range(0,len(galaxies)):
-        #print(galaxies[w].name)
+        print(galaxies[w].name)
         mxs = [0,0,0]
         mys = [0,0,0]
         mstdx = [0,0,0]
         mstdy = [0,0,0]
-        for i in range(0, len(filters)):
-            #file = glob.glob(dir+galaxies[w].name+'_final_'+filters[i]+'*sci.fits')
-            file = glob.glob(dir+galaxies[w].name+'*/'+res[1]+'/'+str(filters[i])+'/'+type[1]+'_'+str(filters[i])+'*sci.fits')
+        for i in range(0, len(wavelengths)):
+            if i != 2:
+                file = glob.glob(dir+galaxies[w].name+'*/coarse/'+wavelengths[i]+'/convolved_image*W.fits')
 
+            else:
+                file = glob.glob(dir+galaxies[w].name+'*/coarse/'+wavelengths[i]+'/final*sci.fits')
+                
             hdu = fits.open(file[0])
             data[i], header[i] = hdu[0].data, hdu[0].header
             fnu[i] = header[i]['PHOTFNU']
@@ -248,14 +216,9 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
             mxs[i], mys[i], mstdx[i], mstdy[i], count = plot_image(positions[0], positions[1], 0, [100,100])
         galaxies[w].x = np.average(mxs, weights = mstdx)
         galaxies[w].y = np.average(mys, weights = mstdy)
-        #ws.write(w+1, 0, galaxies[w].name)
-        #ws.write(w+1, 1, galaxies[w].z)
-        ws.write(w+1, 2, galaxies[w].x)
-        ws.write(w+1, 3, galaxies[w].y)
-
         print(galaxies[w].x, galaxies[w].y)
         ###    ##I now think i may need to exit and reenter the program? no that's not right.. we could do a different center for each wavelength? i'll ask aleks.
-        for i in range(0,len(filters)):
+        for i in range(0,len(wavelengths)):
 # GAU IMG BKG TO FIND RSKY TERM: 
             # select all pixels with meaningful information and put them into a
             # one-dimensional array
@@ -293,37 +256,20 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
                 for k in range(0,width):
                     # In data numbers? In electrons?
                     fluxpix[i,width-j-1,k] = data[i][int(j+round(galaxies[w].y)-pixr+1)][int(k+round(galaxies[w].x)-pixr+1)]
-                    pixNoise[i,width-j-1,k] =  math.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
+                    pixNoise[i,width-j-1,k] =  np.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
                                               
                     SNR[i,width-j-1,k] = fluxpix[i,width-j-1,k]/pixNoise[i,width-j-1,k]
 
-            #do photometry on images
-            #convert to proper units
-            for j in range(0,len(radii)):
-                aperture = CircularAperture([galaxies[w].x, galaxies[w].y], radii[j])
-                phot_table = aperture_photometry(data[i], aperture)
-                #flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])/(3.631*10**-6)
-                flux[i,j] = phot_table['aperture_sum'][0]#*gain[i]*exp[i]
-                if j == 0:
-                    subflux[i,j] = flux[i,j]
-                else:
-                    subflux[i,j] = flux[i,j]-flux[i,j-1]
-        
-                annNoise[i,j] = np.sqrt((rSky[w][i]*area[j])**2+flux[i][j]+(RN[i]**2)*area[j]+dark[i]*area[j]*exp[i])
-                annSNR[i,j] = flux[i,j]/annNoise[i,j]
-
         m = np.ma.masked_where(SNR<10,SNR)
         n = np.ma.masked_where(SNR<10,fluxpix)
-# BEGINNING MLR CODE BUT ONLY IN PIXELS???: 
-        for i in range(0,len(wavelengths)):
-            m[i] = np.ma.masked_where(SNR[0]<10,SNR[i])
-            n[i] = np.ma.masked_where(SNR[0]<10, fluxpix[i])
+# BEGINNING MLR CODE: 
+        for i in range(0,len(filters)):
             n[i]=n[i]*fnu[i]/exp[i]
         # making uv color
         colorUV = mag(n[0])-mag(n[1])
-        for i in range (0,len(wavelengths)):
+        for i in range (0,len(filters)):
             lD = galaxies[w].lDcm
-            lum = luminosity(wavelengths[i], n, lD)
+            lum = luminosity(filters[i], n, lD)
             # model is fixed to star formation epoch with bursts
             for mod in range(5,6):
                 fig = plt.figure()
@@ -331,9 +277,8 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
                 mass = lum*mlr
                 #masked colorplot of mass. 
                 plt.imshow(m[i]*mass[i])
-                #plt.imshow(mass)
                 plt.colorbar()
-                plt.title(galaxies[w].name+' Mass Profile in Solar Masses at ' + filters[i], fontsize = 12)
+                plt.title(galaxies[w].name+' Mass Profile in Solar Masses at ' + wavelengths[i], fontsize = 12)
                 pdf.savefig()
                 plt.close()
         # Plotting UV color map and pixel restrictions.                     
@@ -343,8 +288,7 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
         plt.title(galaxies[w].name+'ColorUV map and constrictions')
         pdf.savefig()
         plt.close()
-        wb.save('updated.xlsx')
-        
+
         colorVJ = mag(n[1])-mag(n[2])
         # Plotting VJ color map and pixel restrictions.                     
         fig = plt.figure()
@@ -354,4 +298,4 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
         pdf.savefig()
         plt.close()
         
-os.system('open %s &' % 'sg_MONSTER.pdf')
+os.system('open %s &' % 'so_MONSTER_convolved.pdf')

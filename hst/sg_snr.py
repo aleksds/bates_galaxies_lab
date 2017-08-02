@@ -142,7 +142,11 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
                 else:
                     subflux[i,j] = flux[i,j]-flux[i,j-1]
         
-                annNoise[i,j] = math.sqrt((rSky[i][w]*area[j])**2+flux[i][j]+(RN[i]**2)*area[j]+dark[i]*area[j]*exp[i])
+                annNoise[i,j] = math.sqrt((rSky[i][w]*area[j])**2+flux[i][j]+(RN[i]**2)*area[j]+dark[i]*area[j]*exp[i])area = [0 for x in range(len(radii))]
+sigskyy = np.zeros([len(wavelengths),len(radii)])
+sigread = np.zeros([len(wavelengths),len(radii)])
+sigdark = np.zeros([len(wavelengths),len(radii)])
+sigstar = np.zeros([len(wavelengths),len(radii)])
                 sigskyy[i,j] = (rSky[i][w]*area[j])
                 sigread[i,j] = math.sqrt(RN[i]**2+(gain[i]/2)**2*area[j])
                 sigdark[i,j] = math.sqrt(dark[i]*area[j]*exp[i])
@@ -163,12 +167,17 @@ with PdfPages('sg_SNR_err.pdf') as pdf:
         for k in range(0,len(filters)):
             bx = fig.add_subplot(2,2,k+2)
             bx.set_title('Percent Uncertainty for '+labeling[k]+' by source',fontsize=10)
-            ax.plot(radii, np.log10(annNoise[k]/flux[k]*100), acolors[k], marker='o', label=str(labeling[k]))
-            bx.plot(radii,np.log10(sigread[k]/flux[k]*100), acolors[0],marker = 'x',linestyle = 'None',label='read')
-            bx.plot(radii,np.log10(sigskyy[k]/flux[k]*100), acolors[1],marker = 'o',linestyle = 'None',label='sky')
-            bx.plot(radii,np.log10(sigdark[k]/flux[k]*100), acolors[2],marker = '^',linestyle = 'None',label='dark')
-            bx.plot(radii,np.log10(sigstar[k]/flux[k]*100), acolors[3],marker = 's',linestyle = 'None',label='source')
-            plt.ylim(-4,1)
+            ax.plot(radii,(annNoise[k]/flux[k]*100), acolors[k], marker='o', label=str(labeling[k]))
+            bx.plot(radii,(sigread[k]/flux[k]*100), acolors[0],marker = 'x',linestyle = 'None',label='read')
+            bx.plot(radii,(sigskyy[k]/flux[k]*100), acolors[1],marker = 'o',linestyle = 'None',label='sky')
+            bx.plot(radii,(sigdark[k]/flux[k]*100), acolors[2],marker = '^',linestyle = 'None',label='dark')
+            bx.plot(radii,(sigstar[k]/flux[k]*100), acolors[3],marker = 's',linestyle = 'None',label='source')
+            #ax.plot(radii,np.log10(annNoise[k]/flux[k]*100), acolors[k], marker='o', label=str(labeling[k]))
+            #bx.plot(radii,np.log10( sigread[k]/flux[k]*100), acolors[0], marker = 'x',linestyle = 'None',label='read')
+            #bx.plot(radii,np.log10( sigskyy[k]/flux[k]*100), acolors[1], marker = 'o',linestyle = 'None',label='sky')
+            #bx.plot(radii,np.log10( sigdark[k]/flux[k]*100), acolors[2], marker = '^',linestyle = 'None',label='dark')
+            #bx.plot(radii,np.log10( sigstar[k]/flux[k]*100), acolors[3], marker = 's',linestyle = 'None',label='source')
+            #plt.ylim(-4,1)
             legend = bx.legend(loc='upper right', fontsize=8)
         
         #bx.plot([radii,radii,radii],sigread/flux*100,color = 'c', linestyle = 'None', marker = 'x', label = 'read')

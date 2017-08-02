@@ -24,12 +24,6 @@ from scipy.interpolate import interp1d
 # define the data directory
 dir = os.environ['HIRESDIR']
 
-# speed of light in Angstroms per second
-c = const.c.to('AA/s')
-c_kms = 3E5
-#mass of electron
-mass_e = 9.11**(-28)
-
 # wavelengths of relevant absorption lines
 mgii2803 = 2803.5314853
 mgii2796 = 2796.3542699
@@ -49,8 +43,6 @@ vcen = gal_info['vcen']
 vmax = gal_info['vmax']
 vflip = gal_info['vflip']
 # define velocity ranges to plot the profile
-vb = -3000.
-vr = 500.
 
 
 minorLocator = AutoMinorLocator()
@@ -65,49 +57,37 @@ with PdfPages(filename) as pdf:
         fx = data['fx']
         var = data['var']
 
-        sigma = np.zeros([len(flux)])
-        for i in range(0, len(flux)):
-            sigma[i] = flux[i] * np.sqrt(var[i])/fx[i]
-
         vel_kms = np.zeros([len(lines),len(wave)])
         # define the velocity scale [km / s]
         for i in range(0, len(lines)):
-            vel_kms[i] = ((wave-lines[i]*(1+zem[h]))/(lines[i]*(1+zem[h]))) * c_kms
+            vel_kms[i] = ((wave-lines[i]*(1+zem[h]))/(lines[i]*(1+zem[h]))) * 3E5
         tau = np.zeros([len(flux)])
         # loop over each spectral line-tau is an 8 by 50515 array, with 50515 values of tau for each spectral line
         blah = np.log(1/flux)
         tau = blah
-        sigma_tau = np.zeros([len(flux)])
-        for i in range(0, len(flux)):
-            sigma_tau[i] = (sigma[i]/flux[i])
                 
         #graphs for magnesium absorption lines:
         # define the regions to use the 2796 profile and the regions to use the 2803 profile
-        g2796 = (vel_kms[0] > vb) & (vel_kms[0] < vflip[h])
-        g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < vr)
+        g2796 = (vel_kms[0] > -3000) & (vel_kms[0] < vflip[h])
+        g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < 500)
         # plot the profiles using the 2796 profile on the blue side
         # and the 2803 profile on the red side
         fig = plt.figure()
+
+#Mg II 2796 Voigt Spectrum
         
-        ax = fig.add_subplot(3,1,2)
-        #plt.errorbar(vel_kms[0], flux, yerr = sigma, label = 'error', color = '#99ccff', markevery = 10, linewidth = .1)
-        #plt.errorbar(vel_kms[1][g2803], flux[g2803], yerr = sigma[g2803], label = '_nolegend_',  color = '#99ccff', markevery = 10, linewidth = .1)
+        ax = fig.add_subplot(2,1,1)
         ax.plot(vel_kms[0], flux, linewidth=1, label = names[0], color = '#2CA14B')
-        #ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
         ax.set_xlim(-3000, 500)
         ax.set_ylim(0, 2)
-        #plt.legend(loc = 1)
-        plt.title("Voigt Profile : Velocity vs Flux in %s" %(gal[h]))
+        plt.title("Mg II 2796 Voigt Profile : Velocity vs Flux in %s" %(gal[h]))
         plt.xlabel("Velocity(km/s)")
         plt.ylabel("Continuum Normalized Flux")
-        #handles, labels = ax.get_legend_handles_labels()
-        #ax.legend(handles, labels)
-        
 
         f = interp1d(vel_kms[0], flux)
+        #Tells code to make voigt profile in velocity range -3000 to 500 when flux is below .5
         test = (vel_kms[0] > -3000) & (vel_kms[0] < 500) & (flux < 0.5)
         vel_median = np.median(vel_kms[0][test])
-        print(gal[h],vel_median)
         vel_new = np.linspace(vel_median-1000, vel_median+1000, num=2001, endpoint=True)
 
 
@@ -123,21 +103,63 @@ with PdfPages(filename) as pdf:
         yarr = flux_king - 1.
 
         voi_init = Voigt1D(amplitude_L=-1.0, x_0=one, fwhm_L=two-one, fwhm_G=two-one)+Voigt1D(amplitude_L=-1.0, x_0=two, fwhm_L=thr-two, fwhm_G=thr-two)+Voigt1D(amplitude_L=-1.0, x_0=thr, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=fou, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=vel_median, fwhm_L=200, fwhm_G=200)
+
+                   ## Write function that combines cover fraction code with Voigt profile code ??????????? ##
+                   ##Correlation between amplitude and cover frac could be key##
         fitter = fitting.LevMarLSQFitter()
         voi_fit = fitter(voi_init, xarr, yarr)
-        print(voi_fit)
 
-        #ax = fig.add_subplot(3,1,3)
+        # ax = fig.add_subplot(2,1,2)
         ax.plot(xarr,voi_fit(xarr)+1, color='red')
         plt.xlabel("Velocity(km/s)")
         plt.ylabel("Continuum Normalized Flux")
         ax.set_ylim (0,2)
         ax.set_xlim(-3000,500)
+
+
+#Mg II 2803 Voigt Spectrum
         
+        ax = fig.add_subplot(2,1,2)
+        ax.plot(vel_kms[1], flux, linewidth=1, label = names[0], color = '#2C6EA1')
+        ax.set_xlim(-3000, 500)
+        ax.set_ylim(0, 2)
+        plt.title("Mg II 2803 Voigt Profile : Velocity vs Flux in %s" %(gal[h]))
+        plt.xlabel("Velocity(km/s)")
+        plt.ylabel("Continuum Normalized Flux")
+
+        f = interp1d(vel_kms[1], flux)
+        test = (vel_kms[1] > -3000) & (vel_kms[1] < 500) & (flux < 0.5)
+        vel_median = np.median(vel_kms[1][test])
+        vel_new = np.linspace(vel_median-1000, vel_median+1000, num=2001, endpoint=True)
+
+
+        blah = len(vel_kms[1][test])
+        one = vel_kms[1][test][round(blah*0.2)]
+        two = vel_kms[1][test][round(blah*0.4)]
+        thr = vel_kms[1][test][round(blah*0.6)]
+        fou = vel_kms[1][test][round(blah*0.8)]
+
+        flux_king = f(vel_new)
+
+        xarr = vel_new
+        yarr = flux_king - 1.
+
+        voi_init = Voigt1D(amplitude_L=-1.0, x_0=one, fwhm_L=two-one, fwhm_G=two-one)+Voigt1D(amplitude_L=-1.0, x_0=two, fwhm_L=thr-two, fwhm_G=thr-two)+Voigt1D(amplitude_L=-1.0, x_0=thr, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=fou, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=vel_median, fwhm_L=200, fwhm_G=200)
+        fitter = fitting.LevMarLSQFitter()
+        voi_fit = fitter(voi_init, xarr, yarr)
+
+        # ax = fig.add_subplot(2,1,2)
+        ax.plot(xarr,voi_fit(xarr)+1, color='red')
+        plt.xlabel("Velocity(km/s)")
+        plt.ylabel("Continuum Normalized Flux")
+        ax.set_ylim (0,2)
+        ax.set_xlim(-3000,500)
+
+
         fig.tight_layout()
         pdf.savefig()
         plt.close()
-os.system("evince  %s &" % filename)
+os.system("open %s &" % filename)
 
 
 
