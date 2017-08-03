@@ -56,7 +56,7 @@ with PdfPages(filename) as pdf:
             vel_kms[i] = ((wave-lines[i]*(1+zem[h]))/(lines[i]*(1+zem[h]))) * 3E5
     
         # define the regions to use the 2796 profile and the regions to use the 2803 profile
-        g2796 = (vel_kms[0] > -3000) & (vel_kms[0] < vflip[h])
+        g2796 = (vel_kms[0] > -3000) & (vel_kms[0] <500)#< vflip[h])
         g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < 500)
         # plots the profiles where the 2796 profile on the blue side
         # and the 2803 profile on the red side
