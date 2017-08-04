@@ -1,18 +1,15 @@
 # Makes plot for covering fraction vs velocity
 
-from scipy.interpolate import spline
-import math
+
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from astropy import units as u
-from astropy import constants as const
 from astropy.io import ascii
 from matplotlib.ticker import AutoMinorLocator
 from scipy.interpolate import interp1d
-import matplotlib._color_data as mcd
-import matplotlib.patches as mpatch
+from astropy.modeling.models import Voigt1D
+from astropy.modeling import models, fitting
 
 
 # define the data directory
@@ -56,47 +53,137 @@ with PdfPages(filename) as pdf:
             vel_kms[i] = ((wave-lines[i]*(1+zem[h]))/(lines[i]*(1+zem[h]))) * 3E5
     
         # define the regions to use the 2796 profile and the regions to use the 2803 profile
-        g2796 = (vel_kms[0] > -3000) & (vel_kms[0] <500)#< vflip[h])
+        # plots the profiles where the 2796 profile on the blue side and the 2803 profile on the red side
+        
+        # g2796 = (vel_kms[0] > -3000) & (vel_kms[0] < vflip[h])
+        g2796 = (vel_kms[0] > -3000) & (vel_kms[0] <500)
         g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < 500)
-        # plots the profiles where the 2796 profile on the blue side
-        # and the 2803 profile on the red side
+        # g2803 = (vel_kms[1] > -3000) & (vel_kms[1] < 500)
+
+        fig = plt.figure()
+
+# ##Flux Plots
+        
+#         ax = fig.add_subplot(3,1,1)
+#         plt.title("Flux Plot in Galaxy %s" %(gal[h]))
+#         plt.xlabel("Velocity(km/s)")
+#         plt.ylabel("C.N. Flux")
+#         ax.plot(vel_kms[0][g2796], flux[g2796], linewidth=1, label = names[0], color = '#2CA14B')
+#         ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
+#         ax.set_xlim(-3000, 500)
+#         ax.set_ylim(0, 2)
+
+##Voigt Profile
+
+
+        ax = fig.add_subplot(3,1,1)
+        ax.plot(vel_kms[0][g2796], flux[g2796], linewidth=1, label = names[0], color = '#2CA14B')
+        ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[0], color = '#2C6EA1')
+        ax.set_xlim(-3000, 500)
+        ax.set_ylim(0, 2)
+        plt.title("Mg Dub Voigt in %s" %(gal[h]))
+        plt.xlabel("Velocity(km/s)")
+        plt.ylabel("C.N. Flux")
+
+##2796 Segment
+
+        f = interp1d(vel_kms[0], flux)
+        #Tells code to make voigt profile in velocity range -3000 to 500 when flux is below .5
+        test_2796 = (vel_kms[0] > -3000) & (vel_kms[0] < 500) & (flux < 0.5)
+        vel_median = np.median(vel_kms[0][test_2796])
+        vel_new = np.linspace(vel_median-1000, vel_median+1000, num=2001, endpoint=True)
+
+
+        boom = len(vel_kms[0][test_2796])
+        one = vel_kms[0][test_2796][round(boom*0.2)]
+        two = vel_kms[0][test_2796][round(boom*0.4)]
+        thr = vel_kms[0][test_2796][round(boom*0.6)]
+        fou = vel_kms[0][test_2796][round(boom*0.8)]
+
+        flux_king = f(vel_new)
+
+        xarr = vel_new
+        yarr = flux_king - 1.
+
+        voi_init = Voigt1D(amplitude_L=-1.0, x_0=one, fwhm_L=two-one, fwhm_G=two-one)+Voigt1D(amplitude_L=-1.0, x_0=two, fwhm_L=thr-two, fwhm_G=thr-two)+Voigt1D(amplitude_L=-1.0, x_0=thr, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=fou, fwhm_L=fou-thr, fwhm_G=fou-thr)+Voigt1D(amplitude_L=-1.0, x_0=vel_median, fwhm_L=200, fwhm_G=200)
+
+                   ## Write function that combines cover fraction code with Voigt profile code ??????????? ##
+                   ##Correlation between amplitude and cover frac could be key##
+                   
+        fitter = fitting.LevMarLSQFitter()
+        voi_fit = fitter(voi_init, xarr, yarr)
+        
+##2803 Segment
+
+        
+        f_2803 = interp1d(vel_kms[1], flux)
+        test_2803 = (vel_kms[1] > -3000) & (vel_kms[1] < 500) & (flux < 0.5)
+        vel_median_2803 = np.median(vel_kms[1][test_2803])
+        vel_new_2803 = np.linspace(vel_median_2803-1000, vel_median_2803+1000, num=2001, endpoint=True)
+
+
+        boom_2803 = len(vel_kms[1][test_2803])
+        one_2803 = vel_kms[1][test_2803][round(boom_2803*0.2)]
+        two_2803 = vel_kms[1][test_2803][round(boom_2803*0.4)]
+        thr_2803 = vel_kms[1][test_2803][round(boom_2803*0.6)]
+        fou_2803 = vel_kms[1][test_2803][round(boom_2803*0.8)]
+
+        flux_king_2803 = f(vel_new_2803)
+
+        xarr_2803 = vel_new_2803
+        yarr_2803 = flux_king_2803 - 1.
+
+        voi_init_2803 = Voigt1D(amplitude_L=-1.0, x_0=one_2803, fwhm_L=two_2803-one_2803, fwhm_G=two_2803-one_2803)+Voigt1D(amplitude_L=-1.0, x_0=two_2803, fwhm_L=thr_2803-two_2803, fwhm_G=thr_2803-two_2803)+Voigt1D(amplitude_L=-1.0, x_0=thr_2803, fwhm_L=fou_2803-thr_2803, fwhm_G=fou_2803-thr_2803)+Voigt1D(amplitude_L=-1.0, x_0=fou_2803, fwhm_L=fou_2803-thr_2803, fwhm_G=fou_2803-thr_2803)+Voigt1D(amplitude_L=-1.0, x_0=vel_median_2803, fwhm_L=200, fwhm_G=200)
+        fitter_2803 = fitting.LevMarLSQFitter()
+        voi_fit_2803 = fitter(voi_init_2803, xarr_2803, yarr_2803)
+        
+
+        ax.plot(xarr,voi_fit(xarr)+1, color='red')
+        ax.plot(xarr_2803,voi_fit_2803(xarr_2803)+1, color='magenta')
+        plt.xlabel("Velocity(km/s)")
+        plt.ylabel("C.N. Flux")
+        ax.set_ylim (0,2)
+        ax.set_xlim(-3000,500)
+
+
+## Covering Fraction Plot
+
+        covrfrac = 1-flux
+
+        ax = fig.add_subplot(3,1,2)
+        plt.title("Covering Frac. in %s" %(gal[h]))
+        plt.xlabel("Velocity(km/s)")
+        plt.ylabel("Covering Fraction")
+        ax.plot(vel_kms[0][g2796], covrfrac[g2796], linewidth=1, label = names[0], color = '#2CA14B')
+        ax.plot(vel_kms[1][g2803], covrfrac[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
+        ax.set_xlim(-3000, 500)
+        ax.set_ylim(0, 1)
+
+## Tau Plots
 
         tau = np.zeros([len(flux)])
         # loop over each spectral line-tau is an 8 by 50515 array, with 50515 values of tau for each spectral line
         #Used 2803 line because all graphs have their max absorption in Mg2803 wavelength region
-        f_new_2796 = ((flux - np.min(flux[g2796]))/(1 - np.min(flux[g2796])))
-        f_new_2803 = ((flux - np.min(flux[g2803]))/(1 - np.min(flux[g2803])))
-        # blah = np.log(1/flux)
-        bleh = np.log (1/f_new_2796)
-        blah = np.log (1/f_new_2803)
-        tau_2796 = bleh
-        tau_2803 = blah
+        #f_new_2796 = ((flux - np.min([g2796]))/(1 - np.min(flux[g2796])))
+        #f_new_2803 = ((flux - np.min(flux[g2803]))/(1 - np.min(flux[g2803])))
 
-        fig = plt.figure()
-
-##Flux Plots
+        f_new_2796 = ((flux - np.min(voi_fit(xarr)+1))/(1 - np.min(flux[g2796])))
+        f_new_2803 = ((flux - np.min(voi_fit_2803(xarr_2803)+1))/(1 - np.min(flux[g2803])))
         
-        ax = fig.add_subplot(2,1,1)
-        plt.title("Flux Plot in Galaxy %s" %(gal[h]))
-        plt.xlabel("Velocity(km/s)")
-        plt.ylabel("Continuum Normalized Flux")
-        ax.plot(vel_kms[0][g2796], flux[g2796], linewidth=1, label = names[0], color = '#2CA14B')
-        ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
-        ax.set_xlim(-3000, 500)
-        ax.set_ylim(0, 2)
+        # blah = np.log(1/flux)
+        tau_2796 = np.log (1/f_new_2796)
+        tau_2803 = np.log (1/f_new_2803)
 
-
-## Tau Plots
-
-        ax = fig.add_subplot(2,1,2)
-        plt.title("Tau based on constant Covering Fraction in Galaxy %s" %(gal[h]))
+        
+        ax = fig.add_subplot(3,1,3)
+        plt.title("Tau in Galaxy %s" %(gal[h]))
         plt.xlabel("Velocity(km/s)")
         plt.ylabel("Tau")
         ax.plot(vel_kms[0][g2796], tau_2796[g2796], linewidth=1, label = names[0], color = '#2CA14B')
         ax.plot(vel_kms[1][g2803], tau_2803[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
         ax.set_xlim(-3000, 500)
         # y-axis limit set to 5 because tau of 5 and t of infinity have no visible difference
-        ax.set_ylim(0, 2)
+        ax.set_ylim(0, 6)
 
 
         fig.tight_layout()
