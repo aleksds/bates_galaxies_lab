@@ -3,6 +3,7 @@
 #Makes Combined Flux Plot and compares it to Tau and Column Density
 
 #07/31/17  =  attempt to add MgI 2852 wavelength
+#08/2/17 = Mg Omnipotent Works for Mg Ions
 
 
 import numpy as np
@@ -333,8 +334,11 @@ with PdfPages(filename) as pdf:
         fig.tight_layout()
         pdf.savefig()
         plt.close()
+
+
+
         
-        # Mg II 2803
+#### Mg II 2803
 
         fig = plt.figure()
 

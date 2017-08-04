@@ -1,5 +1,6 @@
 #Kwamo 07/31/17
 #Beginning of Fe code, based on kd_omnipotent_Mg
+#08/03/17 Iron Code Works
 
 import numpy as np
 import os
