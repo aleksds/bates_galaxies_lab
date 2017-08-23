@@ -32,7 +32,8 @@ from astropy.cosmology import FlatLambdaCDM
 
 # define the directory that contains the images
 #dir = os.environ['HSTDIR']
-dir = '/Users/sgottlie/Desktop/'
+#dir = '/Users/sgottlie/Desktop/'
+dir = '/Volumes/physics/linux-lab/data/hst/'
 
 ### THINGS FOR READING IN GALAXY DATA FROM galaxydata.xlsx
 
@@ -130,7 +131,8 @@ def color (pair):
     return mag(fluxpix[pair[0]])-mag(fluxpix[pair[1]])
 
 with PdfPages('sg_COLORS.pdf') as pdf:
-    for w in range(0,1):
+    #for w in range(0,1):
+    for w in range(0, len(galaxies)):
         J = galaxies[w]
         print(J.name)
         #for i in range(0,1):
@@ -193,10 +195,14 @@ with PdfPages('sg_COLORS.pdf') as pdf:
                                 fluxpix[ih8u,width-j-1,k] = data[int(j+round(J.y*(res+1))-pixr+1)][int(k+round(J.x*(res+1))-pixr+1)]
                                 #pixnoise may not need to be the same structure as fluxpix. infact, let us attempt that:
                                 # OR: pixNoise[ih8u,width-j-1,k] = math.sqrt((rSky)**2+fluxpix[ih8u][width-j-1][k]+(RN**2+(gain/2)**2)*1+dark[i]*exp)
-                                pixNoise[width-j-1,k] = math.sqrt((rSky)**2+fluxpix[ih8u][width-j-1][k]+(RN**2+(gain/2)**2)*1+dark[i]*exp) #the matching indices keeps things in the correct shapes
+                                val = (rSky)**2+fluxpix[ih8u][width-j-1][k]+(RN**2+(gain/2)**2)*1+dark[i]*exp
+                                if val > 0:
+                                    pixNoise[width-j-1,k] = math.sqrt((rSky)**2+fluxpix[ih8u][width-j-1][k]+(RN**2+(gain/2)**2)*1+dark[i]*exp) #the matching indices keeps things in the correct shapes
                                 # Incorrect because it doesn't map properly: pixNoise[j,k] = math.sqrt((rSky)**2+fluxpix[ih8u][j][k]+(RN**2+(gain/2)**2)*1+dark[i]*exp)
                                 #SNR[ih8u, width-j-1,k] = fluxpix[ih8u,width-j-1,k]/pixNoise[ih8u,width-j-1,k]
-                                SNR[width-j-1,k] = fluxpix[ih8u,width-j-1,k] / pixNoise[width-j-1,k]
+                                    SNR[width-j-1,k] = fluxpix[ih8u,width-j-1,k] / pixNoise[width-j-1,k]
+                                else:
+                                    SNR[width-j-1,k] = -10    
 
                                 fluxpix[ih8u] = np.ma.masked_where(SNR<3, fluxpix[ih8u])
 
