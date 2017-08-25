@@ -31,9 +31,9 @@ from astropy import constants as const
 from astropy.cosmology import FlatLambdaCDM
 
 # define the directory that contains the images
-#dir = os.environ['HSTDIR']
+dir = os.environ['HSTDIR']
 #dir = '/Users/sgottlie/Desktop/'
-dir = '/Volumes/physics/linux-lab/data/hst/'
+#dir = '/Volumes/physics/linux-lab/data/hst/'
 
 ### THINGS FOR READING IN GALAXY DATA FROM galaxydata.xlsx
 
