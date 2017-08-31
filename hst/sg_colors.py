@@ -209,17 +209,19 @@ with PdfPages('sg_COLORS.pdf') as pdf:
                             #i think that completes the data collection, snr, mask, store & exit stage.... that is done for each galaxy. now we return to the galaxy level.
         # and i believe that is here. so at this point, we have our fluxpix that is 0-6 and 8. meow.
         fig = plt.figure()
-        plt.suptitle(J.name +' fliggity flux, dawg')
+        plt.suptitle(J.name +' fliggity flux, dawg (kJy)')
         for h0t in range(0,len(fluxpix)):
             ax = fig.add_subplot(3,3,h0t+1)
-            plt.imshow(fluxpix[h0t])
+            plt.imshow(fluxpix[h0t]/1000, clim=(0,50))
+            plt.axis('off')
             #plt.tight_layout()
-            plt.colorbar(format='%.0e')
+            #plt.colorbar(format='%.0e')
+            plt.colorbar()
             f = int(h0t/4)
             r = int((h0t-f*4)/2)
             im = int(h0t%2)
             
-            plt.title(filters[f]+' '+cf[r]+ ' ' +rc[im])
+            plt.title(filters[f]+' '+cf[r]+ ' ' +rc[im][:3])
         pdf.savefig()
         plt.close() #??
             #plt.close()
@@ -229,10 +231,16 @@ with PdfPages('sg_COLORS.pdf') as pdf:
         for p00ps in range(0,len(pairs)):
             ax = fig.add_subplot(2,3,p00ps+1)
             pl0tme = color(pairs[p00ps])
-            plt.imshow(pl0tme) #remember how to make red / blue!!!!
-            plt.colorbar()
+            im = plt.imshow(pl0tme,clim=(-5,6)) #remember how to make red / blue!!!!
+            #plt.colorbar()
+            plt.axis('off')
             plt.tight_layout()
-            ax.set_title(titleMFKRs[p00ps]) #SRY!SRY
+            ax.set_title(titleMFKRs[p00ps],fontsize=12) #SRY!SRY
+        # OKAY LETS TRY TO MAKE A SINGLE COLORBAR
+        fig.subplots_adjust(right=0.8)
+        cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+        fig.colorbar(im, cax=cbar_ax)
+        #OKAY ALL DONE
         pdf.savefig()
         plt.close() #???
 #I wouldn't hate it if I at some point learned to make titles that weren't like, WILDLY inappropriate.
