@@ -51,6 +51,7 @@ from matplotlib.ticker import ScalarFormatter
 #paramfile = '/Users/sgottlie/github/prospector/demo/demo_mock_params1.py'
 paramfile = '/demo_mock_params1.py'
 dmp1 = 'demo_mock_params1.py'
+photfile ='/demo_photometry1.dat'
 ### OKAY ALL DONE
 
 clargs = {'param_file':paramfile}
@@ -68,7 +69,7 @@ spec_noise, phot_noise = model_setup.load_gp(**run_params)
 model = model_setup.load_model(**run_params)
 
 # demo data (generated from the script)
-obs = model_setup.load_obs(**run_params)
+obs = model_setup.load_obs(phottable = photfile,**run_params)
 print('Mock S/N={}'.format(obs['mock_snr']))
 if run_params['add_noise']:
     print('Noise realization added to mock photometry')
