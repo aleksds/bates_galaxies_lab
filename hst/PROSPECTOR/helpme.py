@@ -3,7 +3,7 @@ import time, sys, os
 import h5py
 import numpy as np
 from matplotlib.pyplot import *
-
+import matplotlib.pyplot as plt
 #matplotlib inline
 
 # re-defining plotting defaults
@@ -48,7 +48,8 @@ from matplotlib.ticker import ScalarFormatter
 #okay that is in, let's try this bullshit
 
 ## HERE IS A LIST OF THINGS THAT I REFUSE TO HARD CODE INTO THE PROGRAM!!!
-paramfile = '/Users/sgottlie/github/prospector/demo/demo_mock_params1.py'
+#paramfile = '/Users/sgottlie/github/prospector/demo/demo_mock_params1.py'
+paramfile = '/demo_mock_params1.py'
 dmp1 = 'demo_mock_params1.py'
 ### OKAY ALL DONE
 
@@ -197,13 +198,15 @@ figure(figsize=(16,8))
 ymax = 1e-7
 
 # plot model + data
-loglog(wspec * a, mspec_init, label='Model spectrum', 
+fig = plt.figure()
+
+plt.loglog(wspec * a, mspec_init, label='Model spectrum', 
        lw=0.7, color='navy', alpha=0.7)
-errorbar(wphot, mphot_init, label='Model photometry', 
+plt.errorbar(wphot, mphot_init, label='Model photometry', 
          marker='s',markersize=10, alpha=0.8, ls='', lw=3,
          markerfacecolor='none', markeredgecolor='blue', 
          markeredgewidth=3)
-errorbar(wphot, obs['maggies'], yerr=obs['maggies_unc'], 
+plt.errorbar(wphot, obs['maggies'], yerr=obs['maggies_unc'], 
          label='Observed photometry',
          marker='o', markersize=10, alpha=0.8, ls='', lw=3,
          ecolor='red', markerfacecolor='none', markeredgecolor='red', 
@@ -216,15 +219,17 @@ for f in obs['filters']:
     while t.max() > 1:
         t /= 10.
     t = 0.1*(ymax-ymin)*t + ymin
-    loglog(w, t, lw=3, color='gray', alpha=0.7)
+    plt.loglog(w, t, lw=3, color='gray', alpha=0.7)
 
 # prettify
-xlabel('Wavelength [A]')
-ylabel('Flux Density [maggies]')
-xlim([xmin, xmax])
-ylim([ymin, ymax])
-legend(loc='best', fontsize=20)
-tight_layout()
+plt.xlabel('Wavelength [A]')
+plt.ylabel('Flux Density [maggies]')
+plt.xlim([xmin, xmax])
+plt.ylim([ymin, ymax])
+plt.legend(loc='best', fontsize=20)
+plt.tight_layout()
+
+plt.savefig('hi.png')
 
 # Minimization Step
 # We can attempt to initialize our model reasonably close to the data by using some numerical minimization routines.
@@ -773,13 +778,13 @@ if outname is not None:
 # HERE IS THE END OF THE INTERACTIVE DEMO OMG
 
 # plot transmission curves
-
+fig = plt.figure()
 for f in obs['filters']:
     w, t = f.wavelength.copy(), f.transmission.copy()
     while t.max() > 1:
         t /= 10.
     t = 0.1*(ymax-ymin)*t + ymin
-    loglog(w, t, lw=3, color='gray', alpha=0.7)
+    plt.loglog(w, t, lw=3, color='gray', alpha=0.7)
 
 
 for f in obs['filters']:
@@ -787,4 +792,5 @@ for f in obs['filters']:
     while t.max() > 1:
         t /= 10.
     t = 0.1*(ymax-ymin)*t +ymin
-    loglog(w,t,lw=3,color='gray',alpha=0.7)
+    plt.loglog(w,t,lw=3,color='gray',alpha=0.7)
+plt.savefig('somewaves.png')
