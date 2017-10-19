@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # In [20]
-import plot_utils as pread
+import spot_utils as pread
 from prospect.io.read_results import results_from
 
 # In [21]
