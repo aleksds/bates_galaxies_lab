@@ -1,9 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
-# In [20]
 import spot_utils as pread
 from prospect.io.read_results import results_from
+from prospect.models import model_setup
+
+
+paramfile = 'ad_params.py'
+clargs = {'param_file':paramfile}
+run_params = model_setup.get_run_params(argv=paramfile, **clargs)
+print(run_params)
+
+obs = model_setup.load_obs(**run_params)
+sps = model_setup.load_sps(**run_params)
+model = model_setup.load_model(**run_params)
+
+wspec = sps.csp.wavelengths # *restframe* spectral wavelengths
+a = 1.0 + model.params.get('zred', 0.6) # cosmological redshifting
+wphot = np.array([f.wave_effective for f in obs['filters']])
 
 # In [21]
 # grab results, powell results, and our corresponding models
@@ -58,4 +71,51 @@ except:
 
 plt.savefig('yo.png')
     
+# In [24]
 
+# randomly chosen parameters from chain
+run_params = res['run_params']
+randint = np.random.randint
+nwalkers, niter = run_params['nwalkers'], run_params['niter']
+theta = res['chain'][randint(nwalkers), randint(niter)]
+# generate model
+model = mod
+mspec, mphot, mextra = model.mean_model(theta, obs, sps=sps)
+
+# establish bounds
+xmin, xmax = wphot.min()*0.8, wphot.max()/0.8
+temp = np.interp(np.linspace(xmin,xmax,10000), wspec * a, mspec)
+ymin, ymax = temp.min()*0.8, temp.max()/0.8
+#figure(figsize=(16,8))
+
+fig = plt.figure(figsize=(16,8))
+
+# plot data and model
+plt.loglog(wspec * a, mspec, label='Model spectrum',
+       lw=0.7, color='navy', alpha=0.7)
+plt.errorbar(wphot, mphot, label='Model photometry',
+         marker='s', markersize=10, alpha=0.8, ls='', lw=3, 
+         markerfacecolor='none', markeredgecolor='blue', 
+         markeredgewidth=3)
+plt.errorbar(wphot, obs['maggies'], yerr=obs['maggies_unc'], 
+         label='Observed photometry', ecolor='red', 
+         marker='o', markersize=10, ls='', lw=3, alpha=0.8, 
+         markerfacecolor='none', markeredgecolor='red', 
+         markeredgewidth=3)
+
+# plot transmission curves
+for f in obs['filters']:
+    w, t = f.wavelength.copy(), f.transmission.copy()
+    while t.max() > 1:
+        t /= 10.
+    t = 0.1*(ymax-ymin)*t + ymin
+    plt.loglog(w, t, lw=3, color='gray', alpha=0.7)
+
+plt.xlabel('Wavelength [A]')
+plt.ylabel('Flux Density [maggies]')
+plt.xlim([xmin, xmax])
+plt.ylim([ymin, ymax])
+plt.legend(loc='best', fontsize=20)
+plt.tight_layout()
+
+plt.savefig('ha.png')
