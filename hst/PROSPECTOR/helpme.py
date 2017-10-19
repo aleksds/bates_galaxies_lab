@@ -25,10 +25,10 @@ rcParams.update({'xtick.color': 'k'})
 rcParams.update({'ytick.color': 'k'})
 rcParams.update({'font.size': 30})
 import sys
-sys.path.append('/Users/sgottlie/github/prospector')
-sys.path.append('/Users/sgottlie/github/sedpy')
-sys.path.append('/Users/sgottlie/github/python-fsps')
-sys.path.append('/Users/sgottlie/github/corner')
+#sys.path.append('/Users/sgottlie/github/prospector')
+#sys.path.append('/Users/sgottlie/github/sedpy')
+#sys.path.append('/Users/sgottlie/github/python-fsps')
+#sys.path.append('/Users/sgottlie/github/corner')
 import fsps
 import sedpy
 import prospect
@@ -710,7 +710,7 @@ for i, x in enumerate(xs):
         '''
         h0tp00ps = ax[i]
         hist2d(y, x, ax=h0tp00ps, range=[range[j], range[i]], weights=weights, color=color, smooth=smooth, bins=[bins[j], bins[i]], **hist2d_kwargs)
-
+        '''
         if truths is not None:
             if truths[i] is not None and truths[j] is not None:
                 ax.plot(truths[j], truths[i], "s", color=truth_color)
@@ -762,7 +762,7 @@ for i, x in enumerate(xs):
             # use MathText for axes ticks
             ax.yaxis.set_major_formatter(
                 ScalarFormatter(useMathText=use_math_text))
-'''
+
 #return fig
 
 ### all done with triangle from corner
@@ -779,6 +779,7 @@ if outname is not None:
 # HERE IS THE END OF THE INTERACTIVE DEMO OMG
 
 # plot transmission curves
+'''
 fig = plt.figure()
 for f in obs['filters']:
     w, t = f.wavelength.copy(), f.transmission.copy()
@@ -795,3 +796,4 @@ for f in obs['filters']:
     t = 0.1*(ymax-ymin)*t +ymin
     plt.loglog(w,t,lw=3,color='gray',alpha=0.7)
 plt.savefig('somewaves.png')
+'''
