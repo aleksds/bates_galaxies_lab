@@ -1,43 +1,28 @@
 import numpy as np
-# IF I ADD SOME STUFF, DOES IT WORK OKAY?
-
 import sys
-
-# need to have prospect in python path
-# https://github.com/bd-j/prospector
-sys.path.append('/Users/sgottlie/github/prospector')
-
-# need to have sedpy
-# https://github.com/bd-j/sedpy
-sys.path.append('/Users/sgottlie/github/sedpy')
-
-# need to have fsps
-# https://github.com/cconroy20/fsps
-# https://github.com/dfm/python-fsps
-sys.path.append('/Users/sgottlie/github/python-fsps')
-#import fsps
-
-
-## THIS IS THE END OF ME ADDING STUFF
-
-
 from prospect.models import priors, sedmodel
 from prospect.sources import CSPSpecBasis
 from sedpy.observate import load_filters
-
 # --------------
 # RUN_PARAMS
 # --------------
-
+photfile = 'sgflux.dat'
 run_params = {'verbose':True,
               'debug':False,
               'outfile':'demo_galphot',
-              # Fitter parameters
-              'nwalkers':128,
-              'nburn':[10, 10, 10], 'niter':512,
+              # Optimization parameters
               'do_powell': False,
               'ftol':0.5e-5, 'maxfev':5000,
               'initial_disp':0.1,
+              'do_levenburg': True,
+              'nmin': 10,
+              # Fitter parameters
+              'nwalkers':128,
+              'nburn':[10, 10, 10], 'niter':512,
+              # nestle Fitter parameters
+              'nestle_method': 'single',
+              'nestle_npoints': 200,
+              'nestle_maxcall': int(1e6),
               # Obs data parameters
               'objid':0,
               'phottable': 'demo_photometry.dat',
@@ -46,8 +31,16 @@ run_params = {'verbose':True,
               'wlo':3750., 'whi':7200.,
               # SPS parameters
               'zcontinuous': 1,
+              # Input mock model parameters
+              'mass': 5e11,
+              'logzsol': 0.19,
+              'tage': 7.9,
+              'tau': 9.6,
+              'dust2': 0.18,
+              'zred': 0.6,
               }
 
+    
 # --------------
 # OBS
 # --------------
@@ -68,9 +61,10 @@ sdss = ['sdss_{0}0'.format(b) for b in ['u','g','r','i','z']]
 # names (and format)
 #filtersets = (galex + bessell + spitzer,
 #              galex + sdss + spitzer)
-filterset = ['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w']
+filtersets = ['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w']
 
 def load_obs(objid=0, phottable='sgflux.fits', **kwargs):
+    filternames = ['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w']
     """Load photometry from an ascii file.  Assumes the following columns:
     `objid`, `filterset`, [`mag0`,....,`magN`] where N >= 11.  The User should
     modify this function (including adding keyword arguments) to read in their
@@ -91,28 +85,18 @@ def load_obs(objid=0, phottable='sgflux.fits', **kwargs):
     # sqlite, whatever.
     # NO YOU CANT YOU CANT USE .DAT SO DON'T WHATEVER ME, MISTER
     # e.g.:
-    import astropy.io.fits as pyfits
-    #catalog = pyfits.getdata(phottable)
-    global catalog
+
     catalog = ascii.read(phottable)
-    print(catalog)
-    # Here we will read in an ascii catalog of magnitudes as a numpy structured
-    # array
-    with open(phottable, 'r') as f:
-        # drop the comment hash
-        header = f.readline().split()[1:]
-    catalog = np.genfromtxt(phottable, comments='#',
-                            dtype=np.dtype([(n, np.float) for n in header]))
 
     # Find the right row
+    
     ind = catalog['objid'] == float(objid)
-    # Here we are dynamically choosing which filters to use based on the object
-    # and a flag in the catalog.  Feel free to make this logic more (or less)
-    # complicated.
-    filternames = filtersets[ int(catalog[ind]['filterset']) ]
-    # And here we loop over the magnitude columns
-    mags = [catalog[ind]['mag{}'.format(i)] for i in range(len(filternames))]
-    mags = np.array(mags)
+    # Pick up data from our file, yo.
+    wavelengths = [475,814,1600]
+    mags = np.array([catalog['f-{}'.format(i)] for i in wavelengths])
+    ivars = np.array([catalog['ivar-{}'.format(i)] for i in wavelengths])
+    ids = catalog['objid']
+    zs = catalog['z']
 
     # Build output dictionary. 
     obs = {}
@@ -123,15 +107,15 @@ def load_obs(objid=0, phottable='sgflux.fits', **kwargs):
     # order as `filters` above.
     obs['maggies'] = np.squeeze(10**(-mags/2.5))
     # HACK.  You should use real flux uncertainties
+    # At some point we may want this to be results from SNR??
     obs['maggies_unc'] = obs['maggies'] * 0.07
     # Here we mask out any NaNs or infs
     obs['phot_mask'] = np.isfinite(np.squeeze(mags))
     # We have no spectrum.
     obs['wavelength'] = None
+    obs['objid'] = ids
+    obs['z'] = zs
 
-    # Add unessential bonus info.  This will be stored in output
-    #obs['dmod'] = catalog[ind]['dmod']
-    obs['objid'] = objid
 
     return obs
 
@@ -474,3 +458,8 @@ def getthisdata(filename, *args, **kwargs):
         return data, hdr
     else:
         return data
+def load_model(**extras):
+    # In principle (and we've done it) you could have the model depend on
+    # command line arguments (or anything in run_params) by making changes to
+    # `model_params` here before instantiation the SedModel object.  Up to you.
+    return sedmodel.SedModel(model_params)
