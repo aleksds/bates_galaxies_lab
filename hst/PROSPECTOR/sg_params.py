@@ -3,13 +3,14 @@ import sys
 from prospect.models import priors, sedmodel
 from prospect.sources import CSPSpecBasis
 from sedpy.observate import load_filters
+photfile = 'sgflux.dat'
 # --------------
 # RUN_PARAMS
 # --------------
-photfile = 'sgflux.dat'
+
 run_params = {'verbose':True,
               'debug':False,
-              'outfile':'demo_galphot',
+              'outfile':'resultsfor_',
               # Optimization parameters
               'do_powell': False,
               'ftol':0.5e-5, 'maxfev':5000,
@@ -40,7 +41,7 @@ run_params = {'verbose':True,
               'zred': 0.6,
               }
 
-    
+
 # --------------
 # OBS
 # --------------
@@ -61,10 +62,9 @@ sdss = ['sdss_{0}0'.format(b) for b in ['u','g','r','i','z']]
 # names (and format)
 #filtersets = (galex + bessell + spitzer,
 #              galex + sdss + spitzer)
-filtersets = ['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w']
+filtersets = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
 
-def load_obs(objid=0, phottable='sgflux.dat', **kwargs):
-    filternames = ['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w']
+def load_obs(objid=0, phottable=photfile, **kwargs):
     """Load photometry from an ascii file.  Assumes the following columns:
     `objid`, `filterset`, [`mag0`,....,`magN`] where N >= 11.  The User should
     modify this function (including adding keyword arguments) to read in their
@@ -85,25 +85,24 @@ def load_obs(objid=0, phottable='sgflux.dat', **kwargs):
     # sqlite, whatever.
     # NO YOU CANT YOU CANT USE .DAT SO DON'T WHATEVER ME, MISTER
     # e.g.:
-    return (phottable)
-'''
+    import astropy.io.fits as pyfits
+    #catalog = pyfits.getdata(phottable)
+    global catalog
     catalog = ascii.read(phottable)
 
-    # Find the right row
-    
-    ind = catalog['objid'] == float(objid)
+    #ind = catalog['objid'] == float(objid)
     # Pick up data from our file, yo.
     wavelengths = [475,814,1600]
     mags = np.array([catalog['f-{}'.format(i)] for i in wavelengths])
     ivars = np.array([catalog['ivar-{}'.format(i)] for i in wavelengths])
-    ids = catalog['objid']
+    ids = catalog['ID']
     zs = catalog['z']
 
     # Build output dictionary. 
     obs = {}
     # This is a list of sedpy filter objects.    See the
     # sedpy.observate.load_filters command for more details on its syntax.
-    obs['filters'] = load_filters(filternames)
+    obs['filters'] = load_filters(filtersets)
     # This is a list of maggies, converted from mags.  It should have the same
     # order as `filters` above.
     obs['maggies'] = np.squeeze(10**(-mags/2.5))
@@ -119,8 +118,50 @@ def load_obs(objid=0, phottable='sgflux.dat', **kwargs):
 
 
     return obs
-'''
 
+    '''
+    print(catalog)
+    # Here we will read in an ascii catalog of magnitudes as a numpy structured
+    # array
+    with open(phottable, 'r') as f:
+        # drop the comment hash
+        header = f.readline().split()[1:]
+    catalog = np.genfromtxt(phottable, comments='#',
+                            dtype=np.dtype([(n, np.float) for n in header]))
+
+    # Find the right row
+    ind = catalog['objid'] == float(objid)
+    # Here we are dynamically choosing which filters to use based on the object
+    # and a flag in the catalog.  Feel free to make this logic more (or less)
+    # complicated.
+    filternames = filtersets#[ int(catalog[ind]['filterset']) ]
+    print(filternames)
+    # And here we loop over the magnitude columns
+    mags = [catalog[ind]['mag{}'.format(i)] for i in range(len(filternames))]
+    mags = np.array(mags)
+
+    # Build output dictionary. 
+    obs = {}
+    # This is a list of sedpy filter objects.    See the
+    # sedpy.observate.load_filters command for more details on its syntax.
+    obs['filters'] = load_filters(filternames)
+    # This is a list of maggies, converted from mags.  It should have the same
+    # order as `filters` above.
+    obs['maggies'] = np.squeeze(10**(-mags/2.5))
+    # HACK.  You should use real flux uncertainties
+    obs['maggies_unc'] = obs['maggies'] * 0.07
+    # Here we mask out any NaNs or infs
+    obs['phot_mask'] = np.isfinite(np.squeeze(mags))
+    # We have no spectrum.
+    obs['wavelength'] = None
+
+    # Add unessential bonus info.  This will be stored in output
+    #obs['dmod'] = catalog[ind]['dmod']
+    obs['objid'] = objid
+
+    return obs
+
+    '''
 # --------------
 # SPS Object
 # --------------
@@ -157,7 +198,7 @@ model_params = []
 # be 10pc (i.e. for absolute magnitudes)
 model_params.append({'name': 'zred', 'N': 1,
                         'isfree': False,
-                        'init': 0.0,
+                        'init': 0.6,
                         'units': '',
                         'prior':priors.TopHat(mini=0.0, maxi=4.0)})
 
@@ -174,10 +215,10 @@ model_params.append({'name': 'sfh', 'N': 1,
 # mass formed.
 model_params.append({'name': 'mass', 'N': 1,
                         'isfree': True,
-                        'init': 1e7,
-                        'init_disp': 1e6,
+                        'init': 5e11,
+                        'init_disp': 1e11,
                         'units': r'M_\odot',
-                        'prior':priors.TopHat(mini=1e6, maxi=1e9)})
+                        'prior':priors.TopHat(mini=1e9, maxi=1e12)})
 
 # Since we have zcontinuous=1 above, the metallicity is controlled by the
 # ``logzsol`` parameter.
@@ -459,6 +500,7 @@ def getthisdata(filename, *args, **kwargs):
         return data, hdr
     else:
         return data
+
 def load_model(**extras):
     # In principle (and we've done it) you could have the model depend on
     # command line arguments (or anything in run_params) by making changes to
