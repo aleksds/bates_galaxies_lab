@@ -17,7 +17,7 @@ from astropy.modeling import models, fitting
 
 
 def voigt_slow(a, u):
-      with mp.workdps(20):
+      with mp.workdps(581):
             z = mp.mpc(u, a)
             result = mp.exp(-z*z) * mp.erfc(-1j*z)
       return result.real
@@ -162,3 +162,29 @@ with PdfPages(filename) as pdf:
         
 os.system("open  %s &" % filename)
 
+
+
+#Moving Forward:
+#    Figure out what the ratios between Lorentzian to Gaussian are  --> this will be     'a'     for Barak Voigt code
+
+#    Figure out if    'u'    is the flux[g2796] or vel_kms[0][g2796]
+
+
+#        May be of help:
+
+    #The Voigt function H(a, u) is related to the Voigt profile
+    #V(x, sigma, gamma)::
+    # V(x, sigma, gamma) = H(a, u) / (sqrt(2*pi) * sigma)
+    # where::
+    #   a = gamma / (sqrt(2) * sigma)
+    #   u = x / (sqrt(2) * sigma)
+    # The Voigt profile is convolution of a Gaussian profile::
+    #   G(x, sigma) = exp(-0.5 * (x / sigma)^2) / (sigma * sqrt(2*pi))
+    # and a Lorentzian profile::
+    
+    #   L(x, gamma) = gamma / ((x^2 + gamma^2) * pi)
+
+
+# http://astrophysicsformulas.com/astronomy-formulas-astrophysics-formulas/lorentzian-fwhm-calculation/
+
+# http://astrophysicsformulas.com/astronomy-formulas-astrophysics-formulas/fwhm-gaussian-fwhm-calculation/
