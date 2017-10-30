@@ -10,7 +10,7 @@ photfile = 'sgflux.dat'
 
 run_params = {'verbose':True,
               'debug':False,
-              'outfile':'resultsfor_',
+              'outfile':'done',
               # Optimization parameters
               'do_powell': False,
               'ftol':0.5e-5, 'maxfev':5000,
@@ -103,19 +103,19 @@ def load_obs(objid=0, phottable=photfile, **kwargs):
     # This is a list of sedpy filter objects.    See the
     # sedpy.observate.load_filters command for more details on its syntax.
     obs['filters'] = load_filters(filtersets)
-    # This is a list of maggies, converted from mags.  It should have the same
-    # order as `filters` above.
-    obs['maggies'] = np.squeeze(10**(-mags/2.5))
-    # HACK.  You should use real flux uncertainties
-    # At some point we may want this to be results from SNR??
-    obs['maggies_unc'] = obs['maggies'] * 0.07
+    # sg_flux feeds nanomaggies, oops
+    obs['all_maggies'] = np.squeeze(mags*10**(-9))
+    #obs['maggies_unc'] = np.squeeze(ivars*10**(-9))
+    #obs['maggies'] = np.squeeze(10**(-mags/2.5))
+    obs['all_maggies_unc'] = obs['all_maggies'] * 0.07
     # Here we mask out any NaNs or infs
-    obs['phot_mask'] = np.isfinite(np.squeeze(mags))
+    obs['all_phot_mask'] = np.isfinite(np.squeeze(mags))
     # We have no spectrum.
     obs['wavelength'] = None
     obs['objid'] = ids
     obs['z'] = zs
-
+    obs['spectrum'] = None
+    obs['logify_spectrum'] = False
 
     return obs
 
