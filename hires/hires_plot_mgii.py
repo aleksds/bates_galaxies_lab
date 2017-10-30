@@ -126,7 +126,43 @@ with PdfPages(filename) as pdf:
         
         pdf.savefig()
         plt.close()
-    
+
+        fig = plt.figure()
+        plt.suptitle(gal[i])
+
+        # show the profile in 2796 velocity units
+        ax = fig.add_subplot(4,1,1)
+        #plot_setup()
+        ax.set_xlim(xmin, xmax)
+        ax.xaxis.set_minor_locator(minorLocator)
+        ax.set_ylim(0., 1.5)
+        ax.tick_params(axis='x', labelsize=10)
+        ax.tick_params(axis='y', labelsize=10)
+        plt.xlabel("Outflow Velocity [km/s]")
+        plt.ylabel("Flux")
+        plt.title(gal[i]+" Mg II 2796")
+        ax.plot(vel_mgii_2796, flux, color='black', linewidth=0.5)
+        #plt.text(xmin+0.03*(xmax-xmin), 0.15, 'MgII 2796', color='black')
+        
+        # show the velocity profile using the 2796 line on the blue
+        # side and the 2803 line on the red side
+        ax = fig.add_subplot(4,1,4)
+        #plot_setup()
+        ax.set_xlim(xmin, xmax)
+        ax.xaxis.set_minor_locator(minorLocator)
+        ax.set_ylim(0., 1.5)
+        ax.tick_params(axis='x', labelsize=10)
+        ax.tick_params(axis='y', labelsize=10)
+        plt.xlabel("Outflow Velocity [km/s]")
+        plt.ylabel("Flux")
+        plt.title(gal[i]+" Mg II 2796, 2803 (combined)")
+        ax.plot(vel_mgii_2803[g2803], flux[g2803], color='black', linewidth=0.5)
+        ax.plot(vel_mgii_2796[g2796], flux[g2796], color='black', linewidth=0.5)
+        #plt.text(xmin+0.03*(xmax-xmin), 0.15, 'MgII 2796+2803')
+
+        pdf.savefig()
+        plt.close()
+        
     os.system("open %s &" % filename)
 
 
