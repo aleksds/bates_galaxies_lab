@@ -1,0 +1,9 @@
+YO BAGELS.
+
+Your code broke for ${OBJID} while fitting curves for ${PARAM}.
+
+I'll try to continue on.
+
+Cheers,
+
+S. Carline W. Gottlieb I
