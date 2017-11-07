@@ -473,8 +473,11 @@ def scat_plot():
 
     plt.xlim(-16,-24)
     plt.ylim(1,7)
-    plt.scatter(absmag[:,5], absmag[:,1]-absmag[:,5], marker='.',color=['blue'])
-
+    plt.scatter(absmag[:,5], absmag[:,1]-absmag[:,5], marker='.',color=['blue'], s=0.5)
+    plt.xlabel('i-band absolute magnitude', fontsize=16)
+    plt.ylabel('NUV - i', fontsize=16)
+    plt.tick_params(axis='both', labelsize=14)
+    
     ifu_list = drpdata.field('plateifu')
     for i in good_galaxies:
         ithname = str(i[0]) + str(i[1])
@@ -482,7 +485,7 @@ def scat_plot():
             ethname = ifu_list[e]
             ethname = ethname.replace("-","")
             if ithname == ethname:
-                plt.scatter(absmag[e, 5], absmag[e, 1] - absmag[e, 5], marker='.',color=['red'])
+                plt.scatter(absmag[e, 5], absmag[e, 1] - absmag[e, 5], marker='*',color=['red'])
     f.savefig("scatter.pdf", bbox_inches='tight')
     # pp = PdfPages('scatter.pdf')
     # pp.savefig(plot_1)
