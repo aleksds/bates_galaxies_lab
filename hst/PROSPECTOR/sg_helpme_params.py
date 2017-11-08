@@ -11,6 +11,7 @@ import sedpy
 import prospect
 import emcee
 import sg_params as params
+from corner import quantile
 
 # Here is some stuff for plotting I may already have but will import again
 from matplotlib import cm,axes as ax
@@ -21,6 +22,8 @@ from sg_likelihood import lnlike_spec, lnlike_phot, write_log
 from prospect.models import model_setup
 import plot_utils as pread
 from prospect.io.read_results import results_from
+import xlwt
+import xlrd
 ## stuff for later
 
 # IMMA IMPORT STUFF FOR MY EMAIL BITCHES
@@ -29,22 +32,24 @@ from string import Template
 from email import encoders
 
 MY_ADDRESS = 'scarlinewgottlieb@gmail.com'
-MYPASSWORD = '**********'
+MYPASSWORD = '****'
 
 filename = 'errmessage.txt'
-
+startindex = 0
+endindex = 40
 def read_template(filename):
     with open(filename, 'r', encoding='utf-8') as template_file:
         template_file_content = template_file.read()
     return Template(template_file_content)
 
 message_template = read_template(filename)
-
-# set up the SMTP server
-s = smtplib.SMTP(host='smtp.gmail.com', port = 587)
-#s = smtplib.SMTP(host='smtpout.secureserver.net', port = 465)
-s.starttls()
-s.login(MY_ADDRESS,MYPASSWORD)
+def login():
+    # set up the SMTP server
+    s = smtplib.SMTP(host='smtp.gmail.com', port = 587)
+    #s = smtplib.SMTP(host='smtpout.secureserver.net', port = 465)
+    s.starttls()
+    s.login(MY_ADDRESS,MYPASSWORD)
+    return s
 
 # import necessary packages
 from email.mime.multipart import MIMEMultipart
@@ -53,6 +58,10 @@ from email.mime.base import MIMEBase
 
 
 def error_email(errobjid, errparam):
+    s = login()
+    filename = 'errmessage.txt'
+    message_template = read_template(filename)
+
     msg = MIMEMultipart()       # create a message
     part = MIMEBase('application', "octet-stream")
     '''f = 'Result.pdf'
@@ -67,6 +76,29 @@ def error_email(errobjid, errparam):
     msg['From']=MY_ADDRESS
     msg['To']='sgottlie@bates.edu'
     msg['Subject']="Eeek! Your code broke!"
+
+    # add in the message body
+    msg.attach(MIMEText(message, 'plain'))
+
+    # send the message via the server set up earlier.
+    s.send_message(msg)
+    
+    del msg
+
+def succ_message(objid, parm):
+    s = login()
+    filename = 'sucmessage.txt'
+    message_template = read_template(filename)
+
+    msg = MIMEMultipart()       # create a message
+    part = MIMEBase('application', "octet-stream")
+     # add in the actual person name to the message template
+    message = message_template.substitute(OBJID=objid, PARAM=parm)
+    print('Emailing success for ' + objid + ' and ' + parm)
+    # setup the parameters of the message
+    msg['From']=MY_ADDRESS
+    msg['To']='sgottlie@bates.edu'
+    msg['Subject']="Never fear! It's alive!"
 
     # add in the message body
     msg.attach(MIMEText(message, 'plain'))
@@ -128,6 +160,9 @@ tnow = str(int(time.time()))+'/'
 paramfile = 'sg_params.py'
 #photfile ='demo_photometry1.dat'
 
+wb = xlwt.Workbook()
+ws = wb.add_sheet('Param Results')
+
 # In [4]
 clargs = {'param_file':paramfile}
 run_params = model_setup.get_run_params(argv=paramfile, **clargs)
@@ -139,16 +174,23 @@ if not os.path.exists(tnow):
 # load photometry from sg_flux.dat
 obs = params.load_obs(**run_params)
 obs['spectrum'] = None
+ws.write(0,0, 'Obj ID')
 
 varnames = ['mass','logzsol','tau','tage','dust2']
+coltit = [ty + par for par in varnames for ty in ['low ', 'best ', 'high ']]
+
+for i, lab in enumerate(coltit):
+    ws.write(0,i+1, lab)
+
 
 ## HERE BE THE BEGINNING OF THE LOOP
 with PdfPages(tnow+'total.pdf') as pdf:
-    #for i in range(0,480):
-    for i in range(80,240):
+    for i in range(startindex,endindex):
+    #for i in range(80,240):
+        ws.write(i+1,0, obs['objid'][i])
         print(obs['objid'][i])
         print()
-        try: 
+        #try: 
         
             obsap = [obs['all_maggies'][j][i] for j in range(0,len(obs['all_maggies']))]
             errap = [obs['all_maggies_unc'][j][i] for j in range(0,len(obs['all_maggies_unc']))]
@@ -259,7 +301,8 @@ with PdfPages(tnow+'total.pdf') as pdf:
                     res = least_squares(chivecfn, pinit, method='dogbox', x_scale='jac',
                                     xtol=1e-16, ftol=1e-16)
                 except:
-                    error_email(obs['objid'][i], varnames[j])
+                    #error_email(obs['objid'][i], varnames[j])
+                    print('error with', obs['objid'][i], varnames[j])
                     res = None
                 guesses.append(res)
 
@@ -386,11 +429,19 @@ with PdfPages(tnow+'total.pdf') as pdf:
             print(obs['objid'][i])
 
             for p00p, things in enumerate(fc):
+                q_16, q_50, q_84 = quantile(things, [0.16, 0.5, 0.84],)
+                q_m, q_p = q_50-q_16, q_84-q_50
 
-                ten = np.percentile(things,50)
-                low = np.percentile(things,40)
-                high = np.percentile(things,60)
-                print(varnames[p00p], low, ten, high)
+                best = q_50
+                low = q_m
+                high = q_p
+                ws.write(i+1, p00p*3+1, low)
+                ws.write(i+1, p00p*3+2, best)
+                ws.write(i+1, p00p*3+3, high)
+
+
+                #print(varnames[p00p], low, best, high)
+
 
             cornerfig = pread.subtriangle(res, outname = tnow+obs['objid'][i], start=0, thin=5, truths=theta_truth, fig=plt.subplots(5,5,figsize=(27,27))[0])
             plt.suptitle(obs['objid'][i] + ' Triangle Plot')
@@ -422,37 +473,47 @@ with PdfPages(tnow+'total.pdf') as pdf:
                      markeredgewidth=3)
             plt.errorbar(wphot, obsap, yerr=errap, 
                      label='Observed photometry', ecolor='red', 
-                     marker='o', markersize=10, ls='', lw=3, alpha=0.8, 
-                     markerfacecolor='none', markeredgecolor='red', 
-                     markeredgewidth=3)
+                 marker='o', markersize=10, ls='', lw=3, alpha=0.8, 
+                 markerfacecolor='none', markeredgecolor='red', 
+                 markeredgewidth=3)
 
-            # plot transmission curves
-            for f in obs['filters']:
-                w, t = f.wavelength.copy(), f.transmission.copy()
-                while t.max() > 1:
-                    t /= 10.
-                t = 0.1*(ymax-ymin)*t + ymin
-                plt.loglog(w, t, lw=3, color='gray', alpha=0.7)
+        # plot transmission curves
+        for f in obs['filters']:
+            w, t = f.wavelength.copy(), f.transmission.copy()
+            while t.max() > 1:
+                t /= 10.
+            t = 0.1*(ymax-ymin)*t + ymin
+            plt.loglog(w, t, lw=3, color='gray', alpha=0.7)
 
-            plt.xlabel('Wavelength [A]')
-            plt.ylabel('Flux Density [maggies]')
-            plt.xlim([xmin, xmax])
-            plt.ylim([ymin, ymax])
-            plt.legend(loc='best', fontsize=20)
-            plt.title(obs['objid'][i] + ' Final Plot')
-            plt.tight_layout()
+        plt.xlabel('Wavelength [A]')
+        plt.ylabel('Flux Density [maggies]')
+        plt.xlim([xmin, xmax])
+        plt.ylim([ymin, ymax])
+        plt.legend(loc='best', fontsize=20)
+        plt.title(obs['objid'][i] + ' Final Plot')
+        plt.tight_layout()
 
-            pdf.savefig()
-            #plt.savefig('test1.png')
-            plt.close()
-            #plt.savefig('ha.png')
+        pdf.savefig()
+        #plt.savefig('test1.png')
+        plt.close()
+        #plt.savefig('ha.png')
+        succ_message(obs['objid'], 'everything')
+        '''
         except:
-            error_email(obs['objid'][i], 'idk just somewhere, okay?')
-
+            try:
+                error_email(obs['objid'][i], varnames[j])
+            except:
+                print('You don\'t want an email? FINE. YOU DON\'T GET AN EMAIL, JERK')
+                print(obs['objid'][i], varnames[j])
+        '''
+        
+        
+wb.save(tnow+'results.xls')
 
 print('HOLY FUCK THAT TOOK FOREVER')
 
 elapsed = (time.time()-tbegin)/3600
 
 print('it took ' + str(elapsed) +' hours!')
+
 
