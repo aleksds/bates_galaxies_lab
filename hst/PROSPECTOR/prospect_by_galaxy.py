@@ -423,9 +423,9 @@ with PdfPages(galaxy_name+'/total.pdf') as pdf:
             #plt.savefig('test1.png')
             plt.close()
             #plt.savefig('ha.png')
-            succ_message(obs['objid'], 'everything')
+            
 
-wb.save(galaxy_name+'/results.xls')
+wb.save(galaxy_name+'/'+galaxy_name+'results.xls')
 
 print('HOLY FUCK THAT TOOK FOREVER')
 
