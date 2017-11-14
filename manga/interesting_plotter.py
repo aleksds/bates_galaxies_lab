@@ -369,7 +369,7 @@ def find_g(plate_rec, min_p, max_p):
                 if bradna_index_sum == 0:
                     bradna_index_sum = 10
 
-                if (np.sum(dap_sflux[dap_sflux > 0.2]) > 540) and (global_quality > 0.32):
+                if (np.sum(dap_sflux[dap_sflux > 0.2]) > 540) and (global_quality > 0.2):
                     state = '>>>>>>>>>>>>>>>>Has enough information'
                 else:
                     state = 'Not enough information'
