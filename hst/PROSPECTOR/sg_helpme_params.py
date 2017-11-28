@@ -184,6 +184,7 @@ for i, lab in enumerate(coltit):
 
 
 ## HERE BE THE BEGINNING OF THE LOOP
+# def prospect(galaxy_name):
 with PdfPages(tnow+'total.pdf') as pdf:
     for i in range(startindex,endindex):
     #for i in range(80,240):

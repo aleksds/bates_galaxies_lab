@@ -25,6 +25,7 @@ from prospect.io.read_results import results_from
 import xlwt
 import xlrd
 ## stuff for later
+galaxy_name = sys.argv[1]
 
 # In [10]
 def lnprobfn(theta):
@@ -84,8 +85,9 @@ ws = wb.add_sheet('Param Results')
 clargs = {'param_file':paramfile}
 run_params = model_setup.get_run_params(argv=paramfile, **clargs)
 
-#print(run_params)
-
+#print(run_params)]
+#NOTICE THIS MAY BE NECESSARY AND MIGHT BREAK
+#########run_params['phottable'] = galaxy_name+'.txt'
 # load photometry from sg_flux.dat
 obs = params.load_obs(**run_params)
 obs['spectrum'] = None
@@ -102,7 +104,7 @@ for i, lab in enumerate(coltit):
 #Here be where I grab the input from the terminal
 # Please note my justified outrage that in this way, we are in a 1-based indexing system
 # And a 1 based indexing system is ALWAYS STUPID. WHO ARE YOU HOW DID YOU GET INTO MY HOUSE?
-galaxy_name = sys.argv[1]
+
 
 ## HERE BE THE BEGINNING OF THE LOOP
 #def prospect(galaxy_name):
@@ -425,7 +427,7 @@ with PdfPages(galaxy_name+'/total.pdf') as pdf:
             #plt.savefig('ha.png')
             
 
-wb.save(galaxy_name+'/'+galaxy_name+'results.xls')
+wb.save(galaxy_name+'/'+galaxy_name+'_results.xls')
 
 print('HOLY FUCK THAT TOOK FOREVER')
 
