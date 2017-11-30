@@ -31,7 +31,7 @@ f2852 = 1.83
 
 # array of names, lines of interest, oscillator strength:
 lines = [mgii2796, mgii2803, mgi2852]
-names = ['Mg II 2796', 'Mg II 2803', 'Mg I 2852']
+names = ['MgII 2796', 'MgII 2803', 'MgI 2852']
 fosc = [f2796, f2803, f2852]
 
 hue = ['#2CA14B', '#99ccff', '#947e94']

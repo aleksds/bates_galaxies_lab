@@ -7,18 +7,12 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import AutoMinorLocator
-from astropy import units as u
-from astropy import constants as const
 from astropy.io import ascii
 from astropy.modeling import models, fitting
 from astropy.modeling.models import Voigt1D
 from scipy.special import wofz
 import pylab
-from scipy.interpolate import spline
-import math
 from scipy.interpolate import interp1d
-import matplotlib._color_data as mcd
-import matplotlib.patches as mpatch
 
 
 def column(vel, col_dens):

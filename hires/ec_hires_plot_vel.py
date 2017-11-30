@@ -39,6 +39,9 @@ wave_SDSS = np.array([10.**(coeff0_SDSS + coeff1_SDSS*index)])
 ## SDSS PLOT WORK!!
 
 
+## Gotta make code for general case in order for tau for loop values to be made
+
+
 #redshift coefficient
 z = 0.60329
 #wavelengths:
