@@ -27,8 +27,8 @@ rawconv = sys.argv[1]
 coarsefine = sys.argv[2]
 '''
 
-rawconv = 0
-coarsefine = 0
+rawconv = 1
+coarsefine = 1
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
@@ -101,7 +101,10 @@ with PdfPages('sg_FLUX.pdf') as pdf:
         for i in range (0, len(collection)):
             
             # read in the images
-            file = glob.glob(dir+w.name+'*/'+res[coarsefine]+'/'+str(filters[i])+'/'+proc[rawconv]+'_'+str(filters[i])+'*sci.fits')
+            #file = glob.glob(dir+w.name+'/'+res[coarsefine]+'/'+str(filters[i])+'/'+proc[rawconv]+'_'+str(filters[i])+'*sci.fits')
+
+            file = glob.glob(dir+w.name+'/'+res[1]+'/'+str(filters[i])+'/'+proc[1]+'_'+str(filters[i])+'*sci.fits')
+
             #file = glob.glob(dir+galaxies[w]+'_final_'+collection[i]+'*sci.fits')
             hdu = fits.open(file[0])
             data[i], header[i] = hdu[0].data, hdu[0].header
