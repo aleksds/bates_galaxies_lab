@@ -1,6 +1,8 @@
 #Kwamo 07/31/17
-#Beginning of Fe code, based on kd_omnipotent_Mg
+#All plots for all the Fe ions, grouped together for comparison
 #08/03/17 Iron Code Works
+
+#Future Steps: add parameter for optical thickness 
 
 import numpy as np
 import os

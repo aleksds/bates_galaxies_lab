@@ -2,7 +2,6 @@
 #Makes Seperate Flux Plots for each Ion and compares it to column density and Voigt Profile
 #Makes Combined Flux Plot and compares it to Tau and Column Density
 #Code on bottom is an attempt to create functions for the plots
-#Final Code
 
 #07/31/17  =  attempt to add MgI 2852 wavelength
 #08/2/17 = Mg Omnipotent Works for Mg Ions
@@ -33,7 +32,7 @@ f2852 = 1.83
 
 # array of names, lines of interest, oscillator strength:
 lines = [mgii2796, mgii2803, mgi2852]
-names = ['MgII 2796', 'MgII 2803', 'MgI 2852']
+names = ['Mg II 2796', 'Mg II 2803', 'Mg I 2852']
 fosc = [f2796, f2803, f2852]
 
 hue = ['#2CA14B', '#99ccff', '#947e94']
@@ -59,16 +58,17 @@ def column(vel, col_dens):
 
 
 
-                                                      ### CODE FOR AXIS AND TITLE FONT ###
-                                                      
-title_font = {'fontname':'Arial', 'size':'16'}
-axis_font = {'fontname':'Arial', 'size':'14'}
+
+title_font = {'fontname':'Arial', 'size':'16', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'} # Bottom vertical alignment for more space
+axis_font = {'fontname':'Arial', 'size':'12'}
 
 
 
 
+    
 minorLocator = AutoMinorLocator()
-filename = 'Mg_Tau_Flux_Column_Comparison.pdf'
+filename = 'Mg_Tau_Flux_Coldens_Comparison.pdf'
 with PdfPages(filename) as pdf:
     for h in range(0, len(gal)):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
@@ -158,8 +158,6 @@ with PdfPages(filename) as pdf:
         plt.title("Mg II 2796 Voigt Profile for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("C.N. Flux", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
 
         
 
@@ -193,8 +191,6 @@ with PdfPages(filename) as pdf:
         plt.title("Mg 2796 Voigt Profile for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("C.N. Flux", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         ax.set_ylim (0,2)
         ax.set_xlim(-3000,500)
 
@@ -205,8 +201,6 @@ with PdfPages(filename) as pdf:
         plt.title("MgII 2796 Col. Dens. Plot for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity (km/s)",**axis_font)
         plt.ylabel("Column Density", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         ax.set_ylim(0, 5E12)
         ax.set_xlim(-3000,500)
         # plt.legend(loc = 1)
@@ -234,8 +228,6 @@ with PdfPages(filename) as pdf:
         plt.title("Mg II 2803 Voigt Profile for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("C.N. Flux", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
 
         f = interp1d(vel_kms[1], flux)
         test_2803 = (vel_kms[1] > -3000) & (vel_kms[1] < 500) & (flux < 0.5)
@@ -262,8 +254,6 @@ with PdfPages(filename) as pdf:
         plt.title("Mg 2803 Voigt Profile for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("C.N. Flux",**axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         ax.set_ylim (0,2)
         ax.set_xlim(-3000,500)
         
@@ -274,8 +264,6 @@ with PdfPages(filename) as pdf:
         plt.title("MgII 2803 Col. Dens. Plot for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity (km/s)",**axis_font)
         plt.ylabel("Column Density",**axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         ax.set_ylim(0, 5E12)
         ax.set_xlim(-3000,500)
         # plt.legend(loc = 1)
@@ -306,8 +294,6 @@ with PdfPages(filename) as pdf:
         plt.title("MgII Flux Plot for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("C.N. Flux", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         
         #Adds error bars to Flux Plot
         plt.errorbar(vel_kms[0][g2796], flux[g2796], yerr = sigma[g2796], label = 'error', color = '#99ccff', markevery = 10, linewidth = .1)
@@ -325,11 +311,9 @@ with PdfPages(filename) as pdf:
         ax.set_xlim(-3000, 500)
         # y-axis upper lim set to 5 because no visible difference between tau = 5 and tau = infinity
         ax.set_ylim(-.2, 5)
-        plt.title("MgII Tau Plot for Galaxy %s" %(gal[h]), **title_font)
+        plt.title("MgII Tau Plot for Galaxy %s" %(gal[h]), *title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("Tau", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         # plt.legend(loc = 4)
 
         # fig.tight_layout()
@@ -355,8 +339,6 @@ with PdfPages(filename) as pdf:
         plt.title("MgII Flux Plot for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("C.N. Flux", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         # plt.legend(loc = 3)
         
         #Adds error bars to Flux Plot
@@ -376,8 +358,6 @@ with PdfPages(filename) as pdf:
         plt.title("MgII Col. Dens. Plot for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity (km/s)", **axis_font)
         plt.ylabel("Column Density", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         ax.set_ylim(0, 5E12)
         ax.set_xlim(-3000,500)
         # plt.legend(loc = 1)
@@ -405,8 +385,6 @@ with PdfPages(filename) as pdf:
         plt.title("MgI 2852 Flux Plot for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("C.N. Flux", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         
         #Adds error bars to Flux Plot
         # plt.errorbar(vel_kms[2][g2852], flux[g2852], yerr = sigma[g2852], label = '_nolegend_',  color = '#99ccff', markevery = 10, linewidth = .1)
@@ -422,8 +400,6 @@ with PdfPages(filename) as pdf:
         plt.title("MgI 2852 Tau Plot for Galaxy %s" %(gal[h]), **title_font)
         plt.xlabel("Velocity(km/s)", **axis_font)
         plt.ylabel("Tau", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
         # plt.legend(loc = 4)
 
 
@@ -437,8 +413,6 @@ with PdfPages(filename) as pdf:
         # plt.title("MgI 2852 Column Density Plot for Galaxy %s" %(gal[h]), **title_font)
         # plt.xlabel("Velocity (km/s)", **axis_font)
         # plt.ylabel("Column Density (Particle/cm^2)", **axis_font)
-        # plt.rc('xtick', labelsize=10) 
-        # plt.rc('ytick', labelsize=10)
         # ax.set_ylim(0, 5E12)
         # ax.set_xlim(-3000,500)
         # # plt.legend(loc = 1)

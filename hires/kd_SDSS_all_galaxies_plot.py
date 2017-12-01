@@ -1,6 +1,7 @@
 #Kwamo, 20170615
-#Read all SDSS spectrums and make a plot of flux versus wavelength, velocity
-#
+#Creates flux vs wavelength plot for galaxy J0826
+#Future steps: Add all other galaxies and add the rest of the wavelengths
+
 import os
 import numpy as np
 from astropy.io import fits
