@@ -49,7 +49,6 @@ vflip = gal_info['vflip']
 
 
 # define velocity ranges to plot the profile
-## What does this do?????????????
 def column(vel, col_dens):
     cor_col = np.array([])
     for i in range(0, len(vel)):

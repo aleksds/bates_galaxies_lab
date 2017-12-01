@@ -1,5 +1,6 @@
 #Kwamae Delva
 #Code implementing Cover Fraction vs Column Density
+#Going from Tau, Flux, Col Dens  --> Cover Frac vs Col Dens  --> Cover Frac[colden] vs Col Dens[covrfrac]
 
 import numpy as np
 import os
@@ -42,13 +43,19 @@ vflip = gal_info['vflip']
 
 
 # define velocity ranges to plot the profile
-## What does this do?????????????
 def column(vel, col_dens):
     cor_col = np.array([])
     for i in range(0, len(vel)):
         if (vel[i] >= -3000 and vel[i] <= 500):
             cor_col = np.append(cor_col, col_dens[i])
     return cor_col
+
+
+                                                      ### CODE FOR AXIS AND TITLE FONT ###
+                                                      
+title_font = {'fontname':'Arial', 'size':'16'}
+axis_font = {'fontname':'Arial', 'size':'14'}
+
 
 
 minorLocator = AutoMinorLocator()
@@ -100,12 +107,13 @@ with PdfPages(filename) as pdf:
         g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < 500)
         g2852 = (vel_kms[2] > -3000) & (vel_kms[2] <500)
         
-        limit = [g2796, g2803, g2852]        
+        velocity_limits = [g2796, g2803, g2852]        
 
 #COLUMN Info        
         col_2796 = column(vel_kms[0],tau/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
         col_2803 = column(vel_kms[1],tau/(2.654E-15*fosc[1]**2 *(wave/(1+zem[h]))))
         col_2852 = column(vel_kms[2],tau/(2.654E-15*fosc[2]**2 *(wave/(1+zem[h]))))
+        
         column_densities = [col_2796, col_2852, col_2852]
 
         vel_2796 = np.linspace(-3000,500, num = len(col_2796), endpoint = 'True')
@@ -114,11 +122,19 @@ with PdfPages(filename) as pdf:
 
         column_velocities = [vel_2796, vel_2803, vel_2852]
         
-#Error Limits        
+#Error Wheres        
         sigma_coldens2796 = column(vel_kms[0], sigma_coldens/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
         sigma_coldens2803 = column(vel_kms[1], sigma_coldens/(2.654E-15*fosc[1]**2 *(wave/(1+zem[h]))))
         sigma_coldens2852 = column(vel_kms[2], sigma_coldens/(2.654E-15*fosc[2]**2 *(wave/(1+zem[h]))))
-        
+
+#Astropy Table Column --> Numpy Array Conversion
+
+        #Flux data to covering fraction
+        flux_dat_2796=np.array(flux[g2796])
+        cvrfrc_dat_2796=1-flux_dat_2796
+
+        flux_dat_2803=np.array(flux[g2803])
+        cvrfrc_dat_2803=1-flux_dat_2803
 
 
                                                ## PLOTTING BEGINS ##
@@ -134,53 +150,106 @@ with PdfPages(filename) as pdf:
 
 ## Column Density Plot
 
-        ax = fig.add_subplot(1,1,1)
+        ax = fig.add_subplot(2,1,1)
         ax.plot(vel_2796, col_2796, linewidth =1, color = '#2CA14B', label = names[0])
-        plt.title("MgII 2796 Col. Dens. Plot for Galaxy %s" %(gal[h]))
-        plt.xlabel("Velocity (km/s)")
-        plt.ylabel("Col. Dens. (Particle/cm^2)")
+        plt.title("MgII 2796 Col. Dens. Plot for Galaxy %s" %(gal[h]),**title_font)
+        plt.xlabel("Velocity (km/s)",**axis_font)
+        plt.ylabel("Col. Dens.",**axis_font)
         ax.set_ylim(0, 5E12)
         ax.set_xlim(-3000,500)
-        # plt.legend(loc = 1)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
         
         #Adds error bars to plots
         plt.errorbar(vel_2796, col_2796, yerr = sigma_coldens2796, linewidth = 0.1, color = '#99ccff', label = 'error')
-        
-        # fig.tight_layout()
-        pdf.savefig()
-        plt.close()
 
 
-
-        
+       
 #### Mg II 2803
 
-        fig = plt.figure()
         
 ## Column Density Plot
         
-        ax = fig.add_subplot(1,1,1)
+        ax = fig.add_subplot(2,1,2)
         ax.plot(vel_2803, col_2803, linewidth =1, color = '#2C6EA1', label = names[1])
-        plt.title("MgII 2803 Col. Dens. Plot for Galaxy %s" %(gal[h]))
-        plt.xlabel("Velocity (km/s)")
-        plt.ylabel("Col. Dens. (Particle/cm^2)")
+        plt.title("MgII 2803 Col. Dens. Plot for Galaxy %s" %(gal[h]),**title_font)
+        plt.xlabel("Velocity (km/s)",**axis_font)
+        plt.ylabel("Col. Dens. ",**axis_font)
         ax.set_ylim(0, 5E12)
         ax.set_xlim(-3000,500)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
         # plt.legend(loc = 1)
 
         #Adds error bars to plots
         plt.errorbar(vel_2803, col_2803, yerr = sigma_coldens2803, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
 
-        # fig.tight_layout()
+        fig.tight_layout()
         pdf.savefig()
         plt.close()
 
 
                                         ## Combined Mg II Ion Plots##
 
+## Combined Flux Plot to compare to Column Density and Tau
 
-##Tau Plot        
-        ax = fig.add_subplot(1,1,1)
+##Could possible change this to Voigt profile plot of combined MgII ions flux plot
+
+
+#Covering Fraction
+        
+        fig = plt.figure()
+
+        ax = fig.add_subplot(3,1,1)
+
+        #Actual Flux vs. Velocity Plot
+        #Shows 'shadow' of flux plot
+        ax.plot(vel_kms[0][g2796], flux[g2796],color = '#99ccff', markevery = 10, linewidth = .1)
+        ax.plot(vel_kms[1][g2803], flux[g2803],color = '#99ccff', markevery = 10, linewidth = .1)
+
+        #Shows Covering Fraction
+        ax.plot(vel_kms[0][g2796], 1-flux[g2796], linewidth=1, label = names[0], color = '#2CA14B')
+        ax.plot(vel_kms[1][g2803], 1-flux[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
+        
+        ax.set_xlim(-3000, 500)
+        ax.set_ylim(0, 2)
+        plt.title("MgII Flux Plot for Galaxy %s" %(gal[h]),**title_font)
+        plt.xlabel("Velocity(km/s)",**axis_font)
+        plt.ylabel("Cover. Frac.",**axis_font)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
+        # plt.legend(loc = 3)
+        
+        # #Adds error bars to Flux Plot
+        # plt.errorbar(vel_kms[0][g2796], flux[g2796], yerr = sigma[g2796], label = 'error', color = '#99ccff', markevery = 10, linewidth = .1)
+        # plt.errorbar(vel_kms[1][g2803], flux[g2803], yerr = sigma[g2803], label = '_nolegend_',  color = '#99ccff', markevery = 10, linewidth = .1)
+        
+        
+## Column Density
+
+
+        
+        ax = fig.add_subplot(3,1,2)
+
+        ax.plot(vel_2796, col_2796, color = '#2CA14B', label = names[0])
+        ax.plot(vel_2803, col_2803, color = '#2C6EA1', label = names[1])
+        plt.title("MgII Col. Dens. Plot for Galaxy %s" %(gal[h]),**title_font)
+        plt.xlabel("Velocity (km/s)",**axis_font)
+        plt.ylabel("Col. Dens. ",**axis_font)
+        ax.set_ylim(0, 5E12)
+        ax.set_xlim(-3000,500)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
+        # plt.legend(loc = 1)
+        
+        #Adds error bars to plots
+        plt.errorbar(vel_2796, col_2796, yerr = sigma_coldens2796, linewidth = 0.1, color = '#99ccff', label = 'error')
+        plt.errorbar(vel_2803, col_2803, yerr = sigma_coldens2803, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
+
+
+##Tau
+
+        ax = fig.add_subplot(3,1,3)
 
         ## Need to figure out how to calculate error in Tau
 
@@ -190,62 +259,14 @@ with PdfPages(filename) as pdf:
         ax.set_xlim(-3000, 500)
         # y-axis upper lim set to 5 because no visible difference between tau = 5 and tau = infinity
         ax.set_ylim(-.2, 5)
-        plt.title("MgII Doublet Tau Plot for Galaxy %s" %(gal[h]))
-        plt.xlabel("Velocity(km/s)")
-        plt.ylabel("Tau")
+        plt.title("MgII Doublet Tau Plot for Galaxy %s" %(gal[h]),**title_font)
+        plt.xlabel("Velocity(km/s)",**axis_font)
+        plt.ylabel("Tau",**axis_font)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
         # plt.legend(loc = 4)
 
-        # fig.tight_layout()
-        pdf.savefig()
-        plt.close()
-
-
-        
-
-## Flux Plot again, to compare to Column Density
-
-##Could possible change this to Voigt profile plot of combined MgII ions flux plot
-    
-        fig = plt.figure()
-
-        ax = fig.add_subplot(2,1,1)
-
-        #Actual Flux vs. Velocity Plot
-        ax.plot(vel_kms[0][g2796], flux[g2796], linewidth=1, label = names[0], color = '#2CA14B')
-        ax.plot(vel_kms[1][g2803], flux[g2803], linewidth=1, label = names[1], color = '#2C6EA1')
-        ax.set_xlim(-3000, 500)
-        ax.set_ylim(0, 2)
-        plt.title("MgII Flux Plot for Galaxy %s" %(gal[h]))
-        plt.xlabel("Velocity(km/s)")
-        plt.ylabel("C.N. Flux")
-        # plt.legend(loc = 3)
-        
-        #Adds error bars to Flux Plot
-        plt.errorbar(vel_kms[0][g2796], flux[g2796], yerr = sigma[g2796], label = 'error', color = '#99ccff', markevery = 10, linewidth = .1)
-        plt.errorbar(vel_kms[1][g2803], flux[g2803], yerr = sigma[g2803], label = '_nolegend_',  color = '#99ccff', markevery = 10, linewidth = .1)
-
-
-        
-## Column Density Plots
-
-#Try to clean up by removing extra peaks beside 1250 km/s
-
-        ax = fig.add_subplot(2,1,2)
-
-        ax.plot(vel_2796, col_2796, color = '#2CA14B', label = names[0])
-        ax.plot(vel_2803, col_2803, color = '#2C6EA1', label = names[1])
-        plt.title("MgII Col. Dens. Plot for Galaxy %s" %(gal[h]))
-        plt.xlabel("Velocity (km/s)")
-        plt.ylabel("Col. Dens. (Particle/cm^2)")
-        ax.set_ylim(0, 5E12)
-        ax.set_xlim(-3000,500)
-        # plt.legend(loc = 1)
-        
-        #Adds error bars to plots
-        plt.errorbar(vel_2796, col_2796, yerr = sigma_coldens2796, linewidth = 0.1, color = '#99ccff', label = 'error')
-        plt.errorbar(vel_2803, col_2803, yerr = sigma_coldens2803, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
-
-        # fig.tight_layout()
+        fig.tight_layout()
         pdf.savefig()
         plt.close()
 
@@ -253,35 +274,61 @@ with PdfPages(filename) as pdf:
                                                # MgI 2852 Plots ##
 
 
-# Tau Plot
 
-        ax = fig.add_subplot(1,1,1)
+# No Voigt Profile Because Flux plot doesn't have significant absorption line for MgI 2852
+
+        fig=plt.figure()
+
+#Flux
+
+        ax = fig.add_subplot(3,1,1)
+        #Actual Flux vs. Velocity Plot
+        ax.plot(vel_kms[2], flux, linewidth=1, label = names[2], color = '#947e94')
+        ax.set_xlim(-3000, 500)
+        ax.set_ylim(0, 2)
+        # plt.legend(loc = 3)
+        plt.title("MgI 2852 Flux Plot for Galaxy %s" %(gal[h]), **title_font)
+        plt.xlabel("Velocity(km/s)", **axis_font)
+        plt.ylabel("C.N. Flux", **axis_font)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
+        
+        #Adds error bars to Flux Plot
+        # plt.errorbar(vel_kms[2][g2852], flux[g2852], yerr = sigma[g2852], label = '_nolegend_',  color = '#99ccff', markevery = 10, linewidth = .1)
+
+
+#Column Density
+        
+        ax = fig.add_subplot(3,1,2)
+        ax.plot(vel_2852, col_2852, color='#2C6EA1', label = names[1])
+        plt.title("MgI 2852 Column Density Plot for Galaxy %s" %(gal[h]),**title_font)
+        plt.xlabel("Velocity (km/s)",**axis_font)
+        plt.ylabel("Column Density",**axis_font)
+        #y-axis upper where set to 1E11 because its significantly smaller than Mg doublet's col dens
+        ax.set_ylim(0, 1E11)
+        ax.set_xlim(-3000,500)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
+        # plt.legend(loc = 1)
+        
+        #Adds error bars to plots
+        # plt.errorbar(vel_2852, col_2852, yerr = sigma_coldens2852, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
+
+
+# Tau
+
+
+        ax = fig.add_subplot(3,1,3)
         ax.plot(vel_kms[2], tau, linewidth=1, label = names[2], color = '#2C6EA1')
         ax.set_xlim(-3000, 500)
         # y-axis upper lim set to 5 because no visible difference between tau = 5 and tau = infinity
         ax.set_ylim(-.2, 5)
-        plt.title("MgI 2852 Tau Plot for Galaxy %s" %(gal[h]))
-        plt.xlabel("Velocity(km/s)")
-        plt.ylabel("Tau")
+        plt.title("MgI 2852 Tau Plot for Galaxy %s" %(gal[h]),**title_font)
+        plt.xlabel("Velocity(km/s)",**axis_font)
+        plt.ylabel("Tau",**axis_font)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
         # plt.legend(loc = 4)
-
-
-# No Voigt Profile Because Flux plot doesn't have significant absorption line for MgI 2852
-        
-## No Column Density Plots because there's barely any MgI 2852 Present
-
-
-        # ax = fig.add_subplot(3,1,3)
-        # ax.plot(vel_2852, col_2852, color = '#2C6EA1', label = names[1])
-        # plt.title("MgI 2852 Column Density Plot for Galaxy %s" %(gal[h]))
-        # plt.xlabel("Velocity (km/s)")
-        # plt.ylabel("Column Density (Particle/cm^2)")
-        # ax.set_ylim(0, 5E12)
-        # ax.set_xlim(-3000,500)
-        # # plt.legend(loc = 1)
-        
-        # #Adds error bars to plots
-        # # plt.errorbar(vel_2852, col_2852, yerr = sigma_coldens2852, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
 
         # fig.tight_layout()
         pdf.savefig()
