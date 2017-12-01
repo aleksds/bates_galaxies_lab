@@ -93,8 +93,8 @@ def load_obs(objid=0, phottable=photfile, **kwargs):
     #ind = catalog['objid'] == float(objid)
     # Pick up data from our file, yo.
     wavelengths = [475,814,1600]
-    mags = np.array([catalog['f-{}'.format(i)] for i in wavelengths])
-    ivars = np.array([catalog['ivar-{}'.format(i)] for i in wavelengths])
+    mags = np.array([catalog['f_{}'.format(i)] for i in wavelengths])
+    ivars = np.array([catalog['ivar_{}'.format(i)] for i in wavelengths])
     ids = catalog['ID']
     zs = catalog['z']
 
