@@ -87,7 +87,7 @@ with PdfPages(filename) as pdf:
     for h in range(0,1):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
         data = ascii.read(datafile)
-        wave = data['wv'] 
+        wave = data['wv'] #/ (1. + zem[h])
         flux = data['norm']
         fx = data['fx']
         var = data['var']
@@ -107,41 +107,48 @@ with PdfPages(filename) as pdf:
         lt_path = imp.find_module('linetools')[1]
         #xspec = XSpectrum1D.from_file(lt_path+'/spectra/tests/files/UM184_nF.fits')   this was linetools code that we needed to understand in order to get order data to be inserted
 
+
+        mgiitrans = ['MgII 2796', 'MgII 2803']
         #for loop manipulating background info
         abslines = []
-        for trans in names:
-            iline = AbsLine(trans)
-            clear_CACHE_LLIST=True
-            iline.attrib['z'] = zem[h]
-            iline.analy['vlim'] = [-3000.,500.] #*u.km/u.s
+        for trans in mgiitrans:
+            print(trans, zem[h])
+            iline = AbsLine(trans, z=zem[h], vlim=[-3000.,500.]*u.km/u.s)
+            #clear_CACHE_LLIST=True
+            #iline.z = zem[h]
+            #iline.attrib['z'] = zem[h]
+            iline.analy['vlim'] = [-3000.,500.]*u.km/u.s
             iline.analy['spec'] = xspec
             # iline.analy['spec'] = xspec  this was for the default code pulled from linetools
             abslines.append(iline)
-
+        print('check out my abslines:', abslines)
 
 
 
             #Wavelengths of interest
-            MgII2796wrest=2796.3542699
-            MgII2803wrest=2803.5314853
-            MgI2852wrest=2852.96328
+            #MgII2796wrest=2796.3542699
+            #MgII2803wrest=2803.5314853
+            #MgI2852wrest=2852.96328
 
-            AbsLine=[MgII2796wrest, MgII2803wrest, MgI2852wrest]
+            #AbsLine=[MgII2796wrest, MgII2803wrest, MgI2852wrest]
 
 
-            abscomp = lt_abscomp.AbsComponent.from_abslines(abslines)
-            try:
-                sns.set(context="notebook",font_scale=2)
-            except:
-                pass
-            #Generates components for column density plot
-            abscomp.stack_plot()
+        abscomp = lt_abscomp.AbsComponent.from_abslines(abslines)
+        #try:
+        #    sns.set(context="notebook",font_scale=2)
+        #except:
+        #    pass
+        #Generates components for column density plot
+        abscomp.stack_plot(vlim=[-3000.,500.]*u.km/u.s)
 
-            #Produces numbers for plot generation for each wavelength
-            abscomp.synthesize_colm(redo_aodm=True)
-            abscomp.logN
-            for iline in abscomp._abslines:
-                print(iline.wrest, iline.attrib['flag_N'], iline.attrib['logN'], iline.attrib['sig_logN'])
+        #Produces numbers for plot generation for each wavelength
+        zlim=[zem[h]-0.01, zem[h]+0.002]
+        kwargs={}
+        kwargs['zlim'] = zlim
+        abscomp.synthesize_colm(redo_aodm=True)#, **kwargs)#limits=[-3000.,500.]*u.km/u.s)#, vlim=[-3000.,500.]*u.km/u.s)
+        print('give me some column density:', abscomp.logN)
+        for iline in abscomp._abslines:
+            print(iline.wrest, iline.attrib['flag_N'], iline.attrib['logN'], iline.attrib['sig_logN'])
 
-                #Plots Apparent Column Density
-                abscomp.plot_Na()
+            #Plots Apparent Column Density
+            abscomp.plot_Na()
