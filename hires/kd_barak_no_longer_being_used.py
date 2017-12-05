@@ -62,7 +62,7 @@ vflip = gal_info['vflip']
 
 
 minorLocator = AutoMinorLocator()
-filename = 'Tau_Flux_Coldens_Comparison.pdf'
+filename = 'Barak_Voigt_Attempt.pdf'
 with PdfPages(filename) as pdf:
     for h in range(0, len(gal)):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'

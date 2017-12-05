@@ -64,7 +64,6 @@ vflip = gal_info['vflip']
 
 
 # define velocity ranges to plot the profile
-## What does this do?????????????
 def column(vel, col_dens):
     cor_col = np.array([])
     for i in range(0, len(vel)):
@@ -81,7 +80,7 @@ axis_font = {'fontname':'Arial', 'size':'14'}
 
 
 minorLocator = AutoMinorLocator()
-filename = 'Mg_Tau_Flux_Column_Comparison.pdf'
+filename = 'Linetools_Voigt_and_Col_Dens.pdf'
 with PdfPages(filename) as pdf:
     # for h in range(0, len(gal)):
     for h in range(0,1):

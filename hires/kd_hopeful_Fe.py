@@ -58,6 +58,15 @@ def column(vel, col_dens):
     return cor_col
 
 
+
+
+
+title_font = {'fontname':'Arial', 'size':'10'}
+axis_font = {'fontname':'Arial', 'size':'8'}
+
+
+
+
 ## Function for Plotting
 # def Omnipotent(
 
@@ -157,9 +166,9 @@ with PdfPages(filename) as pdf:
 #                 ax.plot(vel_kms[i], flux, linewidth=1, label = names[i], color = hue[i])
 #                 ax.set_xlim(-3000, 500)
 #                 ax.set_ylim(0, 2)
-#                 plt.title(" %s Flux Plot %s" %((names[i]), (gal[h])))
-#                 plt.xlabel("Velocity(km/s)")
-#                 plt.ylabel("C.N. Flux")
+#                 plt.title(" %s Flux Plot %s" %((names[i]), (gal[h]),**title_font))
+#                 plt.xlabel("Velocity(km/s)",**axis_font)
+#                 plt.ylabel("C.N. Flux",**axis_font)
 
             
 #                 f = interp1d(vel_kms[i], flux)
@@ -191,8 +200,8 @@ with PdfPages(filename) as pdf:
 
 #                 #Plots Voigt Profile in red
 #                 ax.plot(xarr,voi_fit(xarr)+1, color='red')
-#                 plt.xlabel("Velocity(km/s)")
-#                 plt.ylabel("C.N. Flux")
+#                 plt.xlabel("Velocity(km/s)",**axis_font)
+#                 plt.ylabel("C.N. Flux",**axis_font)
 #                 ax.set_ylim (0,2)
 #                 ax.set_xlim(-3000,500)
 
@@ -209,9 +218,9 @@ with PdfPages(filename) as pdf:
 #                     ax.plot(vel_kms[i], flux, linewidth=1, label = names[i], color = hue[i])
 #                     ax.set_xlim(-3000, 500)
 #                     ax.set_ylim(0, 2)
-#                     plt.title(" %s Flux Plot %s" %((names[i]), (gal[h])))
-#                     plt.xlabel("Velocity(km/s)")
-#                     plt.ylabel("Flux")
+#                     plt.title(" %s Flux Plot %s" %((names[i]), (gal[h]),**title_font))
+#                     plt.xlabel("Velocity(km/s)",**axis_font)
+#                     plt.ylabel("Flux",**axis_font)
 #         fig.tight_layout()
 #         pdf.savefig()
 #         plt.close()
@@ -219,6 +228,8 @@ with PdfPages(filename) as pdf:
 
 #Flux, gonna remove once voigt works
         fig = plt.figure()
+        plt.rc('xtick', labelsize=6) 
+        plt.rc('ytick', labelsize=6)
         for i in range(0, len(names)):
 
             ax = fig.add_subplot(3,2,i+1)
@@ -226,9 +237,11 @@ with PdfPages(filename) as pdf:
             ax.plot(vel_kms[i], flux, linewidth=1, label = names[i], color = hue[i])
             ax.set_xlim(-3000, 500)
             ax.set_ylim(0, 2)
-            plt.title(" %s Flux Plot %s" %((names[i]), (gal[h])))
-            plt.xlabel("Velocity(km/s)")
-            plt.ylabel("C.N. Flux")
+            plt.title(" %s Flux Plot %s" %((names[i]), (gal[h])), **title_font)
+            plt.xlabel("Velocity(km/s)",**axis_font)
+            plt.ylabel("C.N. Flux",**axis_font)
+            # plt.rc('xtick', labelsize=6) 
+            # plt.rc('ytick', labelsize=6)
             
         fig.tight_layout()
         pdf.savefig()
@@ -241,11 +254,13 @@ with PdfPages(filename) as pdf:
         for i in range(0, len(names)):
             ax = fig.add_subplot(3,2,i+1)
             ax.plot(column_velocities[i], column_densities[i], linewidth =1, color = hue[i], label = names[i])
-            plt.title("%s Column Dens. Plot %s" %((names[i]), (gal[h])))
-            plt.xlabel("Velocity (km/s)")
-            # plt.ylabel("Column Density (Particle/cm^2)")
+            plt.title("%s Col Dens. Plot %s" %((names[i]), (gal[h])), **title_font)
+            plt.xlabel("Velocity (km/s)", **axis_font)
+            plt.ylabel("Col. Dens.",**axis_font)
             ax.set_ylim(0, 2E13)
             ax.set_xlim(-3000,500)
+            plt.rc('xtick', labelsize=6) 
+            plt.rc('ytick', labelsize=6)
             # plt.legend(loc = 1)
             
         fig.tight_layout()
@@ -262,9 +277,11 @@ with PdfPages(filename) as pdf:
             ax.set_xlim(-3000, 500)
             # y-axis upper lim set to 5 because no visible difference between tau = 5 and tau = infinity
             ax.set_ylim(-.2, 5)
-            plt.title("%s Tau Plot %s" %((names[i]), (gal[h])))
-            plt.xlabel("Velocity(km/s)")
-            plt.ylabel("Tau")
+            plt.title("%s Tau Plot %s" %((names[i]), (gal[h])),**title_font)
+            plt.xlabel("Velocity(km/s)",**axis_font)
+            plt.ylabel("Tau",**axis_font)
+            plt.rc('xtick', labelsize=6) 
+            plt.rc('ytick', labelsize=6)
             # plt.legend(loc = 4)
 
         fig.tight_layout()
