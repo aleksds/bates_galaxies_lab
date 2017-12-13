@@ -22,14 +22,14 @@ from astropy import units as u
 from astropy import constants as const
 from astropy.cosmology import FlatLambdaCDM
 from xlrd import open_workbook
-'''
-rawconv = sys.argv[1]
-coarsefine = sys.argv[2]
+
+rawconv = int(sys.argv[1])
+coarsefine = int(sys.argv[2])
 '''
 
 rawconv = 1
 coarsefine = 1
-
+'''
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
 conv = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)

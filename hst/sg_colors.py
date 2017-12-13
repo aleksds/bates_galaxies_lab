@@ -231,7 +231,7 @@ with PdfPages('sg_COLORS.pdf') as pdf:
         for p00ps in range(0,len(pairs)):
             ax = fig.add_subplot(2,3,p00ps+1)
             pl0tme = color(pairs[p00ps])
-            im = plt.imshow(pl0tme,clim=(-5,6)) #remember how to make red / blue!!!!
+            im = plt.imshow(pl0tme,clim=(-2,2)) #remember how to make red / blue!!!!
             #plt.colorbar()
             plt.axis('off')
             plt.tight_layout()

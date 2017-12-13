@@ -26,7 +26,8 @@ import xlwt
 import xlrd
 ## stuff for later
 galaxy_name = sys.argv[1]
-
+#ptype = sys.argv[2]
+ptype = 'coarse_final/'
 from astropy.io import fits
 
 from astropy.table import Table, Column
@@ -104,7 +105,8 @@ run_params = model_setup.get_run_params(argv=paramfile, **clargs)
 # load photometry from sg_flux.dat
 gal = galaxy_name[:5]
 print(gal)
-run_params['phottable'] = 'Photometry/'+gal+'.txt'
+#ptype = 'coarse_convolved_image/'
+run_params['phottable'] = 'Photometry/'+ptype+gal+'.txt'
 obs = params.load_obs(**run_params)
 obs['spectrum'] = None
 ws.write(0,0, 'Obj ID')
@@ -122,11 +124,11 @@ for i, lab in enumerate(coltit):
 ## HERE BE THE BEGINNING OF THE LOOP
 #def prospect(galaxy_name):
 
-run_params['outfile'] = galaxy_name+'/'
-if not os.path.exists(galaxy_name+'/'):
-    os.makedirs(galaxy_name+'/')
+run_params['outfile'] = 'Results/'+galaxy_name+ptype
+if not os.path.exists('Results/'+galaxy_name+ptype):
+    os.makedirs('Results/'+galaxy_name+ptype)
     
-with PdfPages(galaxy_name+'/total.pdf') as pdf:
+with PdfPages(run_params['outfile']+'total.pdf') as pdf:
     for i in range(startindex,endindex):
         #if galaxy_name in obs['objid'][i]:
         # I uncommented the previous line, and all of this will jump down a tab space.
@@ -318,7 +320,7 @@ with PdfPages(galaxy_name+'/total.pdf') as pdf:
         # In [18] --> this is the step where the code breaks
         postkwargs = {} #any keyord arguments to the lnpostfn would go here.
 
-
+        #if "{}_mcmc.h5".format(outroot)
         tstart = time.time()  # time it
 
         out = fitting.run_emcee_sampler(lnprobfn, initial_center, model, postkwargs=postkwargs, initial_prob=initial_prob, pool=None, hdf5=hfile, **run_params)
@@ -350,7 +352,43 @@ with PdfPages(galaxy_name+'/total.pdf') as pdf:
 
         # grab results, powell results, and our corresponding models
         res, pr, mod = results_from("{}_mcmc.h5".format(outroot))
+        '''
+        if os.path.isfile("{}_mcmc.h5".format(outroot)):
+            print('the files are IN the computer!')
+            res, pr, mod = results_from("{}_mcmc.h5".format(outroot))
+        else:
+            tstart = time.time()  # time it
 
+            out = fitting.run_emcee_sampler(lnprobfn, initial_center, model, postkwargs=postkwargs, initial_prob=initial_prob, pool=None, hdf5=hfile, **run_params)
+
+            esampler, burn_p0, burn_prob0 = out
+            edur = time.time() - tstart
+
+            #sys.stdout = fout
+
+            #print('done emcee in {0}s'.format(edur))
+
+            # In [19]
+            write_results.write_pickles(run_params, model, obs, esampler, guesses,
+                                        outroot=outroot, toptimize=pdur, tsample=edur,
+                                        sampling_initial_center=initial_center,
+                                        post_burnin_center=burn_p0,
+                                        post_burnin_prob=burn_prob0)
+
+            if hfile is None:
+                hfile = hfilename
+            write_results.write_hdf5(hfile, run_params, model, obs, esampler, 
+                                     guesses,
+                                     toptimize=pdur, tsample=edur,
+                                     sampling_initial_center=initial_center,
+                                     post_burnin_center=burn_p0,
+                                     post_burnin_prob=burn_prob0)
+
+            #print('Finished')
+
+            # grab results, powell results, and our corresponding models
+            res, pr, mod = results_from("{}_mcmc.h5".format(outroot))
+        '''
 
         # In [22]
         # To see how our MCMC samples look, we can examine a few traces
@@ -447,9 +485,16 @@ with PdfPages(galaxy_name+'/total.pdf') as pdf:
         #plt.savefig('test1.png')
         plt.close()
         #plt.savefig('ha.png')
-            
-table.write('Results/'+galaxy_name+'.fits')
-wb.save('Results/'+galaxy_name+'_results.xls')
+pstart = 0
+try:
+    table.write('Results/'+galaxy_name+ptype+galaxy_name+str(pstart)+'.fits')
+    wb.save('Results/'+galaxy_name+ptype+galaxy_name+str(pstart)+'_results.xls')
+except:
+    while os.path.isfile('Results/'+galaxy_name+ptype+galaxy_name+str(pstart)+'.fits'):
+        print('that file already exists', pstart)
+        pstart += 1
+        table.write('Results/'+galaxy_name+ptype+galaxy_name+str(pstart)+'.fits')
+        wb.save('Results/'+galaxy_name+ptype+galaxy_name+str(pstart)+'_results.xls')
 
 print('HOLY FUCK THAT TOOK FOREVER')
 

@@ -218,7 +218,7 @@ model_params.append({'name': 'mass', 'N': 1,
                         'init': 5e11,
                         'init_disp': 1e11,
                         'units': r'M_\odot',
-                        'prior':priors.TopHat(mini=1e9, maxi=1e12)})
+                        'prior':priors.TopHat(mini=1e7, maxi=1e12)})
 
 # Since we have zcontinuous=1 above, the metallicity is controlled by the
 # ``logzsol`` parameter.
@@ -239,10 +239,10 @@ model_params.append({'name': 'tau', 'N': 1,
 # FSPS parameter
 model_params.append({'name': 'tage', 'N': 1,
                         'isfree': True,
-                        'init': 5.0,
-                        'init_disp': 3.0,
+                        'init': 1.0,
+                        'init_disp': 1.0,
                         'units': 'Gyr',
-                        'prior':priors.TopHat(mini=0.101, maxi=14.0)})
+                        'prior':priors.TopHat(mini=0.01, maxi=14.0)})
 
 
 # FSPS parameter
