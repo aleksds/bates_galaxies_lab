@@ -64,6 +64,9 @@ filters = ['F475W','F814W','F160W']
 res = ['fine','coarse']
 type = ['convolved_image', 'final']
 
+
+alldata = []
+
 with PdfPages('poster.pdf') as pdf:
     for g, gal in enumerate(galaxies):
         fig = plt.figure()
@@ -80,9 +83,14 @@ with PdfPages('poster.pdf') as pdf:
             stamp = data[round(gal.y-dy):round(gal.y+dy), round(gal.x-dx):round(gal.x+dx)]
             #ax = fig.add_subplot(len(galaxies),len(filters), 1+g*4+f)
             ax = fig.add_subplot(1,len(filters)+1, 1+f)
+            plt.axis('off')
             plot_image()
             plt.title(fil)
-            
+            alldata.append(stamp)
+
+        bx = fig.add_subplot(1, len(filters)+1, 4)
+        plt.imshow(alldata)    
+        plt.axis('off')
         pdf.savefig()
         plt.close()
                              
