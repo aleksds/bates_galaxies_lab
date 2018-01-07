@@ -53,7 +53,9 @@ for sheet in wbo.sheets():
 
 
 # define the directory that contains the images
-dir = os.environ['HSTDIR']
+dir = '/Users/sgottlie/Desktop/linux-lab/'
+
+
 # define a function to plot "postage stamp" images
 def plot_image():
     std = np.std(stamp[stamp==stamp])
@@ -68,7 +70,9 @@ type = ['convolved_image', 'final']
 alldata = []
 
 with PdfPages('poster.pdf') as pdf:
-    for g, gal in enumerate(galaxies):
+    for g in range(0,1):
+        #for g, gal in enumerate(galaxies):
+        gal = galaxies[g]
         fig = plt.figure()
         plt.suptitle(gal.name)
         for f, fil in enumerate(filters):
@@ -88,6 +92,10 @@ with PdfPages('poster.pdf') as pdf:
             plt.title(fil)
             alldata.append(stamp)
 
+
+        alldata = np.reshape(alldata, (200,200,3))
+        alldata = alldata - np.min(alldata)
+        alldtat = alldata/np.max(alldata)
         bx = fig.add_subplot(1, len(filters)+1, 4)
         plt.imshow(alldata)    
         plt.axis('off')
