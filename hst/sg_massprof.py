@@ -47,7 +47,7 @@ class Galaxy:
         self.x = x
         self.y = y
         self.lDcm = cosmo.luminosity_distance(self.z)*u.Mpc.to(u.cm) / u.Mpc
-        self.radToKpc = conv.arcsec_per_kpc_proper(self.z)*0.05/u.arcsec*u.kpc
+        self.radToKpc = 0.05/(conv.arcsec_per_kpc_proper(self.z)/u.arcsec*u.kpc)
 
 radii = np.arange(40)+1
 area = [0 for x in range(len(radii))]
@@ -66,9 +66,9 @@ t=0
 
 type = ['convolved_image', 'final']
 
-#wbo = open_workbook(res[t]+'data.xlsx')
+#Grab galaxy data from excel
 wbo = open_workbook('galaxydata.xlsx')
-#wbo = open_workbook('update.xls')
+
 for sheet in wbo.sheets():
     numr = sheet.nrows
     galaxies = []
@@ -81,15 +81,23 @@ pltcolors = ['b','g','r','c','m','y','k']
 pltmarker = ['o','*','v','P','h','d']
 
 datadir = '/Users/sgottlie/Downloads/subset_20171220/'
-with PdfPages('sg_massprofiles.pdf') as pdf:
+with PdfPages('sg_massprofiles_UVIS.pdf') as pdf:
     for root, dirs, filenames in os.walk(datadir):
         for f in filenames:
-            if "UVJ" in f and ".xls" in f:
+            if "UVIS" in f and ".xls" in f:
                 count += 1
+                gal = galaxies[count]
                 data = pd.read_excel(datadir+f)
                 print(datadir+f)
 
-                gal = galaxies[count]
+                flux = pd.read_csv(cwd + '/PROSPECTOR/Photometry/coarse_final/'+gal.name[:5]+'_uvis.txt', sep = "\t", header = 0)
+
+                light = flux['Unnamed: 3']
+                totallight = np.sum(light)
+                totalmass = np.sum(data['best mass'])
+                mlrscalar = totalmass / totallight
+
+                
                 kpcArea = area*gal.radToKpc**2
                 fig = plt.figure(figsize = (10,8))
                 
@@ -97,17 +105,21 @@ with PdfPages('sg_massprofiles.pdf') as pdf:
                 plt.title('Mass vs Radii for ' + gal.name)
                 #plt.xlabel('Radii (kpc)')
                 plt.ylabel('Mass (solar masses)')
-                ax.plot(radii*gal.radToKpc, data['best mass'],linestyle = 'None',  marker = pltmarker[0], color = pltcolors[1])
-
-
-
                 
+                plt.semilogy(radii*gal.radToKpc, light*mlrscalar,linestyle = 'None',  marker = 'o', color = 'g', label = 'Light Profile [F814W]')
+                plt.semilogy(radii*gal.radToKpc, data['best mass'],linestyle = 'None',  marker = '*', color = 'b', label ='Stellar Mass Profile')
+                plt.legend()
+
+
                 ax = fig.add_subplot(2,1,2)
                 plt.title('Mass Density vs Radii for '+ gal.name)
                 plt.xlabel('Radii (kpc)')
                 plt.ylabel('Mass Density (solar masses / kpc^2)')
                 
-                ax.plot(radii*gal.radToKpc, data['best mass']/kpcArea,linestyle = 'None',  marker = pltmarker[1], color = pltcolors[1])
+                plt.semilogy(radii*gal.radToKpc, (light*mlrscalar)/kpcArea,linestyle = 'None',  marker = 'o', color = 'g', label = 'Surface Brightness Profile [F814W]')
+                plt.semilogy(radii*gal.radToKpc, data['best mass']/kpcArea,linestyle = 'None',  marker = '*', color = 'b', label = 'Stellar Mass Surface Density Profile')
+                plt.legend()
+                
                 #plt.close()
 
                 
