@@ -99,12 +99,12 @@ with PdfPages('sg_massprofiles_UVIS.pdf') as pdf:
 
                 
                 kpcArea = area*gal.radToKpc**2
-                fig = plt.figure(figsize = (10,8))
+                fig = plt.figure(figsize = (6,9))
                 
                 ax = fig.add_subplot(2,1,1)
-                plt.title('Mass vs Radii for ' + gal.name)
+                plt.title('Mass vs Radii for ' + gal.name, fontsize = 20)
                 #plt.xlabel('Radii (kpc)')
-                plt.ylabel('Mass (solar masses)')
+                plt.ylabel('Mass (solar masses)', fontsize = 16)
                 
                 plt.semilogy(radii*gal.radToKpc, light*mlrscalar,linestyle = 'None',  marker = 'o', color = 'g', label = 'Light Profile [F814W]')
                 plt.semilogy(radii*gal.radToKpc, data['best mass'],linestyle = 'None',  marker = '*', color = 'b', label ='Stellar Mass Profile')
@@ -122,7 +122,7 @@ with PdfPages('sg_massprofiles_UVIS.pdf') as pdf:
                 
                 #plt.close()
 
-                
+                plt.savefig(gal.name+'.png')
                 pdf.savefig()
                 plt.close()
 
