@@ -1,8 +1,8 @@
 import os
 import numpy as np
 from astropy.io import fits
-from photutils import CircularAperture
-from photutils import aperture_photometry
+#from photutils import CircularAperture
+#from photutils import aperture_photometry
 import glob
 import matplotlib.pyplot as plt
 from matplotlib import cm
