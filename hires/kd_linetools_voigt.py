@@ -9,19 +9,13 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import AutoMinorLocator
-from scipy import integrate
 import astropy.units as u
 from linetools.isgm import abscomponent as lt_abscomp
 from linetools.spectralline import AbsLine
 from linetools.spectra.xspectrum1d import XSpectrum1D
 import imp
 import warnings
-import numpy as np
-import os
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
 from astropy.io import ascii
-from matplotlib.ticker import AutoMinorLocator
 from scipy.interpolate import interp1d
 from astropy.modeling.models import Voigt1D
 from astropy.modeling import models, fitting
@@ -83,7 +77,7 @@ minorLocator = AutoMinorLocator()
 filename = 'Linetools_Voigt_and_Col_Dens.pdf'
 with PdfPages(filename) as pdf:
     # for h in range(0, len(gal)):
-    for h in range(0,1):
+    for h in range(1,2):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
         data = ascii.read(datafile)
         wave = data['wv'] #/ (1. + zem[h])
