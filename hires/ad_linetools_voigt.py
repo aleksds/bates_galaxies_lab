@@ -22,6 +22,7 @@ from linetools import spectralline as ltsp
 from linetools.isgm import abscomponent as lt_abscomp
 from linetools.spectralline import AbsLine, SpectralLine
 from linetools.spectra.xspectrum1d import XSpectrum1D
+from linetools.analysis import voigt as lav
 import imp
 import warnings
 from astropy.io import ascii
@@ -158,3 +159,23 @@ with PdfPages(filename) as pdf:
 
             #Plots Apparent Column Density
             abscomp.plot_Na()
+
+        # adding in code from ad_linetools_exvo.py (clearly need multiple components)
+        fitvoigt = lav.single_voigt_model(logN=np.log10(abscomp.attrib['N'].value),b=100,#b=abscomp.attrib['b'].value,
+                                z=abslines[0].z, wrest=abslines[0].wrest.value, 
+                                gamma=abslines[0].data['gamma'].value, f=abslines[0].data['f'],
+                                 fwhm=3.)
+
+        fitter = fitting.LevMarLSQFitter()
+
+
+        p = fitter(fitvoigt,xspec.wavelength.value,xspec.flux.value,weights=1./(np.ones(len(xspec.wavelength.value))*0.1))
+        print(p)
+
+        plt.plot(xspec.wavelength.value, xspec.flux.value, 'k-',drawstyle='steps')
+        plt.plot(xspec.wavelength.value,p(xspec.wavelength.value), 'g-')
+        plt.xlim(4050., 4100.)
+        plt.ylim(0., 1.1)
+
+        plt.show()
+        plt.close()
