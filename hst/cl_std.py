@@ -24,7 +24,6 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from photutils import centroid_com, centroid_1dg, centroid_2dg
 
-#define a function to plot "postage stamp" images
 def plot_imageX(xcen,ycen):
     std = np.std(stamp[stamp==stamp])
     x1, y1 = centroid_com(stamp)
@@ -56,26 +55,26 @@ ycen = np.zeros([ngal, nmeth, nfil])
 xstds = np.zeros([len(Galaxies)])
 ystds = np.zeros([len(Galaxies)])
 
-# create a PDF file for the plots
 meth = ['centroid_com','centroid_1dg','centroid_2dg']
 foureightone = [4,8,1]
 filters = ['F475W','F814W','F160W']
 colors = ['blue','green','red']
 
 for j in range(0,len(Galaxies)):
-        for i in range(0,len(filters)):
-            for m in range(0,len(meth)):
-                file = glob.glob(dir+Galaxies[j][0]+'_final_F'+str(foureightone[i])+'*sci.fits')
-                hdu = fits.open(file[0])
-                data, header = hdu[0].data, hdu[0].header
-                stamp = data[round(Galaxies[j][2]-dy):round(Galaxies[j][2]+dy), round(Galaxies[j][1]-dx):round(Galaxies[j][1]+dx)]
-                xcoor = plot_imageX(Galaxies[j][1],Galaxies[j][2])
-                xcen[j][i][m] = xcoor[m]
-                ycoor = plot_imageY(Galaxies[j][1],Galaxies[j][2])
-                ycen[j][i][m] = ycoor[m]
-        xstds[j] = np.std(xcen[j])
-        ystds[j] = np.std(ycen[j])
-
+    for i in range(0,len(filters)):
+        for m in range(0,len(meth)):
+            file = glob.glob(dir+Galaxies[j][0]+'_final_F'+str(foureightone[i])+'*sci.fits')
+            hdu = fits.open(file[0])
+            data, header = hdu[0].data, hdu[0].header
+            stamp = data[round(Galaxies[j][2]-dy):round(Galaxies[j][2]+dy), round(Galaxies[j][1]-dx):round(Galaxies[j][1]+dx)]
+            xcoor = plot_imageX(Galaxies[j][1],Galaxies[j][2])
+            xcen[j][i][m] = xcoor[m]
+            ycoor = plot_imageY(Galaxies[j][1],Galaxies[j][2])
+            ycen[j][i][m] = ycoor[m]
+    xstds[j] = np.std(xcen[j])
+    ystds[j] = np.std(ycen[j])
+print (np.sum(xstds)/12)
+print (np.sum(ystds)/12)
 with PdfPages('cl_std.pdf') as pdf:
     plt.figure()
     for q in range (0,len(Galaxies)):

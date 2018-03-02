@@ -100,7 +100,7 @@ for w in range(0,12):
             if p < 41 and q == 41:
                 disfrombest[w][p-1][q-1] = ((41-p+xcendiff[w])**2 + (41-q+np.abs(ycendiff[w]))**2)**0.5
             if p == 41 and q == 41:
-                disfrombest[w][p-1][q-1] = ((41-np.abs(xcendiff[w]))**2 + (41-q+np.abs(ycendiff[w]))**2)**0.5
+                disfrombest[w][p-1][q-1] = ((41-p+np.abs(xcendiff[w]))**2 + (41-q+np.abs(ycendiff[w]))**2)**0.5
             if p > 41 and q == 41:
                 disfrombest[w][p-1][q-1] = ((41-p-xcendiff[w])**2 + (41-q+np.abs(ycendiff[w]))**2)**0.5
             if p < 41 and q > 41:
@@ -111,7 +111,7 @@ for w in range(0,12):
                 disfrombest[w][p-1][q-1] = ((41-p-xcendiff[w])**2 + (41-q+ycendiff[w])**2)**0.5
                 
 # Now, we loop through all galaxies
-# adapting to residuals for J0826 475 coarse
+# adapted for J0905 475 coarse regular flux and residual flux images
 
 for w in range (0, len(galaxies)):
     for i in range (0, 3):
@@ -125,11 +125,11 @@ for w in range (0, len(galaxies)):
         gain[i] = header[i]['CCDGAIN']
         RN[i] = header[i]['READNSEA']
 
-#GALFIT RESIDUAL J0826 coarse 475 (current problem is this address/upload-format doesn't open the file as a multiextensioncube)
-        galfile = glob.glob('/Volumes/physics/linux-lab/data/galfit/'+galaxies[0]+'*/J0826_F475W_coarse.fits')
-        ugg = fits.open(galfile[0])
-
-        
+#GALFIT RESIDUAL J0905 coarse 475 
+        galfile = glob.glob('/Volumes/physics/linux-lab/data/galfit/'+galaxies[2]+'*/J0905_F475W_coarse.fits')
+        multi = fits.open(galfile[0])
+        multi_res, multi_header = multi[3].data, multi[3].header
+        multi_data = multi[1].data
         #define positions for photometry
         positions = [(xcen[w], ycen[w])]
         # do pixel analysis
@@ -140,49 +140,87 @@ for w in range (0, len(galaxies)):
                 pixNoise[w,i,width-j-1,k] =  math.sqrt((rSky[i][w]*1)**2+fluxpix[w][i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
 m = np.ma.masked_where(SNR<10,SNR)
 
-#'/Volumes/physics/linux-lab/data/galfit/'+galaxies[w]+'/J0826_F475W_coarse.fits'
+#YOOOOOO lipscomb radius yo 
+#snrdisoverlap=np.zeros([len(galaxies),len(wavelengths), width, width,2])
+#radiigroups=np.empty([12,3,2])
+#for w in range(0,len(galaxies)):
+#    for z in range(0,len(wavelengths)):
+#        snrdisoverlap[w][z] = np.dstack((disfrombest[w],SNR[w][z]))
+#for w in range(0,len(galaxies)):
+#    for z in range(0,len(wavelengths)):
+#        for q in range(0,width):
+#            for p in range(0,width):
+#                if snrdisoverlap[w][z][q][p][0]<9:
+#                    np.append(radiigroups[w][z][0], snrdisoverlap[w][z][q][p])
 
 
-#YOOOOOO lipscomb radius yo
-snrdisoverlap=np.zeros([len(galaxies),len(wavelengths), width, width,2])
-radiigroups=np.empty([12,3,2])
-for w in range(0,len(galaxies)):
-    for z in range(0,len(wavelengths)):
-        snrdisoverlap[w][z] = np.dstack((disfrombest[w],SNR[w][z]))
-for w in range(0,len(galaxies)):
-    for z in range(0,len(wavelengths)):
-        for q in range(0,width):
-            for p in range(0,width):
-                if snrdisoverlap[w][z][q][p][0]<9:
-                    np.append(radiigroups[w][z][0], snrdisoverlap[w][z][q][p])
+# Define residual J0905 coarse noise and plot it against radius
+snrJ0905 = SNR[2]
+nsrJ0905 = 1/snrJ0905
+fluxpixJ0905 = fluxpix[2]
+noiseJ0905 = nsrJ0905*fluxpixJ0905
+residual_noise_J0905 = noiseJ0905*(2**0.5)
 
-
-# Define residual J0826 coarse noise and plot it against radius
-snrJ0826 = SNR[0]
-nsrJ0826 = 1/snrJ0826
-fluxpixJ0826 = fluxpix[0]
-noiseJ0826 = nsrJ0826*fluxpixJ0826
-residual_noise_J0826 = noiseJ0826*(2**0.5)
-
-with PdfPages('cl_residual_noise_J0826.pdf') as pdf:   
+#make plot in pdf of J0905 residual noise vs radius from centroid
+with PdfPages('cl_residual_noise_J0905.pdf') as pdf:   
     plt.figure()
 
-    plt.scatter(disfrombest[0],residual_noise_J0826[0])
-    plt.scatter(disfrombest[0],residual_noise_J0826[1])
-    plt.scatter(disfrombest[0],residual_noise_J0826[2])
+    plt.scatter(disfrombest[2],residual_noise_J0905[0])
+    plt.scatter(disfrombest[2],residual_noise_J0905[1])
+    plt.scatter(disfrombest[2],residual_noise_J0905[2])
     plt.ylim(0,200)
     plt.xlim(0,40)
     plt.xlabel('Distance from Centroid (pix)')
     plt.ylabel('Residual Image Noise (electrons)')
-    plt.title('Noise by Distance for J0826 Residuals')
-    a=plt.scatter(disfrombest[0],residual_noise_J0826[0])
-    b=plt.scatter(disfrombest[0],residual_noise_J0826[1])
-    c=plt.scatter(disfrombest[0],residual_noise_J0826[2])
+    plt.title('Noise by Distance for J0905 Residuals')
+    a=plt.scatter(disfrombest[2],residual_noise_J0905[0])
+    b=plt.scatter(disfrombest[2],residual_noise_J0905[1])
+    c=plt.scatter(disfrombest[2],residual_noise_J0905[2])
     plt.legend((a,b,c,),
            ('475 coarse', '814 coarse', '1600 coarse'),
            scatterpoints=1,
            loc='upper right',
            ncol=3,
            fontsize=8)
+    pdf.savefig()
+    plt.close()
+
+#cut out 81 by 81 slice of 401 by 401 J0905 475 coarse residual flux and noise arrays
+J0905ressig = np.zeros([width,width])
+J0905resnoise = np.zeros([width,width])
+for i in range(width):
+    for q in range(width):
+        J0905ressig[i][q] = multi_res[161+i][161+q]
+        J0905resnoise = residual_noise_J0905[0]
+        
+#define snr for J0905 475 coarse residual
+SNRresJ0905 = J0905ressig/J0905resnoise
+
+#make plot of SNRresJ0905 coarse 475 vs radius
+with PdfPages('cl_SNRresJ0905 vs radius.pdf') as pdf:   
+    plt.figure()
+    for k in range(width):
+        for j in range(width):
+            plt.scatter(disfrombest[2][j][k],SNRresJ0905[j][k])
+    plt.ylim(0,100)
+    plt.xlim(0,60)
+    plt.xlabel('Distance from Centroid (pix)')
+    plt.ylabel('SNR Residual Images')
+    plt.title('SNR for the Residual Images from J0905 F475W Coarse vs Radius')
+    pdf.savefig()
+    plt.close()
+    
+#make plot of signalresJ0905 coarse 475 vs radius
+with PdfPages('cl_signalresJ0905 vs radius.pdf') as pdf:   
+    plt.figure()
+    for k in range(width):
+        for j in range(width):
+            plt.scatter(disfrombest[2][j][k],J0905ressig[j][k])
+    #plt.ylim(0,1000)
+    plt.xlim(0,60)
+    plt.xlabel('Distance from Centroid (pix)')
+    plt.ylabel('Flux in Residual Images (electrons)')
+    plt.yscale('log')
+    plt.title('Flux of the Residual Images for J0905 F475W Coarse vs Radius')
     pdf.savefig()
     plt.close()
