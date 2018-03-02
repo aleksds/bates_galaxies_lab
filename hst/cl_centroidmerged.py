@@ -40,6 +40,8 @@ def plot_image():
 dir = os.environ['HSTDIR']
 
 # parameters for the initial guess at the galaxy centroid and the size
+# pix coordinates on entire ds9 image
+galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
 Galaxies = [['J0826', 3629, 4154], ['J0901', 3934, 4137], ['J0905', 3387, 3503], ['J0944', 3477., 3405.], ['J1107', 3573, 3339.], ['J1219', 3803., 4170.], ['J1341', 3884, 4165], ['J1506', 4147., 3922.], ['J1558', 3787., 4186.], ['J1613', 4175., 3827.], ['J2116', 3567, 3436], ['J2140', 4067, 4054]]
 dx = 5
 dy = 5
@@ -80,10 +82,8 @@ bestys = np.zeros(12)
 for w in range(0,len(Galaxies)):
     mxs = [0,0,0]
     mys = [0,0,0]
-    mstdx = [0,0,0]
-    mstdy = [0,0,0]
     for i in range(0, len(filters)):
-        file = glob.glob(dir+Galaxies[w][0]+'_final_'+filters[i]+'*sci.fits')
+        file = glob.glob(dir+galaxies[w]+'*/coarse/'+filters[i]+'/final*sci.fits')
         hdu = fits.open(file[0])
         data[i], header[i] = hdu[0].data, hdu[0].header
         fnu[i] = header[i]['PHOTFNU']
@@ -107,7 +107,7 @@ with PdfPages(filename) as pdf:
         plt.scatter(Galaxies[j][1],Galaxies[j][2], label='brightness center',color='black')
         plt.scatter(bestxs[j],bestys[j], label='BEST',color='gold')
         for i in range(0,len(filters)):
-            file = glob.glob(dir+Galaxies[j][0]+'_final_F'+str(foureightone[i])+'*sci.fits')
+            file = glob.glob(dir+galaxies[j]+'*/coarse/'+filters[i]+'/final*sci.fits')
             hdu = fits.open(file[0])
             data, header = hdu[0].data, hdu[0].header
             stamp = data[round(Galaxies[j][2]-dy):round(Galaxies[j][2]+dy), round(Galaxies[j][1]-dx):round(Galaxies[j][1]+dx)]

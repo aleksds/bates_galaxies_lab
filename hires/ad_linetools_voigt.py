@@ -3,6 +3,14 @@
 #Code implementing column density
 
 
+
+
+
+from linetools.isgm import abscomponent as lt_abscomp
+from linetools.spectra.xspectrum1d import XSpectrum1D
+from linetools.lists.linelist import LineList
+
+
 import os
 import numpy as np
 from astropy.io import fits
@@ -10,9 +18,11 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.ticker import AutoMinorLocator
 import astropy.units as u
+from linetools import spectralline as ltsp
 from linetools.isgm import abscomponent as lt_abscomp
-from linetools.spectralline import AbsLine
+from linetools.spectralline import AbsLine, SpectralLine
 from linetools.spectra.xspectrum1d import XSpectrum1D
+from linetools.analysis import voigt as lav
 import imp
 import warnings
 from astropy.io import ascii
@@ -20,12 +30,17 @@ from scipy.interpolate import interp1d
 from astropy.modeling.models import Voigt1D
 from astropy.modeling import models, fitting
 
+from pkg_resources import resource_filename
+from scipy import integrate
+
 try:
     import seaborn as sns; sns.set(context="notebook",font_scale=2)
 except:
     pass
 
 warnings.filterwarnings('ignore')
+
+ism = LineList('ISM')
 
 # define the data directory
 dir = os.environ['HIRESDIR']
@@ -106,17 +121,16 @@ with PdfPages(filename) as pdf:
         abslines = []
         for trans in mgiitrans:
             print(trans, zem[h])
-            iline = AbsLine(trans, z=zem[h], vlim=[-3000.,500.]*u.km/u.s)
+            iline = AbsLine(trans, z=zem[h], linelist=ism)
+            iline.limits.set([-3000.,400.]*u.km/u.s) # vlim
             #clear_CACHE_LLIST=True
             #iline.z = zem[h]
             #iline.attrib['z'] = zem[h]
-            iline.analy['vlim'] = [-3000.,500.]*u.km/u.s
+            #iline.analy['vlim'] = [-3000.,500.]*u.km/u.s
             iline.analy['spec'] = xspec
             # iline.analy['spec'] = xspec  this was for the default code pulled from linetools
             abslines.append(iline)
         print('check out my abslines:', abslines)
-
-
 
             #Wavelengths of interest
             #MgII2796wrest=2796.3542699
@@ -145,3 +159,23 @@ with PdfPages(filename) as pdf:
 
             #Plots Apparent Column Density
             abscomp.plot_Na()
+
+        # adding in code from ad_linetools_exvo.py (clearly need multiple components)
+        fitvoigt = lav.single_voigt_model(logN=np.log10(abscomp.attrib['N'].value),b=100,#b=abscomp.attrib['b'].value,
+                                z=abslines[0].z, wrest=abslines[0].wrest.value, 
+                                gamma=abslines[0].data['gamma'].value, f=abslines[0].data['f'],
+                                 fwhm=3.)
+
+        fitter = fitting.LevMarLSQFitter()
+
+
+        p = fitter(fitvoigt,xspec.wavelength.value,xspec.flux.value,weights=1./(np.ones(len(xspec.wavelength.value))*0.1))
+        print(p)
+
+        plt.plot(xspec.wavelength.value, xspec.flux.value, 'k-',drawstyle='steps')
+        plt.plot(xspec.wavelength.value,p(xspec.wavelength.value), 'g-')
+        plt.xlim(4050., 4100.)
+        plt.ylim(0., 1.1)
+
+        plt.show()
+        plt.close()
