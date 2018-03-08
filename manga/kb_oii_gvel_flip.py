@@ -182,32 +182,75 @@ with PdfPages(filename) as pdf:
             # Flipping the gvel plot
             x_axis = copy.deepcopy(xproj_kpc_map)
             y_axis = copy.deepcopy(zproj_kpc_map)
-            neg_yax = copy.deepcopy(y_axis)
-            neg_yax = neg_yax * (-1)
+            # neg_yax = copy.deepcopy(y_axis)
+            # neg_yax = neg_yax * (-1)
             gvel = copy.deepcopy(dap_vel)
             bad = np.abs(gvel) > 300
             gvel[bad] = 0
-            #
+
             pos_y = y_axis > 0
             neg_y = y_axis < 0
             pos_x = x_axis > 0
             neg_x = x_axis < 0
+            y_array = y_axis != 0
+            x_array = x_axis != 0
             gvel_invert = np.zeros([size, size])
+
             for i in dap_vel:
                 for v in i:
                     if (v != 0) and (-300 < abs(v) < 300):
                         vy, vx = np.where(dap_vel == v)
+                                                                       
+                        # zval = y_axis[vy[0]][vx[0]]
+                        # zprimy, zprimx = np.where(neg_yax == zval)
+                        #
+                        # gvel_invert[zprimy[0]][zprimx[0]] = v
 
-                        zval = y_axis[vy[0]][vx[0]]
-                        zprimy, zprimx = np.where(neg_yax == zval)
-
-                        gvel_invert[zprimy[0]][zprimx[0]] = v
-
-                        '''y_val = y_axis[vy[0]][vx[0]]
+                        y_val = y_axis[vy[0]][vx[0]]
                         x_val = x_axis[vy[0]][vx[0]]
-                        flipped_vy, flipped_vx = np.where(y_axis == -1*y_val)
-                        gvel_invert[flipped_vy,flipped_vx] = v'''
+
                         
+                        # if y_val > 0 and x_val > 0:
+                        #     dist = np.sqrt(np.square(x_axis[x_array]-x_val)+np.square(y_axis[y_array]-y_val))
+                        # elif y_val > 0 and x_val < 0:
+                        #     dist = np.sqrt(np.square(x_axis[x_array]+x_val)+np.square(y_axis[y_array]-y_val))
+                        # elif y_val < 0 and x_val > 0:
+                        #     dist = np.sqrt(np.square(x_axis[x_array]-x_val)+np.square(y_axis[y_array]+y_val))
+                        # else:
+                        #     dist = np.sqrt(np.square(x_axis[x_array]+x_val)+np.square(y_axis[y_array]+y_val))
+
+
+                        # if y_val > 0 and x_val > 0:
+                        #     dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis-y_val))
+                        # elif y_val > 0 and x_val < 0:
+                        #     dist = np.sqrt(np.square(x_axis+x_val)+np.square(y_axis-y_val))
+                        # elif y_val < 0 and x_val > 0:
+                        #     dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis+y_val))
+                        # else:
+                        #     dist = np.sqrt(np.square(x_axis+x_val)+np.square(y_axis+y_val))
+
+                        dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis-y_val))
+
+                        index = np.where(dist == np.amin(dist)) #getting two index values for some y_val, x_val=0
+                        flp_y_val = y_axis[y_array][index[0]]
+                        #flp_x_val = x_axis[x_array][index[0]]
+                        if np.size(flp_y_val) != 1:
+                            first = abs(abs(y_val) - abs(flp_y_val[0]))
+                            second = abs(abs(y_val) - abs(flp_y_val[1]))
+                            if first < second:
+                                flp_vy, flp_vx = np.where(y_axis == flp_y_val[0])  #using x_axis == flp_x_val gives the same values
+                                gvel_invert[flp_vy[0]][flp_vx[0]] = v
+                            else:
+                                flp_vy, flp_vx = np.where(y_axis == flp_y_val[1])
+                                gvel_invert[flp_vy[0]][flp_vx[0]] = v
+                        else:
+                            flp_vy, flp_vx = np.where(y_axis == flp_y_val[0])
+                            gvel_invert[flp_vy[0]][flp_vx[0]] = v
+
+
+
+                        # flipped_vy, flipped_vx = np.where(y_axis == -1*y_val)
+                        # gvel_invert[flipped_vy,flipped_vx] = vx
 
                         #nearest_y = y_axis - y_val
                         #yminy, yminx = np.where(nearest_y == np.amin(nearest_y))
@@ -219,7 +262,7 @@ with PdfPages(filename) as pdf:
                         # nearest_y.sort(reverse=True)
                         #nearest_y = sorted(nearest_y, reverse=True)
 
-                        #gvel_invert[new_y_coor][new_x_coor] = v
+                        # gvel_invert[new_y_coor][new_x_coor] = v
 
                         #The line method below
 
