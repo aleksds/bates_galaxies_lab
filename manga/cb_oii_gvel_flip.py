@@ -192,25 +192,53 @@ with PdfPages(filename) as pdf:
             pos_x = x_axis > 0
             neg_x = x_axis < 0
             gvel_invert = np.zeros([size, size])
+            # vels = (np.abs(dap_vel) < 300)
             for i in dap_vel:
                 for v in i:
                     if (v != 0) and (-300 < abs(v) < 300):
-                        vy, vx = np.where(dap_vel == v)
+                        vy, vx = np.where(dap_vel == v) #Positions in vel plot
 
-                        y_val = y_axis[vy[0]][vx[0]]
-                        x_val = x_axis[vy[0]][vx[0]]
+                        y_val = y_axis[vy[0]][vx[0]] # Value in z-proj
+                        x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
 
-                        nearest_y = y_axis - y_val
-                        yminy, yminx = np.where(nearest_y == np.amin(nearest_y))
-                        if y_val > 0:
-                            nearest_y = y_axis[neg_y] - y_val
-                        else:
-                            nearest_y = y_axis[pos_y] - y_val
-                        # nearest_y.sort(key=lambda x: x[2], reverse=True)
-                        # nearest_y.sort(reverse=True)
-                        nearest_y = sorted(nearest_y, reverse=True)
+                        # nearest_y = y_axis - y_val
+                        # yminy, yminx = np.where(nearest_y == np.amin(np.abs(nearest_y)))
+                        if y_val != 0:
+                            if y_val > 0: #what if y_val is zero?? cb: solved
+                                nearest_y = y_axis[neg_y] + y_val #difference in opposite y-axis
+                            if y_val < 0:
+                                nearest_y = y_axis[pos_y] + y_val
+                            # nearest_y.sort(key=lambda x: x[2], reverse=True)
+                            # nearest_y.sort(reverse=True)
 
-                        gvel_invert[new_y_coor][new_x_coor] = v
+                            nearest_y = sorted(nearest_y, key=abs) #sorted abs values of difference from smallest to largest
+                            ref_y = nearest_y - y_val #sorted corresponding y_val in the opposite axis
+                            fil_ref_x = []
+                            fil_ref_y=[]
+
+                            for j in ref_y: #getting rid of unwanted ref_y
+                                if np.abs((np.abs(j) - np.abs(y_val))) < 3: #what if y_val is greater than ref_y?? cb:solved maybe
+                                    fil_ref_y.append(j)
+
+                            for k in fil_ref_y:
+                                refxy, refxx = np.where(y_axis == k)
+                                refx_val = x_axis[refxy[0]][refxx[0]]
+                                fil_ref_x.append(refx_val) #corresponding x_val of remaining ref_y
+                                #Why is the size of fil_ref_x smaller than the size of fill_ref_y??
+
+                            fil_y = copy.deepcopy(fil_ref_y)
+                            fil_x = copy.deepcopy(fil_ref_x)
+
+                            dist = np.sqrt(np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))
+                            min_dist_ind = np.where(dist == np.amin(dist))
+                            new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y[min_dist_ind[0][0]])
+
+
+                            gvel_invert[new_y_coor[0]][new_x_coor[0]] = v
+
+                        if y_val == 0:
+                            gvel_invert[vy[0]][vx[0]] = v
+
 
                         #The line method below
 
