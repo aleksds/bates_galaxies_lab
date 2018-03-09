@@ -95,16 +95,16 @@ for w in range(0,12):
             totdataenergyef[w] = np.sum(galenergy[w][i][:][:])
 
 #above shit aint flux its energy! Now dividing by exposure time to get power. Then will multiply by photfnu to get total flux in janskys which will allow me to calculate magnitudes! YEYEYE
-fluxdatafsf = (totdataenergyfsf/expdfsf)*fnudfsf
-fluxdataef = (totdataenergyef/expdef)*fnudef
-fluxmodelfsf = (totmodelenergyfsf/expmfsf)*fnumfsf
-fluxmodelef = (totmodelenergyef/expmef)*fnumef
+fluxdatafsf = (totdataenergyfsf/expdfsf*1e-23)*fnudfsf
+fluxdataef = (totdataenergyef/expdef*1e-23)*fnudef
+fluxmodelfsf = (totmodelenergyfsf/expmfsf*1e-23)*fnumfsf
+fluxmodelef = (totmodelenergyef/expmef*1e-23)*fnumef
 
 #MAGNITUDES
-magdatafsf = -2.5*np.log10(fluxdatafsf)
-magdataef = -2.5*np.log10(fluxdataef)
-magmodelfsf = -2.5*np.log10(fluxmodelfsf)
-magmodelef = -2.5*np.log10(fluxmodelef)
+magdatafsf = -2.5*np.log10(fluxdatafsf)-48.6
+magdataef = -2.5*np.log10(fluxdataef)-48.6
+magmodelfsf = -2.5*np.log10(fluxmodelfsf)-48.6
+magmodelef = -2.5*np.log10(fluxmodelef)-48.6
 
 with PdfPages('Color Plot.pdf') as pdf:   
     plt.figure()
