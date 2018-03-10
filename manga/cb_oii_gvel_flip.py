@@ -180,23 +180,59 @@ with PdfPages(filename) as pdf:
             dap_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[j, :, :]
             dap_serr = np.sqrt(1. / dap_sivar)  # *1.e-4
 
+
             # Flipping the gvel plot
             x_axis = copy.deepcopy(xproj_kpc_map)
             y_axis = copy.deepcopy(zproj_kpc_map)
             gvel = copy.deepcopy(dap_vel)
             bad = np.abs(gvel) > 300
             gvel[bad] = 0
-            #
+
             pos_y = y_axis > 0
             neg_y = y_axis < 0
             pos_x = x_axis > 0
             neg_x = x_axis < 0
             gvel_invert = np.zeros([size, size])
+
+            # CB new approach: circularization; making the vel plot circular so we have better symmetry to work with
+            newx = copy.deepcopy(x_axis)
+            newx = newx[np.logical_and(newx != 0, newx !=0)]
+            newxt = copy.deepcopy(newx)
+            newxt = np.transpose(newxt)
+            newxt = newxt[np.logical_and(newxt != 0, newxt != 0)]
+
+            yind, xdum = np.where(x_axis == newx[0])
+            ydum, xind = np.where(x_axis == newxt[0])
+            yinval = yind[0]
+            xinval = xind[0]
+
+            #figuring out the middle of the plot
+            midy = int(len(dap_vel))/2
+            midy = int(midy)
+            radius = midy-yinval
+            mask_1 = np.zeros([size, size])
+            mask_1 = mask_1 + 1
+
+            # creating circle
+            for i in range(0,len(dap_vel)):
+                for j in range(0, len(dap_vel[i])):
+                    dist = ((yinval-i)**2 + (xinval-j)**2)**0.5
+                    if dist > radius:
+                        mask_1[i][j] = 0
+
+
+            masked_vel = copy.deepcopy(dap_vel)
+            masked_vel = masked_vel * mask_1
+
+
+
+
+
             # vels = (np.abs(dap_vel) < 300)
-            for i in dap_vel:
+            for i in masked_vel:
                 for v in i:
                     if (v != 0) and (-300 < abs(v) < 300):
-                        vy, vx = np.where(dap_vel == v) #Positions in vel plot
+                        vy, vx = np.where(masked_vel == v) #Positions in vel plot
 
                         y_val = y_axis[vy[0]][vx[0]] # Value in z-proj
                         x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
