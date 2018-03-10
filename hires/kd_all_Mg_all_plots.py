@@ -380,6 +380,9 @@ with PdfPages(filename) as pdf:
         ax.set_ylim(0, 5E12)
         ax.set_xlim(-3000,500)
         # plt.legend(loc = 1)
+
+        print('This is max coldens for MgII2796', np.array(np.max(col_2796)))
+        print('This is max coldens for MgII2803', np.array(np.max(col_2803)))
         
         #Adds error bars to plots
         plt.errorbar(vel_2796, col_2796, yerr = sigma_coldens2796, linewidth = 0.1, color = '#99ccff', label = 'error')
@@ -431,21 +434,23 @@ with PdfPages(filename) as pdf:
 ## No Column Density Plots because there's barely any MgI 2852 Present
 
 
-        # ax = fig.add_subplot(3,1,3)
-        # ax.plot(vel_2852, col_2852, color = '#2C6EA1', label = names[1])
-        # plt.title("MgI 2852 Column Density Plot for Galaxy %s" %(gal[h]), **title_font)
-        # plt.xlabel("Velocity (km/s)", **axis_font)
-        # plt.ylabel("Column Density (Particle/cm^2)", **axis_font)
-        # plt.rc('xtick', labelsize=10) 
-        # plt.rc('ytick', labelsize=10)
-        # ax.set_ylim(0, 5E12)
-        # ax.set_xlim(-3000,500)
-        # # plt.legend(loc = 1)
-        
-        # #Adds error bars to plots
-        # # plt.errorbar(vel_2852, col_2852, yerr = sigma_coldens2852, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
+        ax = fig.add_subplot(3,1,3)
+        ax.plot(vel_2852, col_2852, color = '#2C6EA1', label = names[1])
+        plt.title("MgI 2852 Column Density Plot for Galaxy %s" %(gal[h]), **title_font)
+        plt.xlabel("Velocity (km/s)", **axis_font)
+        plt.ylabel("Column Density (Particle/cm^2)", **axis_font)
+        plt.rc('xtick', labelsize=10) 
+        plt.rc('ytick', labelsize=10)
+        ax.set_ylim(0, 5E12)
+        ax.set_xlim(-3000,500)
+        # plt.legend(loc = 1)
 
-        # fig.tight_layout()
+        print('This is max column density for MgI2852', np.array(np.max(col_2852))) 
+        
+        #Adds error bars to plots
+        # plt.errorbar(vel_2852, col_2852, yerr = sigma_coldens2852, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
+
+        fig.tight_layout()
         pdf.savefig()
         plt.close()
 os.system("open  %s &" % filename)

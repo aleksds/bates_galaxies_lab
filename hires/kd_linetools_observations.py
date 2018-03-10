@@ -2,7 +2,7 @@ ad_linetools_exvo
 
 N will be assumed to be found by print(np.max(col_wave)), raise magnitude by 1, with reference to kd_all_Mg_all_plots.py.
 
-b appears to be either v_cen or v_fwhm
+b appears to be either v_cen or v_fwhm, it is v_fwhm
 
 z found with zem[h]
 

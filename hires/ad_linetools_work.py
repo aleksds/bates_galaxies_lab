@@ -4,8 +4,8 @@
 # https://github.com/linetools/linetools/blob/master/docs/AbsLine_examples.rst --> doesn't work
 # https://github.com/linetools/linetools/blob/master/docs/examples/AbsComponent_ColumnDensities.ipynb --> what the below is based on
 
-#import sys
-#sys.path.append('/Users/aleks/github/linetools/')
+import sys
+sys.path.append('/Users/kdelva/github/linetools/')
 
 # suppress warnings for these examples
 import warnings

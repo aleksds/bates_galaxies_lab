@@ -94,7 +94,8 @@ abscomp.plot_Na()
 
 
 
-# This code shows relationship between ????????
+# This code shows relationship between oscillator strength and amount of absorption over absorbed velocity range (equivalent width), using that relationship to estimate column density
+#Previous analysis only uses apparent optical depth method to estimate column density while this uses 
 
 # Curve of Growth
 def ftau_intgrnd(x,tau0=0.1):
