@@ -180,18 +180,38 @@ with PdfPages(filename) as pdf:
             dap_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[j, :, :]
             dap_serr = np.sqrt(1. / dap_sivar)  # *1.e-4
 
+
             # Flipping the gvel plot
             x_axis = copy.deepcopy(xproj_kpc_map)
             y_axis = copy.deepcopy(zproj_kpc_map)
             gvel = copy.deepcopy(dap_vel)
             bad = np.abs(gvel) > 300
             gvel[bad] = 0
-            #
+
             pos_y = y_axis > 0
             neg_y = y_axis < 0
             pos_x = x_axis > 0
             neg_x = x_axis < 0
             gvel_invert = np.zeros([size, size])
+
+            # CB new approach: circularization
+            newx = copy.deepcopy(x_axis)
+            newx = newx[np.logical_and(newx != 0, newx !=0)]
+            newxt = copy.deepcopy(newx)
+            newxt = np.transpose(newxt)
+            newxt = newxt[np.logical_and(newxt != 0, newxt != 0)]
+
+            yind, xdum = np.where(x_axis == newx[0])
+            ydum, xind = np.where(x_axis == newxt[0])
+            yinval = yind[0]
+            xinval = xind[0]
+            radius = (yinval**2 + xinval**2)**0.5
+
+
+
+
+
+
             # vels = (np.abs(dap_vel) < 300)
             for i in dap_vel:
                 for v in i:
