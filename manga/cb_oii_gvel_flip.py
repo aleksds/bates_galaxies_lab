@@ -181,20 +181,9 @@ with PdfPages(filename) as pdf:
             dap_serr = np.sqrt(1. / dap_sivar)  # *1.e-4
 
 
-            # Flipping the gvel plot
-            x_axis = copy.deepcopy(xproj_kpc_map)
-            y_axis = copy.deepcopy(zproj_kpc_map)
-            gvel = copy.deepcopy(dap_vel)
-            bad = np.abs(gvel) > 300
-            gvel[bad] = 0
 
-            pos_y = y_axis > 0
-            neg_y = y_axis < 0
-            pos_x = x_axis > 0
-            neg_x = x_axis < 0
-            gvel_invert = np.zeros([size, size])
 
-            # CB new approach: circularization; making the vel plot circular so we have better symmetry to work with
+            # CB new approach: making the vel plot circular so we have better symmetry to work with
             newx = copy.deepcopy(x_axis)
             newx = newx[np.logical_and(newx != 0, newx !=0)]
             newxt = copy.deepcopy(newx)
@@ -207,16 +196,15 @@ with PdfPages(filename) as pdf:
             xinval = xind[0]
 
             #figuring out the middle of the plot
-            midy = int(len(dap_vel))/2
-            midy = int(midy)
+            midy = int(int(len(dap_vel))/2)
             radius = midy-yinval
             mask_1 = np.zeros([size, size])
             mask_1 = mask_1 + 1
 
-            # creating circle
+            # creating circle; masking out values that are further away than the radius previously defined
             for i in range(0,len(dap_vel)):
                 for j in range(0, len(dap_vel[i])):
-                    dist = ((yinval-i)**2 + (xinval-j)**2)**0.5
+                    dist = ((midy-i)**2 + (midy-j)**2)**0.5
                     if dist > radius:
                         mask_1[i][j] = 0
 
@@ -224,11 +212,25 @@ with PdfPages(filename) as pdf:
             masked_vel = copy.deepcopy(dap_vel)
             masked_vel = masked_vel * mask_1
 
+            # Flipping the gvel plot
+            x_axis = copy.deepcopy(xproj_kpc_map)
+            x_axis = x_axis * mask_1
+            y_axis = copy.deepcopy(zproj_kpc_map)
+            y_axis = y_axis * mask_1
+            masked_vel = copy.deepcopy(dap_vel)
+            masked_vel = masked_vel * mask_1
+            bad = np.abs(masked_vel) > 300
+            masked_vel[bad] = 0
+
+            pos_y = y_axis > 0
+            neg_y = y_axis < 0
+            pos_x = x_axis > 0
+            neg_x = x_axis < 0
+            gvel_invert = np.zeros([size, size])
 
 
 
 
-            # vels = (np.abs(dap_vel) < 300)
             for i in masked_vel:
                 for v in i:
                     if (v != 0) and (-300 < abs(v) < 300):
@@ -244,8 +246,6 @@ with PdfPages(filename) as pdf:
                                 nearest_y = y_axis[neg_y] + y_val #difference in opposite y-axis
                             if y_val < 0:
                                 nearest_y = y_axis[pos_y] + y_val
-                            # nearest_y.sort(key=lambda x: x[2], reverse=True)
-                            # nearest_y.sort(reverse=True)
 
                             nearest_y = sorted(nearest_y, key=abs) #sorted abs values of difference from smallest to largest
                             ref_y = nearest_y - y_val #sorted corresponding y_val in the opposite axis
@@ -258,8 +258,13 @@ with PdfPages(filename) as pdf:
 
                             for k in fil_ref_y:
                                 refxy, refxx = np.where(y_axis == k)
-                                refx_val = x_axis[refxy[0]][refxx[0]]
-                                fil_ref_x.append(refx_val) #corresponding x_val of remaining ref_y
+                                if len(refxy == 0):
+                                    print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost.")
+                                    b = 10**100
+                                    fil_ref_y.append(b)
+                                if len(refxy != 0):
+                                    refx_val = x_axis[refxy[0]][refxx[0]]
+                                    fil_ref_x.append(refx_val) #corresponding x_val of remaining ref_y
                                 #Why is the size of fil_ref_x smaller than the size of fill_ref_y??
 
                             fil_y = copy.deepcopy(fil_ref_y)
