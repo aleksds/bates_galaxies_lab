@@ -192,6 +192,7 @@ with PdfPages(filename) as pdf:
             pos_x = x_axis > 0
             neg_x = x_axis < 0
             gvel_invert = np.zeros([size, size])
+            gvel_invert = gvel_invert - 2000
 
 
             newx = copy.deepcopy(x_axis)
@@ -213,10 +214,10 @@ with PdfPages(filename) as pdf:
 
             # creating circle; masking out values that are further away than the radius previously defined
             for i in range(0,len(dap_vel)):
-                for j in range(0, len(dap_vel[i])):
-                    dist = ((midy-i)**2 + (midy-j)**2)**0.5
+                for valz in range(0, len(dap_vel[i])):
+                    dist = ((midy-i)**2 + (midy-valz)**2)**0.5
                     if dist > radius:
-                        mask_1[i][j] = 0
+                        mask_1[i][valz] = 0
 
 
 
@@ -250,28 +251,34 @@ with PdfPages(filename) as pdf:
 
                             nearest_y = sorted(nearest_y, key=abs) #sorted abs values of difference from smallest to largest
                             ref_y = nearest_y - y_val #sorted corresponding y_val in the opposite axis
-                            fil_ref_x = []
-                            fil_ref_y=[]
+                            fil_ref_x = np.array([])
+                            fil_ref_y = np.array([])
 
-                            for j in ref_y: #getting rid of unwanted ref_y
-                                if np.abs((np.abs(j) - np.abs(y_val))) < 3: #what if y_val is greater than ref_y?? cb:solved maybe
-                                    fil_ref_y.append(j)
+                            for vals in ref_y: #getting rid of unwanted ref_y
+                                if np.abs((np.abs(vals) - np.abs(y_val))) < 3: #what if y_val is greater than ref_y?? cb:solved maybe
+                                    fil_ref_y = np.append(fil_ref_y, vals)
 
+                            count_f = 0
+                            count_nf = 0
                             for k in fil_ref_y:
                                 refxy, refxx = np.where(y_axis == k)
-                                if len(refxy == 0):
-                                    print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost.")
+                                if len(refxy) == 0:
+                                    # print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost. Length of refxy ",len(refxy))
                                     b = 10**100
-                                    fil_ref_x.append(b)
-                                if len(refxy != 0):
+                                    fil_ref_x = np.append(fil_ref_x, b)
+                                    count_nf = count_nf + 1
+                                    # print("count of missing pixels ",count_nf)
+                                if len(refxy) != 0:
                                     refx_val = x_axis[refxy[0]][refxx[0]]
-                                    fil_ref_x.append(refx_val) #corresponding x_val of remaining ref_y
+                                    fil_ref_x = np.append(fil_ref_x, refx_val) #corresponding x_val of remaining ref_y
+                                    count_f = count_f + 1
+                                    # print(k, " Appended. lenrefxy ",len(refxy)," Count of appended pixels ",count_f)
                                 #Why is the size of fil_ref_x smaller than the size of fill_ref_y??
 
                             fil_y = copy.deepcopy(fil_ref_y)
                             fil_x = copy.deepcopy(fil_ref_x)
 
-                            dist = np.sqrt(np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))
+                            dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5
                             min_dist_ind = np.where(dist == np.amin(dist))
                             new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y[min_dist_ind[0][0]])
 
