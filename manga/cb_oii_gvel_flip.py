@@ -184,6 +184,16 @@ with PdfPages(filename) as pdf:
 
 
             # CB new approach: making the vel plot circular so we have better symmetry to work with
+            x_axis = copy.deepcopy(xproj_kpc_map)
+            y_axis = copy.deepcopy(zproj_kpc_map)
+
+            pos_y = y_axis > 0
+            neg_y = y_axis < 0
+            pos_x = x_axis > 0
+            neg_x = x_axis < 0
+            gvel_invert = np.zeros([size, size])
+
+
             newx = copy.deepcopy(x_axis)
             newx = newx[np.logical_and(newx != 0, newx !=0)]
             newxt = copy.deepcopy(newx)
@@ -209,24 +219,15 @@ with PdfPages(filename) as pdf:
                         mask_1[i][j] = 0
 
 
-            masked_vel = copy.deepcopy(dap_vel)
-            masked_vel = masked_vel * mask_1
 
             # Flipping the gvel plot
-            x_axis = copy.deepcopy(xproj_kpc_map)
             x_axis = x_axis * mask_1
-            y_axis = copy.deepcopy(zproj_kpc_map)
             y_axis = y_axis * mask_1
             masked_vel = copy.deepcopy(dap_vel)
             masked_vel = masked_vel * mask_1
             bad = np.abs(masked_vel) > 300
             masked_vel[bad] = 0
 
-            pos_y = y_axis > 0
-            neg_y = y_axis < 0
-            pos_x = x_axis > 0
-            neg_x = x_axis < 0
-            gvel_invert = np.zeros([size, size])
 
 
 
@@ -261,7 +262,7 @@ with PdfPages(filename) as pdf:
                                 if len(refxy == 0):
                                     print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost.")
                                     b = 10**100
-                                    fil_ref_y.append(b)
+                                    fil_ref_x.append(b)
                                 if len(refxy != 0):
                                     refx_val = x_axis[refxy[0]][refxx[0]]
                                     fil_ref_x.append(refx_val) #corresponding x_val of remaining ref_y
