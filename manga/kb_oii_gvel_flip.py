@@ -220,16 +220,16 @@ with PdfPages(filename) as pdf:
                         #     dist = np.sqrt(np.square(x_axis[x_array]+x_val)+np.square(y_axis[y_array]+y_val))
 
 
-                        # if y_val > 0 and x_val > 0:
-                        #     dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis-y_val))
-                        # elif y_val > 0 and x_val < 0:
-                        #     dist = np.sqrt(np.square(x_axis+x_val)+np.square(y_axis-y_val))
-                        # elif y_val < 0 and x_val > 0:
-                        #     dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis+y_val))
-                        # else:
-                        #     dist = np.sqrt(np.square(x_axis+x_val)+np.square(y_axis+y_val))
+                        if y_val > 0 and x_val > 0:
+                            dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis-y_val))
+                        elif y_val > 0 and x_val < 0:
+                            dist = np.sqrt(np.square(x_axis+x_val)+np.square(y_axis-y_val))
+                        elif y_val < 0 and x_val > 0:
+                            dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis+y_val))
+                        else:
+                            dist = np.sqrt(np.square(x_axis+x_val)+np.square(y_axis+y_val))
 
-                        dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis-y_val))
+                        # dist = np.sqrt(np.square(x_axis-x_val)+np.square(y_axis-y_val))
 
                         index = np.where(dist == np.amin(dist)) #getting two index values for some y_val, x_val=0
                         flp_y_val = y_axis[y_array][index[0]]
