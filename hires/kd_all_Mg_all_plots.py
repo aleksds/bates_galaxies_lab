@@ -380,9 +380,6 @@ with PdfPages(filename) as pdf:
         ax.set_ylim(0, 5E12)
         ax.set_xlim(-3000,500)
         # plt.legend(loc = 1)
-
-        print('This is max coldens for MgII2796', np.array(np.max(col_2796)))
-        print('This is max coldens for MgII2803', np.array(np.max(col_2803)))
         
         #Adds error bars to plots
         plt.errorbar(vel_2796, col_2796, yerr = sigma_coldens2796, linewidth = 0.1, color = '#99ccff', label = 'error')
