@@ -20,15 +20,27 @@ mgii2803 = 2803.5314853
 mgii2796 = 2796.3542699
 mgi2852 = 2852.96328
 
+feii2600 = 2600.1724835
+feii2586 = 2586.6495659
+feii2382 = 2382.7641781
+feii2374 = 2374.4603294
+feii2344 = 2344.2129601
+
 #oscillator strengths (fosc)
 f2803 = 0.3058
 f2796 = 0.6155
 f2852 = 1.83
 
+f2600 = 0.2394
+f2586 = 0.069126
+f2382 = 0.320
+f2374 = 0.0313
+f2344 = 0.1142
+
 # array of names, lines of interest, oscillator strength:
-lines = [mgii2796, mgii2803, mgi2852]
-names = ['MgII 2796', 'MgII 2803', 'MgI 2852']
-fosc = [f2796, f2803, f2852]
+lines = [mgii2796, mgii2803, mgi2852, feii2586, feii2600, feii2374, feii2382, feii2344]
+names = ['MgII 2796', 'MgII 2803', 'MgI 2852', 'Fe II 2586', 'Fe II 2600', 'Fe II 2374', 'Fe II 2382', 'Fe II 2344']
+fosc = [f2796, f2803, f2852, f2586, f2600, f2374, f2382, f2344]
 
 hue = ['#2CA14B', '#99ccff', '#947e94']
 # arrays of galaxy names, redshifts, approximate centroid velocities
@@ -109,132 +121,63 @@ with PdfPages(filename) as pdf:
         g2796 = (vel_kms[0] > -3000) & (vel_kms[0] < vflip[h])
         g2803 = (vel_kms[1] > vflip[h]) & (vel_kms[1] < 500)
         g2852 = (vel_kms[2] > -3000) & (vel_kms[2] <500)
-        
-        limit = [g2796, g2803, g2852]        
+
+        g2586 = (vel_kms[0] > -3000) & (vel_kms[0] <500)
+        g2600 = (vel_kms[1] > -3000) & (vel_kms[1] <500)
+        g2374 = (vel_kms[2] > -3000) & (vel_kms[2] <500)
+        g2382 = (vel_kms[3] > -3000) & (vel_kms[3] <500)        
+        g2344 = (vel_kms[4] > -3000) & (vel_kms[4] <500)
+
+          
 
 #COLUMN Info        
         col_2796 = column(vel_kms[0],tau/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
         col_2803 = column(vel_kms[1],tau/(2.654E-15*fosc[1]**2 *(wave/(1+zem[h]))))
         col_2852 = column(vel_kms[2],tau/(2.654E-15*fosc[2]**2 *(wave/(1+zem[h]))))
 
-        # print('This is max coldens for MgII2796', np.array(np.max(col_2796)))
-        # print('This is max coldens for MgII2803', np.array(np.max(col_2803)))
-        # print('This is max column density for MgI2852', np.array(np.max(col_2852))) 
+        col_2586 = column(vel_kms[0],tau/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
+        col_2600 = column(vel_kms[1],tau/(2.654E-15*fosc[1]**2 *(wave/(1+zem[h]))))
+        col_2374 = column(vel_kms[2],tau/(2.654E-15*fosc[2]**2 *(wave/(1+zem[h]))))
+        col_2382 = column(vel_kms[3],tau/(2.654E-15*fosc[3]**2 *(wave/(1+zem[h]))))
+        col_2344 = column(vel_kms[4],tau/(2.654E-15*fosc[4]**2 *(wave/(1+zem[h]))))
 
-        column_densities = [col_2796, col_2852, col_2852]
+        
 
         vel_2796 = np.linspace(-3000,500, num = len(col_2796), endpoint = 'True')
         vel_2803 = np.linspace(-3000,500, num = len(col_2803), endpoint = 'True')
         vel_2852 = np.linspace(-3000,500, num = len(col_2852), endpoint = 'True')
 
-        column_velocities = [vel_2796, vel_2803, vel_2852]
-        
+        vel_2586 = np.linspace(-3000,500, num = len(col_2586), endpoint = 'True')
+        vel_2600 = np.linspace(-3000,500, num = len(col_2600), endpoint = 'True')
+        vel_2374 = np.linspace(-3000,500, num = len(col_2374), endpoint = 'True')
+        vel_2382 = np.linspace(-3000,500, num = len(col_2382), endpoint = 'True')
+        vel_2344 = np.linspace(-3000,500, num = len(col_2344), endpoint = 'True')
+    
 #Error Limits        
         sigma_coldens2796 = column(vel_kms[0], sigma_coldens/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
         sigma_coldens2803 = column(vel_kms[1], sigma_coldens/(2.654E-15*fosc[1]**2 *(wave/(1+zem[h]))))
         sigma_coldens2852 = column(vel_kms[2], sigma_coldens/(2.654E-15*fosc[2]**2 *(wave/(1+zem[h]))))
 
+        sigma_coldens2586 = column(vel_kms[3], sigma_coldens/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
+        sigma_coldens2600 = column(vel_kms[4], sigma_coldens/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
+        sigma_coldens2374 = column(vel_kms[5], sigma_coldens/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
+        sigma_coldens2382 = column(vel_kms[6], sigma_coldens/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
+        sigma_coldens2344 = column(vel_kms[7], sigma_coldens/(2.654E-15*fosc[0]**2 *(wave/(1+zem[h]))))
+        
+
         print('This is max coldens for MgII2796', np.array(np.max(sigma_coldens2796)))
         print('This is max coldens for MgII2803', np.array(np.max(sigma_coldens2803)))
-        print('This is max column density for MgI2852', np.array(np.max(sigma_coldens2852))) 
+        print('This is max coldens for MgI2852', np.array(np.max(sigma_coldens2852)))
+
+        print('This is max coldens for MgII2586', np.array(np.max(sigma_coldens2586)))
+        print('This is max coldens for MgII2600', np.array(np.max(sigma_coldens2600)))
+        print('This is max coldens for MgII2374', np.array(np.max(sigma_coldens2374)))
+        print('This is max coldens for MgII2382', np.array(np.max(sigma_coldens2382)))
+        print('This is max coldens for MgII2344', np.array(np.max(sigma_coldens2344)))
+
         
 
 
-                                               ## PLOTTING BEGINS ##
-
-## Seperated Mg II Ion Plots##
-
-                
-        ## Mg II 2796 
-
-        fig = plt.figure()
-## Column Density Plot
-
-        ax = fig.add_subplot(2,1,1)
-        ax.plot(vel_2796, col_2796, linewidth =1, color = '#2CA14B', label = names[0])
-        plt.title("MgII 2796 Col. Dens. Plot for Galaxy %s" %(gal[h]), **title_font)
-        plt.xlabel("Velocity (km/s)",**axis_font)
-        plt.ylabel("Column Density", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
-        ax.set_ylim(0, 2E14)
-        ax.set_xlim(-1500,-1000)
-        # plt.legend(loc = 1)
-        
-        #Adds error bars to plots
-        plt.errorbar(vel_2796, col_2796, yerr = sigma_coldens2796, linewidth = 0.1, color = '#99ccff', label = 'error')
-
-
-        ##Mg II 2803
-        
-## Column Density Plot
-        
-        ax = fig.add_subplot(2,1,2)
-        ax.plot(vel_2803, col_2803, linewidth =1, color = '#2C6EA1', label = names[1])
-        plt.title("MgII 2803 Col. Dens. Plot for Galaxy %s" %(gal[h]), **title_font)
-        plt.xlabel("Velocity (km/s)",**axis_font)
-        plt.ylabel("Column Density",**axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
-        ax.set_ylim(0, 7.5E14)
-        ax.set_xlim(-2250,-1950)
-        # plt.legend(loc = 1)
-
-        #Adds error bars to plots
-        plt.errorbar(vel_2803, col_2803, yerr = sigma_coldens2803, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
-
-        # fig.tight_layout()
-        pdf.savefig()
-        plt.close()
-
-
-
-        ## Combined Mg II Ion Plots##
-
-## Column Density Plots
-
-        fig=plt.figure()
-
-        ax = fig.add_subplot(2,1,1)
-
-        ax.plot(vel_2796, col_2796, color = '#2CA14B', label = names[0])
-        ax.plot(vel_2803, col_2803, color = '#2C6EA1', label = names[1])
-        plt.title("MgII Col. Dens. Plot for Galaxy %s" %(gal[h]), **title_font)
-        plt.xlabel("Velocity (km/s)", **axis_font)
-        plt.ylabel("Column Density", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
-        ax.set_ylim(0, 7.5E14)
-        ax.set_xlim(-3000,500)
-        # plt.legend(loc = 1)
-        
-        #Adds error bars to plots
-        plt.errorbar(vel_2796, col_2796, yerr = sigma_coldens2796, linewidth = 0.1, color = '#99ccff', label = 'error')
-        plt.errorbar(vel_2803, col_2803, yerr = sigma_coldens2803, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
-
-
-        ##Mg I 2852
-
-## No Column Density Plots because there's barely any MgI 2852 Present
-
-
-        ax = fig.add_subplot(2,1,2)
-        ax.plot(vel_2852, col_2852, color = '#2C6EA1', label = names[1])
-        plt.title("MgI 2852 Column Density Plot for Galaxy %s" %(gal[h]), **title_font)
-        plt.xlabel("Velocity (km/s)", **axis_font)
-        plt.ylabel("Column Density (Particle/cm^2)", **axis_font)
-        plt.rc('xtick', labelsize=10) 
-        plt.rc('ytick', labelsize=10)
-        ax.set_ylim(0, .6E11)
-        ax.set_xlim(-3000,500)
-        # plt.legend(loc = 1)
-        
-        #Adds error bars to plots
-        plt.errorbar(vel_2852, col_2852, yerr = sigma_coldens2852, linewidth = 0.1, color = '#99ccff', label = '_nolegend_')
-
-        fig.tight_layout()
-        pdf.savefig()
-        plt.close()
 os.system("open  %s &" % filename)
 
 
