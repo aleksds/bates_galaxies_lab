@@ -46,21 +46,24 @@ galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J150
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
 # define a function to plot "postage stamp" images
-def plot_image():
-    rotated = np.flip(np.rot90(stamp, 2), 1)
+def plot_image_1():
+    rotated = np.flip(np.rot90(stampdata, 2), 1)
     plt.imshow(img_scale.log(rotated, scale_min=5, scale_max=10000), cmap='Greys', interpolation='none')
-    #plt.tick_params(axis='both', which='major', labelsize=8)
+def plot_image_2():
+    rotated = np.flip(np.rot90(stampmodel, 2), 1)
+    plt.imshow(img_scale.log(rotated, scale_min=5, scale_max=10000), cmap='Greys', interpolation='none')
+def plot_image_3():
+    rotated = np.flip(np.rot90(stampres, 2), 1)
+    plt.imshow(img_scale.log(rotated, scale_min=5, scale_max=10000), cmap='Greys', interpolation='none')
     
 filters = ['_F475W','_F814W']
 type = ['data','model','residual']
-xcen = [3629, 3934, 3387, 3477, 3573, 3803, 3884, 4147, 3787, 4175, 3567, 4067]
-ycen = [4154, 4137, 3503, 3405, 3339, 4170, 4165, 3922, 4186, 3827, 3436, 4054]
 folders = ['475coarsefinepsf/', '814coarsefinepsf/']
-
+dx = dy = 60
 with PdfPages('cl_poster.pdf') as pdf:
     for g in range(0,len(galaxies)):
         fig = plt.figure()
-        plt.suptitle("YOOO")
+        plt.suptitle(galaxies[g])
         alldata = []
         for f in range(0,len(filters)):
             for t in range(0,len(type)):
@@ -69,37 +72,74 @@ with PdfPages('cl_poster.pdf') as pdf:
                 multi = fits.open(file[0])
                 
                 data, data_header = multi[1].data, multi[1].header
-                res, res_header = multi[2].data, multi[2].header
+                model, res_header = multi[2].data, multi[2].header
                 res, res_header = multi[3].data, multi[3].header
-                #define positions for photometry
-                positions = [(xcen[g], ycen[g])]
+ 
 
-                stamp = data[round(ycen[g]-dy):round(ycen[g]+dy), round(xcen[g]-dx):round(xcen[g]+dx)]
-                ax = fig.add_subplot(1,len(filters)+1, 1+f)
-                #ax = fig.add_subplot(1,4, 1+f)
-                plt.axis('off')
-                plot_image()
-                plt.title(fil)
+                stampdata = data[round(201-dy):round(201+dy), round(201-dx):round(201+dx)] 
+                stampmodel = model[round(201-dy):round(201+dy), round(201-dx):round(201+dx)]
+                stampres = res[round(201-dy):round(201+dy), round(201-dx):round(201+dx)]
+                
+                if f ==0:
+                    
+                    ax = fig.add_subplot(2,3,1)
+                    plt.axis('off')
+                    plt.title('F475W Data')
+                    plot_image_1()
+                    ax = fig.add_subplot(2,3,2)
+                    plt.axis('off')
+                    plt.title('F475W Model')
+                    plot_image_2()
+                    ax = fig.add_subplot(2,3,3)
+                    plt.axis('off')
+                    plt.title('F475W Residual')
+                    plot_image_3()
 
-                if f==0:
-                    image_b = np.flip(np.rot90(stamp, 2), 1)
-                    if f==1:
-                        image_g = np.flip(np.rot90(stamp, 2), 1)
-                        if f==2:
-                            image_r = np.flip(np.rot90(stamp, 2), 1)
-            alldata.append(stamp)
-        bx = fig.add_subplot(1, len(filters)+1, 4)
-        #bx = fig.add_subplot(1, 4, 4)
-        img = np.zeros([120,120,3])
-
-        img[:,:,0] = img_scale.log(image_r, scale_min=5, scale_max=10000)
-        img[:,:,1] = img_scale.log(image_g, scale_min=5, scale_max=10000)
-        img[:,:,2] = img_scale.log(image_b, scale_min=5, scale_max=10000)
-        plt.imshow(img)
-        plt.axis('off')
-        plt.title('color')
+                if f ==1: 
+                    ax = fig.add_subplot(2,3,4)
+                    plt.axis('off')
+                    plt.title('F814W Data')
+                    plot_image_1()
+                    ax = fig.add_subplot(2,3,5)
+                    plt.axis('off')
+                    plt.title('F814W Model')
+                    plot_image_2()
+                    ax = fig.add_subplot(2,3,6)
+                    plt.axis('off')
+                    plt.title('F814W Residual')
+                    plot_image_3()
+              
+                
+#                if f==0:
+ #                   image_data_f = np.flip(np.rot90(stampdata, 2), 1)
+  #                  image_model_f = np.flip(np.rot90(stampmodel, 2), 1)
+   #                 image_res_f = np.flip(np.rot90(stampres, 2), 1)
+    #            if f==1:
+     #               image_data_e = np.flip(np.rot90(stampdata, 2), 1)
+      #              image_model_e = np.flip(np.rot90(stampmodel, 2), 1)
+       #             image_res_e = np.flip(np.rot90(stampres, 2), 1)
+            
+        #    alldata.append(stampdata)
+            
         pdf.savefig(dpi=1000)
         plt.close()
 
-os.system('open %s &' % 'ad_poster.pdf')
+os.system('open %s &' % 'cl_poster.pdf')
+
+
+
+        
+        #img = np.zeros([6,120,120])
+        #img[0,:,:] = img_scale.log(image_data_f, scale_min=5, scale_max=10000) #HEYCHARLESHERESTHEPROBLEMDOOOOODINATOR
+       # img[1,:,:] = img_scale.log(image_model_f, scale_min=5, scale_max=10000)
+      #  img[2,:,:] = img_scale.log(image_res_f, scale_min=5, scale_max=10000)
+     #   img[3,:,:] = img_scale.log(image_data_e, scale_min=5, scale_max=10000)
+    #    img[4,:,:] = img_scale.log(image_model_e, scale_min=5, scale_max=10000)
+   #     img[5,:,:] = img_scale.log(image_res_e, scale_min=5, scale_max=10000)
+  #      plt.imshow(img[0,:,:])
+ #       plt.axis('off')
+#        plt.title('color')
+        
+
+
                              

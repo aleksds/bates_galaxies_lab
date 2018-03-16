@@ -90,28 +90,28 @@ for w in range(0,12):
     for i in range(0,2):
         if i == 0:
             totdataenergyfsf[w] = np.sum(galenergy[w][i][:][:])
-            totmodelenergyfsf[w] = np.sum(shavenmodelenergyfsf[w][i])
+#            totmodelenergyfsf[w] = np.sum(shavenmodelenergyfsf[w][i])
         if i == 1:
             totdataenergyef[w] = np.sum(galenergy[w][i][:][:])
 
 #above shit aint flux its energy! Now dividing by exposure time to get power. Then will multiply by photfnu to get total flux in janskys which will allow me to calculate magnitudes! YEYEYE
-fluxdatafsf = (totdataenergyfsf/expdfsf*1e-23)*fnudfsf
-fluxdataef = (totdataenergyef/expdef*1e-23)*fnudef
-fluxmodelfsf = (totmodelenergyfsf/expmfsf*1e-23)*fnumfsf
-fluxmodelef = (totmodelenergyef/expmef*1e-23)*fnumef
+fluxdatafsf = (totdataenergyfsf/expdfsf)*fnudfsf
+fluxdataef = (totdataenergyef/expdef)*fnudef
+fluxmodelfsf = (totmodelenergyfsf/expmfsf)*fnumfsf
+fluxmodelef = (totmodelenergyef/expmef)*fnumef
 
 #MAGNITUDES
-magdatafsf = -2.5*np.log10(fluxdatafsf)-48.6
-magdataef = -2.5*np.log10(fluxdataef)-48.6
-magmodelfsf = -2.5*np.log10(fluxmodelfsf)-48.6
-magmodelef = -2.5*np.log10(fluxmodelef)-48.6
+magdatafsf = -2.5*np.log10(fluxdatafsf)
+magdataef = -2.5*np.log10(fluxdataef)
+magmodelfsf = -2.5*np.log10(fluxmodelfsf)
+magmodelef = -2.5*np.log10(fluxmodelef)
 
 with PdfPages('Color Plot.pdf') as pdf:   
     plt.figure()
     plt.scatter(magdataef,magdatafsf-magdataef, label='Data')
     plt.scatter(magmodelef,magmodelfsf-magmodelef, label='Model')
-    plt.xlim(8,12)
-    plt.ylim(0,22)
+  #  plt.xlim(17,19)
+   # plt.ylim(0,22)
     plt.xlabel('Mag 814')
     plt.ylabel('Mag 475 - Mag 814')
     plt.title('Color Plot')
