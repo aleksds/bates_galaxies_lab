@@ -48,7 +48,7 @@ all_plates = [f for f in os.listdir(mpl5_dir + 'SPX-GAU-MILESHC/') if isdir(join
 print('List of plates: \n', all_plates, '\n')
 plate = int(input('Please enter plate number: '))
 lines = glob.glob(mpl5_dir + 'SPX-GAU-MILESHC/*/*/*' + str(plate) + '*MAPS-SPX-GAU-MILESHC.fits*')
-filename = 'MLP5_dap_multi_' + str(plate) + '_quicklook.pdf'
+filename = 'MLP5_dap_multi_' + str(plate) + '_gvel_flip.pdf'
 
 # for bookkeeping purposes, here's an array of emission-line names
 eml = ['OIId---3728', 'Hb-----4862', 'OIII---4960', 'OIII---5008', 'OI-----6302', 'OI-----6365', 'NII----6549',
@@ -278,9 +278,12 @@ with PdfPages(filename) as pdf:
                             fil_y = copy.deepcopy(fil_ref_y)
                             fil_x = copy.deepcopy(fil_ref_x)
 
-                            dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5
+                            # dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5 double flipping it if abs
+                            dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(fil_x-x_val))**0.5
+
                             min_dist_ind = np.where(dist == np.amin(dist))
                             new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y[min_dist_ind[0][0]])
+
 
 
                             gvel_invert[new_y_coor[0]][new_x_coor[0]] = v
