@@ -279,10 +279,13 @@ with PdfPages(filename) as pdf:
                             fil_x = copy.deepcopy(fil_ref_x)
 
                             # dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5 double flipping it if abs
-                            dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(fil_x-x_val))**0.5
+                            dist = (np.square(fil_y+y_val) + np.square(fil_x-x_val))**0.5 #might be worth fiddling around this line. Somehow this line has control over pixel loss
 
                             min_dist_ind = np.where(dist == np.amin(dist))
                             new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y[min_dist_ind[0][0]])
+                            if (len(new_y_coor) == 0) or (len(new_x_coor) == 0):
+                                print("Warning. No pixel is being appended for original vel val: ",k,"\n Info: Elements in fil_y, fil_x and dist: ",
+                                      len(fil_y)," ; ",len(fil_x)," ; ",len(dist),"\n For plot ",plate, galaxy)
 
 
 
@@ -418,11 +421,11 @@ with PdfPages(filename) as pdf:
             ax.set_ylim(0, size)
             ax.set_xticklabels(())
             ax.set_yticklabels(())
-            plt.imshow(dap_sig, origin='lower',
+            plt.imshow(masked_vel, origin='lower',
                        interpolation='nearest',
-                       cmap=cm.YlOrRd, vmin=0, vmax=250)
+                       cmap=cm.coolwarm, vmin=-250, vmax=250)
             plt.colorbar()
-            plt.title(eml[j] + ' GSIGMA', fontsize=10)
+            plt.title(eml[j] + 'masked-GVEL', fontsize=10)
 
             pdf.savefig()
             plt.close()
