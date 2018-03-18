@@ -2,7 +2,8 @@
 #Code using linetools to make a better voigt profile plot
 #Code implementing column density
 
-
+import sys
+sys.path.append('/Users/kdelva/github/linetools/')
 
 
 
