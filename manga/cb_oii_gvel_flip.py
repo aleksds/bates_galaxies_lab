@@ -226,73 +226,86 @@ with PdfPages(filename) as pdf:
             y_axis = y_axis * mask_1
             masked_vel = copy.deepcopy(dap_vel)
             masked_vel = masked_vel * mask_1
-            bad = np.abs(masked_vel) > 300
+            bad = np.abs(masked_vel) > 1000
             masked_vel[bad] = 0
 
 
 
 
-
+            icount = 0
             for i in masked_vel:
+                vcount = 0
                 for v in i:
-                    if (v != 0) and (-300 < abs(v) < 300):
+                    if -1000 < abs(v) < 1000:
                         vy, vx = np.where(masked_vel == v) #Positions in vel plot
 
-                        y_val = y_axis[vy[0]][vx[0]] # Value in z-proj
-                        x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
+                        if v != 0:
 
-                        # nearest_y = y_axis - y_val
-                        # yminy, yminx = np.where(nearest_y == np.amin(np.abs(nearest_y)))
-                        if y_val != 0:
-                            if y_val > 0: #what if y_val is zero?? cb: solved
-                                nearest_y = y_axis[neg_y] + y_val #difference in opposite y-axis
-                            if y_val < 0:
-                                nearest_y = y_axis[pos_y] + y_val
+                            y_val = y_axis[vy[0]][vx[0]] # Value in z-proj
+                            x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
 
-                            nearest_y = sorted(nearest_y, key=abs) #sorted abs values of difference from smallest to largest
-                            ref_y = nearest_y - y_val #sorted corresponding y_val in the opposite axis
-                            fil_ref_x = np.array([])
-                            fil_ref_y = np.array([])
+                            # nearest_y = y_axis - y_val
+                            # yminy, yminx = np.where(nearest_y == np.amin(np.abs(nearest_y)))
+                            if y_val != 0:
+                                if y_val > 0: #what if y_val is zero?? cb: solved
+                                    nearest_y = y_axis[(y_axis < 0)] + y_val #difference in opposite y-axis
+                                if y_val < 0:
+                                    nearest_y = y_axis[(y_axis > 0)] + y_val
 
-                            for vals in ref_y: #getting rid of unwanted ref_y
-                                if np.abs((np.abs(vals) - np.abs(y_val))) < 3: #what if y_val is greater than ref_y?? cb:solved maybe
-                                    fil_ref_y = np.append(fil_ref_y, vals)
+                                nearest_y = sorted(nearest_y, key=abs) #sorted abs values of difference from smallest to largest
+                                ref_y = nearest_y - y_val #sorted corresponding y_val in the opposite axis
+                                fil_ref_x = np.array([])
+                                fil_ref_y = np.array([])
 
-                            count_f = 0
-                            count_nf = 0
-                            for k in fil_ref_y:
-                                refxy, refxx = np.where(y_axis == k)
-                                if len(refxy) == 0:
-                                    # print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost. Length of refxy ",len(refxy))
-                                    b = 10**100
-                                    fil_ref_x = np.append(fil_ref_x, b)
-                                    count_nf = count_nf + 1
-                                    # print("count of missing pixels ",count_nf)
-                                if len(refxy) != 0:
-                                    refx_val = x_axis[refxy[0]][refxx[0]]
-                                    fil_ref_x = np.append(fil_ref_x, refx_val) #corresponding x_val of remaining ref_y
-                                    count_f = count_f + 1
-                                    # print(k, " Appended. lenrefxy ",len(refxy)," Count of appended pixels ",count_f)
-                                #Why is the size of fil_ref_x smaller than the size of fill_ref_y??
+                                for vals in ref_y: #getting rid of unwanted ref_y
+                                    if np.abs((np.abs(vals) - np.abs(y_val))) < 3: #what if y_val is greater than ref_y?? cb:solved maybe
+                                        fil_ref_y = np.append(fil_ref_y, vals)
 
-                            fil_y = copy.deepcopy(fil_ref_y)
-                            fil_x = copy.deepcopy(fil_ref_x)
+                                count_f = 0
+                                count_nf = 0
+                                for k in fil_ref_y:
+                                    refxy, refxx = np.where(y_axis == k)
+                                    if len(refxy) == 0:
+                                        # print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost. Length of refxy ",len(refxy))
+                                        b = 10**100
+                                        fil_ref_x = np.append(fil_ref_x, b)
+                                        count_nf = count_nf + 1
+                                        # print("count of missing pixels ",count_nf)
+                                    if len(refxy) != 0:
+                                        refx_val = x_axis[refxy[0]][refxx[0]]
+                                        fil_ref_x = np.append(fil_ref_x, refx_val) #corresponding x_val of remaining ref_y
+                                        count_f = count_f + 1
+                                        # print(k, " Appended. lenrefxy ",len(refxy)," Count of appended pixels ",count_f)
+                                    #Why is the size of fil_ref_x smaller than the size of fill_ref_y??
 
-                            # dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5 double flipping it if abs
-                            dist = (np.square(fil_y+y_val) + np.square(fil_x-x_val))**0.5 #might be worth fiddling around this line. Somehow this line has control over pixel loss
+                                fil_y = copy.deepcopy(fil_ref_y)
+                                fil_x = copy.deepcopy(fil_ref_x)
 
-                            min_dist_ind = np.where(dist == np.amin(dist))
-                            new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y[min_dist_ind[0][0]])
-                            if (len(new_y_coor) == 0) or (len(new_x_coor) == 0):
-                                print("Warning. No pixel is being appended for original vel val: ",k,"\n Info: Elements in fil_y, fil_x and dist: ",
-                                      len(fil_y)," ; ",len(fil_x)," ; ",len(dist),"\n For plot ",plate, galaxy)
+                                # dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5 double flipping it if abs
+                                dist = (np.square(fil_y+y_val) + np.square(fil_x-x_val))**0.5 #might be worth fiddling around this line. Somehow this line has control over pixel loss
 
+                                if len(dist) == 0:
+                                    print('Pixel lost. -- ',plate, galaxy, "  Indexes: ",icount,' ',vcount)
 
 
-                            gvel_invert[new_y_coor[0]][new_x_coor[0]] = v
+                                else:
+                                    min_dist_ind = np.where(dist == np.amin(dist))
+                                    new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y[min_dist_ind[0][0]])
+                                    if (len(new_y_coor) == 0) or (len(new_x_coor) == 0):
+                                        print("Warning. No pixel is being appended for original vel val: ",k,"\n Info: Elements in fil_y, fil_x and dist: ",
+                                              len(fil_y)," ; ",len(fil_x)," ; ",len(dist),"\n For plot ",plate, galaxy)
 
-                        if y_val == 0:
-                            gvel_invert[vy[0]][vx[0]] = v
+
+
+                                gvel_invert[new_y_coor[0]][new_x_coor[0]] = v
+
+                            if y_val == 0:
+                                gvel_invert[vy[0]][vx[0]] = v
+                        else:
+                            gvel_invert[vy[icount]][vx[vcount]] = v
+
+                    vcount = vcount + 1
+                icount = icount + 1
 
 
                         #The line method below
