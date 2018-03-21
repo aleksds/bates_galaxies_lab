@@ -226,8 +226,8 @@ with PdfPages(filename) as pdf:
             y_axis = y_axis * mask_1
             masked_vel = copy.deepcopy(dap_vel)
             masked_vel = masked_vel * mask_1
-            bad = np.abs(masked_vel) > 1000
-            masked_vel[bad] = 0
+            # bad = np.abs(masked_vel) > 1000
+            # masked_vel[bad] = 0
 
 
 
@@ -236,73 +236,106 @@ with PdfPages(filename) as pdf:
             for i in masked_vel:
                 vcount = 0
                 for v in i:
-                    if -1000 < abs(v) < 1000:
-                        vy, vx = np.where(masked_vel == v) #Positions in vel plot
+                    vy, vx = np.where(masked_vel == v) #Positions in vel plot
 
-                        if v != 0:
+                    if v != 0:
 
-                            y_val = y_axis[vy[0]][vx[0]] # Value in z-proj
-                            x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
+                        y_val = y_axis[vy[0]][vx[0]] # Value in z-proj
+                        x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
 
-                            # nearest_y = y_axis - y_val
-                            # yminy, yminx = np.where(nearest_y == np.amin(np.abs(nearest_y)))
-                            if y_val != 0:
-                                if y_val > 0: #what if y_val is zero?? cb: solved
-                                    nearest_y = y_axis[(y_axis < 0)] + y_val #difference in opposite y-axis
+                        # nearest_y = y_axis - y_val
+                        # yminy, yminx = np.where(nearest_y == np.amin(np.abs(nearest_y)))
+                        if y_val != 0:
+                            if y_val > 0: #what if y_val is zero?? cb: solved
+                                nearest_y = y_axis[(y_axis < 0)] + y_val #difference in opposite y-axis
+                            if y_val < 0:
+                                nearest_y = y_axis[(y_axis > 0)] + y_val
+
+
+                            nearest_y = sorted(nearest_y, key=abs) #sorted abs values of difference from smallest to largest
+                            ref_y = nearest_y - y_val #sorted corresponding y_val in the opposite axis
+                            fil_ref_x = np.array([])
+                            fil_ref_y = np.array([])
+
+                            for vals in ref_y: #getting rid of unwanted ref_y
+                                if np.abs((np.abs(vals) - np.abs(y_val))) < 3: #what if y_val is greater than ref_y?? cb:solved maybe
+                                    fil_ref_y = np.append(fil_ref_y, vals)
+
+                            fil_ref_y2 = np.array([])
+
+                            count_f = 0
+                            count_nf = 0
+                            for k in fil_ref_y:
+
+                                ####fix 1
+                                kind_neary = np.where(nearest_y == (k+y_val))
+                                if y_val > 0 :
+                                    kind_yax = np.where((y_axis[(y_axis < 0)]+y_val) == (nearest_y[kind_neary[0][0]]))
+                                    refxy, refxx = np.where(y_axis == (y_axis[(y_axis < 0)][kind_yax[0]]))
                                 if y_val < 0:
-                                    nearest_y = y_axis[(y_axis > 0)] + y_val
+                                    kind_yax = np.where((y_axis[(y_axis > 0)]+y_val) == (nearest_y[kind_neary[0][0]]))
+                                    refxy, refxx = np.where(y_axis == (y_axis[(y_axis > 0)][kind_yax[0]]))
 
-                                nearest_y = sorted(nearest_y, key=abs) #sorted abs values of difference from smallest to largest
-                                ref_y = nearest_y - y_val #sorted corresponding y_val in the opposite axis
-                                fil_ref_x = np.array([])
-                                fil_ref_y = np.array([])
+                                ####fix 1
 
-                                for vals in ref_y: #getting rid of unwanted ref_y
-                                    if np.abs((np.abs(vals) - np.abs(y_val))) < 3: #what if y_val is greater than ref_y?? cb:solved maybe
-                                        fil_ref_y = np.append(fil_ref_y, vals)
+                                # version for debugging
+                                # if len(refxy) == 0:
+                                #     # print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost. Length of refxy ",len(refxy))
+                                #     b = 10**100
+                                #     fil_ref_x = np.append(fil_ref_x, b)
+                                #     count_nf = count_nf + 1
+                                #     # print("count of missing pixels ",count_nf)
+                                # if len(refxy) != 0:
 
-                                count_f = 0
-                                count_nf = 0
-                                for k in fil_ref_y:
-                                    refxy, refxx = np.where(y_axis == k)
-                                    if len(refxy) == 0:
-                                        # print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost. Length of refxy ",len(refxy))
-                                        b = 10**100
-                                        fil_ref_x = np.append(fil_ref_x, b)
-                                        count_nf = count_nf + 1
-                                        # print("count of missing pixels ",count_nf)
-                                    if len(refxy) != 0:
-                                        refx_val = x_axis[refxy[0]][refxx[0]]
-                                        fil_ref_x = np.append(fil_ref_x, refx_val) #corresponding x_val of remaining ref_y
-                                        count_f = count_f + 1
+
+                                refx_val = x_axis[refxy[0]][refxx[0]]
+                                fil_ref_x = np.append(fil_ref_x, refx_val) #corresponding x_val of remaining ref_y
+                                fil_ref_y2 = np.append(fil_ref_y2, y_axis[refxy[0]][refxx[0]])
+                                count_f = count_f + 1
+
+                                # WORKING version
+
+                                # if len(refxy) == 0:
+                                #     # print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost. Length of refxy ",len(refxy))
+                                #     b = 10 ** 100
+                                #     fil_ref_x = np.append(fil_ref_x, b)
+                                #     count_nf = count_nf + 1
+                                #     # print("count of missing pixels ",count_nf)
+                                # if len(refxy) != 0:
+                                #     refx_val = x_axis[refxy[0]][refxx[0]]
+                                #     fil_ref_x = np.append(fil_ref_x,
+                                #                           refx_val)  # corresponding x_val of remaining ref_y
+                                #     count_f = count_f + 1
+
+
                                         # print(k, " Appended. lenrefxy ",len(refxy)," Count of appended pixels ",count_f)
-                                    #Why is the size of fil_ref_x smaller than the size of fill_ref_y??
+                                #Why is the size of fil_ref_x smaller than the size of fill_ref_y??
 
-                                fil_y = copy.deepcopy(fil_ref_y)
-                                fil_x = copy.deepcopy(fil_ref_x)
+                            fil_y = copy.deepcopy(fil_ref_y2)
+                            fil_x = copy.deepcopy(fil_ref_x)
 
-                                # dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5 double flipping it if abs
-                                dist = (np.square(fil_y+y_val) + np.square(fil_x-x_val))**0.5 #might be worth fiddling around this line. Somehow this line has control over pixel loss
+                            # dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5 double flipping it if abs
+                            dist = (np.square(fil_y+y_val) + np.square(fil_x-x_val))**0.5 #might be worth fiddling around this line. Somehow this line has control over pixel loss
 
-                                if len(dist) == 0:
-                                    print('Pixel lost. -- ',plate, galaxy, "  Indexes: ",icount,' ',vcount)
-
-
-                                else:
-                                    min_dist_ind = np.where(dist == np.amin(dist))
-                                    new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y[min_dist_ind[0][0]])
-                                    if (len(new_y_coor) == 0) or (len(new_x_coor) == 0):
-                                        print("Warning. No pixel is being appended for original vel val: ",k,"\n Info: Elements in fil_y, fil_x and dist: ",
-                                              len(fil_y)," ; ",len(fil_x)," ; ",len(dist),"\n For plot ",plate, galaxy)
+                            if len(dist) == 0:
+                                print('Pixel lost. -- ',plate, galaxy, "  Indexes: ",icount,' ',vcount)
 
 
+                            else:
+                                min_dist_ind = np.where(dist == np.amin(dist))
+                                new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y2[min_dist_ind[0][0]])
+                                if (len(new_y_coor) == 0) or (len(new_x_coor) == 0):
+                                    print("Warning. No pixel is being appended for original vel val: ",k,"\n Info: Elements in fil_y, fil_x and dist: ",
+                                          len(fil_y)," ; ",len(fil_x)," ; ",len(dist),"\n For plot ",plate, galaxy)
 
-                                gvel_invert[new_y_coor[0]][new_x_coor[0]] = v
 
-                            if y_val == 0:
-                                gvel_invert[vy[0]][vx[0]] = v
-                        else:
-                            gvel_invert[vy[icount]][vx[vcount]] = v
+
+                            gvel_invert[new_y_coor[0]][new_x_coor[0]] = v
+
+                        if y_val == 0:
+                            gvel_invert[vy[0]][vx[0]] = v
+                    else:
+                        gvel_invert[vy[icount]][vx[vcount]] = v
 
                     vcount = vcount + 1
                 icount = icount + 1
@@ -357,6 +390,8 @@ with PdfPages(filename) as pdf:
                             #         gvel_invert[new_y_coor][new_x_coor] = v
 
             # plot 1: galaxy coordinates in kpc
+            assymetry_p = dap_vel - gvel_invert
+
             fig = plt.figure()
             ax = fig.add_subplot(3, 3, 1)
             ax.set_xlim(0, size)
@@ -403,8 +438,15 @@ with PdfPages(filename) as pdf:
 
             # plot 5: emission-line SFLUX serror
             ax = fig.add_subplot(3, 3, 5)
-            daplot(dap_serr * 1.e-17, fmin, fmax)
-            plt.title(eml[j] + ' SFLUX Error', fontsize=10)
+            ax.set_xlim(0, size)
+            ax.set_ylim(0, size)
+            ax.set_xticklabels(())
+            ax.set_yticklabels(())
+            plt.imshow(assymetry_p, origin='lower',
+                       interpolation='nearest',
+                       cmap=cm.coolwarm, vmin=-250, vmax=250)
+            plt.colorbar()
+            plt.title(eml[j] + 'subtracted', fontsize=10)
 
             # plot 6: emission-line SFLUX signal-to-noise ratio
             ax = fig.add_subplot(3, 3, 6)
