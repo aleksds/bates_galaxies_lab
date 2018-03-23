@@ -1,6 +1,5 @@
 # Kwamae Delva
-#Code using linetools to make a better voigt profile plot
-#Code implementing column density
+#Code using linetools to make Flux, Column Density, and Voigt Profile
 
 import sys
 sys.path.append('/Users/kdelva/github/linetools/')
@@ -93,7 +92,7 @@ minorLocator = AutoMinorLocator()
 filename = 'Linetools_Voigt_and_Col_Dens.pdf'
 with PdfPages(filename) as pdf:
     # for h in range(0, len(gal)):
-    for h in range(1,2):
+    for h in range(0,len(gal)):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
         data = ascii.read(datafile)
         wave = data['wv'] #/ (1. + zem[h])
@@ -180,3 +179,6 @@ with PdfPages(filename) as pdf:
 
         plt.show()
         plt.close()
+
+
+# Voigt Plots 1,4,5,6,7 (needs to be shifted left),8,9, maybe 10,11,12,13 (needs to be shifted left),14, 15   --> Possible solution is to personalize voigt profile x-axis so that it focuses on areas of interest... Idk how to do that since the flux plots have very complex structures and some areas of interest for different galaxies may be too complex for me to make a general case....

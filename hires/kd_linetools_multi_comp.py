@@ -76,14 +76,14 @@ f2344 = 0.1142
 
 # array of names, lines of interest, oscillator strength:
 lines = [mgii2796, mgii2803, mgi2852, feii2586, feii2600, feii2374, feii2382, feii2344]
-names = ['MgII 2796', 'MgII 2803', 'MgI 2852', 'Fe II 2586', 'Fe II 2600', 'Fe II 2374', 'Fe II 2382', 'Fe II 2344']
+names = ['MgII 2796', 'MgII 2803', 'MgI 2852', 'FeII 2586', 'FeII 2600', 'FeII 2374', 'FeII 2382', 'FeII 2344']
 fosc = [f2796, f2803, f2852, f2586, f2600, f2374, f2382, f2344]
 
 minorLocator = AutoMinorLocator()
 filename = 'Mg_Tau_Flux_Column_Comparison.pdf'
 with PdfPages(filename) as pdf:
     # for h in range(0, len(gal)):
-    for h in range(0, 1):
+    for h in range(0, 13):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
         data = ascii.read(datafile)
         wave = data['wv'] 
@@ -288,3 +288,4 @@ with PdfPages(filename) as pdf:
         # Next steps, figuring out how to get b w/ kd_linetools_b_solver.py
         #Modifying wave based on each component's min flux
                     
+        # Could try if statements where if y is less than 1 and when x is between 3900 and 5500
