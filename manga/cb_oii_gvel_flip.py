@@ -192,7 +192,8 @@ with PdfPages(filename) as pdf:
             pos_x = x_axis > 0
             neg_x = x_axis < 0
             gvel_invert = np.zeros([size, size])
-            gvel_invert = gvel_invert - 2000
+            backg_val = abs(dap_vel[0][0])
+            gvel_invert = gvel_invert - backg_val
 
 
             newx = copy.deepcopy(x_axis)
@@ -333,12 +334,21 @@ with PdfPages(filename) as pdf:
                             gvel_invert[new_y_coor[0]][new_x_coor[0]] = v
 
                         if y_val == 0:
+                            if gvel_invert[vy[0]][vx[0]] != (backg_val*(-1)):
+                                print("A pixel is being overwritten and values are potentially being lost.",
+                                      "\n Info: Elements in fil_y, fil_x and dist: ",
+                                      len(fil_y), " ; ", len(fil_x), " ; ", len(dist), "\n For plot ", plate, galaxy
+                                      )
                             gvel_invert[vy[0]][vx[0]] = v
                     else:
-                        gvel_invert[vy[icount]][vx[vcount]] = v
+                        gvel_invert[icount][vcount] = v
 
                     vcount = vcount + 1
                 icount = icount + 1
+
+            gvinv = copy.deepcopy(gvel_invert)
+            gvinv = sorted(gvinv)
+            gvmask = sorted(masked_vel)
 
 
                         #The line method below
