@@ -5,6 +5,7 @@ from xlrd import open_workbook
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import os
+from astropy.table import Table
 
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
@@ -93,3 +94,44 @@ for w in range(0,4):
         J2116kpc[w-1] = J2116radiikpc[w]
         J2140kpc[w-1] = J2140radiikpc[w]
   
+
+#getting the 2 re for each galaxy into pc so I can plug them into Heckman et al 2011's equation
+J0826pc = np.zeros(2)
+J0901pc = np.zeros(2)
+J0905pc = np.zeros(2)
+J0944pc = np.zeros(2)
+J1107pc = np.zeros(2)
+J1219pc = np.zeros(2)
+J1341pc = np.zeros(2)
+J1506pc = np.zeros(2)
+J1558pc = np.zeros(2)
+J1613pc = np.zeros(2)
+J2116pc = np.zeros(2)
+J2140pc = np.zeros(2)
+
+for w in range(0,2):
+    J0826pc[w] = J0826kpc[w]*1000
+    J0901pc[w] = J0901kpc[w]*1000
+    J0905pc[w] = J0905kpc[w]*1000
+    J0944pc[w] = J0944kpc[w]*1000
+    J1107pc[w] = J1107kpc[w]*1000
+    J1219pc[w] = J1219kpc[w]*1000
+    J1341pc[w] = J1341kpc[w]*1000
+    J1506pc[w] = J1506kpc[w]*1000
+    J1558pc[w] = J1558kpc[w]*1000
+    J1613pc[w] = J1613kpc[w]*1000
+    J2116pc[w] = J2116kpc[w]*1000
+    J2140pc[w] = J2140kpc[w]*1000
+
+#organizing values into a table
+group = [J0826pc,J0901pc,J0905pc,J0944pc,J1107pc,J1219pc,J1341pc,J1506pc,J1558pc,J1613pc,J2116pc,J2140pc]
+fourseventyfive = np.zeros(12)
+eightfourteen = np.zeros(12)
+for i in range(0,12):
+    for w in range(0,2):
+        if w == 0:
+            fourseventyfive[i] = group[i][w]
+        if w == 1:
+            eightfourteen[i] = group[i][w]
+table = Table([fourseventyfive,eightfourteen], names=('re 475', 're 814'))
+print(table)
