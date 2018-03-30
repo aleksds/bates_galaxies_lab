@@ -1,4 +1,4 @@
-#calculates escape velocity from stellar masses obtained from prospector and radii obtained from galfit. does so for 475 and 814 using the best value prosepector gave us for stellar mass
+#calculates escape velocity from stellar masses obtained from prospector and radii obtained from galfit. does so for 475 and 814 using the best value prosepector gave us for stellar mass and the two percentile values
 import numpy as np
 #need stellar mass in kg and radius in meters
 
@@ -25,3 +25,34 @@ esc = np.zeros([12,2])
 for w in range(0,12):
     for i in range(0,2):
         esc[w][i] = (((2*G*masskg[w])/(rem[w][i]))**(1/2))/1000
+
+#now getting escape velocity from the 16th and 18th percentile values for the stellar mass from prospector
+
+#need to get the masses into kgs
+#first for the 16th percentile
+masslogsolsix = [10.29,10.40,9.88,10.41,10.36,10.92,10.10,10.00,10.79,11.18,10.48,9.89]
+masssolsix = np.zeros(12)
+masskgsix = np.zeros(12)
+for w in range(0,12):
+    masssolsix[w] = 10**(masslogsolsix[w])
+for w in range(0,12):
+    masskgsix[w] = masssolsix[w]*(1.98855*(10**30))
+
+escsix = np.zeros([12,2])
+for w in range(0,12):
+    for i in range(0,2):
+        escsix[w][i] = (((2*G*masskgsix[w])/(rem[w][i]))**(1/2))/1000
+
+#now for the 84th percentile
+masslogsoleight = [10.70,10.75,10.32,10.79,10.73,11.27,10.48,10.42,11.18,11.51,10.91,10.38]
+masssoleight = np.zeros(12)
+masskgeight = np.zeros(12)
+for w in range(0,12):
+    masssoleight[w] = 10**(masslogsoleight[w])
+for w in range(0,12):
+    masskgeight[w] = masssoleight[w]*(1.98855*(10**30))
+
+esceight = np.zeros([12,2])
+for w in range(0,12):
+    for i in range(0,2):
+        esceight[w][i] = (((2*G*masskgeight[w])/(rem[w][i]))**(1/2))/1000
