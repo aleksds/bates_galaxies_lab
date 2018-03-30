@@ -347,8 +347,8 @@ with PdfPages(filename) as pdf:
                 icount = icount + 1
 
             gvinv = copy.deepcopy(gvel_invert)
-            gvinv = sorted(gvinv)
-            gvmask = sorted(masked_vel)
+            gvinv = sorted(np.ndarray.flatten(gvinv))
+            gvmask = sorted(np.ndarray.flatten(masked_vel))
 
 
                         #The line method below
