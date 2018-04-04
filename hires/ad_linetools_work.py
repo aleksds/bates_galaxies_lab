@@ -9,7 +9,7 @@
 #Code implementing column density
 
 import sys
-sys.path.append('/Users/kdelva/github/linetools/')
+sys.path.append('/Users/aleks/github/linetools/')
 
 
 
@@ -99,7 +99,7 @@ minorLocator = AutoMinorLocator()
 filename = 'Linetools_Voigt_and_Col_Dens.pdf'
 with PdfPages(filename) as pdf:
     # for h in range(0, len(gal)):
-    for h in range(1,2):
+    for h in range(2,3):
         datafile = dir+gal[h]+'/'+gal[h]+'_stitched_v1.txt'
         data = ascii.read(datafile)
         wave = data['wv'] #/ (1. + zem[h])
@@ -138,7 +138,7 @@ with PdfPages(filename) as pdf:
             # iline.analy['spec'] = xspec  this was for the default code pulled from linetools
             abslines.append(iline)
 
-        FeIItrans = ['Fe II 2586', 'Fe II 2600', 'Fe II 2374', 'Fe II 2382', 'Fe II 2344']
+        FeIItrans = ['FeII 2586', 'FeII 2600', 'FeII 2374', 'FeII 2382', 'FeII 2344']
         abslines = []
         for trans in FeIItrans:
             iline = AbsLine(trans,z=zem[h], linelist=ism)

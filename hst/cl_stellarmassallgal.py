@@ -10,8 +10,8 @@ imag = [20.55,20.43,20.62,20.65,20.56,20.16,20.31,20.39,20.27,20.07,20.76,20.82]
 vflux=np.zeros(12)
 iflux=np.zeros(12)
 for w in range(0,12):
-    vflux[w] = 10**(vmag[w]/(-2.5))*10**9
-    iflux[w] = 10**(imag[w]/(-2.5))*10**9
+    vflux[w] = (10**(vmag[w]/(-2.5))*10**9)*2.40
+    iflux[w] = (10**(imag[w]/(-2.5))*10**9)*4.11
 
 #inverse variances
 vivar=np.zeros(12)
