@@ -47,9 +47,9 @@ vels = [[[1758,1413,2265],[1392,1119,1794]],[[1337,1111,1662],[1481,1204,1802]],
 
 with PdfPages('cl_vflowvsescvel.pdf') as pdf:
     plt.figure()
-    plt.xlim(500,3000)
-    plt.ylim(-0.1,6.3)
-    #plt.plot(x,y,linestyle=':',color='red',linewidth=1)
+    plt.semilogy()
+    plt.xlim(500,2700)
+
     for w in range (0,12):
         for i in range(0,2):
             
@@ -57,19 +57,19 @@ with PdfPages('cl_vflowvsescvel.pdf') as pdf:
                 if i == 0:
                     plt.scatter(vflow[w], vflow[w]/vels[w][0][0], s=30, marker = markers[0], c=colors[0], label = 'F475W')
                     error = [np.array([vflow[w]/(vels[w][0][2])]),np.array([vflow[w]/(vels[w][0][1])])]
+                    print(error)
                     plt.errorbar(vflow[w], vflow[w]/vels[w][0][0], yerr = error,linewidth=0.5,color=colors[0])
                 else:
                     plt.scatter(vflow[w], vflow[w]/vels[w][1][0], s=30, marker = markers[1], c=colors[1], label = 'F814W')
                     error = [np.array([vflow[w]/(vels[w][1][2])]),np.array([vflow[w]/(vels[w][1][1])])]
+                    print(error)
                     plt.errorbar(vflow[w], vflow[w]/vels[w][1][0], yerr = error,linewidth=0.5,color=colors[1])
                 
             else:
                 plt.scatter(vflow[w], vflow[w]/vels[w][i][0], s=30, marker = markers[i], c=colors[i])
                 error = [np.array([vflow[w]/(vels[w][i][2])]),np.array([vflow[w]/(vels[w][i][1])])]
+                print(error)
                 plt.errorbar(vflow[w], vflow[w]/vels[w][i][0], yerr = error,linewidth=0.5,color=colors[i])
-           
-
-                    
                     
     plt.legend(loc='upper left', prop={'size': 12})
     plt.xlabel('Observed Outflow Speed (km/s)')
