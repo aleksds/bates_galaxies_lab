@@ -185,6 +185,19 @@ with PdfPages(filename) as pdf:
 
             # CB new approach: making the vel plot circular so we have better symmetry to work with
             x_axis = copy.deepcopy(xproj_kpc_map)
+            x_axis_2 = np.zeros([size,size])
+            x_axis_2 = x_axis_2 - 65000
+            for i in range(0,size):
+                for k in range(0,size):
+                    if (dap_ha_sivar[j, k] > 0.):
+                        x_axis_2[i,k] = xproj_kpc[j, k] / u.kpc
+            y_axis_2 = np.zeros([size,size])
+            y_axis_2 = y_axis_2 - 65000
+            for i in range(0,size):
+                for k in range(0,size):
+                    if (dap_ha_sivar[j, k] > 0.):
+                        y_axis_2[i,k] = yproj_kpc[j, k] / u.kpc
+
             y_axis = copy.deepcopy(zproj_kpc_map)
 
             pos_y = y_axis > 0
@@ -222,26 +235,67 @@ with PdfPages(filename) as pdf:
 
 
 
-            # Flipping the gvel plot
-            x_axis = x_axis * mask_1
-            y_axis = y_axis * mask_1
-            masked_vel = copy.deepcopy(dap_vel)
-            masked_vel = masked_vel * mask_1
+            # Applying masks
+            # x_axis = x_axis * mask_1
+            # y_axis = y_axis * mask_1
+            # masked_vel = copy.deepcopy(dap_vel)
+            # masked_vel = masked_vel * mask_1
             # bad = np.abs(masked_vel) > 1000
             # masked_vel[bad] = 0
+
+            # Drawing a line at x = 0
+            xi, xo = np.where(np.around(x_axis_2, decimals=1) == 0.0) #round x axis, find the zeros (should be a horizontal line through
+            #the major axis
+
+
+            def find_line(y_coors, x_coors):
+                slope_values = []
+                if len(x_coors) > 2:
+                    for t in range(0, len(x_coors) - 2):
+                        curr_slope = (y_coors[t + 1] - y_coors[t]) / (x_coors[t + 1] - x_coors[t])
+                        slope_values.append(curr_slope)
+                    slope = np.mean(slope_values)
+                else:
+                    slope = (y_coors[1] - y_coors[0]) / (x_coors[1] - x_coors[0])
+
+                intercept_values = []
+                for t in range(0, len(x_coors) - 1):
+                    curr_intercept = y_coors[t] - (slope * x_coors[t])
+                    intercept_values.append(curr_intercept)
+                intercept = np.mean(intercept_values)
+
+                return slope, intercept
+
+            mainx_slope, mainx_intr = find_line(xi,xo) #this is the slope of the line passing through the
+            # 0 points in the xproj map, and the y-intercept of such line. This describes the line equation.
 
 
 
 
             icount = 0
-            for i in masked_vel:
+            for i in dap_vel:
                 vcount = 0
                 for v in i:
-                    vy, vx = np.where(masked_vel == v) #Positions in vel plot
+                    vy, vx = np.where(dap_vel == v) #Positions in vel plot
 
 
                     y_val = y_axis[vy[0]][vx[0]]  # Value in z-proj
-                    x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
+                    x_val = x_axis_2[vy[0]][vx[0]] # Value in x-proj
+
+                    potential_zeros_in_line = []
+                    # Run only if value is not -65000 for x prok
+                    if x_val != (-65000):
+                        particular_intercept = vy[0] - (mainx_slope*vx[0])
+                        main_ax_yo, main_ax_yi = np.where(np.around(y_axis_2, decimals=1) == 0.0)
+                        for zero1 in main_ax_yo:
+                            for zero2 in main_ax_yo:
+                                if round(zero1) == round(mainx_slope*zero2):
+                                    potential_zeros_in_line.append([zero1,zero2])
+
+
+
+
+
 
                     # if v != 0:
                     #
@@ -368,6 +422,8 @@ with PdfPages(filename) as pdf:
                         # # Two arrays with points that more or less draw a line
                         o, k = np.where(rounded_y == (-1 * y_round))
                         n, m = np.where(rounded_x == x_round)
+
+
 
                         if (len(o) >1) and (len(n) > 1):
 
