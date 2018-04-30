@@ -27,7 +27,7 @@ m_F814W_indep_p = 19.224
 
 #These values are from galfitm where x and y values are allowed to be different between filters
 m_F475W_simul_p = 19.597  
-m_F814W_simul_p = 18.203
+m_F814W_simul_p = 19.203
 
 #These values are from galfitm where x and y positions must remain constant
 m_F475W_simul2_p = 19.663
