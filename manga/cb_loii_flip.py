@@ -286,11 +286,21 @@ with PdfPages(filename) as pdf:
                     # Run only if value is not -65000 for x prok
                     if x_val != (-65000):
                         particular_intercept = vy[0] - (mainx_slope*vx[0])
-                        main_ax_yo, main_ax_yi = np.where(np.around(y_axis_2, decimals=1) == 0.0)
+                        main_ax_yo, main_ax_yi = np.where(np.around(y_axis_2, decimals=0) == 0.0)
                         for zero1 in main_ax_yo:
                             for zero2 in main_ax_yo:
                                 if round(zero1) == round(mainx_slope*zero2):
                                     potential_zeros_in_line.append([zero1,zero2])
+                                    # up to this point, we have candidates for the spaxels we can consider
+                                    # as zeros for our line.
+                    # for now, let's look at only the first candidate in potential_zeros
+                    yind_diff = potential_zeros_in_line[0][0] - vy
+                    xind_diff = potential_zeros_in_line[0][1] - vx
+                    new_yind_cord = vy + (2*yind_diff)
+                    new_xind_cord = vx + (2*xind_diff)
+
+                    gvel_invert[new_yind_cord][new_xind_cord] = v
+
 
 
 
@@ -409,55 +419,55 @@ with PdfPages(filename) as pdf:
             # gvmask = sorted(np.ndarray.flatten(masked_vel))
 
 ###################################################################################################################
-                        #The line method below
-
-                    if (float(y_val) and float(x_val)) != 0:
-
-                        y_round = float(str(round(y_val, 1)))
-                        x_round = float(str(round(x_val, 1)))
-
-                        rounded_y = np.around(y_axis, decimals=1)
-                        rounded_x = np.around(x_axis, decimals=1)
-
-                        # # Two arrays with points that more or less draw a line
-                        o, k = np.where(rounded_y == (-1 * y_round))
-                        n, m = np.where(rounded_x == x_round)
-
-
-
-                        if (len(o) >1) and (len(n) > 1):
-
-                            def find_line(y_coors, x_coors):
-                                slope_values = []
-                                if len(x_coors) > 2:
-                                    for t in range(0, len(x_coors) - 2):
-                                        curr_slope = (y_coors[t + 1] - y_coors[t]) / (x_coors[t + 1] - x_coors[t])
-                                        slope_values.append(curr_slope)
-                                    slope = np.mean(slope_values)
-                                else:
-                                    slope = (y_coors[1] - y_coors[0]) / (x_coors[1] - x_coors[0])
-
-
-                                intercept_values = []
-                                for t in range(0, len(x_coors) - 1):
-                                    curr_intercept = y_coors[t] - (slope * x_coors[t])
-                                    intercept_values.append(curr_intercept)
-                                intercept = np.mean(intercept_values)
-
-                                return slope, intercept
-
-
-                            x_slope, x_intercept = find_line(n, m)
-                            y_slope, y_intercept = find_line(o, k)
-
-                            point_x_float = (y_intercept-x_intercept)/(x_slope-y_slope)
-                            point_y_float = (point_x_float * x_slope) + x_intercept
-                            new_x_coor = int(round(point_x_float))
-                            new_y_coor = int(round(point_y_float))
-
-                            if (new_x_coor < size) and (new_y_coor<size):
-
-                                gvel_invert[new_y_coor][new_x_coor] = v
+                        # The OLD line method below
+                    #
+                    # if (float(y_val) and float(x_val)) != 0:
+                    #
+                    #     y_round = float(str(round(y_val, 1)))
+                    #     x_round = float(str(round(x_val, 1)))
+                    #
+                    #     rounded_y = np.around(y_axis, decimals=1)
+                    #     rounded_x = np.around(x_axis, decimals=1)
+                    #
+                    #     # # Two arrays with points that more or less draw a line
+                    #     o, k = np.where(rounded_y == (-1 * y_round))
+                    #     n, m = np.where(rounded_x == x_round)
+                    #
+                    #
+                    #
+                    #     if (len(o) >1) and (len(n) > 1):
+                    #
+                    #         def find_line(y_coors, x_coors):
+                    #             slope_values = []
+                    #             if len(x_coors) > 2:
+                    #                 for t in range(0, len(x_coors) - 2):
+                    #                     curr_slope = (y_coors[t + 1] - y_coors[t]) / (x_coors[t + 1] - x_coors[t])
+                    #                     slope_values.append(curr_slope)
+                    #                 slope = np.mean(slope_values)
+                    #             else:
+                    #                 slope = (y_coors[1] - y_coors[0]) / (x_coors[1] - x_coors[0])
+                    #
+                    #
+                    #             intercept_values = []
+                    #             for t in range(0, len(x_coors) - 1):
+                    #                 curr_intercept = y_coors[t] - (slope * x_coors[t])
+                    #                 intercept_values.append(curr_intercept)
+                    #             intercept = np.mean(intercept_values)
+                    #
+                    #             return slope, intercept
+                    #
+                    #
+                    #         x_slope, x_intercept = find_line(n, m)
+                    #         y_slope, y_intercept = find_line(o, k)
+                    #
+                    #         point_x_float = (y_intercept-x_intercept)/(x_slope-y_slope)
+                    #         point_y_float = (point_x_float * x_slope) + x_intercept
+                    #         new_x_coor = int(round(point_x_float))
+                    #         new_y_coor = int(round(point_y_float))
+                    #
+                    #         if (new_x_coor < size) and (new_y_coor<size):
+                    #
+                    #             gvel_invert[new_y_coor][new_x_coor] = v
 
             # plot 1: galaxy coordinates in kpc
             assymetry_p = dap_vel - gvel_invert
