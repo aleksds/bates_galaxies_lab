@@ -4,19 +4,19 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-m_F475W_indep = 20.492
-m_F814W_indep = 20.469
+m_F475W_indep = 19.398
+m_F814W_indep = 18.843
 
 #These values are from galfitm where x and y values are allowed to be different between filters
 m_F475W_simul = 19.337  
 m_F814W_simul = 18.896
 
 #These values are from galfitm where x and y positions must remain constant
-m_F475W_simul2 = -0.221
-m_F814W_simul2 = 19.125
+m_F475W_simul2 = 19.346
+m_F814W_simul2 = 18.904
 
-m_diff = [(m_F475W_indep - m_F814W_indep), (m_F475W_simul - m_F814W_simul)]
-F814W = [m_F814W_indep, m_F814W_simul]
+m_diff = [(m_F475W_indep - m_F814W_indep), (m_F475W_simul - m_F814W_simul), (m_F475W_simul2 - m_F814W_simul2)]
+F814W = [m_F814W_indep, m_F814W_simul, m_F814W_simul2]
 
 with PdfPages('ec_m_plot.pdf') as pdf:
     fig = plt.figure()
@@ -31,3 +31,5 @@ with PdfPages('ec_m_plot.pdf') as pdf:
     plt.close()
 
 os.system('open %s &' % 'ec_m_plot.pdf')
+
+#on plot, values go from left to right as follows: indep, simul, simul2
