@@ -45,7 +45,7 @@ for w in range(0,12):
         text.write('# Component number: 1\n')
         text.write(' 0) psf\n')
         text.write(' 1) '+xcoor+' '+ycoor+' 1 1  # position x, y        [pixel]\n')
-        text.write(' 3) 20.4776     1\n')
+        text.write(' 3) 19.5     1\n')
         text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
 
         text.close()
