@@ -28,7 +28,7 @@ for m in range(0,2):
             text.write('F) none\n') #will not change
 
             if m == 0:
-                text.write('G) /Users/clipscom/Documents/bates_galaxies_lab/hst/autogalfit/kv_constraint.txt\n')
+                text.write('G) /Volumes/physics/linux-lab/data/kv_constraint.txt\n')
             if m == 1:
                 text.write('G) \n')
                 
@@ -81,7 +81,7 @@ for m in range(0,2):
         text.write('#  Input menu file: '+galaxies[w]+'_F814W_F475W_psf_input_mac.txt\n') #propably not essential
         text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
         text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') #will not change , probably not essential
-        text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n'
+        text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n')
         text.write('A1) V,U')
         text.write('A2) 814.000,475.000')
         text.write('B) '+galaxies[w]+'_F814W_F475W_'+model[m]+'_output.fits')
@@ -90,7 +90,7 @@ for m in range(0,2):
         text.write('E) 1')
         text.write('F) none,none')
         if m == 0:
-            text.write('G) /Users/clipscom/Documents/bates_galaxies_lab/hst/autogalfit/kv_constraint.txt\n')
+            text.write('G) /Volumes/physics/linux-lab/data/kv_constraint.txt\n')
         if m == 1:
             text.write('G) \n')
         
@@ -118,8 +118,8 @@ for m in range(0,2):
             #text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
         if m == 1:
             text.write(' 0) sersic')
-            text.write(' 1) '+xcoor,xcoor+'    1,0                 band')
-            text.write(' 2) '+ycoor,ycoor+'    1,0                 band')
+            text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band')
+            text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band')
             text.write(' 3) 19.5,19.5     1,1                 band')
             text.write(' 4) 0.906,1.110e-16    1,0                 cheb')
             text.write(' 5) 4.000,4.441e-16    1,0                 cheb')
