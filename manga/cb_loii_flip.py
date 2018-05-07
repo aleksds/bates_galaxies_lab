@@ -189,14 +189,14 @@ with PdfPages(filename) as pdf:
             x_axis_2 = x_axis_2 - 65000
             for i in range(0,size):
                 for k in range(0,size):
-                    if (dap_ha_sivar[j, k] > 0.):
-                        x_axis_2[i,k] = xproj_kpc[j, k] / u.kpc
+                    if (dap_ha_sivar[i, k] > 0.):
+                        x_axis_2[i,k] = xproj_kpc[i, k] / u.kpc
             y_axis_2 = np.zeros([size,size])
             y_axis_2 = y_axis_2 - 65000
             for i in range(0,size):
                 for k in range(0,size):
-                    if (dap_ha_sivar[j, k] > 0.):
-                        y_axis_2[i,k] = yproj_kpc[j, k] / u.kpc
+                    if (dap_ha_sivar[i, k] > 0.):
+                        y_axis_2[i,k] = yproj_kpc[i, k] / u.kpc
 
             y_axis = copy.deepcopy(zproj_kpc_map)
 
@@ -238,10 +238,10 @@ with PdfPages(filename) as pdf:
             # Applying masks
             # x_axis = x_axis * mask_1
             # y_axis = y_axis * mask_1
-            # masked_vel = copy.deepcopy(dap_vel)
-            # masked_vel = masked_vel * mask_1
-            # bad = np.abs(masked_vel) > 1000
-            # masked_vel[bad] = 0
+            masked_vel = copy.deepcopy(dap_vel)
+            masked_vel = masked_vel * mask_1
+            bad = np.abs(masked_vel) > 1000
+            masked_vel[bad] = 0
 
             # Drawing a line at x = 0
             xi, xo = np.where(np.around(x_axis_2, decimals=1) == 0.0) #round x axis, find the zeros (should be a horizontal line through
@@ -276,7 +276,9 @@ with PdfPages(filename) as pdf:
             for i in dap_vel:
                 vcount = 0
                 for v in i:
-                    vy, vx = np.where(dap_vel == v) #Positions in vel plot
+                    # vy, vx = np.where(dap_vel == v) #Positions in vel plot
+                    vy = [icount]
+                    vx = [vcount]
 
 
                     y_val = y_axis[vy[0]][vx[0]]  # Value in z-proj
@@ -287,27 +289,31 @@ with PdfPages(filename) as pdf:
                     if x_val != (-65000):
                         particular_intercept = vy[0] - (mainx_slope*vx[0])
                         main_ax_yo, main_ax_yi = np.where(np.around(y_axis_2, decimals=0) == 0.0)
-                        for zero1 in main_ax_yo:
-                            for zero2 in main_ax_yo:
-                                if round(zero1) == round(mainx_slope*zero2):
-                                    potential_zeros_in_line.append([zero1,zero2])
+                        for zero1 in range(0,len(main_ax_yo)):
+                            y_eq = round(main_ax_yo[zero1])
+                            x_eq = round(mainx_slope*main_ax_yi[zero2] + particular_intercept)
+                            if (abs(y_eq-x_eq))<5:
+                                potential_zeros_in_line.append([zero1,zero2])
                                     # up to this point, we have candidates for the spaxels we can consider
                                     # as zeros for our line.
-                    # for now, let's look at only the first candidate in potential_zeros
-                    yind_diff = potential_zeros_in_line[0][0] - vy
-                    xind_diff = potential_zeros_in_line[0][1] - vx
-                    new_yind_cord = vy + (2*yind_diff)
-                    new_xind_cord = vx + (2*xind_diff)
+                        # for now, let's look at only the first candidate in potential_zeros
+                        yind_diff = potential_zeros_in_line[0][0] - vy[0]
+                        xind_diff = potential_zeros_in_line[0][1] - vx[0]
+                        new_yind_cord = vy[0] + (2*yind_diff)
+                        new_xind_cord = vx[0] + (2*xind_diff)
 
-                    gvel_invert[new_yind_cord][new_xind_cord] = v
+                        gvel_invert[new_yind_cord][new_xind_cord] = v
+                    else:
+                        if x_val == -65000:
+                            gvel_invert[icount][vcount]=v
+                        vcount = vcount + 1
 
 
 
 
 
 
-
-                    # if v != 0:
+                            # if v != 0:
                     #
                     #     y_val = y_axis[vy[0]][vx[0]] # Value in z-proj
                     #     x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
@@ -411,7 +417,7 @@ with PdfPages(filename) as pdf:
             #         else:
             #             gvel_invert[icount][vcount] = v
             #
-            #         vcount = vcount + 1
+                    # vcount = vcount + 1
             #     icount = icount + 1
             #
             # gvinv = copy.deepcopy(gvel_invert)
