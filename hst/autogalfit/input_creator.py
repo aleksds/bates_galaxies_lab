@@ -82,13 +82,13 @@ for m in range(0,2):
         text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
         text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') #will not change , probably not essential
         text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n')
-        text.write('A1) V,U')
-        text.write('A2) 814.000,475.000')
-        text.write('B) '+galaxies[w]+'_F814W_F475W_'+model[m]+'_output.fits')
-        text.write('C) none,none      0.000')
+        text.write('A1) V,U\n')
+        text.write('A2) 814.000,475.000\n')
+        text.write('B) '+galaxies[w]+'_F814W_F475W_'+model[m]+'_output.fits\n')
+        text.write('C) none,none      0.000\n')
         text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_psf.fits\n')
-        text.write('E) 1')
-        text.write('F) none,none')
+        text.write('E) 1\n')
+        text.write('F) none,none\n')
         if m == 0:
             text.write('G) /Volumes/physics/linux-lab/data/kv_constraint.txt\n')
         if m == 1:
@@ -102,14 +102,14 @@ for m in range(0,2):
         ycoorhigh = str(catalog[w][2]+200)
         
         text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
-        text.write('I) 100    100')
-        text.write('J) 25.027,25.613')
-        text.write('K) 0.05  0.05')
-        text.write('O) regular')
-        text.write('P) 0')
-        text.write('U) 0 0.750000 25 4 40')
-        text.write('V) 0 0 50 0.800000 0.500000 100000')
-        text.write('W) input,sigma,psf,component,model,residual')
+        text.write('I) 100    100\n')
+        text.write('J) 25.027,25.613\n')
+        text.write('K) 0.05  0.05\n')
+        text.write('O) regular\n')
+        text.write('P) 0\n')
+        text.write('U) 0 0.750000 25 4 40\n')
+        text.write('V) 0 0 50 0.800000 0.500000 100000\n')
+        text.write('W) input,sigma,psf,component,model,residual\n')
 
         #if m == 0:
             #text.write(' 0) psf\n')
@@ -117,16 +117,28 @@ for m in range(0,2):
             #text.write(' 3) 19.5     1\n')
             #text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
         if m == 1:
-            text.write(' 0) sersic')
-            text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band')
-            text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band')
-            text.write(' 3) 19.5,19.5     1,1                 band')
-            text.write(' 4) 0.906,1.110e-16    1,0                 cheb')
-            text.write(' 5) 4.000,4.441e-16    1,0                 cheb')
-            text.write(' 6) 0,0               0,0                 cheb')
-            text.write(' 7) 0,0               0,0                 cheb')
-            text.write(' 8) 0,0               0,0                 cheb')
-            text.write(' 9) 0.9,0           1,0                 cheb')
-            text.write(' 10) 0,0          1,0                 cheb')
+            text.write(' 0) sersic\n')
+            text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
+            text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
+            text.write(' 3) 19.5,19.5     1,1                 band\n')
+            text.write(' 4) 0.906,1.110e-16    1,0                 cheb\n')
+            text.write(' 5) 4.000,4.441e-16    1,0                 cheb\n')
+            text.write(' 6) 0,0               0,0                 cheb\n')
+            text.write(' 7) 0,0               0,0                 cheb\n')
+            text.write(' 8) 0,0               0,0                 cheb\n')
+            text.write(' 9) 0.9,0           1,0                 cheb\n')
+            text.write(' 10) 0,0          1,0                 cheb\n')
             text.write(' Z) 0')
         text.close()
+
+
+#now to make a shell script to run galfit on the input files created above
+file = 'run_files.txt'
+text = open(file,'w')
+text.write('shopt -s expand_aliases\n')
+text.write('source ~/.bash_profile\n')
+for m in range(0,2):
+    for w in range(0,12):
+        for i in range(0,2):
+            text.write('galfitm '+galaxies[w]+'_'+filters[i]+'_'+model[m]+'_input.txt\n')
+text.close()
