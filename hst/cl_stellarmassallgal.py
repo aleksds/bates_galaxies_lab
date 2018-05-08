@@ -47,7 +47,7 @@ for w in range(0,12):
     file = 'autogalfit/'+date_time+'_sersic_simultaneous/'+galaxies[w]+'_F814W_F475W_sersic_output.galfit.01.band'
     with open(file) as f:
         content = f.readlines()
-    mags[w][0] = np.float(content[47][12:17])
+    mags[w][0] = np.float(content[47][11:17])
     mags[w][1] = np.float(content[47][4:10])
 
 #flux in nanomaggies
@@ -103,7 +103,7 @@ for w in range(0,12):
     file = 'autogalfit/'+date_time+'_psf_simultaneous/'+galaxies[w]+'_F814W_F475W_psf_output.galfit.01.band'
     with open(file) as f:
         content = f.readlines()
-    mags[w][0] = np.float(content[47][12:17])
+    mags[w][0] = np.float(content[47][11:17])
     mags[w][1] = np.float(content[47][4:10])
 
 #flux in nanomaggies
