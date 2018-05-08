@@ -1,0 +1,29 @@
+#  Input menu file: J0901_F475W_coarse_withfinepsf
+#  Chi^2/nu = ,  Chi^2 = ,  Ndof = 
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /Volumes/physics/linux-lab/data/hst/J0901+0314/coarse/F475W/final_F475W_drc_sci.fits
+B) J0901_F475W_sersic_output.fits
+C) none
+D) /Volumes/physics/linux-lab/data/hst/J0901+0314/fine/F475W/final_psf.fits
+E) 2
+F) none
+G) /Volumes/physics/linux-lab/data/galfit/eves_files/constraints_sersic_indep.txt
+H) 3734 4134 3937 4337
+I) 150    150
+J) 25.613
+K) 0.050  0.050
+O) regular
+P) 0
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# Component number: 1
+ 0) sersic
+ 1) 3934 4137 1 1  # position x, y        [pixel]
+ 3) 19.5     1
+ 4) 0.3      1
+ 5) 4.0      1
+ 6) 0      0
+ 7) 0      0
+ 8) 0      0
+ 9) 0.9      1
+ 10) 0     1
+ Z) 0      

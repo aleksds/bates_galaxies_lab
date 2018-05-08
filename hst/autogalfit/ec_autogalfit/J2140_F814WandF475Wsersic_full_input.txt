@@ -1,0 +1,33 @@
+#  Input menu file: J2140_F814W_F475W_psf_input_mac.txt
+#  Chi^2/nu = ,  Chi^2 = ,  Ndof = 
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /Volumes/physics/linux-lab/data/hst/J2140+1209/coarse/F814W/final_F814W_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/J2140+1209/coarse/F475W/final_F475W_drc_sci.fits
+A1) V,U
+A2) 814.000,475.000
+B) J2140_F814WandF475W_sersic_full_output.fits
+C) none,none      0.000
+D) /Volumes/physics/linux-lab/data/hst/J2140+1209/fine/F814W/final_psf.fits,/Volumes/physics/linux-lab/data/hst/J2140+1209/fine/F475W/final_psf.fits
+E) 1
+F) none,none
+G) /Volumes/physics/linux-lab/data/galfit/eves_files/constraints_sersic_indep.txt
+H) 3867 4267 3854 4254
+I) 100    100
+J) 25.027,25.613
+K) 0.05  0.05
+O) regular
+P) 0
+U) 0 0.750000 25 4 40
+V) 0 0 50 0.800000 0.500000 100000
+W) input,sigma,psf,component,model,residual
+ 0) sersic
+ 1) 4067,4067    1,0                 band
+ 2) 4054,4054    1,0                 band
+ 3) 19.5,19.5     1,1                 band
+ 4) 0.906,1.110e-16    1,0                 cheb
+ 5) 4.000,4.441e-16    1,0                 cheb
+ 6) 0,0               0,0                 cheb
+ 7) 0,0               0,0                 cheb
+ 8) 0,0               0,0                 cheb
+ 9) 0.9,0           1,0                 cheb
+ 10) 0,0          1,0                 cheb
+ Z) 0

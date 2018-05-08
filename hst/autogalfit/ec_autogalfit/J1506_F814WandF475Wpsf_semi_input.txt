@@ -1,0 +1,26 @@
+#  Input menu file: J1506_F814W_F475W_psf_input_mac.txt
+#  Chi^2/nu = ,  Chi^2 = ,  Ndof = 
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /Volumes/physics/linux-lab/data/hst/J1506+5402/coarse/F814W/final_F814W_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/J1506+5402/coarse/F475W/final_F475W_drc_sci.fits
+A1) V,U
+A2) 814.000,475.000
+B) J1506_F814WandF475W_psf_semi_output.fits
+C) none,none      0.000
+D) /Volumes/physics/linux-lab/data/hst/J1506+5402/fine/F814W/final_psf.fits,/Volumes/physics/linux-lab/data/hst/J1506+5402/fine/F475W/final_psf.fits
+E) 1
+F) none,none
+G) 
+H) 3947 4347 3722 4122
+I) 100    100
+J) 25.027,25.613
+K) 0.05  0.05
+O) regular
+P) 0
+U) 0 0.750000 25 4 40
+V) 0 0 50 0.800000 0.500000 100000
+W) input,sigma,psf,component,model,residual
+ 0) psf
+ 1) 4147,4147    1,1                 band
+ 2) 3922,3922    1,1                 band
+ 3) 19.5,19.5     1,1 band
+ Z) 0                  #  Skip this model in output image?  (yes=1, no=0)

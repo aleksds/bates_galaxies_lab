@@ -1,0 +1,22 @@
+#  Input menu file: J1341_F475W_coarse_withfinepsf
+#  Chi^2/nu = ,  Chi^2 = ,  Ndof = 
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /Volumes/physics/linux-lab/data/hst/J1341+0321/coarse/F475W/final_F475W_drc_sci.fits
+B) J1341_F475W_psf_output.fits
+C) none
+D) /Volumes/physics/linux-lab/data/hst/J1341+0321/fine/F475W/final_psf.fits
+E) 2
+F) none
+G) 
+H) 3686 4086 3964 4364
+I) 150    150
+J) 25.613
+K) 0.050  0.050
+O) regular
+P) 0
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# Component number: 1
+ 0) psf
+ 1) 3886 4164 1 1  # position x, y        [pixel]
+ 3) 19.5     1
+ Z) 0                  #  Skip this model in output image?  (yes=1, no=0)

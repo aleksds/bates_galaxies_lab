@@ -1,0 +1,22 @@
+#  Input menu file: J0826_F814W_coarse_withfinepsf
+#  Chi^2/nu = ,  Chi^2 = ,  Ndof = 
+# IMAGE and GALFIT CONTROL PARAMETERS
+A) /Volumes/physics/linux-lab/data/hst/J0826+4305/coarse/F814W/final_F814W_drc_sci.fits
+B) J0826_F814W_psf_output.fits
+C) none
+D) /Volumes/physics/linux-lab/data/hst/J0826+4305/fine/F814W/final_psf.fits
+E) 2
+F) none
+G) 
+H) 3430 3830 3955 4355
+I) 150    150
+J) 25.027
+K) 0.050  0.050
+O) regular
+P) 0
+#   par)    par value(s)    fit toggle(s)    # parameter description 
+# Component number: 1
+ 0) psf
+ 1) 3630 4155 1 1  # position x, y        [pixel]
+ 3) 19.5     1
+ Z) 0                  #  Skip this model in output image?  (yes=1, no=0)
