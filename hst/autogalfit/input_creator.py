@@ -4,18 +4,25 @@
 import os
 import numpy as np
 from astropy.io import ascii
+import datetime
 
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
 filters = ['F475W','F814W']
 longgal = ['J0826+4305','J0901+0314','J0905+5759','J0944+0930','J1107+0417','J1219+0336','J1341+0321','J1506+5402','J1558+3957','J1613+2834','J2116-0634','J2140+1209']
 photzeromag = ['25.613','25.027']
 model = ['psf','sersic']
+kind = ['independent','simultaneous']
 
+now = datetime.datetime.now()
+time = now.strftime("%Y%m%d-%H%M")
 for m in range(0,2):
     for w in range(0,12):
         for i in range(0,2):
+            
+            if not os.path.exists(time+'_'+model[m]+'_'+kind[0]):
+                os.makedirs(time+'_'+model[m]+'_'+kind[0])
 
-            file = galaxies[w]+'_'+filters[i]+'_'+model[m]+'_input.txt'
+            file = time+'_'+model[m]+'_'+kind[0]+'/'+galaxies[w]+'_'+filters[i]+'_'+model[m]+'_input.txt'
             text = open(file,'w')
             text.write('#  Input menu file: '+galaxies[w]+'_'+filters[i]+'_coarse_withfinepsf\n') #propably not essential
             text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
@@ -27,9 +34,9 @@ for m in range(0,2):
             text.write('E) 2\n') #will not change
             text.write('F) none\n') #will not change
 
-            if m == 0:
-                text.write('G) /Volumes/physics/linux-lab/data/kv_constraint.txt\n')
             if m == 1:
+                text.write('G) /Volumes/physics/linux-lab/data/kv_constraint.txt\n')
+            if m == 0:
                 text.write('G) \n')
                 
             galcoords = 'galcoords.dat'
@@ -71,11 +78,36 @@ for m in range(0,2):
 
             text.close()
 
-#now for simultaneous fits
+#below we create shell scripts to run galfit on the input files (need to type "sh name of the shell script" in the terminal)
+file = time+'_'+model[0]+'_'+kind[0]+'/'+'psf_independent_run_files.sh'
+text = open(file,'w')
+text.write('shopt -s expand_aliases\n')
+text.write('source ~/.bash_profile\n')
+for w in range(0,12):
+    for i in range(0,2):
+        text.write('galfitm '+galaxies[w]+'_'+filters[i]+'_'+model[0]+'_input.txt\n')
+text.close()
 
+file = time+'_'+model[1]+'_'+kind[0]+'/'+'sersic_independent_run_files.sh'
+text = open(file,'w')
+text.write('shopt -s expand_aliases\n')
+text.write('source ~/.bash_profile\n')
+for w in range(0,12):
+    for i in range(0,2):
+        text.write('galfitm '+galaxies[w]+'_'+filters[i]+'_'+model[1]+'_input.txt\n')
+text.close()
+
+
+#now for simultaneous fits
+now = datetime.datetime.now()
+time = now.strftime("%Y%m%d-%H%M")
 for m in range(0,2):
     for w in range(0,12):
-        file = galaxies[w]+'_F814WandF475W'+model[m]+'_input.txt'
+        
+        if not os.path.exists(time+'_'+model[m]+'_'+kind[1]):
+            os.makedirs(time+'_'+model[m]+'_'+kind[1])
+                
+        file = time+'_'+model[m]+'_'+kind[1]+'/'+galaxies[w]+'_F814WandF475W_'+model[m]+'_input.txt'
         text = open(file,'w')
     
         text.write('#  Input menu file: '+galaxies[w]+'_F814W_F475W_psf_input_mac.txt\n') #propably not essential
@@ -111,11 +143,12 @@ for m in range(0,2):
         text.write('V) 0 0 50 0.800000 0.500000 100000\n')
         text.write('W) input,sigma,psf,component,model,residual\n')
 
-        #if m == 0:
-            #text.write(' 0) psf\n')
-            #text.write(' 1) '+xcoor+' '+ycoor+' 1 1  # position x, y        [pixel]\n')
-            #text.write(' 3) 19.5     1\n')
-            #text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
+        if m == 0:
+            text.write(' 0) psf\n')
+            text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
+            text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
+            text.write(' 3) 19.5,19.5     1,1                 band\n')
+            text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
         if m == 1:
             text.write(' 0) sersic\n')
             text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
@@ -131,14 +164,19 @@ for m in range(0,2):
             text.write(' Z) 0')
         text.close()
 
-
-#now to make a shell script to run galfit on the input files created above
-file = 'run_files.txt'
+file = time+'_'+model[0]+'_'+kind[1]+'/'+'psf_simultaneous_run_files.sh'
 text = open(file,'w')
 text.write('shopt -s expand_aliases\n')
 text.write('source ~/.bash_profile\n')
-for m in range(0,2):
-    for w in range(0,12):
-        for i in range(0,2):
-            text.write('galfitm '+galaxies[w]+'_'+filters[i]+'_'+model[m]+'_input.txt\n')
+for w in range(0,12):
+    text.write('galfitm '+galaxies[w]+'_F814WandF475W_'+model[0]+'_input.txt\n')
+text.close()
+
+
+file = time+'_'+model[1]+'_'+kind[1]+'/'+'sersic_simultaneous_run_files.sh'
+text = open(file,'w')
+text.write('shopt -s expand_aliases\n')
+text.write('source ~/.bash_profile\n')
+for w in range(0,12):
+    text.write('galfitm '+galaxies[w]+'_F814WandF475W_'+model[1]+'_input.txt\n')
 text.close()
