@@ -24,22 +24,22 @@ for m in range(0,2):
 
             file = time+'_'+model[m]+'_'+kind[0]+'/'+galaxies[w]+'_'+filters[i]+'_'+model[m]+'_input.txt'
             text = open(file,'w')
-            text.write('#  Input menu file: '+galaxies[w]+'_'+filters[i]+'_coarse_withfinepsf\n') #propably not essential
+            text.write('#  Input menu file: '+time+'_'+model[m]+'_'+kind[0]+'/'+galaxies[w]+'_'+filters[i]+'_'+model[m]+'_input.txt\n') #propably not essential
             text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
             text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') #will not change , probably not essential
-            text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[i]+'/final_'+filters[i]+'_drc_sci.fits\n')
-            text.write('B) '+galaxies[w]+'_'+filters[i]+'_coarse.fits\n')
+            text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[i]+'/final_'+filters[i]+'_drc_sci.fits\n')
+            text.write('B) '+galaxies[w]+'_'+filters[i]+'_fine.fits\n')
             text.write('C) none\n') #will not change
             text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[i]+'/final_psf.fits\n')
             text.write('E) 2\n') #will not change
             text.write('F) none\n') #will not change
 
             if m == 1:
-                text.write('G) /Volumes/physics/linux-lab/data/kv_constraint.txt\n')
+                text.write('G) /Volumes/physics/linux-lab/data/sersic_index_equaltofour.txt\n')
             if m == 0:
                 text.write('G) \n')
                 
-            galcoords = 'galcoords.dat'
+            galcoords = 'galcoords_fine.dat'
             catalog = ascii.read(galcoords)
         
             xcoor = str(catalog[w][1])
@@ -52,7 +52,7 @@ for m in range(0,2):
             text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
             text.write('I) 150    150\n') 
             text.write('J) '+photzeromag[i]+'\n')
-            text.write('K) 0.050  0.050\n')
+            text.write('K) 0.025  0.025\n')
             text.write('O) regular\n') #will not change
             text.write('P) 0\n') #will not change
             text.write('#   par)    par value(s)    fit toggle(s)    # parameter description \n')
@@ -98,7 +98,7 @@ for w in range(0,12):
 text.close()
 
 
-#now for simultaneous fits
+#NOW FOR SIMULTANEOUS FITS
 now = datetime.datetime.now()
 time = now.strftime("%Y%m%d-%H%M")
 for m in range(0,2):
@@ -110,10 +110,10 @@ for m in range(0,2):
         file = time+'_'+model[m]+'_'+kind[1]+'/'+galaxies[w]+'_F814WandF475W_'+model[m]+'_input.txt'
         text = open(file,'w')
     
-        text.write('#  Input menu file: '+galaxies[w]+'_F814W_F475W_psf_input_mac.txt\n') #propably not essential
+        text.write('#  Input menu file: '+time+'_'+model[m]+'_'+kind[1]+'/'+galaxies[w]+'_F814WandF475W_'+model[m]+'_input.txt\n') #propably not essential
         text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
         text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') #will not change , probably not essential
-        text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/coarse/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n')
+        text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n')
         text.write('A1) V,U\n')
         text.write('A2) 814.000,475.000\n')
         text.write('B) '+galaxies[w]+'_F814W_F475W_'+model[m]+'_output.fits\n')
@@ -121,9 +121,9 @@ for m in range(0,2):
         text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_psf.fits\n')
         text.write('E) 1\n')
         text.write('F) none,none\n')
-        if m == 0:
-            text.write('G) /Volumes/physics/linux-lab/data/kv_constraint.txt\n')
         if m == 1:
+            text.write('G) /Volumes/physics/linux-lab/data/sersic_index_equaltofour.txt\n')
+        if m == 0:
             text.write('G) \n')
         
         xcoor = str(catalog[w][1])
@@ -136,7 +136,7 @@ for m in range(0,2):
         text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
         text.write('I) 100    100\n')
         text.write('J) 25.027,25.613\n')
-        text.write('K) 0.05  0.05\n')
+        text.write('K) 0.025  0.025\n')
         text.write('O) regular\n')
         text.write('P) 0\n')
         text.write('U) 0 0.750000 25 4 40\n')
@@ -145,14 +145,14 @@ for m in range(0,2):
 
         if m == 0:
             text.write(' 0) psf\n')
-            text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
-            text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
+            text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
+            text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
             text.write(' 3) 19.5,19.5     1,1                 band\n')
             text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
         if m == 1:
             text.write(' 0) sersic\n')
-            text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
-            text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
+            text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
+            text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
             text.write(' 3) 19.5,19.5     1,1                 band\n')
             text.write(' 4) 0.906,1.110e-16    1,0                 cheb\n')
             text.write(' 5) 4.000,4.441e-16    1,0                 cheb\n')
