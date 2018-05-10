@@ -35,12 +35,13 @@ F814W_s = [re_F814W_indep_s, re_F814W_simul_s, re_F814W_simul2_s]
 #currently only looks at magnitude: will be issues reading in radius - only in sersic files, sometimes is in scientific notation (more characters)
 j = 0
 magnitude = np.zeros(12)
-radius = np.zeros(12)
+chi = np.zeros(8)
 filenames = ['F475W_psf','F475W_sersic','F814W_psf','F814W_sersic','F814WandF475W_psf_full','F814WandF475W_psf_semi','F814WandF475W_sersic_full','F814WandF475W_sersic_semi']
 for i in range(0,8):
     file = '/Volumes/physics/linux-lab/data/galfit/eves_files/pdf_pages/J0905_'+filenames[i]+'_output.galfit.01.band'
     with open(file) as f:
         content = f.readlines()
+        chi[i] = str(content[3][14:19])
         if i < 4:
             magnitude[j] = np.float(content[47][4:10])
             j += 1
@@ -104,7 +105,6 @@ with PdfPages('ec_pdfpages.pdf') as pdf:
                 stampres = res[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)]
             
             if f ==0:
-                
                 ax = fig.add_subplot(2,3,1)
                 plt.axis('off')
                 plt.title('F475W Data')
@@ -117,6 +117,8 @@ with PdfPages('ec_pdfpages.pdf') as pdf:
                 plt.axis('off')
                 plt.title('F475W Residual')
                 plot_image_3()
+                if i < 2:
+                    plt.text(.5, .05, 'chisq/nu = '+str(chi[i+f]), ha='center')
 
             if f ==1: 
                 ax = fig.add_subplot(2,3,4)
@@ -131,120 +133,16 @@ with PdfPages('ec_pdfpages.pdf') as pdf:
                 plt.axis('off')
                 plt.title('F814W Residual')
                 plot_image_3()
+                if i < 2:
+                    plt.text(.5, .05, 'chisq/nu = '+str(chi[i+f]), ha='center')
+                else:
+                    fig.text(.5, .05, 'chisq/nu = '+str(chi[i+2]), ha='center')
           
-                
+        cax = plt.axes([0.9, 0.1, 0.01, 0.8])
+        plt.colorbar(cax=cax)
         pdf.savefig(dpi=1000)
         plt.close()
 
-
-##
-##    
-##
-##filename = ['F475W','F814W','F814W_F475W']
-##with PdfPages('ec_pdfpages.pdf') as pdf:
-##    fig = plt.figure()
-##    plt.suptitle('J0905 Individual Model')
-##    alldata = []
-##    for f in range(0,2):
-##        for t in range(0,len(type)):
-##            file = glob.glob('/Volumes/physics/linux-lab/data/galfit/eves_files/sersic_fine/ec_J0905_'+filename[f]+'_fine_sersic_output.fits') 
-##                             
-##            multi = fits.open(file[0])
-##            print(file)
-##            
-##            data, data_header = multi[1].data, multi[1].header
-##            model, res_header = multi[2].data, multi[2].header
-##            res, res_header = multi[3].data, multi[3].header
-##
-##
-##            stampdata = data[round(409-dy*10):round(409+dy*10), round(415-dx*10):round(415+dx*10)] 
-##            stampmodel = model[round(409-dy*10):round(409+dy*10), round(415-dx*10):round(415+dx*10)]
-##            stampres = res[round(409-dy):round(409+dy), round(415-dx):round(415+dx)]
-##            
-##            if f ==0:
-##                
-##                ax = fig.add_subplot(2,3,1)
-##                plt.axis('off')
-##                plt.title('F475W Data')
-##                plot_image_1()
-##                ax = fig.add_subplot(2,3,2)
-##                plt.axis('off')
-##                plt.title('F475W Model')
-##                plot_image_2()
-##                ax = fig.add_subplot(2,3,3)
-##                plt.axis('off')
-##                plt.title('F475W Residual')
-##                plot_image_3()
-##
-##            if f ==1: 
-##                ax = fig.add_subplot(2,3,4)
-##                plt.axis('off')
-##                plt.title('F814W Data')
-##                plot_image_1()
-##                ax = fig.add_subplot(2,3,5)
-##                plt.axis('off')
-##                plt.title('F814W Model')
-##                plot_image_2()
-##                ax = fig.add_subplot(2,3,6)
-##                plt.axis('off')
-##                plt.title('F814W Residual')
-##                plot_image_3()
-##          
-##                
-##    pdf.savefig(dpi=1000)
-##    plt.close()
-##
-##    dx = dy = 5
-##    fig = plt.figure()
-##    plt.suptitle('J0905 Simultaneous Model')
-##    alldata = []
-##    for f in range(0,2):
-##        for t in range(0,len(type)):
-##            file = glob.glob('/Volumes/physics/linux-lab/data/galfit/eves_files/sersic_fine/ec_J0905_'+filename[2]+'_sersic_output.fits') 
-##                             
-##            multi = fits.open(file[0])
-##            
-##            data, data_header = multi[f].data, multi[f].header
-##            model, res_header = multi[2+f].data, multi[2+f].header
-##            res, res_header = multi[4+f].data, multi[4+f].header
-##
-##
-##            stampdata = data[round(99-dy*10):round(99+dy*10), round(95-dx*10):round(95+dx*10)] 
-##            stampmodel = model[round(99-dy*10):round(99+dy*10), round(95-dx*10):round(95+dx*10)]
-##            stampres = res[round(99-dy):round(99+dy), round(95-dx):round(95+dx)]
-##            
-##            if f ==0:
-##                
-##                ax = fig.add_subplot(2,3,1)
-##                plt.axis('off')
-##                plt.title('F475W Data')
-##                plot_image_1()
-##                ax = fig.add_subplot(2,3,2)
-##                plt.axis('off')
-##                plt.title('F475W Model')
-##                plot_image_2()
-##                ax = fig.add_subplot(2,3,3)
-##                plt.axis('off')
-##                plt.title('F475W Residual')
-##                plot_image_3()
-##
-##            if f ==1: 
-##                ax = fig.add_subplot(2,3,4)
-##                plt.axis('off')
-##                plt.title('F814W Data')
-##                plot_image_1()
-##                ax = fig.add_subplot(2,3,5)
-##                plt.axis('off')
-##                plt.title('F814W Model')
-##                plot_image_2()
-##                ax = fig.add_subplot(2,3,6)
-##                plt.axis('off')
-##                plt.title('F814W Residual')
-##                plot_image_3()
-##
-##
-##    pdf.savefig(dpi=1000)
-##    plt.close()
 
     fig = plt.figure()
     plt.suptitle('J0905 Difference in Magnitude Between Filters')
