@@ -96,7 +96,7 @@ kpcrad=np.zeros([12,2])
 for w in range(0,12):
     arcsecperkpc = cosmo.arcsec_per_kpc_proper(redshifts[w])
     for i in range(0,2):
-        kpcrad[w][i] = (0.025*sizepix[w][i])/arcsecperkpc.value
+        kpcrad[w][i] = (0.05*sizepix[w][i])/arcsecperkpc.value
 
 for w in range(0,12):
     sersicxvals_four[w] = kpcrad[w][0]

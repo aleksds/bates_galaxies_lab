@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import sys
+import os
 import astropy.units as u
 from astropy.cosmology import FlatLambdaCDM
 
@@ -37,8 +38,9 @@ for w in range(0,12):
     sersicxvals[w] = mags[1][w][1]
     psfyvals[w] = mags[0][w][0] - mags[0][w][1]
     sersicyvals[w] = mags[1][w][0] - mags[1][w][1]
-    
-with PdfPages('psf&sersic_color_vs_mag.pdf') as pdf:   
+
+name_cm = 'psf_sersic_color_vs_mag_'+date_time+'.pdf'
+with PdfPages(name_cm) as pdf:   
     plt.figure()
     plt.scatter(psfxvals,psfyvals, label='PSF')
     plt.scatter(sersicxvals,sersicyvals, label='SERSIC')
@@ -48,6 +50,7 @@ with PdfPages('psf&sersic_color_vs_mag.pdf') as pdf:
     plt.legend(loc='upper right')
     pdf.savefig()
     plt.close()
+os.system('open %s &' % name_cm)
 
 #color vs chi-squared plot
 psfyvals = np.zeros(12)
@@ -64,8 +67,9 @@ for w in range(0,12):
     sersicyvals[w] = mags[1][w][0] - mags[1][w][1]
     psfxvals_eight[w] = chi[0][w][1]
     sersicxvals_eight[w] = chi[1][w][1]
-    
-with PdfPages('psf&sersic_color_vs_chi.pdf') as pdf:   
+
+name_cc = 'psf_sersic_color_vs_chi_'+date_time+'.pdf'
+with PdfPages(name_cc) as pdf:   
     plt.figure()
     
     plt.scatter(psfxvals_four,psfyvals, label='PSF (F475W chi)')
@@ -79,6 +83,7 @@ with PdfPages('psf&sersic_color_vs_chi.pdf') as pdf:
     plt.legend(loc='upper right')
     pdf.savefig()
     plt.close()
+os.system('open %s &' % name_cc)
 
 #color vs size for sersic fits
 sersicyvals = np.zeros(12)
@@ -95,8 +100,9 @@ for w in range(0,12):
     sersicxvals_four[w] = kpcrad[w][0]
     sersicyvals[w] = mags[1][w][0] - mags[1][w][1]
     sersicxvals_eight[w] = kpcrad[w][1] 
-    
-with PdfPages('sersic_color_v_size.pdf') as pdf:   
+
+name_cs = 'sersic_color_v_size_'+date_time+'.pdf'
+with PdfPages(name_cs) as pdf:   
     plt.figure()
     
     plt.scatter(sersicxvals_four,sersicyvals, label='F475W size')
@@ -108,3 +114,4 @@ with PdfPages('sersic_color_v_size.pdf') as pdf:
     plt.legend(loc='lower right')
     pdf.savefig()
     plt.close()
+os.system('open %s &' % name_cs)
