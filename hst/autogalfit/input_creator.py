@@ -31,7 +31,7 @@ for m in range(0,2):
             text.write('B) '+galaxies[w]+'_'+filters[i]+'_fine.fits\n')
             text.write('C) none\n') #will not change
             text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[i]+'/final_psf.fits\n')
-            text.write('E) 2\n') #will not change
+            text.write('E) 1\n') #will not change
             text.write('F) none\n') #will not change
 
             if m == 1:
@@ -67,7 +67,7 @@ for m in range(0,2):
                 text.write(' 0) sersic\n')
                 text.write(' 1) '+xcoor+' '+ycoor+' 1 1  # position x, y        [pixel]\n')
                 text.write(' 3) 19.5     1\n')
-                text.write(' 4) 0.3      1\n')
+                text.write(' 4) 1.0      1\n')
                 text.write(' 5) 4.0      1\n')
                 text.write(' 6) 0      0\n')
                 text.write(' 7) 0      0\n')
@@ -134,7 +134,7 @@ for m in range(0,2):
         ycoorhigh = str(catalog[w][2]+200)
         
         text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
-        text.write('I) 100    100\n')
+        text.write('I) 150    150\n')
         text.write('J) 25.027,25.613\n')
         text.write('K) 0.025  0.025\n')
         text.write('O) regular\n')
@@ -154,7 +154,7 @@ for m in range(0,2):
             text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
             text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
             text.write(' 3) 19.5,19.5     1,1                 band\n')
-            text.write(' 4) 0.906,1.110e-16    1,0                 cheb\n')
+            text.write(' 4) 1.0,1.110e-16    1,0                 cheb\n')
             text.write(' 5) 4.000,4.441e-16    1,0                 cheb\n')
             text.write(' 6) 0,0               0,0                 cheb\n')
             text.write(' 7) 0,0               0,0                 cheb\n')
