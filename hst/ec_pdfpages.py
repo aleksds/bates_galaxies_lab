@@ -72,37 +72,43 @@ def plot_image_3():
 
 
 type = ['data','model','residual']
-dx = dy = 30
+dx = dy = 6
 plotnames = ['psf independent', 'sersic independent', 'psf semi-simultaneous', 'psf fully simultaneous', 'sersic semi-simultaneous', 'sersic fully simultaneous']
-
-with PdfPages('ec_pdfpages.pdf') as pdf:
+counter = 0
+with PdfPages('ec_pdfpages.pdf') as pdf: #
     for i in range(0, len(plotnames)):
         fig = plt.figure()
         plt.suptitle('J0905 '+plotnames[i])
         for f in range(0,2):
             for t in range(0, len(type)):
-                if i == 0 | 1:
-                    file = glob.glob('/Volumes/physics/linux-lab/data/galfit/eves_files/pdf_pages/J0905_'+filenames[i+f]+'_output.fits')
+                if i == 0: #when i = 0, we want to open filenames[0] when f = 0 and fn[2] when f = 1
+                    file = glob.glob('/Volumes/physics/linux-lab/data/galfit/eves_files/pdf_pages/J0905_'+filenames[f*2]+'_output.fits')
+                elif i == 1: #whhen i = 1, we want to open filenames[1] when f = 0 and fn[3] when f = 1
+                    file = glob.glob('/Volumes/physics/linux-lab/data/galfit/eves_files/pdf_pages/J0905_'+filenames[1+f*2]+'_output.fits')                   
                 else:
                     file = glob.glob('/Volumes/physics/linux-lab/data/galfit/eves_files/pdf_pages/J0905_'+filenames[i+2]+'_output.fits')
-
-            multi = fits.open(file[0])
-            data, data_header = multi[1].data, multi[1].header
-            model, res_header = multi[2].data, multi[2].header
-            res, res_header = multi[3].data, multi[3].header
+                multi = fits.open(file[0])
+                if i < 2:
+                    data, data_header = multi[1].data, multi[1].header
+                    model, res_header = multi[2].data, multi[2].header
+                    res, res_header = multi[3].data, multi[3].header
+                else:
+                    data, data_header = multi[1-f].data, multi[1-f].header
+                    model, res_header = multi[3-f].data, multi[3-f].header
+                    res, res_header = multi[5-f].data, multi[5-f].header            
     
             if i == 0 | 1:
-                stampdata = data[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)] 
-                stampmodel = model[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)]
-                stampres = res[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)]
+                stampdata = data[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)] 
+                stampmodel = model[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)]
+                stampres = res[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)]
             elif i == 2 | 3:
-                stampdata = data[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)] 
-                stampmodel = model[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)]
-                stampres = res[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)]
+                stampdata = data[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)] 
+                stampmodel = model[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)]
+                stampres = res[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)]
             else:
-                stampdata = data[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)] 
-                stampmodel = model[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)]
-                stampres = res[round(401-dy*10):round(401+dy*10), round(401-dx*10):round(401+dx*10)]
+                stampdata = data[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)] 
+                stampmodel = model[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)]
+                stampres = res[round(201-dy*10):round(201+dy*10), round(201-dx*10):round(201+dx*10)]
             
             if f ==0:
                 ax = fig.add_subplot(2,3,1)
@@ -118,7 +124,7 @@ with PdfPages('ec_pdfpages.pdf') as pdf:
                 plt.title('F475W Residual')
                 plot_image_3()
                 if i < 2:
-                    plt.text(.5, .05, 'chisq/nu = '+str(chi[i+f]), ha='center')
+                    fig.text(.5, .52, 'chisq/nu = '+str(chi[counter]), va = 'center', ha = 'center')
 
             if f ==1: 
                 ax = fig.add_subplot(2,3,4)
@@ -134,10 +140,11 @@ with PdfPages('ec_pdfpages.pdf') as pdf:
                 plt.title('F814W Residual')
                 plot_image_3()
                 if i < 2:
-                    plt.text(.5, .05, 'chisq/nu = '+str(chi[i+f]), ha='center')
+                    fig.text(.5, .08, 'chisq/nu = '+str(chi[2*i+1]), va = 'center', ha = 'center') #when i = 0, we want chi[1], when i = 1, we want chi[3]
                 else:
                     fig.text(.5, .05, 'chisq/nu = '+str(chi[i+2]), ha='center')
-          
+                    
+            counter += 1
         cax = plt.axes([0.9, 0.1, 0.01, 0.8])
         plt.colorbar(cax=cax)
         pdf.savefig(dpi=1000)

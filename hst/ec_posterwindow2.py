@@ -61,7 +61,7 @@ def plot_image_3():
 
 filename = ['F475W','F814W','F814W_F475W']
 type = ['data','model','residual']
-dx = dy = 120
+dx = dy = 100
 with PdfPages('ec_poster.pdf') as pdf:
     fig = plt.figure()
     plt.suptitle('J0905 Individual Model')
@@ -121,7 +121,7 @@ with PdfPages('ec_poster.pdf') as pdf:
     alldata = []
     for f in range(0,2):
         for t in range(0,len(type)):
-            file = glob.glob('/Volumes/physics/linux-lab/data/galfit/eves_files/ec_J0905_'+filename[2]+'_sersic_output.fits') 
+            file = glob.glob('/Volumes/physics/linux-lab/data/galfit/eves_files/sersic/ec_J0905_'+filename[2]+'_sersic_output.fits') 
                              
             multi = fits.open(file[0])
             
