@@ -2,13 +2,20 @@
 # goal: start with color_mag_plot.py, make code that compares magnitudes, colors, and sizes for two runs of GALFIT
 # requires names of two directories as input, current only works for 'independent' runs of galfit
 # run color_mag_comparison.py 20180511-1229_psf_independent 20180511-1229_sersic_independent
+import sys
 import numpy as np
+from astropy.io import fits
+import glob
+import os
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-import sys
-import os
-import astropy.units as u
-from astropy.cosmology import FlatLambdaCDM
+from astropy.cosmology import WMAP9 as cosmo
+from astropy import units as u
+from astropy.cosmology import FlatLambdaCDM 
+import img_scale
+from xlrd import open_workbook
+
+dir = os.environ['HSTDIR']
 
 one = sys.argv[1]
 two = sys.argv[2]
@@ -19,7 +26,7 @@ filters = ['F475W','F814W']
 redshifts = [0.603,0.459,0.712,0.514,0.467,0.451,0.451,0.658,0.608,0.402,0.449,0.728,0.752]
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
-model = [one,two]
+model = [str(one),str(two)]
 mags = np.zeros([2,12,2]) #order: psf models then sersic models, normal order for galaxies and filters
 chi = np.zeros([2,12,2])
 sizepix = np.zeros([12,2])
@@ -145,3 +152,72 @@ with PdfPages(name_co) as pdf:
     pdf.savefig()
     plt.close
 os.system('open %s &' % name_co)
+
+#goal of this section is to print data/model/residual for each galaxy.
+#each galaxy will consist of two pages of plots: first page will be F475W and F814W plots for model one, and second page is same for model two
+# define a function to plot "postage stamp" images
+def plot_image_1():
+    rotated = np.flip(np.rot90(stampdata, 2), 1)
+    plt.imshow(img_scale.log(rotated, scale_min=5, scale_max=10000), cmap='Greys', interpolation='none')
+def plot_image_2():
+    rotated = np.flip(np.rot90(stampmodel, 2), 1)
+    plt.imshow(img_scale.log(rotated, scale_min=5, scale_max=10000), cmap='Greys', interpolation='none')
+def plot_image_3():
+    rotated = np.flip(np.rot90(stampres, 2), 1)
+    plt.imshow(img_scale.log(rotated, scale_min=5, scale_max=10000), cmap='Greys', interpolation='nearest')
+
+type = ['data','model','residual']
+models = [str(one),str(two)]
+name_res = 'residuals_'+one+'_'+two+'.pdf'
+dx = dy = 25
+with PdfPages(name_res) as pdf:
+    for i in range(0, len(galaxies)):
+        for j in range(0, len(models)):
+            fig = plt.figure()
+            plt.suptitle(galaxies[i]+' '+models[j]+' model')
+            for h in range(0, len(filters)):
+                file = glob.glob(models[j]+'/'+galaxies[i]+'_'+filters[h]+'_fine.fits')
+                multi = fits.open(file[0])
+                
+                data, data_header = multi[1].data, multi[1].header
+                model, res_header = multi[2].data, multi[2].header
+                res, res_header = multi[3].data, multi[3].header
+                
+                stampdata = data[round(201-dy):round(201+dy), round(201-dx):round(201+dx)] 
+                stampmodel = model[round(201-dy):round(201+dy), round(201-dx):round(201+dx)]
+                stampres = res[round(201-dy):round(201+dy), round(201-dx):round(201+dx)]
+                
+                if h==0:
+                    ax = fig.add_subplot(2,3,1)
+                    plt.axis('off')
+                    plt.title('F475W Data')
+                    plot_image_1()
+                    ax = fig.add_subplot(2,3,2)
+                    plt.axis('off')
+                    plt.title('F475W Model')
+                    plot_image_2()
+                    ax = fig.add_subplot(2,3,3)
+                    plt.axis('off')
+                    plt.title('F475W Residual')
+                    plot_image_3()
+                    fig.text(.5, .52, 'chisq/nu = '+str(chi[j][i][h]), va = 'center', ha = 'center')
+
+                if h==1: 
+                    ax = fig.add_subplot(2,3,4)
+                    plt.axis('off')
+                    plt.title('F814W Data')
+                    plot_image_1()
+                    ax = fig.add_subplot(2,3,5)
+                    plt.axis('off')
+                    plt.title('F814W Model')
+                    plot_image_2()
+                    ax = fig.add_subplot(2,3,6)
+                    plt.axis('off')
+                    plt.title('F814W Residual')
+                    plot_image_3()
+                    fig.text(.5, .05, 'chisq/nu = '+str(chi[j][i][h]), ha='center')
+            pdf.savefig(dpi=1000)
+            plt.close()
+os.system('open %s &' % name_res)
+                         
+
