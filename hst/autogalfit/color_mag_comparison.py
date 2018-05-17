@@ -88,16 +88,16 @@ with PdfPages(name_cc) as pdf:
 
     plt.xlabel('chi-squared/nu')
     plt.ylabel('mag_F475W - mag_F814W')
-    plt.title('Color Magnitude Plot (with psf and sersic fits)')
+    plt.title('Color vs chi-squared/nu')
     plt.legend(loc='upper right')
     pdf.savefig()
     plt.close()
 os.system('open %s &' % name_cc)
 
 #color vs size for sersic fits
-sersicyvals = np.zeros(12)
-sersicxvals_four = np.zeros(12)
-sersicxvals_eight = np.zeros(12)
+size_color = np.zeros(12)
+size_four = np.zeros(12)
+size_eight = np.zeros(12)
 
 kpcrad=np.zeros([12,2])
 for w in range(0,12):
@@ -106,16 +106,16 @@ for w in range(0,12):
         kpcrad[w][i] = (0.025*sizepix[w][i])/arcsecperkpc.value
 
 for w in range(0,12):
-    sersicxvals_four[w] = kpcrad[w][0]
-    sersicyvals[w] = mags[1][w][0] - mags[1][w][1]
-    sersicxvals_eight[w] = kpcrad[w][1] 
+    size_four[w] = kpcrad[w][0]
+    size_color[w] = mags[1][w][0] - mags[1][w][1]
+    size_eight[w] = kpcrad[w][1] 
 
 name_cs = 'color_v_size_'+one+'_'+two+'.pdf'
 with PdfPages(name_cs) as pdf:   
     plt.figure()
     
-    plt.scatter(sersicxvals_four,sersicyvals, label='F475W size', marker='^', color='blue')
-    plt.scatter(sersicxvals_eight,sersicyvals, label='F814W size', marker='^', color='green')
+    plt.scatter(size_four,size_color, label='F475W size', marker='^', color='blue')
+    plt.scatter(size_eight,size_color, label='F814W size', marker='^', color='green')
     
     plt.xlabel('size (kpc)')
     plt.ylabel('magF475W - magF814W')
@@ -125,6 +125,7 @@ with PdfPages(name_cs) as pdf:
     plt.close()
 os.system('open %s &' % name_cs)
 
+#comparison plots of mags, colors, chis, and sizes
 name_co = 'comparison_'+one+'_'+two+'.pdf'
 with PdfPages(name_co) as pdf:   
     fig = plt.figure()
@@ -133,10 +134,12 @@ with PdfPages(name_co) as pdf:
     plt.xlabel('magF475W_'+one)
     plt.ylabel('magF475W - magF475W')    
     plt.title('magF475W comparison')
+    
     pdf.savefig()
     plt.close
 
     fig = plt.figure()
+    
     plt.scatter(one_mag_814, one_mag_814-two_mag_814, marker='o', color='green')
     plt.xlabel('magF814W_'+one)
     plt.ylabel('magF814W - magF814W')    
@@ -144,4 +147,57 @@ with PdfPages(name_co) as pdf:
     
     pdf.savefig()
     plt.close
+
+    fig = plt.figure()
+    
+    plt.scatter(two_mag_475, one_mag_475-two_mag_475, marker='o', color='red')
+    plt.xlabel('magF475W_'+two)
+    plt.ylabel('magF475W - magF475W')
+    plt.title('magF475W comparison 2')
+    
+    pdf.savefig()
+    plt.close
+
+    fig = plt.figure()
+    
+    plt.scatter(two_mag_814, one_mag_814-two_mag_814, marker='o', color='purple')
+    plt.xlabel('magF814W_'+two)
+    plt.ylabel('magF814W - magF814W')
+    plt.title('magF814W comparison 2')
+    
+    pdf.savefig()
+    plt.close
+
+    fig = plt.figure()
+
+    plt.scatter(one_color, one_color-two_color, marker='o', color='orange')
+    plt.xlabel('color_'+one)
+    plt.ylabel('difference in color')
+    plt.title('color comparison')
+
+    pdf.savefig()
+    plt.close
+
+    fig = plt.figure()
+
+    plt.scatter(psfxvals_four, psfxvals_four-sersicxvals_four, label='F475W', marker='o', color='blue')
+    plt.scatter(psfxvals_eight, psfxvals_eight-sersicxvals_eight, label='F814W', marker='o', color='green')
+    plt.xlabel('psf chi square/nu values')
+    plt.ylabel('difference in chi sqr/nu values between psf and sersic')
+    plt.title('chi sqr/nu comparison')
+    plt.legend(loc='lower right')
+
+    pdf.savefig()
+    plt.close
+
+    fig = plt.figure()
+
+    plt.scatter(size_four, size_four-size_eight, marker='o', color='red')
+    plt.xlabel('size_four(kpc)')
+    plt.ylabel('size_four-size_eight')
+    plt.title('size comparison')
+
+    pdf.savefig()
+    plt.close()
+    
 os.system('open %s &' % name_co)
