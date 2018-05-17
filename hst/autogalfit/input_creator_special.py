@@ -48,19 +48,19 @@ if togetherness == 'independent':
             if model == 'sersic':
                 text.write('G) /Volumes/physics/linux-lab/data/sersic_index_equaltofour.txt\n')
                 
-                galcoords = 'galcoords_'+plate+'.dat'
-                catalog = ascii.read(galcoords)
+            galcoords = 'galcoords_'+plate+'.dat'
+            catalog = ascii.read(galcoords)
         
-                xcoor = str(catalog[w][1])
-                ycoor = str(catalog[w][2])
-                xcoorlow = str(catalog[w][1]-200)
-                ycoorlow = str(catalog[w][2]-200)
-                xcoorhigh = str(catalog[w][1]+200)
-                ycoorhigh = str(catalog[w][2]+200)
+            xcoor = str(catalog[w][1])
+            ycoor = str(catalog[w][2])
+            xcoorlow = str(catalog[w][1]-200)
+            ycoorlow = str(catalog[w][2]-200)
+            xcoorhigh = str(catalog[w][1]+200)
+            ycoorhigh = str(catalog[w][2]+200)
         
-                text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
-                text.write('I) '+imgsize+'    '+imgsize+'\n') 
-                text.write('J) '+photzeromag[i]+'\n')
+            text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
+            text.write('I) '+imgsize+'    '+imgsize+'\n') 
+            text.write('J) '+photzeromag[i]+'\n')
 
             if plate == 'coarse':
                 text.write('K) 0.050  0.050\n')
