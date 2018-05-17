@@ -46,7 +46,7 @@ if togetherness == 'independent':
             if model == 'psf':
                 text.write('G) \n')
             if model == 'sersic':
-                text.write('G) /Volumes/physics/linux-lab/data/galfit/eves_files/constraints_sersic_indep.txt\n')
+                text.write('G) /Volumes/physics/linux-lab/data/sersic_index_equaltofour.txt\n')
                 
                 galcoords = 'galcoords_'+plate+'.dat'
                 catalog = ascii.read(galcoords)
@@ -92,15 +92,10 @@ if togetherness == 'independent':
                     
             text.close()
 
-            #below we create shell scripts to run galfit on the input files (need to type "sh name of the shell script" in the terminal)
-
-
-
-
 
 
 #SIMULTANEOUS FITS OF VARYING DEGREE
-if togetherness == 'simultaneous':
+if togetherness == 'simultaneous' or 'semi':
     now = datetime.datetime.now()
     time = now.strftime("%Y%m%d-%H%M")
     for w in range(0,12):
@@ -119,14 +114,18 @@ if togetherness == 'simultaneous':
             text.write('A2) 814.000,475.000\n')
             text.write('B) '+galaxies[w]+'_F814W_F475W_'+model+'_output.fits\n')
             text.write('C) none,none      0.000\n')
-            text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_psf.fits\n')
+            text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits\n')
             text.write('E) 1\n')
             text.write('F) none,none\n')
-            if m == 1:
-                text.write('G) /Volumes/physics/linux-lab/data/sersic_index_equaltofour.txt\n')
-            if m == 0:
+
+            if model == 'psf':
                 text.write('G) \n')
-        
+            if model == 'sersic':
+                text.write('G) /Volumes/physics/linux-lab/data/sersic_index_equaltofour.txt\n')
+
+            galcoords = 'galcoords_'+plate+'.dat'
+            catalog = ascii.read(galcoords)
+                
             xcoor = str(catalog[w][1])
             ycoor = str(catalog[w][2])
             xcoorlow = str(catalog[w][1]-200)
@@ -135,25 +134,34 @@ if togetherness == 'simultaneous':
             ycoorhigh = str(catalog[w][2]+200)
         
             text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
-            text.write('I) 150    150\n')
+            text.write('I) '+imgsize+'    '+imgsize+'\n')
             text.write('J) 25.027,25.613\n')
-            text.write('K) 0.025  0.025\n')
+            text.write('K) '+plate+'  '+plate+'\n')
             text.write('O) regular\n')
             text.write('P) 0\n')
             text.write('U) 0 0.750000 25 4 40\n')
             text.write('V) 0 0 50 0.800000 0.500000 100000\n')
             text.write('W) input,sigma,psf,component,model,residual\n')
 
-            if m == 0:
+            if model == 'psf':
                 text.write(' 0) psf\n')
-                text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
-                text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
+                if togetherness == 'simultaneous':
+                    text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
+                    text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
+                if togetherness == 'semi':
+                    text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
+                    text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
                 text.write(' 3) 19.5,19.5     1,1                 band\n')
                 text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
-            if m == 1:
+            
+            if model == 'sersic':
                 text.write(' 0) sersic\n')
-                text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
-                text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
+                if togetherness == 'simultaneous':
+                    text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
+                    text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
+                if togetherness == 'semi':
+                    text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
+                    text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
                 text.write(' 3) 19.5,19.5     1,1                 band\n')
                 text.write(' 4) 1.0,1.110e-16    1,0                 cheb\n')
                 text.write(' 5) 4.000,4.441e-16    1,0                 cheb\n')
@@ -166,7 +174,7 @@ if togetherness == 'simultaneous':
             text.close()
 
 
-
+#below we create shell scripts to run galfit on the input files
 if model == 'psf' and togetherness == 'independent':
     file = time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+'/'+'psf_independent_run_files.sh'
     text = open(file,'w')
@@ -205,6 +213,22 @@ if model == 'sersic' and togetherness == 'simultaneous':
         text.write('galfitm '+galaxies[w]+'_F814WandF475W_'+model+'_input.txt\n')
     text.close()
 
+if model == 'psf' and togetherness == 'semi':
+    file = time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+'/'+'psf_semi_run_files.sh'
+    text = open(file,'w')
+    text.write('shopt -s expand_aliases\n')
+    text.write('source ~/.bash_profile\n')
+    for w in range(0,12):
+        text.write('galfitm '+galaxies[w]+'_F814WandF475W_'+model+'_input.txt\n')
+    text.close()
 
+if model == 'sersic' and togetherness == 'semi':
+    file = time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+'/'+'sersic_semi_run_files.sh'
+    text = open(file,'w')
+    text.write('shopt -s expand_aliases\n')
+    text.write('source ~/.bash_profile\n')
+    for w in range(0,12):
+        text.write('galfitm '+galaxies[w]+'_F814WandF475W_'+model+'_input.txt\n')
+    text.close()
 
 
