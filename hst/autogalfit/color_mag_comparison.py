@@ -57,13 +57,30 @@ for w in range(0,12):
 
 name_cm = 'color_vs_mag_'+one+'_'+two+'.pdf'
 with PdfPages(name_cm) as pdf:   
-    plt.figure()
+    fig = plt.figure()
     plt.scatter(one_mag_814,one_color, label=one, marker='o', color='orange')
     plt.scatter(two_mag_814,two_color, label=two, marker='^', color='purple')
     plt.xlabel('mag_F814W')
     plt.ylabel('mag_F475W - mag_F814W')
     plt.title('Color Magnitude Plot')
     plt.legend(loc='upper right')
+    plt.ylim(0,1.2)
+    plt.xlim(18,20)
+    pdf.savefig()
+    plt.close()
+
+    fig = plt.figure()
+    for i in range(0, len(galaxies)):
+        ax = fig.add_subplot(3,4,i+1)
+        plt.scatter(one_mag_814[i],one_color[i], label=one, marker='o', color='orange')
+        plt.scatter(two_mag_814[i],two_color[i], label=two, marker='^', color='purple')
+##        plt.xlabel('mag_F814W')
+##        plt.ylabel('mag_F475W - mag_F814W')
+        plt.ylim(0,1.2)
+        plt.xlim(18,20)
+        plt.title(galaxies[i])
+        plt.tight_layout()
+        
     pdf.savefig()
     plt.close()
 os.system('open %s &' % name_cm)
@@ -95,7 +112,7 @@ with PdfPages(name_cc) as pdf:
 
     plt.xlabel('chi-squared/nu')
     plt.ylabel('mag_F475W - mag_F814W')
-    plt.title('Color vs chi-squared/nu')
+    plt.title('Color Magnitude Plot (with psf and sersic fits)')
     plt.legend(loc='upper right')
     pdf.savefig()
     plt.close()
@@ -156,26 +173,6 @@ with PdfPages(name_co) as pdf:
     plt.close
 
     fig = plt.figure()
-    
-    plt.scatter(two_mag_475, one_mag_475-two_mag_475, marker='o', color='red')
-    plt.xlabel('magF475W_'+two)
-    plt.ylabel('magF475W - magF475W')
-    plt.title('magF475W comparison 2')
-    
-    pdf.savefig()
-    plt.close
-
-    fig = plt.figure()
-    
-    plt.scatter(two_mag_814, one_mag_814-two_mag_814, marker='o', color='purple')
-    plt.xlabel('magF814W_'+two)
-    plt.ylabel('magF814W - magF814W')
-    plt.title('magF814W comparison 2')
-    
-    pdf.savefig()
-    plt.close
-
-    fig = plt.figure()
 
     plt.scatter(one_color, one_color-two_color, marker='o', color='orange')
     plt.xlabel('color_'+one)
@@ -187,10 +184,10 @@ with PdfPages(name_co) as pdf:
 
     fig = plt.figure()
 
-    plt.scatter(psfxvals_four, psfxvals_four-sersicxvals_four, label='F475W', marker='o', color='blue')
-    plt.scatter(psfxvals_eight, psfxvals_eight-sersicxvals_eight, label='F814W', marker='o', color='green')
+    plt.scatter(psfxvals_four, psfxvals_four/sersicxvals_four, label='F475W', marker='o', color='blue')
+    plt.scatter(psfxvals_eight, psfxvals_eight/sersicxvals_eight, label='F814W', marker='o', color='green')
     plt.xlabel('psf chi square/nu values')
-    plt.ylabel('difference in chi sqr/nu values between psf and sersic')
+    plt.ylabel('ratio of chi sqr/nu values from psf to sersic')
     plt.title('chi sqr/nu comparison')
     plt.legend(loc='lower right')
 
@@ -199,15 +196,16 @@ with PdfPages(name_co) as pdf:
 
     fig = plt.figure()
 
-    plt.scatter(size_four, size_four-size_eight, marker='o', color='red')
+    plt.scatter(size_four, size_four/size_eight, marker='o', color='red')
     plt.xlabel('size_four(kpc)')
-    plt.ylabel('size_four-size_eight')
+    plt.ylabel('ratio of size_four to size_eight')
     plt.title('size comparison')
 
     pdf.savefig()
     plt.close()
     
 os.system('open %s &' % name_co)
+
 
 #goal of this section is to print data/model/residual for each galaxy.
 #each galaxy will consist of two pages of plots: first page will be F475W and F814W plots for model one, and second page is same for model two
@@ -272,6 +270,8 @@ with PdfPages(name_res) as pdf:
                     plt.title('F814W Residual')
                     plot_image_3()
                     fig.text(.5, .05, 'chisq/nu = '+str(chi[j][i][h]), ha='center')
+            cax = plt.axes([0.9, 0.1, 0.01, 0.8])
+            plt.colorbar(cax=cax)
             pdf.savefig(dpi=1000)
             plt.close()
 os.system('open %s &' % name_res)
