@@ -149,26 +149,6 @@ with PdfPages(name_co) as pdf:
     plt.close
 
     fig = plt.figure()
-    
-    plt.scatter(two_mag_475, one_mag_475-two_mag_475, marker='o', color='red')
-    plt.xlabel('magF475W_'+two)
-    plt.ylabel('magF475W - magF475W')
-    plt.title('magF475W comparison 2')
-    
-    pdf.savefig()
-    plt.close
-
-    fig = plt.figure()
-    
-    plt.scatter(two_mag_814, one_mag_814-two_mag_814, marker='o', color='purple')
-    plt.xlabel('magF814W_'+two)
-    plt.ylabel('magF814W - magF814W')
-    plt.title('magF814W comparison 2')
-    
-    pdf.savefig()
-    plt.close
-
-    fig = plt.figure()
 
     plt.scatter(one_color, one_color-two_color, marker='o', color='orange')
     plt.xlabel('color_'+one)
@@ -180,10 +160,10 @@ with PdfPages(name_co) as pdf:
 
     fig = plt.figure()
 
-    plt.scatter(psfxvals_four, psfxvals_four-sersicxvals_four, label='F475W', marker='o', color='blue')
-    plt.scatter(psfxvals_eight, psfxvals_eight-sersicxvals_eight, label='F814W', marker='o', color='green')
+    plt.scatter(psfxvals_four, psfxvals_four/sersicxvals_four, label='F475W', marker='o', color='blue')
+    plt.scatter(psfxvals_eight, psfxvals_eight/sersicxvals_eight, label='F814W', marker='o', color='green')
     plt.xlabel('psf chi square/nu values')
-    plt.ylabel('difference in chi sqr/nu values between psf and sersic')
+    plt.ylabel('ratio of chi sqr/nu values from psf to sersic')
     plt.title('chi sqr/nu comparison')
     plt.legend(loc='lower right')
 
@@ -192,9 +172,9 @@ with PdfPages(name_co) as pdf:
 
     fig = plt.figure()
 
-    plt.scatter(size_four, size_four-size_eight, marker='o', color='red')
+    plt.scatter(size_four, size_four/size_eight, marker='o', color='red')
     plt.xlabel('size_four(kpc)')
-    plt.ylabel('size_four-size_eight')
+    plt.ylabel('ratio of size_four to size_eight')
     plt.title('size comparison')
 
     pdf.savefig()
