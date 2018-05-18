@@ -53,10 +53,10 @@ if togetherness == 'independent':
         
             xcoor = str(catalog[w][1])
             ycoor = str(catalog[w][2])
-            xcoorlow = str(catalog[w][1]-(np.float(imgsize)/2))
-            ycoorlow = str(catalog[w][2]-(np.float(imgsize)/2))
-            xcoorhigh = str(catalog[w][1]+(np.float(imgsize)/2))
-            ycoorhigh = str(catalog[w][2]+(np.float(imgsize)/2))
+            xcoorlow = str(int(catalog[w][1]-(np.float(imgsize)/2)))
+            ycoorlow = str(int(catalog[w][2]-(np.float(imgsize)/2)))
+            xcoorhigh = str(int(catalog[w][1]+(np.float(imgsize)/2)))
+            ycoorhigh = str(int(catalog[w][2]+(np.float(imgsize)/2)))
         
             text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
             text.write('I) 150    150\n') 
