@@ -74,8 +74,6 @@ with PdfPages(name_cm) as pdf:
         ax = fig.add_subplot(3,4,i+1)
         plt.scatter(one_mag_814[i],one_color[i], label=one, marker='o', color='orange')
         plt.scatter(two_mag_814[i],two_color[i], label=two, marker='^', color='purple')
-##        plt.xlabel('mag_F814W')
-##        plt.ylabel('mag_F475W - mag_F814W')
         plt.ylim(0,1.2)
         plt.xlim(18,20)
         plt.title(galaxies[i])
@@ -109,11 +107,27 @@ with PdfPages(name_cc) as pdf:
     plt.scatter(sersicxvals_four,sersicyvals, label=two+' (F475W chi)', marker='^', color='blue')
     plt.scatter(psfxvals_eight,psfyvals, label=one+' (F814W chi)', marker='o', color='green')
     plt.scatter(sersicxvals_eight,sersicyvals, label=two+' (F814W chi)', marker='^', color='green')
-
+    plt.xlim(0,15)
+    plt.ylim(0,1.2)
     plt.xlabel('chi-squared/nu')
     plt.ylabel('mag_F475W - mag_F814W')
     plt.title('Color Magnitude Plot (with psf and sersic fits)')
     plt.legend(loc='upper right')
+    pdf.savefig()
+    plt.close()
+
+    fig = plt.figure()
+    for i in range(0, len(galaxies)):
+        ax = fig.add_subplot(3,4,i+1)
+        plt.scatter(psfxvals_four[i],psfyvals[i], marker='o', color='blue')
+        plt.scatter(sersicxvals_four[i],sersicyvals[i], marker='^', color='blue')
+        plt.scatter(psfxvals_eight[i],psfyvals[i], marker='o', color='green')
+        plt.scatter(sersicxvals_eight[i],sersicyvals[i], marker='^', color='green')
+        plt.xlim(0,15)
+        plt.ylim(0,1.2)
+        plt.title(galaxies[i])
+        plt.tight_layout()
+        
     pdf.savefig()
     plt.close()
 os.system('open %s &' % name_cc)
@@ -140,11 +154,25 @@ with PdfPages(name_cs) as pdf:
     
     plt.scatter(size_four,size_color, label='F475W size', marker='^', color='blue')
     plt.scatter(size_eight,size_color, label='F814W size', marker='^', color='green')
-    
+    plt.ylim(0,1.2)
+    plt.xlim(0,1)
     plt.xlabel('size (kpc)')
     plt.ylabel('magF475W - magF814W')
     plt.title('Color vs Size')
     plt.legend(loc='lower right')
+    pdf.savefig()
+    plt.close()
+
+    fig = plt.figure()
+    for i in range(0, len(galaxies)):
+        ax = fig.add_subplot(3,4,i+1)
+        plt.scatter(size_four[i],size_color[i], label='F475W size', marker='^', color='blue')
+        plt.scatter(size_eight[i],size_color[i], label='F814W size', marker='^', color='green')
+        plt.ylim(0,1.2)
+        plt.xlim(0,1)
+        plt.title(galaxies[i])
+        plt.tight_layout()
+        
     pdf.savefig()
     plt.close()
 os.system('open %s &' % name_cs)
@@ -158,9 +186,23 @@ with PdfPages(name_co) as pdf:
     plt.xlabel('magF475W_'+one)
     plt.ylabel('magF475W - magF475W')    
     plt.title('magF475W comparison')
-    
+    plt.ylim(0,1)
+    plt.xlim(19,21)
     pdf.savefig()
     plt.close
+
+######
+    fig = plt.figure()
+    for i in range(0, len(galaxies)):
+        ax = fig.add_subplot(3,4,i+1)
+        plt.scatter(one_mag_475[i], one_mag_475[i]-two_mag_475[i], marker='o', color='blue')
+        plt.ylim(0,1)
+        plt.xlim(19,21)
+        plt.title(galaxies[i])
+        plt.tight_layout()
+        
+    pdf.savefig()
+    plt.close()
 
     fig = plt.figure()
     
@@ -168,9 +210,23 @@ with PdfPages(name_co) as pdf:
     plt.xlabel('magF814W_'+one)
     plt.ylabel('magF814W - magF814W')    
     plt.title('magF814W comparison')
-    
+    plt.ylim(0,1)
+    plt.xlim(18,20)
     pdf.savefig()
     plt.close
+
+######
+    fig = plt.figure()
+    for i in range(0, len(galaxies)):
+        ax = fig.add_subplot(3,4,i+1)
+        plt.scatter(one_mag_814[i], one_mag_814[i]-two_mag_814[i], marker='o', color='green')
+        plt.ylim(0,1)
+        plt.xlim(18,20)
+        plt.title(galaxies[i])
+        plt.tight_layout()
+
+    pdf.savefig()
+    plt.close()
 
     fig = plt.figure()
 
@@ -178,9 +234,23 @@ with PdfPages(name_co) as pdf:
     plt.xlabel('color_'+one)
     plt.ylabel('difference in color')
     plt.title('color comparison')
-
+    plt.ylim(-.4,0.2)
+    plt.xlim(0,1.2)
     pdf.savefig()
     plt.close
+
+######
+    fig = plt.figure()
+    for i in range(0, len(galaxies)):
+        ax = fig.add_subplot(3,4,i+1)
+        plt.scatter(one_color[i], one_color[i]-two_color[i], marker='o', color='orange')
+        plt.ylim(-.4,0.2)
+        plt.xlim(0,1.2)
+        plt.title(galaxies[i])
+        plt.tight_layout()
+
+    pdf.savefig()
+    plt.close()
 
     fig = plt.figure()
 
@@ -190,9 +260,26 @@ with PdfPages(name_co) as pdf:
     plt.ylabel('ratio of chi sqr/nu values from psf to sersic')
     plt.title('chi sqr/nu comparison')
     plt.legend(loc='lower right')
-
+    plt.ylim(1,6)
+    plt.xlim(0,14)
     pdf.savefig()
     plt.close
+
+
+######
+    fig = plt.figure()
+    for i in range(0, len(galaxies)):
+        ax = fig.add_subplot(3,4,i+1)
+        plt.scatter(psfxvals_four[i], psfxvals_four[i]/sersicxvals_four[i], label='F475W', marker='o', color='blue')
+        plt.scatter(psfxvals_eight[i], psfxvals_eight[i]/sersicxvals_eight[i], label='F814W', marker='o', color='green')
+        plt.ylim(1,6)
+        plt.xlim(0,14)
+        plt.title(galaxies[i])
+        plt.tight_layout()
+
+    pdf.savefig()
+    plt.close()
+
 
     fig = plt.figure()
 
@@ -200,6 +287,20 @@ with PdfPages(name_co) as pdf:
     plt.xlabel('size_four(kpc)')
     plt.ylabel('ratio of size_four to size_eight')
     plt.title('size comparison')
+    plt.ylim(0,2)
+    plt.xlim(0,.6)
+    pdf.savefig()
+    plt.close()
+
+######
+    fig = plt.figure()
+    for i in range(0, len(galaxies)):
+        ax = fig.add_subplot(3,4,i+1)
+        plt.scatter(size_four[i], size_four[i]/size_eight[i], marker='o', color='red')
+        plt.ylim(0,2)
+        plt.xlim(0,.6)
+        plt.title(galaxies[i])
+        plt.tight_layout()
 
     pdf.savefig()
     plt.close()
