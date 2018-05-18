@@ -53,13 +53,13 @@ if togetherness == 'independent':
         
             xcoor = str(catalog[w][1])
             ycoor = str(catalog[w][2])
-            xcoorlow = str(catalog[w][1]-200)
-            ycoorlow = str(catalog[w][2]-200)
-            xcoorhigh = str(catalog[w][1]+200)
-            ycoorhigh = str(catalog[w][2]+200)
+            xcoorlow = str(catalog[w][1]-(np.float(imgsize)/2))
+            ycoorlow = str(catalog[w][2]-(np.float(imgsize)/2))
+            xcoorhigh = str(catalog[w][1]+(np.float(imgsize)/2))
+            ycoorhigh = str(catalog[w][2]+(np.float(imgsize)/2))
         
             text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
-            text.write('I) '+imgsize+'    '+imgsize+'\n') 
+            text.write('I) 150    150\n') 
             text.write('J) '+photzeromag[i]+'\n')
 
             if plate == 'coarse':
@@ -128,13 +128,13 @@ if togetherness == 'simultaneous' or 'semi':
                 
             xcoor = str(catalog[w][1])
             ycoor = str(catalog[w][2])
-            xcoorlow = str(catalog[w][1]-200)
-            ycoorlow = str(catalog[w][2]-200)
-            xcoorhigh = str(catalog[w][1]+200)
-            ycoorhigh = str(catalog[w][2]+200)
+            xcoorlow = str(catalog[w][1]-(np.float(imgsize)/2))
+            ycoorlow = str(catalog[w][2]-(np.float(imgsize)/2))
+            xcoorhigh = str(catalog[w][1]+(np.float(imgsize)/2))
+            ycoorhigh = str(catalog[w][2]+(np.float(imgsize)/2))
         
             text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
-            text.write('I) '+imgsize+'    '+imgsize+'\n')
+            text.write('I) 150    150\n')
             text.write('J) 25.027,25.613\n')
             text.write('K) '+plate+'  '+plate+'\n')
             text.write('O) regular\n')
