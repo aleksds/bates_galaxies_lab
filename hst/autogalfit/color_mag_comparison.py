@@ -33,7 +33,7 @@ sizepix = np.zeros([12,2])
 for m in range(0,2):
     for w in range(0,12):
         for i in range(0,2):
-            file = model[m]+'/'+galaxies[w]+'_'+filters[i]+'_fine.galfit.01.band'
+            file = model[m]+'/'+galaxies[w]+'_'+filters[i]+'_output.galfit.01.band'
             with open(file) as f:
                 content = f.readlines()
             mags[m][w][i] = np.float(content[47][4:10])
@@ -257,7 +257,7 @@ with PdfPages(name_co) as pdf:
     plt.scatter(psfxvals_four, psfxvals_four/sersicxvals_four, label='F475W', marker='o', color='blue')
     plt.scatter(psfxvals_eight, psfxvals_eight/sersicxvals_eight, label='F814W', marker='o', color='green')
     plt.xlabel('psf chi square/nu values')
-    plt.ylabel('ratio of chi sqr/nu values from psf to sersic')
+    plt.ylabel('ratio of chi sqr/nu values from_'+one+two)
     plt.title('chi sqr/nu comparison')
     plt.legend(loc='lower right')
     plt.ylim(1,6)
