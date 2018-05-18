@@ -37,7 +37,7 @@ if togetherness == 'independent':
             text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
             text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') #will not change , probably not essential
             text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+plate+'/'+filters[i]+'/final_'+filters[i]+'_drc_sci.fits\n')
-            text.write('B) '+galaxies[w]+'_'+filters[i]+'_'+model+'_'+plate+'_output.fits\n')
+            text.write('B) '+galaxies[w]+'_'+filters[i]+'_output.fits\n')
             text.write('C) none\n') #will not change
             text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+plate+'/'+filters[i]+'/final_psf.fits\n')
             text.write('E) 2\n') #will not change
