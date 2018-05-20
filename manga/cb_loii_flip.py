@@ -188,7 +188,7 @@ with PdfPages(filename) as pdf:
             # CB new approach: making the vel plot circular so we have better symmetry to work with
             x_axis = copy.deepcopy(xproj_kpc_map)
             x_axis_2 = np.zeros([size,size])
-            x_axis_2 = x_axis_2 - 65000
+            x_axis_2 = x_axis_2 - 40
             for i in range(0,size):
                 for k in range(0,size):
                     if (dap_ha_sivar[i, k] > 0.):
@@ -248,8 +248,8 @@ with PdfPages(filename) as pdf:
 
             def isnumber(s):
                 try:
-                    float(s)
-                except ValueError:
+                    int(s)
+                except OverflowError:
                     return False
                 return True
 
@@ -277,13 +277,13 @@ with PdfPages(filename) as pdf:
 
 
 
-            flipped_y = np.flip(y_axis_2,1)
+            # flipped_x = np.flip(x_axis_2,1)
 
 
             # Drawing a line at x = 0
-            xi, xo = np.where(np.around(y_axis_2, decimals=0) == 0.0) #round x axis, find the zeros (should be a horizontal line through
+            xi, xo = np.where(np.around(x_axis_2, decimals=0) == 0.0) #round x axis, find the zeros (should be a horizontal line through
             #the major axis
-            xi_f,xo_f = np.where(np.around(flipped_y, decimals=0) == 0.0)
+            xi_f,xo_f = np.where(np.around(np.flip(x_axis_2,1), decimals=0) == 0.0)
 
 
             mainx_slope, mainx_intr = find_line(xi,xo) #this is the slope of the line passing through the
@@ -303,7 +303,10 @@ with PdfPages(filename) as pdf:
             theta_o = np.abs(np.arctan(arbit_val/x_o))
             theta_f = np.abs(np.arctan(arbit_val/x_f))
 
-            phi = np.pi-(theta_o+theta_f)
+            if mainx_slope>0:
+                phi = np.pi-(theta_o+theta_f)
+            if mainx_slope<0:
+                phi = theta_o + theta_f
             phi = np.degrees(phi) *-1
 
 
@@ -338,8 +341,11 @@ with PdfPages(filename) as pdf:
                 phi_2 = np.degrees(phi_2)
 
 
+            gvel_invert = copy.deepcopy(dap_vel)
+            gvel_invert = np.flip(gvel_invert, 1)
 
-            gvel_invert = scipy.ndimage.rotate(gvel_invert,phi_2,reshape=False)
+            gvel_invert = scipy.ndimage.rotate(gvel_invert,phi,reshape=False)
+            print("Phi for",plate," - ",galaxy,": ",phi)
 
 
 
@@ -433,7 +439,7 @@ with PdfPages(filename) as pdf:
             ax.set_ylim(0, size)
             ax.set_xticklabels(())
             ax.set_yticklabels(())
-            plt.imshow(y_axis_2,
+            plt.imshow(x_axis_2,
                        origin='lower',
                        interpolation='nearest',
                        cmap=cm.coolwarm)
