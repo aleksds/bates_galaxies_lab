@@ -16,6 +16,8 @@ from astropy.cosmology import FlatLambdaCDM
 import astropy.units as u
 import copy
 from copy import deepcopy
+import scipy
+from scipy import ndimage
 
 
 # function for plotting maps of relevant quantities
@@ -192,7 +194,7 @@ with PdfPages(filename) as pdf:
                     if (dap_ha_sivar[i, k] > 0.):
                         x_axis_2[i,k] = xproj_kpc[i, k] / u.kpc
             y_axis_2 = np.zeros([size,size])
-            y_axis_2 = y_axis_2 - 65000
+            y_axis_2 = y_axis_2 - 35
             for i in range(0,size):
                 for k in range(0,size):
                     if (dap_ha_sivar[i, k] > 0.):
@@ -243,9 +245,13 @@ with PdfPages(filename) as pdf:
             bad = np.abs(masked_vel) > 1000
             masked_vel[bad] = 0
 
-            # Drawing a line at x = 0
-            xi, xo = np.where(np.around(x_axis_2, decimals=1) == 0.0) #round x axis, find the zeros (should be a horizontal line through
-            #the major axis
+
+            def isnumber(s):
+                try:
+                    float(s)
+                except ValueError:
+                    return False
+                return True
 
 
             def find_line(y_coors, x_coors):
@@ -253,10 +259,12 @@ with PdfPages(filename) as pdf:
                 if len(x_coors) > 2:
                     for t in range(0, len(x_coors) - 2):
                         curr_slope = (y_coors[t + 1] - y_coors[t]) / (x_coors[t + 1] - x_coors[t])
-                        slope_values.append(curr_slope)
+                        if isnumber(curr_slope):
+                            slope_values.append(curr_slope)
                     slope = np.mean(slope_values)
                 else:
                     slope = (y_coors[1] - y_coors[0]) / (x_coors[1] - x_coors[0])
+                    print('Single value slope for ',galaxy,'-',plate)
 
                 intercept_values = []
                 for t in range(0, len(x_coors) - 1):
@@ -266,214 +274,141 @@ with PdfPages(filename) as pdf:
 
                 return slope, intercept
 
+
+
+
+            flipped_y = np.flip(y_axis_2,1)
+
+
+            # Drawing a line at x = 0
+            xi, xo = np.where(np.around(y_axis_2, decimals=0) == 0.0) #round x axis, find the zeros (should be a horizontal line through
+            #the major axis
+            xi_f,xo_f = np.where(np.around(flipped_y, decimals=0) == 0.0)
+
+
             mainx_slope, mainx_intr = find_line(xi,xo) #this is the slope of the line passing through the
             # 0 points in the xproj map, and the y-intercept of such line. This describes the line equation.
+            slope_f,int_f = find_line(xi_f,xo_f)
+            if np.isinf(mainx_slope) or np.isinf(slope_f):
+                print('Infinite slope for ',galaxy,'-',plate,' Main slope isinf ',np.isinf(mainx_slope),' flip slope isinf ',np.isinf(slope_f))
 
 
+            if mainx_slope>0:
+                arbit_val = 5
+            if mainx_slope<0:
+                arbit_val = -5
+
+            x_o = arbit_val/mainx_slope
+            x_f = arbit_val/slope_f
+            theta_o = np.abs(np.arctan(arbit_val/x_o))
+            theta_f = np.abs(np.arctan(arbit_val/x_f))
+
+            phi = np.pi-(theta_o+theta_f)
+            phi = np.degrees(phi) *-1
 
 
-            icount = 0
-            for i in dap_vel:
-                vcount = 0
-                for v in i:
-                    # vy, vx = np.where(dap_vel == v) #Positions in vel plot
-                    vy = [icount]
-                    vx = [vcount]
-
-
-                    y_val = y_axis[vy[0]][vx[0]]  # Value in z-proj
-                    x_val = x_axis_2[vy[0]][vx[0]] # Value in x-proj
-
-                    potential_zeros_in_line = []
-                    # Run only if value is not -65000 for x prok
-                    if x_val != (-65000):
-                        particular_intercept = vy[0] - (mainx_slope*vx[0])
-                        main_ax_yo, main_ax_yi = np.where(np.around(y_axis_2, decimals=0) == 0.0)
-                        for zero1 in range(0,len(main_ax_yo)):
-                            y_eq = round(main_ax_yo[zero1])
-                            x_eq = round(mainx_slope*main_ax_yi[zero2] + particular_intercept)
-                            if (abs(y_eq-x_eq))<5:
-                                potential_zeros_in_line.append([zero1,zero2])
-                                    # up to this point, we have candidates for the spaxels we can consider
-                                    # as zeros for our line.
-                        # for now, let's look at only the first candidate in potential_zeros
-                        yind_diff = potential_zeros_in_line[0][0] - vy[0]
-                        xind_diff = potential_zeros_in_line[0][1] - vx[0]
-                        new_yind_cord = vy[0] + (2*yind_diff)
-                        new_xind_cord = vx[0] + (2*xind_diff)
-
-                        gvel_invert[new_yind_cord][new_xind_cord] = v
-                    else:
-                        if x_val == -65000:
-                            gvel_invert[icount][vcount]=v
-                        vcount = vcount + 1
+            #calculating a second angle
 
 
 
 
 
 
-                            # if v != 0:
-                    #
-                    #     y_val = y_axis[vy[0]][vx[0]] # Value in z-proj
-                    #     x_val = x_axis[vy[0]][vx[0]] # Value in x-proj
-                    #
-                        # nearest_y = y_axis - y_val
-                        # yminy, yminx = np.where(nearest_y == np.amin(np.abs(nearest_y)))
-            #             if y_val != 0:
-            #                 if y_val > 0: #what if y_val is zero?? cb: solved
-            #                     nearest_y = y_axis[(y_axis < 0)] + y_val #difference in opposite y-axis
-            #                 if y_val < 0:
-            #                     nearest_y = y_axis[(y_axis > 0)] + y_val
+            def method_2():
+
+                gvel_invert = copy.deepcopy(dap_vel)
+                gvel_invert = np.flip(gvel_invert,1)
+
+                center = round(size/2)
+                arbit_vel = dap_vel[center+5,center+5]
+                vy, vx = np.where(np.flip(dap_vel,1) == dap_vel[center+5,center+5])
+                x_fl = abs(vx[0]-center)
+                y_fl = abs(vy[0]-center)
+                theta_or = np.abs(np.arctan(1))
+                theta_fl = np.abs(np.arctan(y_fl/x_fl))
+                if ((vx[0]-center)>0) and (abs(vy[0]-center)>0):
+                    phi_2 = theta_or - theta_fl
+                if ((vx[0]-center)<0) and (abs(vy[0]-center)>0):
+                    phi_2 = -1*(np.pi-(theta_or+theta_fl))
+                if ((vx[0]-center)<0) and (abs(vy[0]-center)<0):
+                    phi_2 = -1*((np.pi/2)-theta_or+(np.pi/2)+theta_fl)
+                if ((vx[0]-center)>0) and (abs(vy[0]-center)<0):
+                    phi_2 = -1*(theta_or+theta_fl)
+
+                phi_2 = np.degrees(phi_2)
+
+
+
+            gvel_invert = scipy.ndimage.rotate(gvel_invert,phi_2,reshape=False)
+
+
+
+
+            # A = np.asarray([[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+            #      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]])
+
+
+
+
+
+
+
+
+            # icount = 0
+            # for i in dap_vel:
+            #     vcount = 0
+            #     for v in i:
+            #         # vy, vx = np.where(dap_vel == v) #Positions in vel plot
+            #         vy = [icount]
+            #         vx = [vcount]
             #
             #
-            #                 nearest_y = sorted(nearest_y, key=abs) #sorted abs values of difference from smallest to largest
-            #                 ref_y = nearest_y - y_val #sorted corresponding y_val in the opposite axis
-            #                 fil_ref_x = np.array([])
-            #                 fil_ref_y = np.array([])
+            #         y_val = y_axis[vy[0]][vx[0]]  # Value in z-proj
+            #         x_val = x_axis_2[vy[0]][vx[0]] # Value in x-proj
             #
-            #                 for vals in ref_y: #getting rid of unwanted ref_y
-            #                     if np.abs((np.abs(vals) - np.abs(y_val))) < 3: #what if y_val is greater than ref_y?? cb:solved maybe
-            #                         fil_ref_y = np.append(fil_ref_y, vals)
-            #
-            #                 fil_ref_y2 = np.array([])
-            #
-            #                 count_f = 0
-            #                 count_nf = 0
-            #                 for k in fil_ref_y:
-            #
-            #                     ####fix 1
-            #                     kind_neary = np.where(nearest_y == (k+y_val))
-            #                     if y_val > 0 :
-            #                         kind_yax = np.where((y_axis[(y_axis < 0)]+y_val) == (nearest_y[kind_neary[0][0]]))
-            #                         refxy, refxx = np.where(y_axis == (y_axis[(y_axis < 0)][kind_yax[0]]))
-            #                     if y_val < 0:
-            #                         kind_yax = np.where((y_axis[(y_axis > 0)]+y_val) == (nearest_y[kind_neary[0][0]]))
-            #                         refxy, refxx = np.where(y_axis == (y_axis[(y_axis > 0)][kind_yax[0]]))
-            #
-            #                     ####fix 1
-            #
-            #                     # version for debugging
-            #                     # if len(refxy) == 0:
-            #                     #     # print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost. Length of refxy ",len(refxy))
-            #                     #     b = 10**100
-            #                     #     fil_ref_x = np.append(fil_ref_x, b)
-            #                     #     count_nf = count_nf + 1
-            #                     #     # print("count of missing pixels ",count_nf)
-            #                     # if len(refxy) != 0:
+            #         # Run only if value is not -65000 for x prok
+            #         if x_val != (-65000):
+            #             print(plate, '-', galaxy, ' Analizing ', v)
+            #             potential_zeros_in_line = []
+            #             particular_intercept = vy[0] - (mainx_slope*vx[0])
+            #             main_ax_yo, main_ax_yi = np.where(np.around(y_axis_2, decimals=0) == 0.0)
+            #             for zero1 in range(0,len(main_ax_yo)):
+            #                 y_eq = round(main_ax_yo[zero1])
+            #                 x_eq = round(mainx_slope*main_ax_yi[zero1] + particular_intercept)
+            #                 if (abs(y_eq-x_eq))<3:
+            #                     potential_zeros_in_line.append([main_ax_yo[zero1],main_ax_yi[zero1]])
+            #                         # up to this point, we have candidates for the spaxels we can consider
+            #                         # as zeros for our line.
+            #             # for now, let's look at only the first candidate in potential_zeros
+            #             yind_diff = potential_zeros_in_line[0][0] - vy[0]
+            #             xind_diff = potential_zeros_in_line[0][1] - vx[0]
+            #             new_yind_cord = vy[0] + (2*yind_diff)
+            #             new_xind_cord = vx[0] + (2*xind_diff)
             #
             #
-            #                     refx_val = x_axis[refxy[0]][refxx[0]]
-            #                     fil_ref_x = np.append(fil_ref_x, refx_val) #corresponding x_val of remaining ref_y
-            #                     fil_ref_y2 = np.append(fil_ref_y2, y_axis[refxy[0]][refxx[0]])
-            #                     count_f = count_f + 1
-            #
-            #                     # WORKING version
-            #
-            #                     # if len(refxy) == 0:
-            #                     #     # print("WARNING: Original position of ",k," was not found in z_proj. One pixel lost. Length of refxy ",len(refxy))
-            #                     #     b = 10 ** 100
-            #                     #     fil_ref_x = np.append(fil_ref_x, b)
-            #                     #     count_nf = count_nf + 1
-            #                     #     # print("count of missing pixels ",count_nf)
-            #                     # if len(refxy) != 0:
-            #                     #     refx_val = x_axis[refxy[0]][refxx[0]]
-            #                     #     fil_ref_x = np.append(fil_ref_x,
-            #                     #                           refx_val)  # corresponding x_val of remaining ref_y
-            #                     #     count_f = count_f + 1
-            #
-            #
-            #                             # print(k, " Appended. lenrefxy ",len(refxy)," Count of appended pixels ",count_f)
-            #                     #Why is the size of fil_ref_x smaller than the size of fill_ref_y??
-            #
-            #                 fil_y = copy.deepcopy(fil_ref_y2)
-            #                 fil_x = copy.deepcopy(fil_ref_x)
-            #
-            #                 # dist = (np.square(np.abs(fil_y)-abs(y_val)) + np.square(np.abs(fil_x)-abs(x_val)))**0.5 double flipping it if abs
-            #                 dist = (np.square(fil_y+y_val) + np.square(fil_x-x_val))**0.5 #might be worth fiddling around this line. Somehow this line has control over pixel loss
-            #
-            #                 if len(dist) == 0:
-            #                     print('Pixel lost. -- ',plate, galaxy, "  Indexes: ",icount,' ',vcount)
-            #
-            #
-            #                 else:
-            #                     min_dist_ind = np.where(dist == np.amin(dist))
-            #                     new_y_coor, new_x_coor = np.where(y_axis == fil_ref_y2[min_dist_ind[0][0]])
-            #                     if (len(new_y_coor) == 0) or (len(new_x_coor) == 0):
-            #                         print("Warning. No pixel is being appended for original vel val: ",k,"\n Info: Elements in fil_y, fil_x and dist: ",
-            #                               len(fil_y)," ; ",len(fil_x)," ; ",len(dist),"\n For plot ",plate, galaxy)
-            #
-            #
-            #
-            #                 gvel_invert[new_y_coor[0]][new_x_coor[0]] = v
-            #
-            #             if y_val == 0:
-            #                 if gvel_invert[vy[0]][vx[0]] != (backg_val*(-1)):
-            #                     print("A pixel is being overwritten and values are potentially being lost.",
-            #                           "\n Info: Elements in fil_y, fil_x and dist: ",
-            #                           len(fil_y), " ; ", len(fil_x), " ; ", len(dist), "\n For plot ", plate, galaxy
-            #                           )
-            #                 gvel_invert[vy[0]][vx[0]] = v
+            #             gvel_invert[new_yind_cord][new_xind_cord] = v
+            #             print(plate,'-',galaxy,' Appended ',v,' @ ',new_yind_cord,', ',new_xind_cord)
             #         else:
-            #             gvel_invert[icount][vcount] = v
-            #
-                    # vcount = vcount + 1
-            #     icount = icount + 1
-            #
-            # gvinv = copy.deepcopy(gvel_invert)
-            # gvinv = sorted(np.ndarray.flatten(gvinv))
-            # gvmask = sorted(np.ndarray.flatten(masked_vel))
-
-###################################################################################################################
-                        # The OLD line method below
-                    #
-                    # if (float(y_val) and float(x_val)) != 0:
-                    #
-                    #     y_round = float(str(round(y_val, 1)))
-                    #     x_round = float(str(round(x_val, 1)))
-                    #
-                    #     rounded_y = np.around(y_axis, decimals=1)
-                    #     rounded_x = np.around(x_axis, decimals=1)
-                    #
-                    #     # # Two arrays with points that more or less draw a line
-                    #     o, k = np.where(rounded_y == (-1 * y_round))
-                    #     n, m = np.where(rounded_x == x_round)
-                    #
-                    #
-                    #
-                    #     if (len(o) >1) and (len(n) > 1):
-                    #
-                    #         def find_line(y_coors, x_coors):
-                    #             slope_values = []
-                    #             if len(x_coors) > 2:
-                    #                 for t in range(0, len(x_coors) - 2):
-                    #                     curr_slope = (y_coors[t + 1] - y_coors[t]) / (x_coors[t + 1] - x_coors[t])
-                    #                     slope_values.append(curr_slope)
-                    #                 slope = np.mean(slope_values)
-                    #             else:
-                    #                 slope = (y_coors[1] - y_coors[0]) / (x_coors[1] - x_coors[0])
-                    #
-                    #
-                    #             intercept_values = []
-                    #             for t in range(0, len(x_coors) - 1):
-                    #                 curr_intercept = y_coors[t] - (slope * x_coors[t])
-                    #                 intercept_values.append(curr_intercept)
-                    #             intercept = np.mean(intercept_values)
-                    #
-                    #             return slope, intercept
-                    #
-                    #
-                    #         x_slope, x_intercept = find_line(n, m)
-                    #         y_slope, y_intercept = find_line(o, k)
-                    #
-                    #         point_x_float = (y_intercept-x_intercept)/(x_slope-y_slope)
-                    #         point_y_float = (point_x_float * x_slope) + x_intercept
-                    #         new_x_coor = int(round(point_x_float))
-                    #         new_y_coor = int(round(point_y_float))
-                    #
-                    #         if (new_x_coor < size) and (new_y_coor<size):
-                    #
-                    #             gvel_invert[new_y_coor][new_x_coor] = v
+            #             if x_val == -65000:
+            #                 gvel_invert[icount][vcount]=v
+            #             vcount = vcount + 1
+            #     icount =icount+1
 
             # plot 1: galaxy coordinates in kpc
             assymetry_p = dap_vel - gvel_invert
@@ -498,7 +433,7 @@ with PdfPages(filename) as pdf:
             ax.set_ylim(0, size)
             ax.set_xticklabels(())
             ax.set_yticklabels(())
-            plt.imshow(xproj_kpc_map,
+            plt.imshow(y_axis_2,
                        origin='lower',
                        interpolation='nearest',
                        cmap=cm.coolwarm)
@@ -536,8 +471,15 @@ with PdfPages(filename) as pdf:
 
             # plot 6: emission-line SFLUX signal-to-noise ratio
             ax = fig.add_subplot(3, 3, 6)
-            daplot(dap_sflux / dap_serr, 0.1, 10.)
-            plt.title(eml[j] + ' SFLUX S/N', fontsize=10)
+            ax.set_xlim(0, size)
+            ax.set_ylim(0, size)
+            ax.set_xticklabels(())
+            ax.set_yticklabels(())
+            plt.imshow(np.flip(dap_vel,1), origin='lower',
+                       interpolation='nearest',
+                       cmap=cm.coolwarm, vmin=-250, vmax=250)
+            plt.colorbar()
+            plt.title(eml[j] + 'inv-GVEL', fontsize=10)
 
             # plot 7: emission-line flux / Halpha flux
             ax = fig.add_subplot(3, 3, 7)
