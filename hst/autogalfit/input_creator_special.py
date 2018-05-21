@@ -6,7 +6,7 @@ import numpy as np
 from astropy.io import ascii
 import datetime
 import sys
-#sys.argv[1] is psf or sersic (model), sys.arg[2] is coarse or fine (plate scale), sys.arg[3] is a number (image region size), sys.arg[4] is coarse or fine (psf), sys.arg[5] is simultaneous or independent or semi
+#sys.argv[1] is psf or sersic (model), sys.arg[2] is coarse or fine (plate scale), sys.arg[3] is a number (image region size), sys.arg[4] is coarse or fine (psf), sys.arg[5] is simultaneous or independent or semi, sys.arg[6] is either none or s_index or re or s_index, re
 
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
 filters = ['F475W','F814W']
@@ -19,6 +19,7 @@ plate = sys.argv[2]
 imgsize = sys.argv[3]
 psf = sys.argv[4]
 togetherness = sys.argv[5]
+constraint = sys.argv[6]
 
 now = datetime.datetime.now()
 time = now.strftime("%Y%m%d-%H%M")
@@ -43,11 +44,15 @@ if togetherness == 'independent':
             text.write('E) 2\n') #will not change
             text.write('F) none\n') #will not change
 
-            if model == 'psf':
+            if constraint == 'none':
                 text.write('G) \n')
-            if model == 'sersic':
+            if constraint == 's_index':
                 text.write('G) /Volumes/physics/linux-lab/data/sersic_index_equaltofour.txt\n')
-                
+            if constraint == 're':
+                 text.write('G) /Volumes/physics/linux-lab/data/size_constraint_1to1.txt\n')
+            if constraint == 's_index, re':
+                 text.write('G) /Volumes/physics/linux-lab/data/s_index_and_size.txt\n')    
+
             galcoords = 'galcoords_'+plate+'.dat'
             catalog = ascii.read(galcoords)
         
@@ -95,7 +100,7 @@ if togetherness == 'independent':
 
 
 #SIMULTANEOUS FITS OF VARYING DEGREE
-if togetherness == 'simultaneous' or 'semi':
+else:
     now = datetime.datetime.now()
     time = now.strftime("%Y%m%d-%H%M")
     for w in range(0,12):
