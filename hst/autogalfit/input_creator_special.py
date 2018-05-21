@@ -81,7 +81,7 @@ if togetherness == 'independent':
                 text.write(' 0) sersic\n')
                 text.write(' 1) '+xcoor+' '+ycoor+' 1 1  # position x, y        [pixel]\n')
                 text.write(' 3) 19.5     1\n')
-                text.write(' 4) 0.3      1\n')
+                text.write(' 4) 1.0      1\n')
                 text.write(' 5) 4.0      1\n')
                 text.write(' 6) 0      0\n')
                 text.write(' 7) 0      0\n')
@@ -128,10 +128,10 @@ if togetherness == 'simultaneous' or 'semi':
                 
             xcoor = str(catalog[w][1])
             ycoor = str(catalog[w][2])
-            xcoorlow = str(catalog[w][1]-(np.float(imgsize)/2))
-            ycoorlow = str(catalog[w][2]-(np.float(imgsize)/2))
-            xcoorhigh = str(catalog[w][1]+(np.float(imgsize)/2))
-            ycoorhigh = str(catalog[w][2]+(np.float(imgsize)/2))
+            xcoorlow = str(int(catalog[w][1]-(np.float(imgsize)/2)))
+            ycoorlow = str(int(catalog[w][2]-(np.float(imgsize)/2)))
+            xcoorhigh = str(int(catalog[w][1]+(np.float(imgsize)/2)))
+            ycoorhigh = str(int(catalog[w][2]+(np.float(imgsize)/2)))
         
             text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
             text.write('I) 150    150\n')
