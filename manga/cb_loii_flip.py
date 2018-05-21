@@ -18,6 +18,8 @@ import copy
 from copy import deepcopy
 import scipy
 from scipy import ndimage
+from scipy.stats import linregress
+from statistics import mean
 
 
 # function for plotting maps of relevant quantities
@@ -188,13 +190,14 @@ with PdfPages(filename) as pdf:
             # CB new approach: making the vel plot circular so we have better symmetry to work with
             x_axis = copy.deepcopy(xproj_kpc_map)
             x_axis_2 = np.zeros([size,size])
-            x_axis_2 = x_axis_2 - 40
+            x_axis_2 = x_axis_2 - 2
             for i in range(0,size):
                 for k in range(0,size):
                     if (dap_ha_sivar[i, k] > 0.):
                         x_axis_2[i,k] = xproj_kpc[i, k] / u.kpc
+            x_axis_2[0] = x_axis_2[0] - 2
             y_axis_2 = np.zeros([size,size])
-            y_axis_2 = y_axis_2 - 35
+            y_axis_2 = y_axis_2 - 2
             for i in range(0,size):
                 for k in range(0,size):
                     if (dap_ha_sivar[i, k] > 0.):
@@ -254,25 +257,31 @@ with PdfPages(filename) as pdf:
                 return True
 
 
-            def find_line(y_coors, x_coors):
-                slope_values = []
-                if len(x_coors) > 2:
-                    for t in range(0, len(x_coors) - 2):
-                        curr_slope = (y_coors[t + 1] - y_coors[t]) / (x_coors[t + 1] - x_coors[t])
-                        if isnumber(curr_slope):
-                            slope_values.append(curr_slope)
-                    slope = np.mean(slope_values)
-                else:
-                    slope = (y_coors[1] - y_coors[0]) / (x_coors[1] - x_coors[0])
-                    print('Single value slope for ',galaxy,'-',plate)
+            # def find_line(y_coors, x_coors):
+            #     slope_values = []
+            #     if len(x_coors) > 2:
+            #         for t in range(0, len(x_coors) - 2):
+            #             curr_slope = (y_coors[t + 1] - y_coors[t]) / (x_coors[t + 1] - x_coors[t])
+            #             if isnumber(curr_slope):
+            #                 slope_values.append(curr_slope)
+            #         slope = np.mean(slope_values)
+            #     else:
+            #         slope = (y_coors[1] - y_coors[0]) / (x_coors[1] - x_coors[0])
+            #         print('Single value slope for ',galaxy,'-',plate)
+            #
+            #     intercept_values = []
+            #     for t in range(0, len(x_coors) - 1):
+            #         curr_intercept = y_coors[t] - (slope * x_coors[t])
+            #         intercept_values.append(curr_intercept)
+            #     intercept = np.mean(intercept_values)
+            #
+            #     return slope, intercept
 
-                intercept_values = []
-                for t in range(0, len(x_coors) - 1):
-                    curr_intercept = y_coors[t] - (slope * x_coors[t])
-                    intercept_values.append(curr_intercept)
-                intercept = np.mean(intercept_values)
+            # def find_slope(y_coors,x_coors):
+            #     slp = (((mean(x_coors)*mean(y_coors))-mean(x_coors*y_coors)) /
+            #          ((mean(x_coors)**2)-mean(x_coors**2)))
+            #     return slp
 
-                return slope, intercept
 
 
 
@@ -286,9 +295,14 @@ with PdfPages(filename) as pdf:
             xi_f,xo_f = np.where(np.around(np.flip(x_axis_2,1), decimals=0) == 0.0)
 
 
-            mainx_slope, mainx_intr = find_line(xi,xo) #this is the slope of the line passing through the
+            # mainx_slope = find_slope(xi,xo) #this is the slope of the line passing through the
             # 0 points in the xproj map, and the y-intercept of such line. This describes the line equation.
-            slope_f,int_f = find_line(xi_f,xo_f)
+            # slope_f = find_slope(xi_f,xo_f)
+
+            mainx_slope = linregress(xo,xi)
+            mainx_slope = mainx_slope[0]
+            slope_f = linregress(xo_f,xi_f)
+            slope_f = slope_f[0]
             if np.isinf(mainx_slope) or np.isinf(slope_f):
                 print('Infinite slope for ',galaxy,'-',plate,' Main slope isinf ',np.isinf(mainx_slope),' flip slope isinf ',np.isinf(slope_f))
 
@@ -303,11 +317,16 @@ with PdfPages(filename) as pdf:
             theta_o = np.abs(np.arctan(arbit_val/x_o))
             theta_f = np.abs(np.arctan(arbit_val/x_f))
 
-            if mainx_slope>0:
-                phi = np.pi-(theta_o+theta_f)
-            if mainx_slope<0:
-                phi = theta_o + theta_f
-            phi = np.degrees(phi) *-1
+            # if mainx_slope>0:
+            phi = np.pi-(theta_o+theta_f)
+            # if mainx_slope<0:
+            #     phi = theta_o + theta_f
+            phi = np.degrees(phi)
+
+            tst_o1, tst_o2 = np.where(np.around(x_axis_2, decimals=0) == 2.0)
+            tst_o = x_axis_2[tst_o1[0],tst_o2[0]]
+            tst_oo = x_axis_2[tst_o1[-1],tst_o2[-1]]
+
 
 
             #calculating a second angle
@@ -343,9 +362,16 @@ with PdfPages(filename) as pdf:
 
             gvel_invert = copy.deepcopy(dap_vel)
             gvel_invert = np.flip(gvel_invert, 1)
-
             gvel_invert = scipy.ndimage.rotate(gvel_invert,phi,reshape=False)
-            print("Phi for",plate," - ",galaxy,": ",phi)
+
+            tst_f = scipy.ndimage.rotate(np.flip(x_axis_2, 1),phi,reshape=False)[tst_o1[0],tst_o2[0]]
+            tst_ff = scipy.ndimage.rotate(np.flip(x_axis_2, 1),phi,reshape=False)[tst_o1[-1],tst_o2[-1]]
+            if ((tst_o*tst_f)<0) or ((tst_oo*tst_ff)<0):
+                gvel_invert = scipy.ndimage.rotate(gvel_invert, 180, reshape=False)
+                print("Phi for", plate, " - ", galaxy, ": ", phi, " inverted.")
+
+
+            print("Phi for",plate," - ",galaxy,": ",phi,". Slopes. M: ",mainx_slope,". F: ",slope_f,".")
 
 
 
