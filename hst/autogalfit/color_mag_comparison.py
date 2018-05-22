@@ -30,7 +30,6 @@ cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 def minmax(values):
     axes = np.zeros([len(values)])
     coords = np.zeros(2)
-    #for reference: axes = [x1min, x1max; y1min, y1max; x2min, x2max; y2min, y2max; x3min, x3max; y3min, y3max; x4min, x4max; y4min, y4max]
     coords[0] = np.min(values)-0.1
     coords[1] = np.max(values)+0.1
     return coords
@@ -307,8 +306,8 @@ with PdfPages(name_co) as pdf:
     pdf.savefig()
     plt.close()
 
-    x7 = ([size_four])
-    y7 = ([size_four/size_eight])
+    x7 = minmax([size_four])
+    y7 = minmax([size_four/size_eight])
 
     fig = plt.figure()
 
@@ -360,16 +359,18 @@ with PdfPages(name_res) as pdf:
             fig = plt.figure()
             plt.suptitle(galaxies[i]+' '+models[j]+' model')
             for h in range(0, len(filters)):
-                file = glob.glob(models[j]+'/'+galaxies[i]+'_'+filters[h]+'_fine.fits')
+                file = glob.glob(models[j]+'/'+galaxies[i]+'_'+filters[h]+'_output.fits')
                 multi = fits.open(file[0])
                 
                 data, data_header = multi[1].data, multi[1].header
                 model, res_header = multi[2].data, multi[2].header
                 res, res_header = multi[3].data, multi[3].header
+
+                center = int(len(data)/2)
                 
-                stampdata = data[round(201-dy):round(201+dy), round(201-dx):round(201+dx)] 
-                stampmodel = model[round(201-dy):round(201+dy), round(201-dx):round(201+dx)]
-                stampres = res[round(201-dy):round(201+dy), round(201-dx):round(201+dx)]
+                stampdata = data[round(center-dy):round(center+dy), round(center-dx):round(center+dx)] 
+                stampmodel = model[round(center-dy):round(center+dy), round(center-dx):round(center+dx)]
+                stampres = res[round(center-dy):round(center+dy), round(center-dx):round(center+dx)]
                 
                 if h==0:
                     ax = fig.add_subplot(2,3,1)
