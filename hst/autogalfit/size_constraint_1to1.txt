@@ -1,0 +1,6 @@
+# Component/    parameter   constraint	Comment
+# operation	(see below)   range
+
+    4              re        1 to 1    # hard constraint: Constrains the 
+					# sersic index n to within values 
+				        # from 1 to 1.
