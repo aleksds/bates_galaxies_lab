@@ -54,7 +54,7 @@ for m in range(0,len(model)): #loop through each directory
                 modeltype[m] = 'psf'
                 sizepix[w][0] = 0
             else:
-                modelype[m] = 'sersic'
+                modeltype[m] = 'sersic'
                 sizepix[w][0] = np.float(content[48][4:8])
             #475:
             mags[m][w][1] = np.float(content[47][11:17])
@@ -88,12 +88,6 @@ for m in range(0,len(model)): #loop through each directory
                    modeltype[m] = 'sersic'
                    sizepix[w][1] = np.float(content[48][4:8])
         w =+ 1 
-                    
-
-
-
-    
-            
 #color magnitude plot
 one_mag_475 = np.zeros(12)
 one_mag_814 = np.zeros(12)
