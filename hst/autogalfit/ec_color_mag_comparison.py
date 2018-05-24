@@ -22,7 +22,7 @@ two = sys.argv[2]
 
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
 filters = ['F475W','F814W']
-
+dependency = ['dep1', 'dep2']
 redshifts = [0.603,0.459,0.712,0.514,0.467,0.451,0.451,0.658,0.608,0.402,0.449,0.728,0.752]
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
@@ -48,6 +48,7 @@ for m in range(0,len(model)): #loop through each directory
         print(content[10])
         if content[8][4] == 'V':
             print('yes')
+            dependency[m] = ['simultaneous']
             #file is simultaneous
             #814:
             mags[m][w][0] = np.float(content[47][4:10])
@@ -69,6 +70,7 @@ for m in range(0,len(model)): #loop through each directory
                 sizepix[w][1] = np.float(content[48][4:8])
         else:
             #file is independent
+            dependency[m] = ['independent']
             if np.float(content[10][10:13]) == 814: #note that when i = 0, filter = 814, etc.
                 print('814')
                 mags[m][w][0] = np.float(content[47][4:10])
@@ -193,194 +195,195 @@ with PdfPages(name_cc) as pdf:
     plt.close()
 os.system('open %s &' % name_cc)
 
-#color vs size for sersic fits
-size_color = np.zeros(12)
-size_four = np.zeros(12)
-size_eight = np.zeros(12)
+if modeltype[0] == 'sersic' or modeltype[1] == 'sersic':
+    #color vs size for sersic fits
+    size_color = np.zeros(12)
+    size_four = np.zeros(12)
+    size_eight = np.zeros(12)
 
-kpcrad=np.zeros([12,2])
-for w in range(0,12):
-    arcsecperkpc = cosmo.arcsec_per_kpc_proper(redshifts[w])
-    for i in range(0,2):
-        kpcrad[w][i] = (0.025*sizepix[w][i])/arcsecperkpc.value
+    kpcrad=np.zeros([12,2])
+    for w in range(0,12):
+        arcsecperkpc = cosmo.arcsec_per_kpc_proper(redshifts[w])
+        for i in range(0,2):
+            kpcrad[w][i] = (0.025*sizepix[w][i])/arcsecperkpc.value
 
-for w in range(0,12):
-    size_four[w] = kpcrad[w][0]
-    size_color[w] = mags[1][w][0] - mags[1][w][1]
-    size_eight[w] = kpcrad[w][1] 
+    for w in range(0,12):
+        size_four[w] = kpcrad[w][0]
+        size_color[w] = mags[1][w][0] - mags[1][w][1]
+        size_eight[w] = kpcrad[w][1] 
 
-x3 = minmax([size_four, size_eight])
-y3 = minmax([size_color])
+    x3 = minmax([size_four, size_eight])
+    y3 = minmax([size_color])
 
-name_cs = 'color_v_size_'+one+'_'+two+'.pdf'
-with PdfPages(name_cs) as pdf:   
-    plt.figure()
-    
-    plt.scatter(size_four,size_color, label='F475W size', marker='^', color='blue')
-    plt.scatter(size_eight,size_color, label='F814W size', marker='^', color='green')
-    plt.xlim(x3[0],x3[1])
-    plt.ylim(y3[0],y3[1])
-    plt.xlabel('size (kpc)')
-    plt.ylabel('magF475W - magF814W')
-    plt.title('Color vs Size')
-    plt.legend(loc='lower right')
-    pdf.savefig()
-    plt.close()
-
-    fig = plt.figure()
-    for i in range(0, len(galaxies)):
-        ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(size_four[i],size_color[i], label='F475W size', marker='^', color='blue')
-        plt.scatter(size_eight[i],size_color[i], label='F814W size', marker='^', color='green')
+    name_cs = 'color_v_size_'+one+'_'+two+'.pdf'
+    with PdfPages(name_cs) as pdf:   
+        plt.figure()
+        
+        plt.scatter(size_four,size_color, label='F475W size', marker='^', color='blue')
+        plt.scatter(size_eight,size_color, label='F814W size', marker='^', color='green')
         plt.xlim(x3[0],x3[1])
         plt.ylim(y3[0],y3[1])
-        plt.title(galaxies[i])
-        plt.tight_layout()
-        
-    pdf.savefig()
-    plt.close()
-os.system('open %s &' % name_cs)
+        plt.xlabel('size (kpc)')
+        plt.ylabel('magF475W - magF814W')
+        plt.title('Color vs Size')
+        plt.legend(loc='lower right')
+        pdf.savefig()
+        plt.close()
 
-x4 = minmax([one_mag_475, one_mag_814])
-y4 = minmax([one_mag_475-two_mag_475, one_mag_814-two_mag_814])
+        fig = plt.figure()
+        for i in range(0, len(galaxies)):
+            ax = fig.add_subplot(3,4,i+1)
+            plt.scatter(size_four[i],size_color[i], label='F475W size', marker='^', color='blue')
+            plt.scatter(size_eight[i],size_color[i], label='F814W size', marker='^', color='green')
+            plt.xlim(x3[0],x3[1])
+            plt.ylim(y3[0],y3[1])
+            plt.title(galaxies[i])
+            plt.tight_layout()
+            
+        pdf.savefig()
+        plt.close()
+    os.system('open %s &' % name_cs)
 
-#comparison plots of mags, colors, chis, and sizes
-name_co = 'comparison_'+one+'_'+two+'.pdf'
-with PdfPages(name_co) as pdf:   
-    fig = plt.figure()
+    x4 = minmax([one_mag_475, one_mag_814])
+    y4 = minmax([one_mag_475-two_mag_475, one_mag_814-two_mag_814])
 
-    plt.scatter(one_mag_475, one_mag_475-two_mag_475, marker='o', color='blue')
-    plt.xlabel('magF475W_'+one)
-    plt.ylabel('magF475W - magF475W')    
-    plt.title('magF475W comparison')
-    plt.xlim(x4[0],x4[1])
-    plt.ylim(y4[0],y4[1])
-    pdf.savefig()
-    plt.close
+    #comparison plots of mags, colors, chis, and sizes
+    name_co = 'comparison_'+one+'_'+two+'.pdf'
+    with PdfPages(name_co) as pdf:   
+        fig = plt.figure()
 
-######
-    fig = plt.figure()
-    for i in range(0, len(galaxies)):
-        ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(one_mag_475[i], one_mag_475[i]-two_mag_475[i], marker='o', color='blue')
+        plt.scatter(one_mag_475, one_mag_475-two_mag_475, marker='o', color='blue')
+        plt.xlabel('magF475W_'+one)
+        plt.ylabel('magF475W - magF475W')    
+        plt.title('magF475W comparison')
         plt.xlim(x4[0],x4[1])
         plt.ylim(y4[0],y4[1])
-        plt.title(galaxies[i])
-        plt.tight_layout()
+        pdf.savefig()
+        plt.close
+
+    ######
+        fig = plt.figure()
+        for i in range(0, len(galaxies)):
+            ax = fig.add_subplot(3,4,i+1)
+            plt.scatter(one_mag_475[i], one_mag_475[i]-two_mag_475[i], marker='o', color='blue')
+            plt.xlim(x4[0],x4[1])
+            plt.ylim(y4[0],y4[1])
+            plt.title(galaxies[i])
+            plt.tight_layout()
+            
+        pdf.savefig()
+        plt.close()
+
+        fig = plt.figure()
         
-    pdf.savefig()
-    plt.close()
-
-    fig = plt.figure()
-    
-    plt.scatter(one_mag_814, one_mag_814-two_mag_814, marker='o', color='green')
-    plt.xlabel('magF814W_'+one)
-    plt.ylabel('magF814W - magF814W')    
-    plt.title('magF814W comparison')
-    plt.xlim(x4[0],x4[1])
-    plt.ylim(y4[0],y4[1])
-    pdf.savefig()
-    plt.close
-
-######
-    fig = plt.figure()
-    for i in range(0, len(galaxies)):
-        ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(one_mag_814[i], one_mag_814[i]-two_mag_814[i], marker='o', color='green')
+        plt.scatter(one_mag_814, one_mag_814-two_mag_814, marker='o', color='green')
+        plt.xlabel('magF814W_'+one)
+        plt.ylabel('magF814W - magF814W')    
+        plt.title('magF814W comparison')
         plt.xlim(x4[0],x4[1])
         plt.ylim(y4[0],y4[1])
-        plt.title(galaxies[i])
-        plt.tight_layout()
+        pdf.savefig()
+        plt.close
 
-    pdf.savefig()
-    plt.close()
+    ######
+        fig = plt.figure()
+        for i in range(0, len(galaxies)):
+            ax = fig.add_subplot(3,4,i+1)
+            plt.scatter(one_mag_814[i], one_mag_814[i]-two_mag_814[i], marker='o', color='green')
+            plt.xlim(x4[0],x4[1])
+            plt.ylim(y4[0],y4[1])
+            plt.title(galaxies[i])
+            plt.tight_layout()
 
-    x5 = minmax([one_color])
-    y5 = minmax([one_color-two_color])
+        pdf.savefig()
+        plt.close()
 
-    fig = plt.figure()
+        x5 = minmax([one_color])
+        y5 = minmax([one_color-two_color])
 
-    plt.scatter(one_color, one_color-two_color, marker='o', color='orange')
-    plt.xlabel('color_'+one)
-    plt.ylabel('difference in color')
-    plt.title('color comparison')
-    plt.xlim(x5[0],x5[1])
-    plt.ylim(y5[0],y5[1])
-    pdf.savefig()
-    plt.close
+        fig = plt.figure()
 
-######
-    fig = plt.figure()
-    for i in range(0, len(galaxies)):
-        ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(one_color[i], one_color[i]-two_color[i], marker='o', color='orange')
+        plt.scatter(one_color, one_color-two_color, marker='o', color='orange')
+        plt.xlabel('color_'+one)
+        plt.ylabel('difference in color')
+        plt.title('color comparison')
         plt.xlim(x5[0],x5[1])
         plt.ylim(y5[0],y5[1])
-        plt.title(galaxies[i])
-        plt.tight_layout()
+        pdf.savefig()
+        plt.close
 
-    pdf.savefig()
-    plt.close()
+    ######
+        fig = plt.figure()
+        for i in range(0, len(galaxies)):
+            ax = fig.add_subplot(3,4,i+1)
+            plt.scatter(one_color[i], one_color[i]-two_color[i], marker='o', color='orange')
+            plt.xlim(x5[0],x5[1])
+            plt.ylim(y5[0],y5[1])
+            plt.title(galaxies[i])
+            plt.tight_layout()
 
-    x6 = minmax([psfxvals_four, psfxvals_eight])
-    y6 = minmax([psfxvals_four/sersicxvals_four, psfxvals_eight/sersicxvals_eight])
+        pdf.savefig()
+        plt.close()
 
-    fig = plt.figure()
+        x6 = minmax([psfxvals_four, psfxvals_eight])
+        y6 = minmax([psfxvals_four/sersicxvals_four, psfxvals_eight/sersicxvals_eight])
 
-    plt.scatter(psfxvals_four, psfxvals_four/sersicxvals_four, label='F475W', marker='o', color='blue')
-    plt.scatter(psfxvals_eight, psfxvals_eight/sersicxvals_eight, label='F814W', marker='o', color='green')
-    plt.xlabel('psf chi square/nu values')
-    plt.ylabel('ratio of chi sqr/nu values from psf to sersic')
-    plt.title('chi sqr/nu comparison')
-    plt.legend(loc='lower right')
-    plt.xlim(x6[0],x6[1])
-    plt.ylim(y6[0],y6[1])
-    pdf.savefig()
-    plt.close
+        fig = plt.figure()
 
-
-######
-    fig = plt.figure()
-    for i in range(0, len(galaxies)):
-        ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(psfxvals_four[i], psfxvals_four[i]/sersicxvals_four[i], label='F475W', marker='o', color='blue')
-        plt.scatter(psfxvals_eight[i], psfxvals_eight[i]/sersicxvals_eight[i], label='F814W', marker='o', color='green')
+        plt.scatter(psfxvals_four, psfxvals_four/sersicxvals_four, label='F475W', marker='o', color='blue')
+        plt.scatter(psfxvals_eight, psfxvals_eight/sersicxvals_eight, label='F814W', marker='o', color='green')
+        plt.xlabel('psf chi square/nu values')
+        plt.ylabel('ratio of chi sqr/nu values from psf to sersic')
+        plt.title('chi sqr/nu comparison')
+        plt.legend(loc='lower right')
         plt.xlim(x6[0],x6[1])
         plt.ylim(y6[0],y6[1])
-        plt.title(galaxies[i])
-        plt.tight_layout()
+        pdf.savefig()
+        plt.close
 
-    pdf.savefig()
-    plt.close()
 
-    x7 = minmax([size_four])
-    y7 = minmax([size_four/size_eight])
+    ######
+        fig = plt.figure()
+        for i in range(0, len(galaxies)):
+            ax = fig.add_subplot(3,4,i+1)
+            plt.scatter(psfxvals_four[i], psfxvals_four[i]/sersicxvals_four[i], label='F475W', marker='o', color='blue')
+            plt.scatter(psfxvals_eight[i], psfxvals_eight[i]/sersicxvals_eight[i], label='F814W', marker='o', color='green')
+            plt.xlim(x6[0],x6[1])
+            plt.ylim(y6[0],y6[1])
+            plt.title(galaxies[i])
+            plt.tight_layout()
 
-    fig = plt.figure()
+        pdf.savefig()
+        plt.close()
 
-    plt.scatter(size_four, size_four/size_eight, marker='o', color='red')
-    plt.xlabel('size_four(kpc)')
-    plt.ylabel('ratio of size_four to size_eight')
-    plt.title('size comparison')
-    plt.xlim(x7[0],x7[1])
-    plt.ylim(y7[0],y7[1])
-    pdf.savefig()
-    plt.close()
+        x7 = minmax([size_four])
+        y7 = minmax([size_four/size_eight])
 
-######
-    fig = plt.figure()
-    for i in range(0, len(galaxies)):
-        ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(size_four[i], size_four[i]/size_eight[i], marker='o', color='red')
+        fig = plt.figure()
+
+        plt.scatter(size_four, size_four/size_eight, marker='o', color='red')
+        plt.xlabel('size_four(kpc)')
+        plt.ylabel('ratio of size_four to size_eight')
+        plt.title('size comparison')
         plt.xlim(x7[0],x7[1])
         plt.ylim(y7[0],y7[1])
-        plt.title(galaxies[i])
-        plt.tight_layout()
+        pdf.savefig()
+        plt.close()
 
-    pdf.savefig()
-    plt.close()
-    
-os.system('open %s &' % name_co)
+    ######
+        fig = plt.figure()
+        for i in range(0, len(galaxies)):
+            ax = fig.add_subplot(3,4,i+1)
+            plt.scatter(size_four[i], size_four[i]/size_eight[i], marker='o', color='red')
+            plt.xlim(x7[0],x7[1])
+            plt.ylim(y7[0],y7[1])
+            plt.title(galaxies[i])
+            plt.tight_layout()
+
+        pdf.savefig()
+        plt.close()
+        
+    os.system('open %s &' % name_co)
 
 
 #goal of this section is to print data/model/residual for each galaxy.
@@ -406,12 +409,17 @@ with PdfPages(name_res) as pdf:
             fig = plt.figure()
             plt.suptitle(galaxies[i]+' '+models[j]+' model')
             for h in range(0, len(filters)):
-                file = glob.glob(models[j]+'/'+galaxies[i]+'_'+filters[h]+'_output.fits')
+                file = glob.glob(models[j]+'/'+galaxies[i]+'_*_output.fits')
                 multi = fits.open(file[0])
-                
-                data, data_header = multi[1].data, multi[1].header
-                model, res_header = multi[2].data, multi[2].header
-                res, res_header = multi[3].data, multi[3].header
+
+                if dependency[j] == 'independent':
+                    data, data_header = multi[1].data, multi[1].header
+                    model, res_header = multi[2].data, multi[2].header
+                    res, res_header = multi[3].data, multi[3].header
+                else:
+                    data, data_header = multi[1-h].data, multi[1-h].header
+                    model, res_header = multi[3-h].data, multi[3-h].header
+                    res, res_header = multi[5-h].data, multi[5-h].header
                 
                 stampdata = data[round(101-dy):round(101+dy), round(101-dx):round(101+dx)] 
                 stampmodel = model[round(201-dy):round(201+dy), round(201-dx):round(201+dx)]
