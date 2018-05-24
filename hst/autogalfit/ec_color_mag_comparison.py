@@ -43,6 +43,8 @@ for m in range(0,len(model)): #loop through each directory
     for file in glob.glob(model[m]+"/*.band"): #loop through each file
         with open(file) as f:
             content = f.readlines()
+        gal = content[10][3:8]
+        w = galaxies.index(gal)
         print(content[10])
         if content[8][4] == 'V':
             print('yes')
@@ -86,8 +88,7 @@ for m in range(0,len(model)): #loop through each directory
                    sizepix[w][1] = 0
                 else:
                    modeltype[m] = 'sersic'
-                   sizepix[w][1] = np.float(content[48][4:8])
-        w =+ 1 
+                   sizepix[w][1] = np.float(content[48][4:8]) 
                     
 
 
