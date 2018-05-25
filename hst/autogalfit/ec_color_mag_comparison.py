@@ -21,7 +21,7 @@ one = sys.argv[1]
 two = sys.argv[2]
 
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
-filters = ['F475W','F814W']
+filters = ['F814W','F475W']
 dependency = ['dep1', 'dep2']
 redshifts = [0.603,0.459,0.712,0.514,0.467,0.451,0.451,0.658,0.608,0.402,0.449,0.728,0.752]
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
