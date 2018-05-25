@@ -720,6 +720,7 @@ def plot_g(galaxy_c):
                     if (dap_ha_sivar[i, k] > 0.):
                         y_axis_2[i, k] = yproj_kpc[i, k] / u.kpc
 
+
             y_axis = copy.deepcopy(zproj_kpc_map)
             def circular_plot():
                 pos_y = y_axis > 0
@@ -810,6 +811,12 @@ def plot_g(galaxy_c):
             # mainx_slope = find_slope(xi,xo) #this is the slope of the line passing through the
             # 0 points in the xproj map, and the y-intercept of such line. This describes the line equation.
             # slope_f = find_slope(xi_f,xo_f)
+            # alternative
+            secnd_m_slope_o_y = -1/(linregress(np.where(np.around(y_axis_2, decimals=0) == 0.0)))[0]
+            secnd_m_slope_f_y = -1 / (linregress(np.where(np.around(np.flip(y_axis_2, 1), decimals=0) == 0.0)))[0]
+
+
+
 
             mainx_slope = linregress(xo, xi)
             mainx_slope = mainx_slope[0]
@@ -818,6 +825,10 @@ def plot_g(galaxy_c):
             if np.isinf(mainx_slope) or np.isinf(slope_f):
                 print('Infinite slope for ', galaxy, '-', plate, ' Main slope isinf ', np.isinf(mainx_slope),
                       ' flip slope isinf ', np.isinf(slope_f))
+
+
+            mainx_slope = (mainx_slope+secnd_m_slope_o_y)/2
+            slope_f = (slope_f+secnd_m_slope_f_y)/2
 
             if mainx_slope > 0:
                 arbit_val = 5
@@ -828,6 +839,8 @@ def plot_g(galaxy_c):
             x_f = arbit_val / slope_f
             theta_o = np.abs(np.arctan(arbit_val / x_o))
             theta_f = np.abs(np.arctan(arbit_val / x_f))
+            theta_o = np.abs(np.arctan(mainx_slope))
+            theta_f = np.abs(np.arctan(slope_f))
 
             # if mainx_slope>0:
             phi = np.pi - (theta_o + theta_f)
@@ -903,12 +916,12 @@ def plot_g(galaxy_c):
             ax.set_ylim(0, size)
             ax.set_xticklabels(())
             ax.set_yticklabels(())
-            plt.imshow(zproj_kpc_map,
+            plt.imshow(y_axis_2,
                        origin='lower',
                        interpolation='nearest',
                        cmap=cm.coolwarm)
             plt.colorbar()
-            plt.title('vertical distance [kpc]', fontsize=10)
+            plt.title('y_axis_2', fontsize=10)
             plt.suptitle(name)
 
             # plot 2/3: emission-line flux vs vertical distance
