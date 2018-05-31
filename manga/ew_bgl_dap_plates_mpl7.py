@@ -1,8 +1,6 @@
 # Aleks Diamond-Stanic
 # May 31, 2019
-# Copied from cp_dap_plates_mpl5
-
-# Imports
+# Copied from cp_dap_plates_mpl# Imports
 
 
 import os
@@ -92,7 +90,8 @@ with PdfPages(filename) as pdf:
         theta = drpdata.field('nsa_sersic_phi')[match][0]
         ba = drpdata.field('nsa_sersic_ba')[match][0]
         inc = np.arccos(ba)
-
+        re_sersic = drpdata.field('nsa_sersic_th50')[match]
+        
         # redefine x=0 and y=0 to be in the center of the field
         xprime = xpos - np.median(xpos)
         yprime = ypos - np.median(ypos)
@@ -106,9 +105,12 @@ with PdfPages(filename) as pdf:
         # calculate the radius of each pixel in the plane of the disk [units: pixels]
         radpix = np.sqrt(xproj**2 + (yproj/ba)**2)
 
-        # figure out the conversion between pixel size and kpc
+       	#identify all pixels wihtin a galactocentric radius of two times the half-light radius
+
+ 	# figure out the conversion between pixel size and kpc
         z = drpdata.field('nsa_z')[match][0]
         radkpc = radpix / cosmo.arcsec_per_kpc_proper(z) * (0.5 * u.arcsec)
+        re_sersic_kpc = re_sersic / cosmo.arcsec_per_kpc_proper(z)
 
         # compute values along the x and y axis of the disk and the z axis above the disk
         xproj_kpc = xproj / cosmo.arcsec_per_kpc_proper(z) * (0.5 * u.arcsec)
@@ -129,7 +131,12 @@ with PdfPages(filename) as pdf:
                     zproj_kpc_map[j,k] = zproj_kpc[j,k] / u.kpc
                 else:
                     radkpc_map[j,k] = radkpc[j,k] / u.kpc * (-1.)
-
+        double_re_sersic_kpc = re_sersic_kpc * 1.5 *u.arcsec/u.kpc
+        small = (radkpc_map < double_re_sersic_kpc)
+        zproj_kpc_map_filtered = zproj_kpc_map
+        zproj_kpc_map_filtered[small] = 0
+        #zproj_kpc_map_filtered[small] = zproj_kpc_map_filtered[small]* -1
+        
         # hdu_dap['EMLINE_GFLUX'].header
         #C01     = 'OII-3727'           / Data in channel 1                      
         #C02     = 'OII-3729'           / Data in channel 2                      
@@ -185,7 +192,7 @@ with PdfPages(filename) as pdf:
             ax.set_ylim(0, size)
             ax.set_xticklabels(())
             ax.set_yticklabels(())
-            plt.imshow(zproj_kpc_map,
+            plt.imshow(zproj_kpc_map_filtered,#zproj_kpc_map[large],
                        origin='lower',
                        interpolation='nearest',
                        cmap=cm.coolwarm)
