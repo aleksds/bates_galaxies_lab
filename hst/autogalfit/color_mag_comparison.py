@@ -41,8 +41,8 @@ sizepix = np.zeros([12,2])
 for m in range(0,2):
     for w in range(0,12):
         for i in range(0,2):
-            file = model[m]+'/'+galaxies[w]+'_'+filters[i]+'_output.galfit.01.band'
-            with open(file) as f:
+            file = glob.glob(model[m]+'/'+galaxies[w]+'*'+filters[i]+'*.galfit.01.band')
+            with open(file[0]) as f:
                 content = f.readlines()
             mags[m][w][i] = np.float(content[47][4:10])
             chi[m][w][i] = np.float(content[3][14:19])
