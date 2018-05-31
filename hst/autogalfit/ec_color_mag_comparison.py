@@ -359,7 +359,10 @@ with PdfPages(name_co) as pdf:
     plt.close()
 
     x7 = minmax([size_four])
-    y7 = minmax([size_four/size_eight])
+    if np.max(size_eight) > 0:
+    	y7 = minmax([size_four/size_eight])
+    else:
+    	y7 = minmax(size_eight)
 
     fig = plt.figure()
 
