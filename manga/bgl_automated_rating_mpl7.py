@@ -28,6 +28,20 @@ def daplot(quantity, qmin, qmax):
        norm=colors.LogNorm(vmin=qmin, vmax=qmax), cmap=cm.coolwarm)
     plt.colorbar()
 
+def channel_dictionary(hdu, ext):
+    """
+    Construct a dictionary of the channels in a MAPS file.
+    """
+    channel_dict = {}
+    for k, v in hdu[ext].header.items():
+        if k[0] == 'C':
+            try:
+                i = int(k[1:])-1
+            except ValueError:
+                continue
+            channel_dict[v] = i
+    return channel_dict
+    
 # define a standard cosmology
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
@@ -104,9 +118,10 @@ with PdfPages(filename) as pdf:
             # read in the appropriate DAP file and Halpha flux information
             hdu_dap = fits.open(name)
             # hdu_dap.info()
-            dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[18, :, :]
-            dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[18, :, :]
-    
+            emlc = channel_dictionary(hdu_dap, 'EMLINE_SFLUX')
+            dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Ha-6564'],:,:]
+            dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[emlc['Ha-6564'],:,:]
+            
             # create arrays that correspond to x and y coordinates for each spaxel
             size = len(hdu_dap['EMLINE_GFLUX'].data[0, :])
             xpos = np.zeros([size, size])
