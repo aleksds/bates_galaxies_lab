@@ -106,6 +106,7 @@ def find_g(plate_rec, min_p, max_p):
         theta = drpdata.field('nsa_sersic_phi')[match][0]
         ba = drpdata.field('nsa_sersic_ba')[match][0]
         inc = np.arccos(ba)
+        re_sersic = drpdata.field('nsa_sersic_th50')[match]
 
         #insert IF statement for inclination
         if (min_par < (inc * 180 / np.pi) < max_par):
@@ -126,6 +127,7 @@ def find_g(plate_rec, min_p, max_p):
             # figure out the conversion between pixel size and kpc
             z = drpdata.field('nsa_z')[match][0]
             radkpc = radpix / cosmo.arcsec_per_kpc_proper(z) * (0.5 * u.arcsec)
+            re_sersic_kpc = re_sersic / cosmo.arcsec_per_kpc_proper(z)
 
             # compute values along the x and y axis of the disk and the z axis above the disk
             xproj_kpc = xproj / cosmo.arcsec_per_kpc_proper(z) * (0.5 * u.arcsec)
@@ -146,6 +148,11 @@ def find_g(plate_rec, min_p, max_p):
                         zproj_kpc_map[j, k] = zproj_kpc[j, k] / u.kpc
                     else:
                         radkpc_map[j, k] = radkpc[j, k] / u.kpc * (-1.)
+            double_re_sersic_kpc = re_sersic_kpc * 1.5 *u.arcsec/u.kpc
+            small = (radkpc_map < double_re_sersic_kpc)
+            zproj_kpc_map_filtered = zproj_kpc_map
+            zproj_kpc_map_filtered[small] = 0
+            #zproj_kpc_map_filtered[small] = zproj_kpc_map_filtered[small]* -1
 
             # hdu_dap['EMLINE_GFLUX'].header
             # C01     = 'OIId---3728'        / Species in cube channel 1
@@ -712,7 +719,7 @@ def plot_g(galaxy_c):
             ax.set_ylim(0, size)
             ax.set_xticklabels(())
             ax.set_yticklabels(())
-            plt.imshow(zproj_kpc_map,
+            plt.imshow(zproj_kpc_map_filtered,
                        origin='lower',
                        interpolation='nearest',
                        cmap=cm.coolwarm)
