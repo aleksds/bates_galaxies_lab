@@ -104,8 +104,8 @@ with PdfPages(filename) as pdf:
             # read in the appropriate DAP file and Halpha flux information
             hdu_dap = fits.open(name)
             # hdu_dap.info()
-            dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[7, :, :]
-            dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[7, :, :]
+            dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[18, :, :]
+            dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[18, :, :]
     
             # create arrays that correspond to x and y coordinates for each spaxel
             size = len(hdu_dap['EMLINE_GFLUX'].data[0, :])
