@@ -41,7 +41,7 @@ fmin = 1e-19
 fmax = 1e-16
 
 # for bookkeeping purposes, here's an array of emission-line names
-eml = ['OIId---3728', 'Hb-----4862', 'OIII---4960', 'OIII---5008', 'OI-----6302', re_sersic_kpc'OI-----6365', 'NII----6549',
+eml = ['OIId---3728', 'Hb-----4862', 'OIII---4960', 'OIII---5008', 'OI-----6302', 'OI-----6365', 'NII----6549',
        'Ha-----6564', 'NII----6585', 'SII----6718', 'SII----6732']
 
 # specify initial information about plates and galaxies to consider
@@ -156,7 +156,8 @@ with PdfPages(filename) as pdf:
                 yproj_kpc_map = np.zeros([size, size])
                 zproj_kpc_map = np.zeros([size, size])
     
-                for j in range(0, size)                    for k in range(0, size):
+                for j in range(0, size):
+                    for k in range(0, size):
                         if (dap_ha_sivar[j, k] > 0.):
                             radkpc_map[j, k] = radkpc[j, k] / u.kpc
                             yproj_kpc_map[j, k] = yproj_kpc[j, k] / u.kpc
