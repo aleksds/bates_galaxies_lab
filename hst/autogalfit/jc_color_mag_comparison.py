@@ -20,8 +20,20 @@ dir = os.environ['HSTDIR']
 one = sys.argv[1]
 two = sys.argv[2]
 
+# check if first directory exists
+if os.path.isdir(one):
+    print('1st directory exists!')
+else:
+    print('Uh oh! First directory does not exist!')
+	
+# check if second directory exists
+if os.path.isdir(two):
+    print('2nd directory exists!')
+else:
+    print('Uh oh! Second directory does not exist!')
+
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
-filters = ['F814W','F475W']
+filters = ['F475W','F814W']
 dependency = ['dep1', 'dep2']
 redshifts = [0.603,0.459,0.712,0.514,0.467,0.451,0.451,0.658,0.608,0.402,0.449,0.728,0.752]
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
@@ -47,12 +59,14 @@ def addtext(xvals, yvals):
 model = [str(one),str(two)]
 mags = np.zeros([2,12,2]) #order: psf models then sersic models, normal order for galaxies and filters
 chi = np.zeros([2,12,2])
-sizepix = np.zeros([12,2])
+sizepix = np.zeros([2,12,2])
 modeltype = ['type1', 'type2']
 for m in range(0,len(model)): #loop through each directory
     for file in glob.glob(model[m]+"/*.band"): #loop through each file
         with open(file) as f:
             content = f.readlines()
+        print(content[10])
+        print(content[48])
         gal = content[10][3:8]
         w = galaxies.index(gal)
         print(content[10])
@@ -61,46 +75,51 @@ for m in range(0,len(model)): #loop through each directory
             dependency[m] = 'simultaneous'
             #file is simultaneous
             #814:
-            mags[m][w][0] = np.float(content[47][4:10])
-            chi[m][w][0] = np.float(content[3][14:19])
-            if np.float(content[48][4]) == 0:
+            mags[m][w][1] = np.float(content[47][4:10])
+            chi[m][w][1] = np.float(content[3][14:19])
+            test = content[48]
+            comma_location = test.find(',')
+            size = content[48][4:comma_location]
+            if np.float(size) == 0:
+            #if np.float(content[48][4]) == 0:
                 modeltype[m] = 'psf'
-                sizepix[w][0] = 0
+                sizepix[m][w][1] = 0
             else:
                 modeltype[m] = 'sersic'
-                sizepix[w][0] = np.float(content[48][4:8])
+                sizepix[m][w][1] = np.float(content[48][4:8])
             #475:
-            mags[m][w][1] = np.float(content[47][11:17])
-            chi[m][w][1] = np.float(content[3][14:19]) #will be the same as chi[m][w][0]
-            if np.float(content[48][4]) == 0:
+            mags[m][w][0] = np.float(content[47][11:17])
+            chi[m][w][0] = np.float(content[3][14:19]) #will be the same as chi[m][w][0]
+            if np.float(size) == 0:
+            #if np.float(content[48][4]) == 0:
                 modeltype[m] = 'psf'
-                sizepix[w][1] = 0
+                sizepix[m][w][0] = 0
             else:
                 modeltype[m] = 'sersic'
-                sizepix[w][1] = np.float(content[48][4:8])
+                sizepix[m][w][0] = np.float(content[48][4:8])
         else:
             #file is independent
             dependency[m] = 'independent'
             if np.float(content[10][10:13]) == 814: #note that when i = 0, filter = 814, etc.
                 print('814')
-                mags[m][w][0] = np.float(content[47][4:10])
-                chi[m][w][0] = np.float(content[3][14:19])
-                if np.float(content[48][4]) == 0:
-                    modeltype[m] = 'psf'
-                    sizepix[w][0] = 0
-                else:
-                    modeltype[m] = 'sersic'
-                    sizepix[w][0] = np.float(content[48][4:8])
-            else:
-                print('475')
                 mags[m][w][1] = np.float(content[47][4:10])
                 chi[m][w][1] = np.float(content[3][14:19])
                 if np.float(content[48][4]) == 0:
+                    modeltype[m] = 'psf'
+                    sizepix[m][w][1] = 0
+                else:
+                    modeltype[m] = 'sersic'
+                    sizepix[m][w][1] = np.float(content[48][4:8])
+            else:
+                print('475')
+                mags[m][w][0] = np.float(content[47][4:10])
+                chi[m][w][0] = np.float(content[3][14:19])
+                if np.float(content[48][4]) == 0:
                    modeltype[m] = 'psf'
-                   sizepix[w][1] = 0
+                   sizepix[m][w][0] = 0
                 else:
                    modeltype[m] = 'sersic'
-                   sizepix[w][1] = np.float(content[48][4:8])
+                   sizepix[m][w][0] = np.float(content[48][4:8])
 
 
 #color vs size for sersic fits
@@ -112,7 +131,7 @@ kpcrad=np.zeros([12,2])
 for w in range(0,12):
     arcsecperkpc = cosmo.arcsec_per_kpc_proper(redshifts[w])
     for i in range(0,2):
-        kpcrad[w][i] = (0.025*sizepix[w][i])/arcsecperkpc.value
+        kpcrad[w][i] = (0.025*sizepix[1][w][i])/arcsecperkpc.value
 
 for w in range(0,12):
     size_four[w] = kpcrad[w][0]
@@ -171,23 +190,23 @@ for w in range(0,12):
 x1 = minmax([one_mag_814, two_mag_814])
 y1 = minmax([one_color, two_color])
 #color vs chi-squared plot
-psfyvals = np.zeros(12)
-psfxvals_four = np.zeros(12)
-sersicyvals = np.zeros(12)
-sersicxvals_four = np.zeros(12)
-psfxvals_eight = np.zeros(12)
-sersicxvals_eight = np.zeros(12)
+oneyvals = np.zeros(12)
+onexvals_four = np.zeros(12)
+twoyvals = np.zeros(12)
+twoxvals_four = np.zeros(12)
+onexvals_eight = np.zeros(12)
+twoxvals_eight = np.zeros(12)
 
 for w in range(0,12):
-    psfxvals_four[w] = chi[0][w][0]
-    sersicxvals_four[w] = chi[1][w][0]
-    psfyvals[w] = mags[0][w][0] - mags[0][w][1]
-    sersicyvals[w] = mags[1][w][0] - mags[1][w][1]
-    psfxvals_eight[w] = chi[0][w][1]
-    sersicxvals_eight[w] = chi[1][w][1]
+    onexvals_four[w] = chi[0][w][0]
+    twoxvals_four[w] = chi[1][w][0]
+    oneyvals[w] = mags[0][w][0] - mags[0][w][1]
+    twoyvals[w] = mags[1][w][0] - mags[1][w][1]
+    onexvals_eight[w] = chi[0][w][1]
+    twoxvals_eight[w] = chi[1][w][1]
 
-x2 = minmax([psfxvals_four, sersicxvals_four, psfxvals_eight, sersicxvals_eight])
-y2 = minmax([psfyvals, sersicyvals])
+x2 = minmax([onexvals_four, twoxvals_four, onexvals_eight, twoxvals_eight])
+y2 = minmax([oneyvals, twoyvals])
 x4 = minmax([one_mag_475, one_mag_814])
 y4 = minmax([one_mag_475-two_mag_475, one_mag_814-two_mag_814])
 #comparison plots of mags, colors, chis, and sizes
@@ -200,7 +219,9 @@ with PdfPages(name_co) as pdf:
     plt.ylabel('magF475W - magF475W')    
     plt.title('magF475W comparison')
     plt.xlim(x4[0],x4[1])
-    plt.ylim(y4[0],y4[1])
+    plt.ylim(minmax(one_mag_475-two_mag_475))
+    #plt.ylim(y4[0],y4[1])
+    addtext(one_mag_475, one_mag_475-two_mag_475)
     pdf.savefig()
     plt.close
 
@@ -225,6 +246,7 @@ with PdfPages(name_co) as pdf:
     plt.title('magF814W comparison')
     plt.xlim(x4[0],x4[1])
     plt.ylim(y4[0],y4[1])
+    addtext(one_mag_814, one_mag_814-two_mag_814)
     pdf.savefig()
     plt.close
 
@@ -252,6 +274,7 @@ with PdfPages(name_co) as pdf:
     plt.title('color comparison')
     plt.xlim(x5[0],x5[1])
     plt.ylim(y5[0],y5[1])
+    addtext(one_color, one_color-two_color)
     pdf.savefig()
     plt.close
 
@@ -268,19 +291,21 @@ with PdfPages(name_co) as pdf:
     pdf.savefig()
     plt.close()
 
-    x6 = minmax([psfxvals_four, psfxvals_eight])
-    y6 = minmax([psfxvals_four/sersicxvals_four, psfxvals_eight/sersicxvals_eight])
+    x6 = minmax([onexvals_four, onexvals_eight])
+    y6 = minmax([onexvals_four/twoxvals_four, onexvals_eight/twoxvals_eight])
 
     fig = plt.figure()
 
-    plt.scatter(psfxvals_four, psfxvals_four/sersicxvals_four, label='F475W', marker='o', color='blue')
-    plt.scatter(psfxvals_eight, psfxvals_eight/sersicxvals_eight, label='F814W', marker='o', color='green')
+    plt.scatter(onexvals_four, onexvals_four/twoxvals_four, label='F475W', marker='o', color='blue')
+    plt.scatter(onexvals_eight, onexvals_eight/twoxvals_eight, label='F814W', marker='o', color='green')
     plt.xlabel('chi square/nu values')
     plt.ylabel('ratio of chi sqr/nu values')
     plt.title('chi sqr/nu comparison')
     plt.legend(loc='lower right')
+    addtext(onexvals_eight, onexvals_eight/twoxvals_eight)
     plt.xlim(x6[0],x6[1])
-    plt.ylim(y6[0],y6[1])
+    #plt.ylim(minmax(onexvals_four/twoxvals_four))
+    #plt.ylim(y6[0],y6[1])
     pdf.savefig()
     plt.close
 
@@ -289,10 +314,10 @@ with PdfPages(name_co) as pdf:
     fig = plt.figure()
     for i in range(0, len(galaxies)):
         ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(psfxvals_four[i], psfxvals_four[i]/sersicxvals_four[i], label='F475W', marker='o', color='blue')
-        plt.scatter(psfxvals_eight[i], psfxvals_eight[i]/sersicxvals_eight[i], label='F814W', marker='o', color='green')
+        plt.scatter(onexvals_four[i], onexvals_four[i]/twoxvals_four[i], label='F475W', marker='o', color='blue')
+        plt.scatter(onexvals_eight[i], onexvals_eight[i]/twoxvals_eight[i], label='F814W', marker='o', color='green')
         plt.xlim(x6[0],x6[1])
-        plt.ylim(y6[0],y6[1])
+        #plt.ylim(y6[0],y6[1])
         plt.title(galaxies[i])
         plt.tight_layout()
 
@@ -300,11 +325,11 @@ with PdfPages(name_co) as pdf:
     plt.close()
 
     x7 = minmax([size_four])
-    y7=x7
-    #if np.min(size_eight) == 0.:
-    #	y7 = minmax([size_four/size_eight])
-    #else:
-    #	y7 = minmax(size_eight)
+    #y7=x7
+    if np.min(size_eight) == 0.:
+    	y7 = minmax([size_four/size_eight])
+    else:
+    	y7 = minmax(size_eight)
 
     fig = plt.figure()
 
@@ -313,7 +338,8 @@ with PdfPages(name_co) as pdf:
     plt.ylabel('ratio of size_four to size_eight')
     plt.title('size comparison')
     plt.xlim(x7[0],x7[1])
-    plt.ylim(y7[0],y7[1])
+    #plt.ylim(y7[0],y7[1])
+    addtext(size_four, size_four/size_eight)
     pdf.savefig()
     plt.close()
 
@@ -323,7 +349,7 @@ with PdfPages(name_co) as pdf:
         ax = fig.add_subplot(3,4,i+1)
         plt.scatter(size_four[i], size_four[i]/size_eight[i], marker='o', color='red')
         plt.xlim(x7[0],x7[1])
-        plt.ylim(y7[0],y7[1])
+        #plt.ylim(y7[0],y7[1])
         plt.title(galaxies[i])
         plt.tight_layout()
 
@@ -339,6 +365,8 @@ with PdfPages(name_co) as pdf:
     plt.legend(loc='upper right')
     plt.xlim(x1[0], x1[1])
     plt.ylim(y1[0], y1[1])
+    addtext(one_mag_814,one_color)
+    addtext(two_mag_814,two_color)
     pdf.savefig()
     plt.close()
 
@@ -357,26 +385,27 @@ with PdfPages(name_co) as pdf:
   
     plt.figure()
     
-    plt.scatter(psfxvals_four,psfyvals, label=one+' (F475W chi)', marker='o', color='blue')
-    plt.scatter(sersicxvals_four,sersicyvals, label=two+' (F475W chi)', marker='^', color='blue')
-    plt.scatter(psfxvals_eight,psfyvals, label=one+' (F814W chi)', marker='o', color='green')
-    plt.scatter(sersicxvals_eight,sersicyvals, label=two+' (F814W chi)', marker='^', color='green')
+    plt.scatter(onexvals_four,oneyvals, label=one+' (F475W chi)', marker='o', color='blue')
+    plt.scatter(twoxvals_four,twoyvals, label=two+' (F475W chi)', marker='^', color='blue')
+    plt.scatter(onexvals_eight,oneyvals, label=one+' (F814W chi)', marker='o', color='green')
+    plt.scatter(twoxvals_eight,twoyvals, label=two+' (F814W chi)', marker='^', color='green')
     plt.xlim(x2[0],x2[1])
     plt.ylim(y2[0],y2[1])
     plt.xlabel('chi-squared/nu')
     plt.ylabel('mag_F475W - mag_F814W')
-    plt.title('Chi Squared vs. Color Plot (with psf and sersic fits)')
+    plt.title('Chi Squared vs. Color Plot (with one and two fits)')
     plt.legend(loc='upper right')
+    addtext(onexvals_four,oneyvals)
     pdf.savefig()
     plt.close()
 
     fig = plt.figure()
     for i in range(0, len(galaxies)):
         ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(psfxvals_four[i],psfyvals[i], marker='o', color='blue')
-        plt.scatter(sersicxvals_four[i],sersicyvals[i], marker='^', color='blue')
-        plt.scatter(psfxvals_eight[i],psfyvals[i], marker='o', color='green')
-        plt.scatter(sersicxvals_eight[i],sersicyvals[i], marker='^', color='green')
+        plt.scatter(onexvals_four[i],oneyvals[i], marker='o', color='blue')
+        plt.scatter(twoxvals_four[i],twoyvals[i], marker='^', color='blue')
+        plt.scatter(onexvals_eight[i],oneyvals[i], marker='o', color='green')
+        plt.scatter(twoxvals_eight[i],twoyvals[i], marker='^', color='green')
         plt.xlim(x2[0],x2[1])
         plt.ylim(y2[0],y2[1])
         plt.title(galaxies[i])
@@ -426,9 +455,9 @@ with PdfPages(name_res) as pdf:
                     res, res_header = multi[5-h].data, multi[5-h].header
                     print('not independent', galaxies[i], dependency[j])
                 
-                stampdata = data[round(75-dy):round(75+dy), round(75-dx):round(75+dx)] 
-                stampmodel = model[round(75-dy):round(75+dy), round(75-dx):round(75+dx)]
-                stampres = res[round(75-dy):round(75+dy), round(75-dx):round(75+dx)]
+                stampdata = data#[round(75-dy):round(75+dy), round(75-dx):round(75+dx)] 
+                stampmodel = model#[round(75-dy):round(75+dy), round(75-dx):round(75+dx)]
+                stampres = res#[round(75-dy):round(75+dy), round(75-dx):round(75+dx)]
                 
                 if h==0:
                     ax = fig.add_subplot(2,3,1)
