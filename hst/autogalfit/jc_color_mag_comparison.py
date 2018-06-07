@@ -129,18 +129,19 @@ size_eight_one = np.zeros(12)
 size_four_two = np.zeros(12)
 size_eight_two = np.zeros(12)
 
-kpcrad=np.zeros([12,2])
-for w in range(0,12):
-    arcsecperkpc = cosmo.arcsec_per_kpc_proper(redshifts[w])
-    for i in range(0,2):
-        kpcrad[w][i] = (0.025*sizepix[1][w][i])/arcsecperkpc.value
+kpcrad=np.zeros([2,12,2])
+for m in range(0,len(model)):
+    for w in range(0,12):
+        arcsecperkpc = cosmo.arcsec_per_kpc_proper(redshifts[w])
+        for i in range(0,2):
+            kpcrad[m][w][i] = (0.025*sizepix[m][w][i])/arcsecperkpc.value
 
 for w in range(0,12):
-    size_four_one[w] = kpcrad[w][0]
-    size_four_two[w] = kpcrad[w][0]
+    size_four_one[w] = kpcrad[0][w][0]
+    size_four_two[w] = kpcrad[1][w][0]
     size_color[w] = mags[1][w][0] - mags[1][w][1]
-    size_eight_one[w] = kpcrad[w][1]
-    size_eight_two[w] = kpcrad[w][1] 
+    size_eight_one[w] = kpcrad[0][w][1]
+    size_eight_two[w] = kpcrad[1][w][1] 
 
 x3 = minmax([size_four_one, size_eight_one])
 x3 = minmax([size_four_two, size_eight_two])
@@ -228,7 +229,7 @@ with PdfPages(name_co) as pdf:
     #plt.ylim(y4[0],y4[1])
     addtext(one_mag_475, one_mag_475-two_mag_475)
     pdf.savefig()
-    plt.close
+    plt.close()
 
 ######
     fig = plt.figure()
@@ -253,7 +254,7 @@ with PdfPages(name_co) as pdf:
     plt.ylim(y4[0],y4[1])
     addtext(one_mag_814, one_mag_814-two_mag_814)
     pdf.savefig()
-    plt.close
+    plt.close()
 
     ######
     fig = plt.figure()
@@ -281,7 +282,7 @@ with PdfPages(name_co) as pdf:
     plt.ylim(y5[0],y5[1])
     addtext(one_color, one_color-two_color)
     pdf.savefig()
-    plt.close
+    plt.close()
 
     ######
     fig = plt.figure()
@@ -312,7 +313,7 @@ with PdfPages(name_co) as pdf:
     #plt.ylim(minmax(onexvals_four/twoxvals_four))
     #plt.ylim(y6[0],y6[1])
     pdf.savefig()
-    plt.close
+    plt.close()
 
 
     ######
@@ -379,6 +380,7 @@ with PdfPages(name_co) as pdf:
     plt.title('size comparison')
     plt.xlim(x7[0],x7[1])
     #plt.ylim(y7[0],y7[1])
+    plt.ylim(0.1,5)
     addtext(size_four_two, size_four_two/size_eight_two)
     pdf.savefig()
     plt.close()
@@ -395,13 +397,13 @@ with PdfPages(name_co) as pdf:
     pdf.savefig()
     plt.close()
 
-    plt.scatter(size_four_one, size_four_one/size_eight_two, marker='o', color='red')
+    plt.scatter(size_four_one, size_four_one/size_four_two, marker='o', color='red')
     plt.xlabel('size_four_one(kpc)')
-    plt.ylabel('ratio of size_four_one to size_eight_two')
+    plt.ylabel('ratio of size_four_one to size_four_two')
     plt.title('size comparison')
     plt.xlim(x7[0],x7[1])
     #plt.ylim(y7[0],y7[1])
-    addtext(size_four_one, size_four_two/size_eight_two)
+    addtext(size_four_one, size_four_one/size_four_two)
     pdf.savefig()
     plt.close()
 
@@ -409,7 +411,7 @@ with PdfPages(name_co) as pdf:
     fig = plt.figure()
     for i in range(0, len(galaxies)):
         ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(size_four_one[i], size_four_one[i]/size_eight_two[i], marker='o', color='red')
+        plt.scatter(size_four_one[i], size_four_one[i]/size_four_two[i], marker='o', color='red')
         plt.xlim(x7[0],x7[1])
         #plt.ylim(y7[0],y7[1])
         plt.title(galaxies[i])
@@ -417,13 +419,13 @@ with PdfPages(name_co) as pdf:
     pdf.savefig()
     plt.close()
 
-    plt.scatter(size_four_two, size_four_two/size_eight_one, marker='o', color='red')
-    plt.xlabel('size_four_two(kpc)')
-    plt.ylabel('ratio of size_four_two to size_eight_one')
+    plt.scatter(size_eight_one, size_eight_one/size_eight_two, marker='o', color='red')
+    plt.xlabel('size_eight_one(kpc)')
+    plt.ylabel('ratio of size_eight_one to size_eight_two')
     plt.title('size comparison')
     plt.xlim(x7[0],x7[1])
     #plt.ylim(y7[0],y7[1])
-    addtext(size_four_two, size_four_two/size_eight_one)
+    addtext(size_eight_one, size_eight_one/size_eight_two)
     pdf.savefig()
     plt.close()
 
@@ -431,7 +433,7 @@ with PdfPages(name_co) as pdf:
     fig = plt.figure()
     for i in range(0, len(galaxies)):
         ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(size_four_two[i], size_four_two[i]/size_eight_one[i], marker='o', color='red')
+        plt.scatter(size_eight_one[i], size_eight_one[i]/size_eight_two[i], marker='o', color='red')
         plt.xlim(x7[0],x7[1])
         #plt.ylim(y7[0],y7[1])
         plt.title(galaxies[i])
@@ -466,37 +468,37 @@ with PdfPages(name_co) as pdf:
     pdf.savefig()
     plt.close()
   
-    plt.figure()
-    
-    plt.scatter(onexvals_four,oneyvals, label=one+' (F475W chi)', marker='o', color='blue')
-    plt.scatter(twoxvals_four,twoyvals, label=two+' (F475W chi)', marker='^', color='blue')
-    plt.scatter(onexvals_eight,oneyvals, label=one+' (F814W chi)', marker='o', color='green')
-    plt.scatter(twoxvals_eight,twoyvals, label=two+' (F814W chi)', marker='^', color='green')
-    plt.xlim(x2[0],x2[1])
-    plt.ylim(y2[0],y2[1])
-    plt.xlabel('chi-squared/nu')
-    plt.ylabel('mag_F475W - mag_F814W')
-    plt.title('Chi Squared vs. Color Plot (with one and two fits)')
-    plt.legend(loc='upper right')
-    addtext(onexvals_four,oneyvals)
-    pdf.savefig()
-    plt.close()
-
-    fig = plt.figure()
-    for i in range(0, len(galaxies)):
-        ax = fig.add_subplot(3,4,i+1)
-        plt.scatter(onexvals_four[i],oneyvals[i], marker='o', color='blue')
-        plt.scatter(twoxvals_four[i],twoyvals[i], marker='^', color='blue')
-        plt.scatter(onexvals_eight[i],oneyvals[i], marker='o', color='green')
-        plt.scatter(twoxvals_eight[i],twoyvals[i], marker='^', color='green')
-        plt.xlim(x2[0],x2[1])
-        plt.ylim(y2[0],y2[1])
-        plt.title(galaxies[i])
-        plt.tight_layout()
-        
-    pdf.savefig()
-    plt.close()
-os.system('open %s &' % name_co)
+    #plt.figure()
+    #
+    #    plt.scatter(onexvals_four,oneyvals, label=one+' (F475W chi)', marker='o', color='blue')
+    #    plt.scatter(twoxvals_four,twoyvals, label=two+' (F475W chi)', marker='^', color='blue')
+    #    plt.scatter(onexvals_eight,oneyvals, label=one+' (F814W chi)', marker='o', color='green')
+    #    plt.scatter(twoxvals_eight,twoyvals, label=two+' (F814W chi)', marker='^', color='green')
+    #    plt.xlim(x2[0],x2[1])
+    #    plt.ylim(y2[0],y2[1])
+    #    plt.xlabel('chi-squared/nu')
+    #    plt.ylabel('mag_F475W - mag_F814W')
+    #    plt.title('Chi Squared vs. Color Plot (with one and two fits)')
+    #    plt.legend(loc='upper right')
+    #    addtext(onexvals_four,oneyvals)
+    #    pdf.savefig()
+    #    plt.close()
+    #
+    #    fig = plt.figure()
+    #    for i in range(0, len(galaxies)):
+    #        ax = fig.add_subplot(3,4,i+1)
+    #        plt.scatter(onexvals_four[i],oneyvals[i], marker='o', color='blue')
+    #        plt.scatter(twoxvals_four[i],twoyvals[i], marker='^', color='blue')
+    #        plt.scatter(onexvals_eight[i],oneyvals[i], marker='o', color='green')
+    #        plt.scatter(twoxvals_eight[i],twoyvals[i], marker='^', color='green')
+    #        plt.xlim(x2[0],x2[1])
+    #        plt.ylim(y2[0],y2[1])
+    #        plt.title(galaxies[i])
+    #        plt.tight_layout()
+    #    
+    #   pdf.savefig()
+    #   plt.close()
+    os.system('open %s &' % name_co)
 
 
 #goal of this section is to print data/model/residual for each galaxy.
