@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
+from astropy.coordinates import SkyCoord
+from astropy import units as u
 
 mpl7_dir = os.environ['MANGADIR_MPL7'] 
 drp = fits.open(mpl7_dir+'drpall-v2_4_3.fits')
@@ -15,6 +17,39 @@ absmag = drpdata.field('nsa_elpetro_absmag')
 gr= absmag[:,3] - absmag[:,4]
 filename = 'histograms.pdf'
 
+# read in information from NSA catalog
+nsa = fits.open(mpl7_dir+'1-nsa_v1_0_1.fits')
+nsa_data = nsa[1].data
+
+# check on a galaxy of interest
+plate = 7977
+galaxy = 12704
+match = np.where((drpdata.field('plate') == plate) & (drpdata.field('ifudsgn') == str(galaxy)))
+mangaid = drpdata[match].field('mangaid')[0]
+nsaid = drpdata[match].field('nsa_nsaid')[0]
+
+yo = np.where(nsa_data.field('NSAID') == nsaid)
+name = nsa_data[yo[0][0]].field('IAUNAME')
+print(name)
+blah = drpdata[match].field('nsa_iauname')[0]
+print(blah)
+
+# match the two catalogs on the basis of right ascension and declination
+manga_ra = drpdata.field('objra')
+manga_dec = drpdata.field('objdec')
+nsa_ra = nsa_data.field('RA')
+nsa_dec = nsa_data.field('DEC')
+c = SkyCoord(ra=manga_ra*u.degree, dec=manga_dec*u.degree)
+catalog = SkyCoord(ra=nsa_ra*u.degree, dec=nsa_dec*u.degree)
+idx, d2d, d3d = c.match_to_catalog_sky(catalog)  
+
+# define th50, th90, and concentration arrays
+th50 = nsa_data.field('ELPETRO_TH50_R')
+th90 = nsa_data.field('ELPETRO_TH90_R')
+
+th50_manga = th50[idx]
+th90_manga = th90[idx]
+c_manga = th90_manga / th50_manga
 
 with PdfPages(filename) as pdf:
 
@@ -55,7 +90,17 @@ with PdfPages(filename) as pdf:
     pdf.savefig()
     plt.close
 
+    #concentration
+    fig = plt.figure()
+    print(np.shape(drpdata))
+    plt.hist(c_manga[good], bins=np.arange(1.5,4.1,0.1), color='teal')
+    plt.xlabel('Concentration')
+    plt.ylabel('Number of Galaxies')
+    plt.title('Distribution of Concentration in MaNGA sample')
 
+    pdf.savefig()
+    plt.close
+    
     
 os.system("open %s &" % filename)
     
