@@ -56,7 +56,7 @@ with PdfPages(filename) as pdf:
     fig = plt.figure()
     good = ba > 0
     bad_ba = ba > 0.3
-    print(np.count_nonzero(wanted))
+    print(np.count_nonzero(bad_ba))
     print(np.shape(drpdata))
     plt.hist(bad_ba[good], color='teal', bins=np.arange(0.1,1.02,.02))
     plt.xlabel('b/a ratio')
