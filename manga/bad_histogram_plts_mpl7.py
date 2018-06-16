@@ -55,10 +55,10 @@ with PdfPages(filename) as pdf:
     #plot 1: b/a ratio
     fig = plt.figure()
     good = ba > 0
-    bad_ba = good > 0.3
+    bad_ba = ba > 0.3
     print(np.count_nonzero(wanted))
     print(np.shape(drpdata))
-    plt.hist(ba[good], color='teal', bins=np.arange(0.1,1.02,.02))
+    plt.hist(bad_ba[good], color='teal', bins=np.arange(0.1,1.02,.02))
     plt.xlabel('b/a ratio')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of b/a Values in MaNGA sample')
@@ -91,10 +91,10 @@ with PdfPages(filename) as pdf:
     plt.close
 
     #concentration
-    bad_c = good > 2.6
+    bad_c = c_manga > 2.6
     fig = plt.figure()
     print(np.shape(drpdata))
-    plt.hist(c_manga[bad_c], bins=np.arange(1.5,4.1,0.1), color='teal')
+    plt.hist(bad_c[good], bins=np.arange(1.5,4.1,0.1), color='teal')
     plt.xlabel('Concentration')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of Concentration in MaNGA sample')
