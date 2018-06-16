@@ -50,19 +50,22 @@ th50_manga = th50[idx]
 th90_manga = th90[idx]
 c_manga = th90_manga / th50_manga
 
+
+with PdfPages(filename) as pdf:
+
 with PdfPages(filename) as pdf:
 
     #plot 1: b/a ratio
     fig = plt.figure()
     good = ba > 0
-    wanted = good > 0.3
+    wanted = ba > 0.3
     print(np.count_nonzero(wanted))
     print(np.shape(drpdata))
-    plt.hist(ba[wanted], color='teal', bins=np.arange(0.1,1.02,.02))
+    plt.xlim(xmin=0.3, xmax = 1.05)
+    plt.hist(ba[wanted], color='teal', bins=np.arange(0.05,1.02,.02))
     plt.xlabel('b/a ratio')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of b/a Values in MaNGA sample')
-    plt.axvline(x=0.3, color='k', linestyle='dashed')
 
     pdf.savefig()
     plt.close
@@ -70,7 +73,7 @@ with PdfPages(filename) as pdf:
     #plot 2: stellar mass
     fig = plt.figure()
     print(np.shape(drpdata))
-    plt.hist(np.log10(stellar_mass[good]),color='teal', bins=np.arange(8.0,12.0,.2))
+    plt.hist(np.log10(stellar_mass[wanted]),color='teal', bins=np.arange(8.0,12.0,.2))
     plt.xlim(8,12)
     plt.xlabel('Stellar Mass (logM☉)')
     plt.ylabel('Number of Galaxies')
@@ -82,7 +85,7 @@ with PdfPages(filename) as pdf:
     #plot 3: g-r
     fig = plt.figure()
     print(np.shape(drpdata))
-    plt.hist(gr[good], bins=np.arange(0.0,1.0,0.05), color='teal')
+    plt.hist(gr[wanted], bins=np.arange(0.0,1.0,0.05), color='teal')
     plt.xlabel('g-r')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of g-r in MaNGA sample')
@@ -91,10 +94,10 @@ with PdfPages(filename) as pdf:
     plt.close
 
     #concentration
-    bad_c = good > 2.6
     fig = plt.figure()
     print(np.shape(drpdata))
-    plt.hist(c_manga[bad_c], bins=np.arange(1.5,4.1,0.1), color='teal')
+    plt.xlim(xmin=0, xmax = 4.5)
+    plt.hist(c_manga[wanted], bins=np.arange(.25,4.1,0.1), color='teal')
     plt.xlabel('Concentration')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of Concentration in MaNGA sample')
