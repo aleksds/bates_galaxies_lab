@@ -89,11 +89,12 @@ with PdfPages(filename) as pdf:
     #plot 1: b/a ratio
     fig = plt.figure()
     plt.xlim(xmin=0.0, xmax = 1.05)
-    plt.hist(ba_gal, color='teal', bins=np.arange(0.05,1.02,.02))
-    plt.hist(ba_gal_late_edge, color='red', bins=np.arange(0.05,1.02,.02)) 
+    plt.hist(ba_gal, color='teal', bins=np.arange(0.05,1.02,.02), label= 'All MPL-7 galaxies')
+    plt.hist(ba_gal_late_edge, color='red', bins=np.arange(0.05,1.02,.02), label= 'Late-type-edge-on Galaxies') 
     plt.xlabel('b/a ratio')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of b/a Values in MaNGA sample')
+    plt.legend(loc='upper left', frameon=False, fontsize='x-small')
 
     pdf.savefig()
     plt.close
@@ -109,25 +110,27 @@ with PdfPages(filename) as pdf:
     
     #plot 2: stellar mass
     fig = plt.figure()
-    plt.hist(log_stellar_mass_gal[use],color='teal', bins=np.arange(8.0,12.0,.2))
-    plt.hist(log_stellar_mass_gal_late[mo], color='cyan', bins=np.arange(8.0,12.0,.2))
-    plt.hist(log_stellar_mass_gal_late_edge[yo], color='red', bins=np.arange(8.0,12.0,.2))
+    plt.hist(log_stellar_mass_gal[use],color='teal', bins=np.arange(8.0,12.0,.2), label= 'All MPL-7 galaxies')
+    plt.hist(log_stellar_mass_gal_late[mo], color='cyan', bins=np.arange(8.0,12.0,.2), label= 'Late-type Galaxies')
+    plt.hist(log_stellar_mass_gal_late_edge[yo], color='red', bins=np.arange(8.0,12.0,.2), label= 'Late-type-edge-on Galaxies')
     plt.xlim(8,12)
     plt.xlabel('Stellar Mass (logM☉)')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of Stellar Mass in MaNGA sample')
+    plt.legend(loc='upper left', frameon=False, fontsize='x-small')
 
     pdf.savefig()
     plt.close
 
     #plot 3: g-r
     fig = plt.figure()
-    plt.hist(gr_gal, bins=np.arange(0.0,1.0,0.05), color='teal')
-    plt.hist(gr_gal_late, bins=np.arange(0.0,1.0,0.05), color='cyan')
-    plt.hist(gr_gal_late_edge, bins=np.arange(0.0,1.0,0.05), color='red')
+    plt.hist(gr_gal, bins=np.arange(0.0,1.0,0.05), color='teal', label= 'All MPL-7 galaxies')
+    plt.hist(gr_gal_late, bins=np.arange(0.0,1.0,0.05), color='cyan', label= 'Late-type Galaxies')
+    plt.hist(gr_gal_late_edge, bins=np.arange(0.0,1.0,0.05), color='red', label= 'Late-type-edge-on Galaxies')
     plt.xlabel('g-r')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of g-r in MaNGA sample')
+    plt.legend(loc='upper left', frameon=False, fontsize='x-small')
 
     pdf.savefig()
     plt.close
@@ -135,11 +138,12 @@ with PdfPages(filename) as pdf:
     #concentration
     fig = plt.figure()
     plt.xlim(xmin=0, xmax = 4.5)
-    plt.hist(c_manga_gal, bins=np.arange(.25,4.1,0.1), color='teal')
-    plt.hist(c_manga_gal_late_edge, bins=np.arange(.25,4.1,0.1), color='red')
+    plt.hist(c_manga_gal, bins=np.arange(.25,4.1,0.1), color='teal', label= 'All MPL-7 galaxies')
+    plt.hist(c_manga_gal_late_edge, bins=np.arange(.25,4.1,0.1), color='red', label= 'Late-type-edge-on Galaxies')
     plt.xlabel('Concentration')
     plt.ylabel('Number of Galaxies')
     plt.title('Distribution of Concentration in MaNGA sample')
+    plt.legend(loc='upper left', frameon=False, fontsize='x-small')
 
     pdf.savefig()
     plt.close
