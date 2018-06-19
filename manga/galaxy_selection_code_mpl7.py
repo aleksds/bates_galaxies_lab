@@ -248,22 +248,22 @@ with PdfPages(filename) as pdf:
                 # plot 4: emission-line SFLUX
                 ax = fig.add_subplot(3,3,4)
                 daplot(dap_sflux*1.e-17, fmin, fmax)
-                plt.title('SFLUX', fontsize=10)
+                plt.title(' O[II] flux', fontsize=10)
     
                 # plot 5: emission-line SFLUX serror
                 ax = fig.add_subplot(3,3,5)
                 daplot(dap_serr*1.e-17, fmin, fmax)
-                plt.title('SFLUX Error', fontsize=10)
+                plt.title('O[II] flux Error', fontsize=10)
     
                 # plot 6: emission-line SFLUX signal-to-noise ratio
                 ax = fig.add_subplot(3,3,6)
                 daplot(dap_sflux/dap_serr, 0.1, 10.)
-                plt.title('SFLUX S/N', fontsize=10)
+                plt.title('signal to noise ratio of O[II] flux', fontsize=10)
     
                 # plot 7: emission-line flux / Halpha flux
                 ax = fig.add_subplot(3,3,7)
                 daplot(dap_sflux/dap_ha_sflux, 0.1, 10.)
-                plt.title('/HA', fontsize=10)
+                plt.title('O[II] to HA ratio', fontsize=10)
     
                 #plot 8: emission-line velocity
                 ax = fig.add_subplot(3,3,8)
