@@ -293,8 +293,7 @@ with PdfPages(filename) as pdf:
                 plt.close()
 
 
-    print("KEEP IN MIND SOMETIMES YOU GET AN ERROR WHEN THE PROGRAM TRIES TO OPEN THE PDF. JUST GO TO THE DIRECTORY WHERE IT WAS CREATED AND OPEN IT MANUALLY.")
-    os.system("open %s &" % filename)
+os.system("open %s &" % filename)
 
 
 
