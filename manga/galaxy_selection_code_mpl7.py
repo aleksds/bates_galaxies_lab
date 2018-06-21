@@ -95,20 +95,20 @@ ba_gal = ba[blah]
 # define edge-on, late-type galaxies
 late = c_manga_gal < 2.6
 ba_gal_late = ba_gal[late]
-edge = ba_gal_late < 0.3
+edge = abs(ba_gal_late) < 0.3
 ba_gal_late_edge = ba_gal_late[edge]
 print('there are', len(ba_gal_late_edge),'edge-on and late-type galxies in the mpl7 survey')
 good_plates = np.sort(plateifu[blah][late][edge])
 
-filename = 'good_galaxies.pdf'
+filename = 'good_galaxiesAll.pdf'
 with PdfPages(filename) as pdf:
 
-    for i in range(0, 10): #len(good_plates)
+    for i in range(0,len(good_plates)):
         hyphen = good_plates[i].find('-')
         plate = good_plates[i][0:hyphen]
         ifu = good_plates[i][hyphen + 1:]
         name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
-        print(name)
+        print(str(i)+' '+str(plate)+"-"+str(ifu))
         if os.path.isfile(name):
             match = np.where((drpdata.field('plate') == int(plate)) & (drpdata.field('ifudsgn') == str(ifu)))
             hdu_dap = fits.open(name)
@@ -159,7 +159,7 @@ with PdfPages(filename) as pdf:
             radkpc_map = np.zeros([size, size])
             xproj_kpc_map = np.zeros([size, size])
             yproj_kpc_map = np.zeros([size, size])
-            zproj_kpc_map = np.zeros([size, size]) 
+            zproj_kpc_map = np.zeros([size, size]) #
     
             for j in range(0, size):
                 for k in range(0, size):
@@ -231,7 +231,8 @@ with PdfPages(filename) as pdf:
                            cmap=cm.coolwarm)
                 plt.colorbar()
                 plt.title('vertical distance [kpc]', fontsize=10)
-                plt.suptitle(name)
+                plt.suptitle('('+str(i)+')'+' '+plate+'-'+ifu)
+
     
                 # plot 2/3: emission-line flux vs vertical distance
                 ax = fig.add_subplot(4,2,2)
@@ -244,26 +245,31 @@ with PdfPages(filename) as pdf:
                 ax.scatter(zproj_kpc,  dap_sflux*1.e-17, lw = 0, color='red', s=0.2)
                 plt.title('emission-line flux vs vertical distance', fontsize=9)
                 plt.text(0.,fmin*2.,'i='+str(round(inc * 180. / np.pi,2)), fontsize=9)
+
     
                 # plot 4: emission-line SFLUX
                 ax = fig.add_subplot(3,3,4)
                 daplot(dap_sflux*1.e-17, fmin, fmax)
                 plt.title(' O[II] flux', fontsize=10)
+
     
                 # plot 5: emission-line SFLUX serror
                 ax = fig.add_subplot(3,3,5)
                 daplot(dap_serr*1.e-17, fmin, fmax)
                 plt.title('O[II] flux Error', fontsize=10)
+
     
                 # plot 6: emission-line SFLUX signal-to-noise ratio
                 ax = fig.add_subplot(3,3,6)
                 daplot(dap_sflux/dap_serr, 0.1, 10.)
                 plt.title('signal to noise ratio of O[II] flux', fontsize=10)
+
     
                 # plot 7: emission-line flux / Halpha flux
                 ax = fig.add_subplot(3,3,7)
                 daplot(dap_sflux/dap_ha_sflux, 0.1, 10.)
                 plt.title('O[II] to HA ratio', fontsize=10)
+
     
                 #plot 8: emission-line velocity
                 ax = fig.add_subplot(3,3,8)
@@ -276,6 +282,7 @@ with PdfPages(filename) as pdf:
                            cmap=cm.coolwarm, vmin=-250, vmax=250)
                 plt.colorbar()
                 plt.title('GVEL', fontsize=10)
+
     
                 # plot 9: emission-line dispersion
                 ax = fig.add_subplot(3,3,9)
@@ -288,6 +295,7 @@ with PdfPages(filename) as pdf:
                            cmap=cm.YlOrRd, vmin=0, vmax=250)
                 plt.colorbar()
                 plt.title('GSIGMA', fontsize=10)
+
     
                 pdf.savefig()
                 plt.close()
