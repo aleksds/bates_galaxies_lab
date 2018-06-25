@@ -105,7 +105,7 @@ if togetherness == 'independent':
                 if i==1:
                     mag=jc_values[w][2] # the m814 value
                     text.write(' 3) '+str(mag)+'     1\n')
-                text.write(' 4) 1.0      1\n')
+                text.write(' 4) '+str(jc_values[w][3])+'      1\n')
                 text.write(' 5) 4.0      1\n')
                 text.write(' 6) 0      0\n')
                 text.write(' 7) 0      0\n')
@@ -194,7 +194,7 @@ else:
                     text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
                     text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
                 text.write(' 3) 19.5,19.5     1,1                 band\n')
-                text.write(' 4) 1.0,1.110e-16    1,0                 cheb\n')
+                text.write(' 4)  '+str(jc_values[w][3])+' ,1.110e-16    1,0                 cheb\n')
                 text.write(' 5) 4.000,4.441e-16    1,0                 cheb\n')
                 text.write(' 6) 0,0               0,0                 cheb\n')
                 text.write(' 7) 0,0               0,0                 cheb\n')
