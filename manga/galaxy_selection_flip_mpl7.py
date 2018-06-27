@@ -107,7 +107,7 @@ good_plates = np.sort(plateifu[blah][late][edge])
 filename = 'good_galaxiesAll.pdf'
 with PdfPages(filename) as pdf:
 
-    for i in range(0,10):#len(good_plates)):
+    for i in range(0,5):#len(good_plates)):
         hyphen = good_plates[i].find('-')
         plate = good_plates[i][0:hyphen]
         ifu = good_plates[i][hyphen + 1:]
@@ -224,6 +224,15 @@ with PdfPages(filename) as pdf:
 
                 vel_flip = np.zeros([size,size])
 
+                s_n = dap_sflux/dap_serr
+                bad = (s_n < 2.5)
+                s_n[bad]=0
+
+                dap_vel[bad]= -2000
+                for i in range(0,len(dap_vel[i])):
+                    if dap_vel[i].all() < -1999:
+                            dap_vel.remove(dap_vel[i].all())
+
                 for m in range(0,size):
                     for n in range(0,size):
                         dist = np.sqrt((xproj_kpc - xproj_kpc[m,n])**2 + (yproj_kpc + yproj_kpc[m,n])**2)
@@ -295,7 +304,7 @@ with PdfPages(filename) as pdf:
     
                 # plot 6: emission-line SFLUX signal-to-noise ratio
                 ax = fig.add_subplot(3,3,6)
-                daplot(dap_sflux/dap_serr, 0.1, 10.)
+                daplot(s_n, 0.1, 10.)
                 plt.title('signal to noise ratio of O[II] flux', fontsize=10)
 
     
