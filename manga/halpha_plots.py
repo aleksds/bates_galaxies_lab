@@ -13,6 +13,7 @@ import glob
 from marvin.utils.general.images import showImage
 
 
+
 # function for plotting maps of relevant quantities
 def daplot(quantity, qmin, qmax):
     ax.set_xlim(0, size)
@@ -51,7 +52,6 @@ drp = fits.open(mpl7_dir + 'drpall-v2_4_3.fits')
 drpdata = drp[1].data
 
 ba = drpdata.field('nsa_sersic_ba')
-filename = 'good_galaxies.pdf'
 plateifu = drpdata.field('plateifu')
 
 # read in information from NSA catalog
@@ -91,7 +91,7 @@ print('there are', len(ba_gal_late_edge),'edge-on and late-type galxies in the m
 good_plates = np.sort(plateifu[blah][late][edge])
 
 
-filename = 'ha_plots.pdf'      #    input('please enter filename')
+filename = 'ha_plots_vel.pdf'
 with PdfPages(filename) as pdf:
     for i in range(0, 3):  # len(good_plates)):
         plate, ifu = good_plates[i].split('-')
@@ -107,6 +107,7 @@ with PdfPages(filename) as pdf:
             dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Ha-6564'], :, :]
             dap_hb_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Hb-4862'], :, :]
             dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[emlc['Ha-6564'], :, :]
+            dap_vel_ha = hdu_dap['EMLINE_GVEL'].data[emlc['Ha-6564'], :, :]
 
 
             # create arrays that correspond to x and y coordinates for each spaxel
@@ -225,39 +226,51 @@ with PdfPages(filename) as pdf:
                 s_n[bad] = 0
 
                 # plot 1: plots the image of the galaxy
-                image = showImage(plateifu=good_plates[i], show_image=False)
                 fig = plt.figure()
-                ax = fig.add_subplot(2, 3, 1)
+                ax = fig.add_subplot(3, 3, 1)
+                image = showImage(plateifu=good_plates[i], show_image=False)
+                fig.suptitle(good_plates[i]+' '+ '('+str(i)+')', fontsize = 12)
                 plt.imshow(image)
                 plt.axis('off')
-                plt.title(good_plates[i], fontsize=8)
                 print(good_plates[i] + ' ' + str(i))
 
                 # plot 2: ha flux
-                ax = fig.add_subplot(2, 3, 2)
+                ax = fig.add_subplot(3, 3, 2)
                 daplot(dap_ha_sflux * 1.e-17, fmin, fmax)
                 plt.title(' Ha flux', fontsize=8)
 
                 # plot 3: ha error
-                ax = fig.add_subplot(2, 3, 3)
+                ax = fig.add_subplot(3, 3, 3)
                 daplot(dap_serr * 1.e-17, fmin, fmax)
                 plt.title('Ha flux Error', fontsize=8)
 
                 # plot 4: s/n
-                ax = fig.add_subplot(2, 3, 4)
+                ax = fig.add_subplot(3, 3, 4)
                 daplot(dap_ha_sflux / dap_serr, 0.1, 10.)
                 plt.title('signal to noise ratio of O[II] flux', fontsize=8)
 
                 # plot 5: Ha/Hb emission
-                ax = fig.add_subplot(2, 3, 5)
+                ax = fig.add_subplot(3, 3, 5)
                 daplot(dap_ha_sflux / dap_hb_sflux, 0.1, 10.)
                 plt.title('Ha / Hab', fontsize=8)
 
 
                 # plot 6:
-                ax = fig.add_subplot(2, 3, 6)
+                ax = fig.add_subplot(3, 3, 6)
                 daplot(ha_hb - ha_hb_flip, 0.1, 10.)
                 plt.title('Ha/Hb - Ha/Hb flip', fontsize=8)
+
+                # plot 7:
+                ax = fig.add_subplot(3, 3, 7)
+                ax.set_xlim(0, size)
+                ax.set_ylim(0, size)
+                ax.set_xticklabels(())
+                ax.set_yticklabels(())
+                plt.imshow(dap_vel_ha, origin='lower',
+                           interpolation='nearest',
+                           cmap=cm.seismic, vmin=-250, vmax=250)
+                plt.colorbar()
+                plt.title('Ha Vel', fontsize=8)
 
                 pdf.savefig()
                 plt.close()
