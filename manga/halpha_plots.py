@@ -107,7 +107,7 @@ with PdfPages(filename) as pdf:
             dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Ha-6564'], :, :]
             dap_hb_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Hb-4862'], :, :]
             dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[emlc['Ha-6564'], :, :]
-            dap_vel_ha = hdu_dap['EMLINE_GVEL'].data[emlc['Ha-6564'], :, :]
+            dap_ha_vel = hdu_dap['EMLINE_GVEL'].data[emlc['Ha-6564'], :, :]
 
 
             # create arrays that correspond to x and y coordinates for each spaxel
@@ -208,10 +208,19 @@ with PdfPages(filename) as pdf:
                 dap_serr = np.sqrt(1. / dap_ha_sivar)  # *1.e-4
 
 
-                s_n = dap_ha_sflux/dap_serr
                 vel_flip = np.zeros([size, size])
                 ha_hb = dap_ha_sflux / dap_hb_sflux
                 ha_hb_flip =np.zeros([size,size])
+                ha_vel_flip = np.zeros([size, size])
+
+                s_n = dap_ha_sflux/dap_serr
+                bad = (s_n < 2.5)
+                s_n[bad]=0
+
+                dap_ha_vel[bad]= -2000
+                for i in range(0,len(dap_vel[i])):
+                    if dap_ha_vel[i].all() < -1999:
+                            dap_vel.remove(dap_vel[i].all())
 
 
                 for m in range(0, size):
@@ -220,6 +229,7 @@ with PdfPages(filename) as pdf:
                         test = (dist == np.min(dist))
                         vel_flip[m, n] = dap_vel[test]
                         ha_hb_flip[m, n] = ha_hb[test]
+                        ha_vel_flip[m, n]= dap_ha_vel[test]
 
                 s_n = dap_sflux / dap_serr
                 bad = (s_n < 3)
@@ -246,8 +256,8 @@ with PdfPages(filename) as pdf:
 
                 # plot 4: s/n
                 ax = fig.add_subplot(3, 3, 4)
-                daplot(dap_ha_sflux / dap_serr, 0.1, 10.)
-                plt.title('signal to noise ratio of O[II] flux', fontsize=8)
+                daplot(s_n, 0.1, 10.)
+                plt.title('signal to noise ratio of Halpha flux', fontsize=8)
 
                 # plot 5: Ha/Hb emission
                 ax = fig.add_subplot(3, 3, 5)
@@ -255,22 +265,35 @@ with PdfPages(filename) as pdf:
                 plt.title('Ha / Hab', fontsize=8)
 
 
-                # plot 6:
+                # plot 6: Ha/Hb - Ha/Hb flip
                 ax = fig.add_subplot(3, 3, 6)
                 daplot(ha_hb - ha_hb_flip, 0.1, 10.)
                 plt.title('Ha/Hb - Ha/Hb flip', fontsize=8)
 
-                # plot 7:
+                # plot 7: Halpha velovity
                 ax = fig.add_subplot(3, 3, 7)
                 ax.set_xlim(0, size)
                 ax.set_ylim(0, size)
                 ax.set_xticklabels(())
                 ax.set_yticklabels(())
-                plt.imshow(dap_vel_ha, origin='lower',
+                plt.imshow(dap_ha_vel, origin='lower',
                            interpolation='nearest',
                            cmap=cm.seismic, vmin=-250, vmax=250)
                 plt.colorbar()
                 plt.title('Ha Vel', fontsize=8)
+
+                #plot 8: Halpha vel - halpha vel flipped
+                ax = fig.add_subplot(3, 3, 8)
+                ax.set_xlim(0, size)
+                ax.set_ylim(0, size)
+                ax.set_xticklabels(())
+                ax.set_yticklabels(())
+                plt.imshow(dap_ha_vel - ha_vel_flip, origin='lower',
+                           interpolation='nearest',
+                           cmap=cm.seismic, vmin=-250, vmax=250)
+                plt.colorbar()
+                plt.title('Ha Vel - ha Vel flipped', fontsize=8)
+
 
                 pdf.savefig()
                 plt.close()
