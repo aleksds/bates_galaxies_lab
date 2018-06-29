@@ -209,30 +209,18 @@ with PdfPages(filename) as pdf:
                 dap_serr = np.sqrt(1. / dap_sivar)  # *1.e-4
                 dap_ha_serr = np.sqrt(1. / dap_ha_sivar)
 
-
                 vel_flip = np.zeros([size, size])
                 ha_hb = dap_ha_sflux / dap_hb_sflux
                 ha_hb_flip =np.zeros([size,size])
                 ha_vel_flip = np.zeros([size, size])
 
                 s_n_ha = dap_ha_sflux/dap_ha_serr
-                bad = (s_n_ha < 2.)
+                bad = (s_n_ha < 3.)
                 s_n_ha[bad]=0
 
                 s_n = dap_sflux/dap_serr
-                bad = (s_n < 2.)
+                bad = (s_n < 3.)
                 s_n[bad]=0
-
-                dap_ha_vel[bad]= -2000
-                for i in range(0,len(dap_vel[i])):
-                    if dap_ha_vel[i].all() < -1999:
-                            dap_vel.remove(dap_vel[i].all())
-
-                dap_vel[bad]= -2000
-                for i in range(0,len(dap_vel[i])):
-                    if dap_vel[i].all() < -1999:
-                            dap_vel.remove(dap_vel[i].all())
-
 
                 for m in range(0, size):
                     for n in range(0, size):
@@ -242,6 +230,18 @@ with PdfPages(filename) as pdf:
                         ha_hb_flip[m, n] = ha_hb[test]
                         ha_vel_flip[m, n]= dap_ha_vel[test]
 
+                flip_difference = dap_vel-vel_flip
+                flip_ha_difference = dap_ha_vel-ha_vel_flip
+
+                flip_ha_difference[bad]= -2000
+                for i in range(0,len(flip_ha_difference[i])):
+                    if flip_ha_difference[i].all() < -1999:
+                            flip_ha_difference.remove(flip_ha_difference[i].all())
+
+                flip_difference[bad]= -2000
+                for i in range(0,len(flip_difference[i])):
+                    if flip_difference[i].all() < -1999:
+                            flip_difference.remove(flip_difference[i].all())
 
                 # page 1, plot 1: galaxy coordinates in kpc
                 fig = plt.figure()
@@ -325,7 +325,7 @@ with PdfPages(filename) as pdf:
                 ax.set_ylim(0, size)
                 ax.set_xticklabels(())
                 ax.set_yticklabels(())
-                plt.imshow(dap_vel-vel_flip, origin='lower',
+                plt.imshow(flip_difference, origin='lower',
                            interpolation='nearest',
                            cmap=cm.coolwarm, vmin=-80, vmax=80)
                 plt.colorbar()
@@ -338,10 +338,10 @@ with PdfPages(filename) as pdf:
                 # page 2, plot 1: plots the image of the galaxy
                 fig = plt.figure()
                 ax = fig.add_subplot(3, 3, 1)
-                image = showImage(plateifu=good_plates[i], show_image=False)
-                fig.suptitle(good_plates[i]+' '+ '('+str(i)+')', fontsize = 12)
-                plt.imshow(image)
-                plt.axis('off')
+                #image = showImage(plateifu=good_plates[i], show_image=False)
+                #fig.suptitle(good_plates[i]+' '+ '('+str(i)+')', fontsize = 12)
+                #plt.imshow(image)
+                #plt.axis('off')
                 print(good_plates[i] + ' ' + str(i))
 
                 # page 2, plot 2: ha flux
@@ -370,7 +370,7 @@ with PdfPages(filename) as pdf:
                 daplot(ha_hb - ha_hb_flip, 0.1, 10.)
                 plt.title('Ha/Hb - Ha/Hb flip', fontsize=8)
 
-                # page 1, plot 7: Ha emission-line dispersion
+                # page 2, plot 7: Ha emission-line dispersion
                 ax = fig.add_subplot(3,3,7)
                 ax.set_xlim(0, size)
                 ax.set_ylim(0, size)
@@ -395,13 +395,13 @@ with PdfPages(filename) as pdf:
                 plt.title('Ha Velocity', fontsize=8)
 
 
-                #plot 9: Halpha vel - halpha vel flipped
+                # page 2, plot 9: Halpha vel - halpha vel flipped
                 ax = fig.add_subplot(3, 3, 9)
                 ax.set_xlim(0, size)
                 ax.set_ylim(0, size)
                 ax.set_xticklabels(())
                 ax.set_yticklabels(())
-                plt.imshow(dap_ha_vel - ha_vel_flip, origin='lower',
+                plt.imshow(flip_ha_difference, origin='lower',
                            interpolation='nearest',
                            cmap=cm.seismic, vmin=-250, vmax=250)
                 plt.colorbar()
