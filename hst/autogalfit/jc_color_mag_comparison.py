@@ -104,7 +104,7 @@ for m in range(0,len(model)): #loop through each directory
                 print('814')
                 mags[m][w][1] = np.float(content[47][4:10])
                 chi[m][w][1] = np.float(content[3][14:19])
-                if np.float(content[48][4]) == 0:
+                if np.float(content[48][4:7]) == 0:
                     modeltype[m] = 'psf'
                     sizepix[m][w][1] = 0
                 else:
@@ -114,7 +114,7 @@ for m in range(0,len(model)): #loop through each directory
                 print('475')
                 mags[m][w][0] = np.float(content[47][4:10])
                 chi[m][w][0] = np.float(content[3][14:19])
-                if np.float(content[48][4]) == 0:
+                if np.float(content[48][4:7]) == 0:
                    modeltype[m] = 'psf'
                    sizepix[m][w][0] = 0
                 else:
