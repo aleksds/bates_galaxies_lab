@@ -338,9 +338,9 @@ with PdfPages(filename) as pdf:
                 # page 2, plot 1: plots the image of the galaxy
                 fig = plt.figure()
                 ax = fig.add_subplot(3, 3, 1)
-                #image = showImage(plateifu=good_plates[i], show_image=False)
-                #fig.suptitle(good_plates[i]+' '+ '('+str(i)+')', fontsize = 12)
-                #plt.imshow(image)
+                image = showImage(plateifu=good_plates[i], show_image=False)
+                fig.suptitle(good_plates[i]+' '+ '('+str(i)+')', fontsize = 12)
+                plt.imshow(image)
                 plt.axis('off')
                 print(good_plates[i] + ' ' + str(i))
 
