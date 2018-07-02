@@ -93,7 +93,7 @@ good_plates = np.sort(plateifu[blah][late][edge])
 
 filename = 'all_good_plots.pdf'
 with PdfPages(filename) as pdf:
-    for i in range(0, 3):  # len(good_plates)):
+    for i in range(0, 5): #len(good_plates)):
         plate, ifu = good_plates[i].split('-')
         name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(
             ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
@@ -209,11 +209,8 @@ with PdfPages(filename) as pdf:
                 dap_serr = np.sqrt(1. / dap_sivar)  # *1.e-4
                 dap_ha_serr = np.sqrt(1. / dap_ha_sivar)
 
-                vel_flip = np.zeros([size, size])
-                ha_hb = dap_ha_sflux / dap_hb_sflux
-                ha_hb_flip =np.zeros([size,size])
-                ha_vel_flip = np.zeros([size, size])
-
+            
+                #Identifying bad spaxels
                 s_n_ha = dap_ha_sflux/dap_ha_serr
                 bad = (s_n_ha < 3.)
                 s_n_ha[bad]=0
@@ -221,6 +218,12 @@ with PdfPages(filename) as pdf:
                 s_n = dap_sflux/dap_serr
                 bad = (s_n < 3.)
                 s_n[bad]=0
+
+                #flipping velocity and fining the asymmetry
+                vel_flip = np.zeros([size, size])
+                ha_hb = dap_ha_sflux / dap_hb_sflux
+                ha_hb_flip =np.zeros([size,size])
+                ha_vel_flip = np.zeros([size, size])
 
                 for m in range(0, size):
                     for n in range(0, size):
@@ -234,14 +237,19 @@ with PdfPages(filename) as pdf:
                 flip_ha_difference = dap_ha_vel-ha_vel_flip
 
                 flip_ha_difference[bad]= -2000
-                for i in range(0,len(flip_ha_difference[i])):
+                for i in range(0,size):
                     if flip_ha_difference[i].all() < -1999:
                             flip_ha_difference.remove(flip_ha_difference[i].all())
 
                 flip_difference[bad]= -2000
-                for i in range(0,len(flip_difference[i])):
+                for i in range(0,size):
                     if flip_difference[i].all() < -1999:
                             flip_difference.remove(flip_difference[i].all())
+
+                #Identifying outflow velocity
+                dap_vel_out = flip_difference/(2*np.cos(inc))
+                dap_vel_out_avg = np.median(dap_vel_out)
+                print(dap_vel_out_avg)
 
                 # page 1, plot 1: galaxy coordinates in kpc
                 fig = plt.figure()
@@ -403,10 +411,25 @@ with PdfPages(filename) as pdf:
                 ax.set_yticklabels(())
                 plt.imshow(flip_ha_difference, origin='lower',
                            interpolation='nearest',
-                           cmap=cm.seismic, vmin=-250, vmax=250)
+                           cmap=cm.seismic, vmin=-80, vmax=80)
                 plt.colorbar()
                 plt.title('Ha Vel - ha Vel flipped', fontsize=8)
 
+
+                pdf.savefig()
+                plt.close()
+
+                # page 3, plot 1: Outflow velocity
+                ax = fig.add_subplot(1, 1, 1)
+                ax.set_xlim(0, size)
+                ax.set_ylim(0, size)
+                ax.set_xticklabels(())
+                ax.set_yticklabels(())
+                plt.imshow(dap_vel_out, origin='lower',
+                           interpolation='nearest',
+                           cmap=cm.seismic, vmin=-250, vmax=250)
+                plt.colorbar()
+                plt.title('Outflow Velocity', fontsize=8)
 
                 pdf.savefig()
                 plt.close()
