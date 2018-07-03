@@ -93,7 +93,7 @@ good_plates = np.sort(plateifu[blah][late][edge])
 
 filename = 'all_good_plots.pdf'
 with PdfPages(filename) as pdf:
-    for i in range(0, 5): #len(good_plates)):
+    for i in range(0,5): #len(good_plates)):
         plate, ifu = good_plates[i].split('-')
         name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(
             ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
@@ -209,7 +209,6 @@ with PdfPages(filename) as pdf:
                 dap_serr = np.sqrt(1. / dap_sivar)  # *1.e-4
                 dap_ha_serr = np.sqrt(1. / dap_ha_sivar)
 
-            
                 #Identifying bad spaxels
                 s_n_ha = dap_ha_sflux/dap_ha_serr
                 bad = (s_n_ha < 3.)
@@ -237,19 +236,23 @@ with PdfPages(filename) as pdf:
                 flip_ha_difference = dap_ha_vel-ha_vel_flip
 
                 flip_ha_difference[bad]= -2000
-                for i in range(0,size):
-                    if flip_ha_difference[i].all() < -1999:
-                            flip_ha_difference.remove(flip_ha_difference[i].all())
+                for b in range(0,size):
+                    if flip_ha_difference[b].all() < -1999:
+                            flip_ha_difference.remove(flip_ha_difference[b].all())
 
                 flip_difference[bad]= -2000
-                for i in range(0,size):
-                    if flip_difference[i].all() < -1999:
-                            flip_difference.remove(flip_difference[i].all())
+                for b in range(0,size):
+                    if flip_difference[b].all() < -1999:
+                            flip_difference.remove(flip_difference[b ].all())
 
                 #Identifying outflow velocity
                 dap_vel_out = flip_difference/(2*np.cos(inc))
                 dap_vel_out_avg = np.median(dap_vel_out)
                 print(dap_vel_out_avg)
+
+                dap_vel_ha_out = flip_difference/(2*np.cos(inc))
+                dap_vel_ha_out_avg = np.median(dap_vel_out)
+                print(dap_vel_ha_out_avg)
 
                 # page 1, plot 1: galaxy coordinates in kpc
                 fig = plt.figure()
@@ -291,16 +294,16 @@ with PdfPages(filename) as pdf:
 
     
                 # page 1, plot 6: emission-line dispersion
-                ax = fig.add_subplot(3,3,6)
-                ax.set_xlim(0, size)
-                ax.set_ylim(0, size)
-                ax.set_xticklabels(())
-                ax.set_yticklabels(())
-                plt.imshow(dap_sig, origin='lower',
-                           interpolation='nearest',
-                           cmap=cm.YlOrRd, vmin=0, vmax=250)
-                plt.colorbar()
-                plt.title('GSIGMA', fontsize=10)
+                #ax = fig.add_subplot(3,3,6)
+                #ax.set_xlim(0, size)
+                #ax.set_ylim(0, size)
+                #ax.set_xticklabels(())
+                #ax.set_yticklabels(())
+                #plt.imshow(dap_sig, origin='lower',
+                           #interpolation='nearest',
+                           #cmap=cm.YlOrRd, vmin=0, vmax=250)
+                #plt.colorbar()
+                #plt.title('GSIGMA', fontsize=10)
 
                 
                 # page 1, plot 7: emission-line velocity
@@ -314,6 +317,18 @@ with PdfPages(filename) as pdf:
                            cmap=cm.coolwarm, vmin=-250, vmax=250)
                 plt.colorbar()
                 plt.title('GVEL', fontsize=10)
+
+                 # page 1, plot 7: Outflow velocity
+                ax = fig.add_subplot(3, 3, 6)
+                ax.set_xlim(0, size)
+                ax.set_ylim(0, size)
+                ax.set_xticklabels(())
+                ax.set_yticklabels(())
+                plt.imshow(dap_vel_out, origin='lower',
+                           interpolation='nearest',
+                           cmap=cm.coolwarm, vmin=-250, vmax=250)
+                plt.colorbar()
+                plt.title('Outflow Velocity', fontsize=8)
 
                 # page 1, plot 8: Vflip
                 ax = fig.add_subplot(3,3,8)
@@ -346,10 +361,10 @@ with PdfPages(filename) as pdf:
                 # page 2, plot 1: plots the image of the galaxy
                 fig = plt.figure()
                 ax = fig.add_subplot(3, 3, 1)
-                #image = showImage(plateifu=good_plates[i], show_image=False)
-                #fig.suptitle(good_plates[i]+' '+ '('+str(i)+')', fontsize = 12)
-                #plt.imshow(image)
-                #plt.axis('off')
+                image = showImage(plateifu=good_plates[i], show_image=False)
+                fig.suptitle(good_plates[i]+' '+ '('+str(i)+')', fontsize = 12)
+                plt.imshow(image)
+                plt.axis('off')
                 print(good_plates[i] + ' ' + str(i))
 
                 # page 2, plot 2: ha flux
@@ -379,16 +394,16 @@ with PdfPages(filename) as pdf:
                 plt.title('Ha/Hb - Ha/Hb flip', fontsize=8)
 
                 # page 2, plot 7: Ha emission-line dispersion
-                ax = fig.add_subplot(3,3,7)
-                ax.set_xlim(0, size)
-                ax.set_ylim(0, size)
-                ax.set_xticklabels(())
-                ax.set_yticklabels(())
-                plt.imshow(dap_sig, origin='lower',
-                           interpolation='nearest',
-                           cmap=cm.YlOrRd, vmin=0, vmax=250)
-                plt.colorbar()
-                plt.title('Ha GSIGMA', fontsize=10)
+                #ax = fig.add_subplot(3,3,7)
+                #ax.set_xlim(0, size)
+                #ax.set_ylim(0, size)
+                #ax.set_xticklabels(())
+                #ax.set_yticklabels(())
+                #plt.imshow(dap_sig, origin='lower',
+                           #interpolation='nearest',
+                           #cmap=cm.YlOrRd, vmin=0, vmax=250)
+                #plt.colorbar()
+                #plt.title('Ha GSIGMA', fontsize=10)
 
                 # page 2, plot 8: Halpha velovity
                 ax = fig.add_subplot(3, 3, 8)
@@ -416,16 +431,13 @@ with PdfPages(filename) as pdf:
                 plt.title('Ha Vel - ha Vel flipped', fontsize=8)
 
 
-                pdf.savefig()
-                plt.close()
-
-                # page 3, plot 1: Outflow velocity
-                ax = fig.add_subplot(1, 1, 1)
+                # page 2, plot 7: Outflow velocity
+                ax = fig.add_subplot(3, 3, 7)
                 ax.set_xlim(0, size)
                 ax.set_ylim(0, size)
                 ax.set_xticklabels(())
                 ax.set_yticklabels(())
-                plt.imshow(dap_vel_out, origin='lower',
+                plt.imshow(dap_vel_ha_out, origin='lower',
                            interpolation='nearest',
                            cmap=cm.seismic, vmin=-250, vmax=250)
                 plt.colorbar()
