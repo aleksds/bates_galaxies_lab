@@ -16,10 +16,12 @@ import csv
 #   0) clear blue/red separation but no clear orientation
 
 # read information from from database files
-drp = fits.open('drpall-v2_4_3.fits')                                   # drpall sdss file mpl7 file
+
+mpl7_dir = os.environ['MANGADIR_MPL7']
+drp = fits.open(mpl7_dir + 'drpall-v2_4_3.fits')                        # drpall sdss file mpl7 file
 drpdata = drp[1].data
 
-nsa = fits.open('1-nsa_v1_0_1.fits')                                    # nsa catalog
+nsa = fits.open(mpl7_dir + '1-nsa_v1_0_1.fits')                         # nsa catalog
 nsa_data = nsa[1].data
 
 # dprall arrays
@@ -92,10 +94,10 @@ del outflow_assign[0]                                                    # delet
 del br_assign[0]                                                     # deleting the column label blue/red sep from the csv file data set
 
 # Empty lists for categorization
-c1 = [size]                                                             # clear outflow
-c2 = [size]                                                             # clear opposite outflow
-c3 = [size]                                                             # no clear blue/red separation
-c0 = [size]                                                             # clear blue/red but no clear orientation
+c1 = np.zeros(size)                                                             # clear outflow
+c2 = np.zeros(size)                                                             # clear opposite outflow
+c3 = np.zeros(size)                                                             # no clear blue/red separation
+c0 = np.zeros(size)                                                             # clear blue/red but no clear orientation
 
 # counters to see how many galaxies lie in each outflow category
 g = 0                                                                  # category 1 counter
@@ -113,14 +115,15 @@ for b in range(0,size):
         n = n + 1
     elif outflow_assign[b] == 'unclear':
         c0[b] = 10
+    
 # blue/red separation category assignment
 for b in range(0,size):
     if br_assign[b] == 'unclear':
         c3[b] = 10
-        c0[b] = 0
+        c0[b] = 10
         ok = ok + 1
     elif br_assign == 'yes ' and c0[b] == 10:
-        c0[b] = 10
+        c4[b] = 10
 
 # outflow categories bool arrays
 cat_1 = abs(np.array(c1)) > 0
@@ -142,7 +145,7 @@ with PdfPages(filename) as pdf:
     plt.xlabel('i-band absolute magnitude')
     plt.ylabel('redshift')
     plt.title('All MPL-7 Late-type-Edge-on Galaxies')
-    plt.subtitle('I-band Absolute Magnitude vs Redshift')
+    plt.suptitle('I-band Absolute Magnitude vs Redshift')
     plt.legend(loc='upper right', frameon=False, fontsize='x-small')
 
     pdf.savefig()
@@ -156,7 +159,7 @@ with PdfPages(filename) as pdf:
     plt.xlabel('i-Band Absolute Magnitude')
     plt.ylabel('Redshift')
     plt.title('Clear Outflow')
-    plt.subtitle('I-band Absolute Magnitude vs Redshift')
+    plt.suptitle('I-band Absolute Magnitude vs Redshift')
     plt.legend(loc='upper right', frameon=False, fontsize='x-small')
 
     pdf.savefig()
@@ -166,11 +169,11 @@ with PdfPages(filename) as pdf:
     fig = plt.figure()
     plt.xlim(-16, -24)
     plt.ylim(0, 0.14)
-    plt.scatter(iabs_gal[cat_2], redshift_gal[cat2], color='black', marker='^', label='galaxies w/ clear opposite outflows', s=5, alpha = .8)
+    plt.scatter(iabs_gal[cat_2], redshift_gal[cat_2], color='black', marker='^', label='galaxies w/ clear opposite outflows', s=5, alpha = .8)
     plt.xlabel('i-Mand Absolute Magnitude')
     plt.ylabel('Redshift')
     plt.title('Clear Opposite Outflow Patterns')
-    plt.subtitle('I-band Absolute Magnitude vs Redshift')
+    plt.suptitle('I-band Absolute Magnitude vs Redshift')
     plt.legend(loc='upper right', frameon=False, fontsize='x-small')
 
     pdf.savefig()
@@ -186,7 +189,7 @@ with PdfPages(filename) as pdf:
     plt.xlabel('i-band Absolute Magnatitude')
     plt.ylabel('Redshift')
     plt.title('Unclear Outflow Galaxies')
-    plt.subtitle('I-band Absolute Magnitude vs Redshift')
+    plt.suptitle('I-band Absolute Magnitude vs Redshift')
     plt.legend(loc='upper right', frameon=False, fontsize='x-small')
 
     pdf.savefig()
@@ -195,11 +198,12 @@ with PdfPages(filename) as pdf:
 
 
     # plot 5: composite of all categories
+    fig = plt.figure()
     plt.xlim(-16, -24)
     plt.ylim(0,0.14)
     plt.scatter(iabs_gal[cat_3], redshift_gal[cat_3], color='darkblue', label= 'Galaxies with no clear blue/red sep', s=5, alpha = .5)
     plt.scatter(iabs_gal[cat_0], redshift_gal[cat_0], color='springgreen', label='Galaxies with clear b/r but unclear outflow', s=5, alpha=.5)
-    plt.scatter(iabs_gal[cat_2], redshift_gal[cat2], color='black', marker='^', label='galaxies w/ clear opposite outflows', s=5, alpha=.8)
+    plt.scatter(iabs_gal[cat_2], redshift_gal[cat_2], color='black', marker='^', label='galaxies w/ clear opposite outflows', s=5, alpha=.8)
     plt.scatter(iabs_gal[cat_1], redshift_gal[cat_1], color='crimson', marker='*', label= 'galaxies w/ clear outflow', s=5, alpha = .8)
     plt.xlabel('i-band Absolute Magnatitude')
     plt.ylabel('Redshift')
