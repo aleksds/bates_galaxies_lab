@@ -271,4 +271,4 @@ with PdfPages(filename) as pdf:
 # #
 # #
 #
-os.system("open %s &" % filename)
+os.system("open %s &" % filename)     
