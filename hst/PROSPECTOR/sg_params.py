@@ -215,10 +215,10 @@ model_params.append({'name': 'sfh', 'N': 1,
 # mass formed.
 model_params.append({'name': 'mass', 'N': 1,
                         'isfree': True,
-                        'init': 5e11,
-                        'init_disp': 1e11,
+                        'init': 1e10,
+                        'init_disp': 5e9,
                         'units': r'M_\odot',
-                        'prior':priors.TopHat(mini=1e7, maxi=1e12)})
+                        'prior':priors.LogUniform(mini=1e7, maxi=1e12)})
 
 # Since we have zcontinuous=1 above, the metallicity is controlled by the
 # ``logzsol`` parameter.
@@ -242,7 +242,7 @@ model_params.append({'name': 'tage', 'N': 1,
                         'init': 1.0,
                         'init_disp': 1.0,
                         'units': 'Gyr',
-                        'prior':priors.TopHat(mini=0.01, maxi=14.0)})
+                        'prior':priors.LogUniform(mini=0.01, maxi=10.0)})
 
 
 # FSPS parameter
@@ -340,7 +340,7 @@ model_params.append({'name': 'agb_dust', 'N': 1,
 # FSPS parameter
 model_params.append({'name': 'add_neb_emission', 'N': 1,
                      'isfree': False,
-                     'init': True})
+                     'init': False})
 
 # Here is a really simple function that takes a **dict argument, picks out the
 # `logzsol` key, and returns the value.  This way, we can have gas_logz find
