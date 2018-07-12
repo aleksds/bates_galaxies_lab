@@ -92,16 +92,16 @@ ba_gal_late_edge = ba_gal_late[edge]
 good_plates = np.sort(plateifu[blah][late][edge])
 
 total = len(good_plates)
-poop = np.zeros(total)
-indi = np.zeros(total)
-poopy = np.zeros(total)
-vdisp = np.zeros(total)
-vrot = np.zeros(total)
-disp_rot = np.zeros(total)
+poop = np.zeros(5)
+indi = np.zeros(5)
+poopy = np.zeros(5)
+#vdisp = np.zeros(total)
+#vrot = np.zeros(total)
+disp_rot = np.zeros(5)
 
 
 
-for i in range(0,total):
+for i in range(0,5):
     plate, ifu = good_plates[i].split('-')
     name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
     if os.path.isfile(name):
@@ -259,8 +259,8 @@ for i in range(0,total):
             #Velocity dispersion for Vdisp/Vrot 
             ha_good_large = np.ravel(s_n_ha)[re_large] > 5
             med_vel_disp = np.median(np.ravel(dap_sig)[re_large][ha_good_large])
-            print('the velocity dispersion ot rotation ratio is', med_vel_disp)
-            vdisp[i] = med_vel_disp
+            print('the velocity dispersion is', med_vel_disp)
+            #vdisp[i] = med_vel_disp
 
             #Velocity roation for Vdisp/Vrot
             major = yproj_kpc_map < 1.0 # within 1 kpc of major axis
@@ -268,14 +268,17 @@ for i in range(0,total):
             vrot = np.percentile(vel_major,90) # 90th percentile make sense?
             vrot_max = np.round(np.mean(vrot, dtype=None),5)
             print('the rotational velocity is', vrot_max)
-            vrot[i] = vrot_max
+            #vrot[i] = vrot_max
 
             #Vrot/Vdisp
             med_vel_disp_vrot_max = med_vel_disp/vrot_max
-            print('the velocity dipsersion to roation ratio is', med_vel_disp_vrot_max)
+            print('the velocity dipsersion to rotation ratio is', med_vel_disp_vrot_max)
             disp_rot[i] = med_vel_disp_vrot_max
+            
 
-np.savetxt('poop.txt', indi + poop + poopy + vdisp + vrot + disp_rot, delimeter=',',header='Number, Asymmetry, Good Asymmetry, Vdisp, Vrot, disp/rot')
+np.savetxt('poop.txt', indi + poop + poopy + disp_rot, delimiter=',',header='Plate, Asymmetry, Good Asymmetry, Velocity dispersion/rotation')
+
+
 
 
 
