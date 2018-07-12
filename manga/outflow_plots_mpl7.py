@@ -118,7 +118,7 @@ total = len(good_plates)
 filename = 'outflow_galaxies'
 with PdfPages(filename) as pdf:
     
-    for i in range(0,5):
+    for i in range(0,445):
         plate, ifu = good_plates[i].split('-')
         name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
         if os.path.isfile(name):
