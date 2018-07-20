@@ -142,3 +142,39 @@ with PdfPages(filename) as pdf:
 
 os.system('open %s &' % filename)
 
+mass_50_ssp =  np.array([9.38,9.26,9.73,9.36,9.30,9.41,9.34,9.54,9.36,9.52,9.30,9.71])
+mass_84_diff = np.array([0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20])
+mass_16_diff = np.array([0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20,0.20])
+
+mass_ssp = 10.**(mass_50_ssp)*const.M_sun
+mass_84_ssp = 10.**(mass_50_ssp + mass_84_diff)*const.M_sun
+mass_16_ssp = 10.**(mass_50_ssp - mass_16_diff)*const.M_sun
+
+vesc_ssp = np.sqrt(2*G*mass_ssp/re_kpc).to('km/s')
+vesc_84_ssp = np.sqrt(2*G*mass_84_ssp/re_kpc).to('km/s')
+vesc_16_ssp = np.sqrt(2*G*mass_16_ssp/re_kpc).to('km/s')
+
+filename = 'ad_vflow_ssp.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_ssp, s=30, marker='o', c='blue')
+    lower_error_ssp = (vesc_ssp - vesc_16_ssp) * u.s / u.km
+    upper_error_ssp = (vesc_84_ssp - vesc_ssp) * u.s / u.km
+    plt.errorbar(vflow, vesc_ssp * u.s / u.km, yerr=[lower_error_ssp, upper_error_ssp], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
+
+r = 100 * const.pc
+m = 2e9 * const.M_sun
+print(np.sqrt(2.*G*m/r).to('km/s'))

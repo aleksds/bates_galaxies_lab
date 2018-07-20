@@ -1,6 +1,3 @@
-# Rebecca Minsley
-# Tuesday July 10th, 2018
-
 import os
 import matplotlib.pyplot as plt
 from astropy.io import fits
@@ -15,6 +12,17 @@ from os.path import isdir, join
 import glob
 import csv
 import math
+from marvin.utils.general.images import showImage
+
+# function for plotting maps of relevant quantities
+def daplot(quantity, qmin, qmax):
+    ax.set_xlim(0, size)
+    ax.set_ylim(0, size)
+    ax.set_xticklabels(())
+    ax.set_yticklabels(())
+    plt.imshow(quantity, origin='lower', interpolation='nearest',
+               norm=colors.LogNorm(vmin=qmin, vmax=qmax), cmap=cm.coolwarm)
+    plt.colorbar()
 
 # Categories of Galaxies Outflows
 #   1) clear outflow
@@ -79,6 +87,7 @@ th50_manga = th50[idx]
 th90_manga = th90[idx]
 c_manga = th90_manga / th50_manga
 
+
 # get just the MaNGA galaxies
 blah = drpdata.field('srvymode') == 'MaNGA dither'
 # update the concentration and ba arrays
@@ -90,37 +99,36 @@ ba_gal_late = ba_gal[late]
 edge = abs(ba_gal_late) < 0.3
 ba_gal_late_edge = ba_gal_late[edge]
 good_plates = np.sort(plateifu[blah][late][edge])
+elp_50 = th50_manga[blah][late][edge]
 
+
+# finding the asymmetry value for late-type-edge-on MaNGA galaxies
 total = len(good_plates)
-poop = np.zeros(5)
-indi = np.zeros(5)
-poopy = np.zeros(5)
-#vdisp = np.zeros(total)
-#vrot = np.zeros(total)
-disp_rot = np.zeros(5)
 
+xi = np.zeros(total)
+xi_g = np.zeros(total)
+eta = np.zeros(total)
+ind = np.zeros(total)
 
-
-for i in range(0,5):
+for i in range(129,150):#range(0,total):
     plate, ifu = good_plates[i].split('-')
-    name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
+    name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(
+        ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
     if os.path.isfile(name):
         match = np.where((drpdata.field('plate') == int(plate)) & (drpdata.field('ifudsgn') == str(ifu)))
         hdu_dap = fits.open(name)
-        print('('+str(i)+')', plate, ifu)
-        indi[i] = plate
+        print(name + ' (' + str(i) + ')')
 
         # hdu_dap.info()
         emlc = channel_dictionary(hdu_dap, 'EMLINE_SFLUX')
         dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Ha-6564'], :, :]
         dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[emlc['Ha-6564'], :, :]
-        s_n_ha = dap_ha_sflux * np.sqrt(dap_ha_sivar)
+        dap_hb_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Hb-4862'], :, :]
 
         # read in the position angle and axis from from the NSA
         theta = drpdata.field('nsa_sersic_phi')[match][0]
         ba = drpdata.field('nsa_sersic_ba')[match][0]
         inc = np.arccos(ba)
-
 
         # create arrays that correspond to x and y coordinates for each spaxel
         size = len(hdu_dap['EMLINE_GFLUX'].data[0, :])
@@ -207,84 +215,159 @@ for i in range(0,5):
             dap_sflux = hdu_dap['EMLINE_SFLUX'].data[j, :, :]
             dap_smask = hdu_dap['EMLINE_SFLUX_MASK'].data[j, :, :]
             dap_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[j, :, :]
+
+            # calculating noise variables
             dap_serr = np.sqrt(1. / dap_sivar)
+            s_n_ha = dap_ha_sflux * np.sqrt(dap_ha_sivar)  # signal to noise h alpha
+            snb = s_n_ha < 5
 
-            # getting rid of bad spaxels
-            # s_n = dap_sflux / dap_serr
-            # bad = (s_n < 2.5)
-            # s_n[bad] = 0
-            # dap_vel[bad] = -2000
-            # for b in range(0, len(dap_vel[i])):
-            #     if dap_vel[b].all() < -1999:
-            #         dap_vel.remove(dap_vel[b].all())
-            #         dap_vel_ivar.remove(dap_vel[b].all())
-
-            # creating vel_flip map
+            # creating maps flipped across the major axis
             vel_flip = np.zeros([size, size])
             ivar_flip = np.zeros([size, size])
-
+            ha_hb = dap_ha_sflux / dap_hb_sflux
+            ha_hb_flip =np.zeros([size,size])
+            
             for m in range(0, size):
                 for n in range(0, size):
                     dist = np.sqrt((xproj_kpc - xproj_kpc[m, n]) ** 2 + (yproj_kpc + yproj_kpc[m, n]) ** 2)
                     test = (dist == np.min(dist))
                     vel_flip[m, n] = dap_vel[test]
+                    ha_hb_flip[m, n] = ha_hb[test]
                     ivar_flip[m, n] = dap_vel_ivar[test]
 
-            delta_vel = dap_vel-vel_flip
-            denom = np.sqrt((1/dap_ivar)+(1/ivar_flip))
-            frac = delta_vel/denom
-            flat = np.std(frac)
-
-            # defining halfight radius + 1 arcsec
-            re_arcsec = (drpdata.field('nsa_elpetro_th50_r')[match]) + np.array([1])
+            # calculating asymmetry parameter including spaxels with s_n(h alpha) < 5
+            delta_vel = dap_vel - vel_flip
+            denom = np.sqrt((1 / dap_ivar) + (1 / ivar_flip))
+            frac = delta_vel / denom
+            re_arcsec = drpdata.field('nsa_elpetro_th50_r')[match] + np.array([1])
             re_kpc = re_arcsec * u.arcsec / cosmo.arcsec_per_kpc_proper(z)
-
-            #Creating assymetry parameter
             re_large = np.ravel(radkpc) > re_kpc
             re_large_positive = np.ravel(yproj_kpc_map)[re_large] > 0
             re_large_negative = np.ravel(yproj_kpc_map)[re_large] < 0
-            poop_positive = (np.std(np.ravel(frac)[re_large][re_large_positive]))
-            poop_negative = (np.std(np.ravel(frac)[re_large][re_large_negative]))
+            poop_positive = np.std(np.ravel(frac)[re_large][re_large_positive])
+            poop_negative = np.std(np.ravel(frac)[re_large][re_large_negative])
+            poop_tmp = np.round((poop_positive + poop_negative) / 2.,3)
+            xi[i] = poop_tmp
+
+            # calculating asymmetry parameter removing the spaxels with s_n(h alpha) < 5
+            delta_vel_g = delta_vel
+            delta_vel_g[snb] = -4000
+            frac_g = delta_vel_g/ denom
             ha_good_large_positive = np.ravel(s_n_ha)[re_large][re_large_positive] > 5
             ha_good_large_negative = np.ravel(s_n_ha)[re_large][re_large_negative] > 5
-            poop_positive_good = (np.std(np.ravel(frac)[re_large][re_large_positive][ha_good_large_positive]))
-            poop_negative_good = (np.std(np.ravel(frac)[re_large][re_large_negative][ha_good_large_negative]))
-            poop_tmp_good = (poop_positive_good + poop_negative_good) / 2.
-            poop_tmp = (poop_positive + poop_negative) / 2.
-            print('assymetry', poop_tmp)
-            print('the assymetry parameter with good spaxels is', poop_tmp_good)
-            poop[i] = poop_tmp
-            poopy[i] = poop_tmp_good
+            poop_positive_good = (
+                np.std(np.ravel(frac)[re_large][re_large_positive][ha_good_large_positive]))
+            poop_negative_good = (
+                np.std(np.ravel(frac)[re_large][re_large_negative][ha_good_large_negative]))
+            poop_tmp_good = np.round((poop_positive_good + poop_negative_good) / 2.,3)
+            xi_g[i] = poop_tmp_good
 
-            #Velocity dispersion for Vdisp/Vrot 
+            # calculating eta or the velocity dispersion to rotation variable
             ha_good_large = np.ravel(s_n_ha)[re_large] > 5
-            med_vel_disp = np.median(np.ravel(dap_sig)[re_large][ha_good_large])
-            print('the velocity dispersion is', med_vel_disp)
-            #vdisp[i] = med_vel_disp
+            med_vel_disp = np.median(np.ravel(dap_sig)[re_large][ha_good_large])        # velocity dispersion
 
-            #Velocity roation for Vdisp/Vrot
-            major = yproj_kpc_map < 1.0 # within 1 kpc of major axis
-            vel_major = (dap_vel)[major] # might need np.ravel() ?
-            vrot = np.percentile(vel_major,90) # 90th percentile make sense?
-            vrot_max = np.round(np.mean(vrot, dtype=None),5)
-            print('the rotational velocity is', vrot_max)
-            #vrot[i] = vrot_max
+            # one method will be to look at the 97th percentile of all velocities from spaxels with good S/N
+            ha_good = (s_n_ha) > 5
+            vel_good = np.abs(np.ravel(dap_vel[ha_good]))
+            vrot_one = np.percentile(vel_good,97)
 
-            #Vrot/Vdisp
-            med_vel_disp_vrot_max = med_vel_disp/vrot_max
-            print('the velocity dipsersion to rotation ratio is', med_vel_disp_vrot_max)
-            disp_rot[i] = med_vel_disp_vrot_max
+            #  the next method will be to look at the 95th percentile of values close to the major axis
+            major_good = (np.ravel(yproj_kpc_map[ha_good]) < (re_kpc/u.kpc * ba))  
+            #major = (yproj_kpc_map < (re_kpc/u.kpc * ba))                                                 # spaxels within 1 kpc of major axis
+            vel_major_good = np.ravel(dap_vel[ha_good][major_good])                                                  # velocity values along major axis
+            vrot = np.percentile(np.abs(vel_major_good), 95)  # 90th percentile make sense?
 
-outflow_galaxies = (med_vel_disp_vrot_max > 0.3) and (poop_tmp_good > 1.8)
-print(outflow_galaxies)
-            
-
-np.savetxt('poop.txt', indi + poop + poopy + disp_rot, delimiter=',',header='Plate, Asymmetry, Good Asymmetry, Velocity dispersion/rotation')
+            vrot_max = np.round(np.mean(vrot, dtype=None), 5)                           # velocity rotation
 
 
+            # Vrot/Vdisp
+            med_vel_disp_vrot_max = med_vel_disp / vrot_max
+            print('the velocity dipsersion to rotation ratio is', med_vel_disp_vrot_max, med_vel_disp, vrot_one, vrot_max)
+            eta[i] = med_vel_disp_vrot_max
+
+            ind[i] = float(i)
 
 
+#np.savetxt('metafile2.txt', np.c_[ind, xi, xi_g, eta], fmt='%01.4f', delimiter=',')
+#os.system("open %s &" % 'metafile2.txt')
+
+xi_1 = xi[np.logical_not(np.isnan(xi))]
+real = np.isfinite(xi_1)
+xg_1 = xi_g[np.logical_not(np.isnan(xi_g))]
+realg = np.isfinite(xg_1)
+eta_1 = eta[np.logical_not(np.isnan(eta))]
+reale = np.isfinite(eta_1)
+
+filename = 'xi_eta_hist.pdf'
+with PdfPages(filename) as pdf:
+
+    #Gvel
+    fig = plt.figure()
+    ax = fig.add_subplot(3,3,4)
+    ax.set_xlim(0, size)
+    ax.set_ylim(0, size)
+    ax.set_xticklabels(())
+    ax.set_yticklabels(())
+    plt.imshow(dap_vel, origin='lower', interpolation='nearest', cmap=cm.coolwarm, vmin=-250, vmax=250)
+    plt.ylabel('km/s')
+    cb = plt.colorbar()
+    cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=7)
+    plt.title('Emission Line Velocity', fontsize=8)
+
+    # page 1, plot 8: Vflip
+    ax = fig.add_subplot(3,3,5)
+    ax.set_xlim(0, size)
+    ax.set_ylim(0, size)
+    ax.set_xticklabels(())
+    ax.set_yticklabels(())
+    plt.imshow(vel_flip, origin='lower', interpolation='nearest', cmap=cm.coolwarm, vmin=-250, vmax=250)
+    cb = plt.colorbar()
+    cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=7)
+    plt.title('Flipped Emission Line Velocity', fontsize=8)
 
 
+    #asymmetry plot
+    #ax = plt.subplot(2,2,4)
+    #plt.xlim(xmin=0.5, xmax=150)
+    #plt.hist(xi_1[real], color='lime', bins=np.arange(0.5, 150, .5), label='xi',
+    #         alpha=.6)
+    #plt.hist(xg_1[realg], color='green', bins=np.arange(0.5, 150, .5),
+             #label='xi w/ only spaxels > 5', alpha=.6)
+    #plt.xscale('log')
+    #plt.xlabel('xi')
+    #plt.ylabel('Number of Galaxies')
+    #plt.title('Distribution of xi Values in MaNGA sample')
+    #plt.legend(loc='upper left', frameon=False, fontsize='x-small')
 
 
+    ax = fig.add_subplot(3, 3, 6)
+    ax.set_xlim(0, size)
+    ax.set_ylim(0, size)
+    ax.set_yticklabels(())
+    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    ax.set_xticklabels(())
+    plt.imshow(frac_g, origin='lower', interpolation='nearest', cmap=cm.coolwarm, vmin=-40, vmax=40)
+    cb = plt.colorbar()
+    cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=7)
+    plt.text(20, 95, 's_n h alpha > 5', fontsize=6)
+    plt.title(r'$\frac{v_{gass}-v_{gass,flipped}}{\sqrt{Err(v_{gass})^2 + Err(v_{gass,flipped})^2}}}$', verticalalignment='bottom', fontsize=10)
+    plt.text(0, -5, r'$ξ_{sn>5} =$' + ' ' + str(poop_tmp_good), fontsize=8)
+    plt.text(0, -9.5, r'$η_{50} =$' + ' ' + str(med_vel_disp_vrot_max), fontsize=8)
+    
+
+    pdf.savefig()
+    plt.close
+
+    # plot 2
+    #fig = plt.figure()
+    #plt.xlim(xmin=0.1, xmax=200)
+    #plt.hist(eta_1[reale], color='midnightblue', bins=np.arange(0.1, 200.,0.1), label='eta',
+             #alpha=.6)
+    #plt.xlabel('vdisp/vrot')
+    #plt.ylabel('Number of Galaxies')
+    #plt.title('Distribution of eta Values in MaNGA sample')
+    #plt.xscale('log')
+    #plt.legend(loc='upper left', frameon=False, fontsize='x-small')
+
+
+os.system("open %s &" % filename)
