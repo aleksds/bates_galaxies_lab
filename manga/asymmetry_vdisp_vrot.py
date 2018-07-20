@@ -274,6 +274,9 @@ for i in range(0,5):
             med_vel_disp_vrot_max = med_vel_disp/vrot_max
             print('the velocity dipsersion to rotation ratio is', med_vel_disp_vrot_max)
             disp_rot[i] = med_vel_disp_vrot_max
+
+outflow_galaxies = (med_vel_disp_vrot_max > 0.3) and (poop_tmp_good > 1.8)
+print(outflow_galaxies)
             
 
 np.savetxt('poop.txt', indi + poop + poopy + disp_rot, delimiter=',',header='Plate, Asymmetry, Good Asymmetry, Velocity dispersion/rotation')
