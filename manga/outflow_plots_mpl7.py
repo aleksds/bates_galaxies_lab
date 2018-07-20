@@ -117,8 +117,10 @@ total = len(good_plates)
 
 filename = 'outflow_galaxies'
 with PdfPages(filename) as pdf:
-    
-    for i in range(0,445):
+
+    xi = np.zeros(total)
+    eta = np.zeros(total)
+    for i in range(0,total):
         plate, ifu = good_plates[i].split('-')
         name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
         if os.path.isfile(name):
@@ -273,11 +275,12 @@ with PdfPages(filename) as pdf:
                 poop_negative_good = (np.std(np.ravel(frac)[re_large][re_large_negative][ha_good_large_negative]))
                 poop_tmp_good = (poop_positive_good + poop_negative_good) / 2.
                 poop_tmp = (poop_positive + poop_negative) / 2.
+
                 print('assymetry', poop_tmp)
                 print('the assymetry parameter with good spaxels is', poop_tmp_good)
                 #poop[i] = poop_tmp
                 #poopy[i] = poop_tmp_good
-
+                xi[i] = poop_tmp_good
                 #Velocity dispersion for Vdisp/Vrot 
                 ha_good_large = np.ravel(s_n_ha)[re_large] > 5
                 med_vel_disp = np.median(np.ravel(dap_sig)[re_large][ha_good_large])
@@ -294,157 +297,22 @@ with PdfPages(filename) as pdf:
 
                 #Vrot/Vdisp
                 med_vel_disp_vrot_max = med_vel_disp/vrot_max
+                eta[i] = med_vel_disp_vrot_max
+
                 print('the velocity dipsersion to rotation ratio is', med_vel_disp_vrot_max)
                 #disp_rot[i] = med_vel_disp_vrot_max
-
-
-                if (med_vel_disp_vrot_max > 0.3) and (poop_tmp_good > 1.8):
-                    state = 'this galaxy has outflows!!'
-                    print('this galaxy has outflows!')
-                else:
-                    state = 'no outflows detected'
-                    print('no outflows detected')
-
-                #plotting galaxies with outflows   
-                if state == 'this galaxy has outflows!!':
-
-                    #Identifying bad spaxels
-                    s_n_ha = dap_ha_sflux/dap_ha_serr
-                    bad = (s_n_ha < 3.)
-                    s_n_ha[bad]=0
-
-                    s_n = dap_sflux/dap_serr
-                    bad = (s_n < 3.)
-                    s_n[bad]=0
-
-                    #flipping velocity and fining the asymmetry
-                    vel_flip = np.zeros([size, size])
-                    ha_hb = dap_ha_sflux / dap_hb_sflux
-                    ha_hb_flip =np.zeros([size,size])
-                    ha_vel_flip = np.zeros([size, size])
-
-                    for m in range(0, size):
-                        for n in range(0, size):
-                            dist = np.sqrt((xproj_kpc - xproj_kpc[m, n]) ** 2 + (yproj_kpc + yproj_kpc[m, n]) ** 2)
-                            test = (dist == np.min(dist))
-                            vel_flip[m, n] = dap_vel[test]
-                            ha_hb_flip[m, n] = ha_hb[test]
-                            ha_vel_flip[m, n]= dap_ha_vel[test]
-
-                    flip_difference = dap_vel-vel_flip
-                    flip_ha_difference = dap_ha_vel-ha_vel_flip
-
-                    flip_ha_difference[bad]= -2000
-                    for b in range(0,size):
-                        if flip_ha_difference[b].all() < -1999:
-                            flip_ha_difference.remove(flip_ha_difference[b].all())
-
-                    flip_difference[bad]= -2000
-                    for b in range(0,size):
-                        if flip_difference[b].all() < -1999:
-                            flip_difference.remove(flip_difference[b ].all())
-
-                    #Identifying outflow velocity
-                    dap_vel_out = flip_difference/(2*np.cos(inc))
-                    dap_vel_out_avg = np.median(dap_vel_out)
-                    print(dap_vel_out_avg)
-
-                    dap_vel_ha_out = flip_difference/(2*np.cos(inc))
-                    dap_vel_ha_out_avg = np.median(dap_vel_out)
-                    print(dap_vel_ha_out_avg)
-
-                    # page 1, plot 1: galaxy coordinates in kpc
-                    fig = plt.figure()
-                    ax = fig.add_subplot(3,3,1)
-                    ax.set_xlim(0, size)
-                    ax.set_ylim(0, size)
-                    ax.set_xticklabels(())
-                    ax.set_yticklabels(())
-                    plt.imshow(zproj_kpc_map, origin='lower', interpolation='nearest', cmap=cm.coolwarm)
-                    plt.colorbar()
-                    plt.title('vertical distance [kpc]', fontsize=10)
-                    plt.suptitle('('+str(i)+')'+' '+plate+'-'+ifu + ', pg 1')
-
-                    # page 1, plot 2: emission-line SFLUX
-                    ax = fig.add_subplot(3,3,2)
-                    daplot(dap_sflux*1.e-17, fmin, fmax)
-                    plt.title(' O[II] flux', fontsize=10)
-
-    
-                    # page 1, plot 3: emission-line SFLUX serror
-                    ax = fig.add_subplot(3,3,3)
-                    daplot(dap_serr*1.e-17, fmin, fmax)
-                    plt.title('O[II] flux Error', fontsize=10)
-
-    
-                    # page 1, plot 4: emission-line SFLUX signal-to-noise ratio
-                    ax = fig.add_subplot(3,3,4)
-                    daplot(s_n, 0.1, 10.)
-                    plt.title('signal to noise ratio of O[II] flux', fontsize=10)
-
-    
-                    # page 1, plot 5: emission-line flux / Halpha flux
-                    ax = fig.add_subplot(3,3,5)
-                    daplot(dap_sflux/dap_ha_sflux, 0.1, 10.)
-                    plt.title('O[II] to HA ratio', fontsize=10)
-
-    
-                    # page 1, plot 6: emission-line dispersion
-                    #ax = fig.add_subplot(3,3,6)
-                    #ax.set_xlim(0, size)
-                    #ax.set_ylim(0, size)
-                    #ax.set_xticklabels(())
-                    #ax.set_yticklabels(())
-                    #plt.imshow(dap_sig, origin='lower',
-                           #interpolation='nearest',
-                           #cmap=cm.YlOrRd, vmin=0, vmax=250)
-                    #plt.colorbar()
-                    #plt.title('GSIGMA', fontsize=10)
-
                 
-                    # page 1, plot 7: emission-line velocity
-                    ax = fig.add_subplot(3,3,7)
-                    ax.set_xlim(0, size)
-                    ax.set_ylim(0, size)
-                    ax.set_xticklabels(())
-                    ax.set_yticklabels(())
-                    plt.imshow(dap_vel, origin='lower', interpolation='nearest', cmap=cm.coolwarm, vmin=-250, vmax=250)
-                    plt.colorbar()
-                    plt.title('GVEL', fontsize=10)
 
-                    # page 1, plot 7: Outflow velocity
-                    ax = fig.add_subplot(3, 3, 6)
-                    ax.set_xlim(0, size)
-                    ax.set_ylim(0, size)
-                    ax.set_xticklabels(())
-                    ax.set_yticklabels(())
-                    plt.imshow(dap_vel_out, origin='lower', interpolation='nearest', cmap=cm.coolwarm, vmin=-250, vmax=250)
-                    plt.colorbar()
-                    plt.title('Outflow Velocity', fontsize=8)
-
-                    # page 1, plot 8: Vflip
-                    ax = fig.add_subplot(3,3,8)
-                    ax.set_xlim(0, size)
-                    ax.set_ylim(0, size)
-                    ax.set_xticklabels(())
-                    ax.set_yticklabels(())
-                    plt.imshow(vel_flip, origin='lower', interpolation='nearest', cmap=cm.coolwarm, vmin=-250, vmax=250)
-                    plt.colorbar()
-                    plt.title('VFLIP', fontsize=10)
-
-                    #page 1, plot 9: GVEL-Vflip
-                    ax = fig.add_subplot(3,3,9)
-                    ax.set_xlim(0, size)
-                    ax.set_ylim(0, size)
-                    ax.set_xticklabels(())
-                    ax.set_yticklabels(())
-                    plt.imshow(flip_difference, origin='lower', interpolation='nearest', cmap=cm.coolwarm, vmin=-80, vmax=80)
-                    plt.colorbar()
-                    plt.title('GVEL-VFLIP', fontsize=10)
-
-    
-                    pdf.savefig()
-                    plt.close()
+    plt.scatter(eta, xi, s=0.5, color='crimson', marker='s')
+    plt.xlim(0.01, 148)
+    plt.ylim(0.01, 100)
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xlabel('Velocity Dispersion to Rotation ratio')
+    plt.ylabel('Velocity Asymmetry')
+    pdf.savefig()
+    plt.close()
+                    
 
 os.system("open %s &" % filename)
 
