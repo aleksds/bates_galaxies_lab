@@ -1,9 +1,10 @@
+# Rebecca Minsley
+# Tuesday July 10th, 2018
+
 import os
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.colors as colors
-from matplotlib import cm
 import numpy as np
 import matplotlib.colors as colors
 from matplotlib import cm
@@ -14,26 +15,8 @@ from os.path import isdir, join
 import glob
 import csv
 import math
+import pickle
 
-# Categories of Galaxies Outflows
-#   1) clear outflow
-#     1*) exciting outflow along major axis, inflow along minor axis
-#   2) clear opposite outflow
-#   3) no clear blue/red extraplanar separation
-#
-#   0) clear blue/red separation but no clear orientation
-
-# EMLINE_GVEL_IVAR gives inverse variance = 1 / sigma^2 (where sigma is the 1-sigma uncertainty)
-
-# function for plotting maps of relevant quantities
-def daplot(quantity, qmin, qmax):
-    ax.set_xlim(0, size)
-    ax.set_ylim(0, size)
-    ax.set_xticklabels(())
-    ax.set_yticklabels(())
-    plt.imshow(quantity, origin='lower', interpolation='nearest',
-               norm=colors.LogNorm(vmin=qmin, vmax=qmax), cmap=cm.coolwarm)
-    plt.colorbar()
 
 def channel_dictionary(hdu, ext):
     """
@@ -48,12 +31,6 @@ def channel_dictionary(hdu, ext):
                 continue
             channel_dict[v] = i
     return channel_dict
-
-# minimum and maximum emission-line fluxes for plot ranges
-fmin = 1e-19
-fmax = 1e-16
-
-
 # define a standard cosmology
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
@@ -94,6 +71,7 @@ th50_manga = th50[idx]
 th90_manga = th90[idx]
 c_manga = th90_manga / th50_manga
 
+
 # get just the MaNGA galaxies
 blah = drpdata.field('srvymode') == 'MaNGA dither'
 # update the concentration and ba arrays
@@ -105,39 +83,28 @@ ba_gal_late = ba_gal[late]
 edge = abs(ba_gal_late) < 0.3
 ba_gal_late_edge = ba_gal_late[edge]
 good_plates = np.sort(plateifu[blah][late][edge])
+elp_50 = th50_manga[blah][late][edge]
 
 total = len(good_plates)
-#poop = np.zeros(5)
-#indi = np.zeros(5)
-#poopy = np.zeros(5)
-#vdisp = np.zeros(total)
-#vrot = np.zeros(total)
-#disp_rot = np.zeros(5)
+xib = np.zeros(total)
+xig = np.zeros(total)
+poo_n = np.zeros(total)
 
 
-filename = 'outflow_galaxies'
+filename = 'xi_plot.pdf'
 with PdfPages(filename) as pdf:
-
-    xi = np.zeros(total)
-    eta = np.zeros(total)
-    for i in range(0,total):
+    for i in range(0, total):
         plate, ifu = good_plates[i].split('-')
         name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
         if os.path.isfile(name):
             match = np.where((drpdata.field('plate') == int(plate)) & (drpdata.field('ifudsgn') == str(ifu)))
             hdu_dap = fits.open(name)
-            print('('+str(i)+')', plate, ifu)
-            #indi[i] = plate
+            print(name)
 
             # hdu_dap.info()
             emlc = channel_dictionary(hdu_dap, 'EMLINE_SFLUX')
             dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Ha-6564'], :, :]
             dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[emlc['Ha-6564'], :, :]
-            dap_hb_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Hb-4862'], :, :]
-            dap_ha_vel = hdu_dap['EMLINE_GVEL'].data[emlc['Ha-6564'], :, :]
-            dap_ha_sig = hdu_dap['EMLINE_GSIGMA'].data[emlc['Ha-6564'], :, :]
-            s_n_ha = dap_ha_sflux * np.sqrt(dap_ha_sivar)
-        
 
             # read in the position angle and axis from from the NSA
             theta = drpdata.field('nsa_sersic_phi')[match][0]
@@ -230,91 +197,195 @@ with PdfPages(filename) as pdf:
                 dap_sflux = hdu_dap['EMLINE_SFLUX'].data[j, :, :]
                 dap_smask = hdu_dap['EMLINE_SFLUX_MASK'].data[j, :, :]
                 dap_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[j, :, :]
+
+                # calculating noise variables
                 dap_serr = np.sqrt(1. / dap_sivar)
-                dap_ha_serr = np.sqrt(1./dap_ha_sivar)
+                s_n_ha = dap_ha_sflux * np.sqrt(dap_ha_sivar)                           # signal to noise h alpha
 
-                # getting rid of bad spaxels
-                # s_n = dap_sflux / dap_serr
-                # bad = (s_n < 2.5)
-                # s_n[bad] = 0
-                # dap_vel[bad] = -2000
-                # for b in range(0, len(dap_vel[i])):
-                #     if dap_vel[b].all() < -1999:
-                #         dap_vel.remove(dap_vel[b].all())
-                #         dap_vel_ivar.remove(dap_vel[b].all())
 
-                # creating vel_flip map
+                # creating maps flipped across the major axis
                 vel_flip = np.zeros([size, size])
                 ivar_flip = np.zeros([size, size])
-
+                snha_flip = np.zeros([size, size])
                 for m in range(0, size):
                     for n in range(0, size):
                         dist = np.sqrt((xproj_kpc - xproj_kpc[m, n]) ** 2 + (yproj_kpc + yproj_kpc[m, n]) ** 2)
                         test = (dist == np.min(dist))
                         vel_flip[m, n] = dap_vel[test]
                         ivar_flip[m, n] = dap_vel_ivar[test]
+                        snha_flip[m, n] = s_n_ha[test]
 
+                # identifying bad spaxels
+                snb = s_n_ha < 5
+                snb_flip = snha_flip < 5
+
+                # calculating asymmetry parameter including spaxels with s_n(h alpha) < 5
                 delta_vel = dap_vel-vel_flip
+                delta_vel[snb] = 0
+                delta_vel[snb_flip] = 0
                 denom = np.sqrt((1/dap_ivar)+(1/ivar_flip))
-                frac = delta_vel/denom
-                flat = np.std(frac)
-
-                # defining halfight radius + 1 arcsec
-                re_arcsec = (drpdata.field('nsa_elpetro_th50_r')[match]) + np.array([1])
+                frac = (dap_vel-vel_flip)/denom                                                  # asymmetry parameter before taking the std
+                re_arcsec = drpdata.field('nsa_elpetro_th50_r')[match] + np.array([1])
                 re_kpc = re_arcsec * u.arcsec / cosmo.arcsec_per_kpc_proper(z)
-
-                #Creating assymetry parameter
                 re_large = np.ravel(radkpc) > re_kpc
                 re_large_positive = np.ravel(yproj_kpc_map)[re_large] > 0
                 re_large_negative = np.ravel(yproj_kpc_map)[re_large] < 0
-                poop_positive = (np.std(np.ravel(frac)[re_large][re_large_positive]))
-                poop_negative = (np.std(np.ravel(frac)[re_large][re_large_negative]))
+                poop_positive = np.std(np.ravel(frac)[re_large][re_large_positive])
+                poop_negative = np.std(np.ravel(frac)[re_large][re_large_negative])
+                poop_tmp = (poop_positive + poop_negative) / 2.                         # asymmetry parameter value with bad spaxels
+                xib[i] = poop_tmp
+
+                # calculating asymmetry parameter removing the spaxels with s_n(h alpha) < 5
+                frac_g = delta_vel/ denom
                 ha_good_large_positive = np.ravel(s_n_ha)[re_large][re_large_positive] > 5
                 ha_good_large_negative = np.ravel(s_n_ha)[re_large][re_large_negative] > 5
                 poop_positive_good = (np.std(np.ravel(frac)[re_large][re_large_positive][ha_good_large_positive]))
                 poop_negative_good = (np.std(np.ravel(frac)[re_large][re_large_negative][ha_good_large_negative]))
-                poop_tmp_good = (poop_positive_good + poop_negative_good) / 2.
-                poop_tmp = (poop_positive + poop_negative) / 2.
+                poop_tmp_good = (poop_positive_good + poop_negative_good) / 2.          # asymmetry parameter value with bad spaxels removed
+                xig[i] = poop_tmp_good
+                print(poop_tmp)
+                #
+                #
+                # # calculating eta or the velocity dispersion to rotation variable
+                # # velocity dispersion
+                # ha_good_large = np.ravel(s_n_ha)[re_large] > 5
+                # med_vel_disp = np.median(np.ravel(dap_sig)[re_large][ha_good_large])
+                # print('the velocity dispersion is', med_vel_disp)
+                #
+                # # velocity roation
+                # major = yproj_kpc_map < 1.0  # within 1 kpc of major axis
+                # vel_major = (dap_vel)[major]  # might need np.ravel() ?
+                # vrot = np.percentile(vel_major, 90)  # 90th percentile make sense?
+                # vrot_max = np.round(np.mean(vrot, dtype=None), 5)
+                # print('the rotational velocity is', vrot_max)
+                # # Vrot/Vdisp
+                # med_vel_disp_vrot_max = med_vel_disp / vrot_max
+                # print('the velocity dipsersion to rotation ratio is', med_vel_disp_vrot_max)
 
-                print('assymetry', poop_tmp)
-                print('the assymetry parameter with good spaxels is', poop_tmp_good)
-                #poop[i] = poop_tmp
-                #poopy[i] = poop_tmp_good
-                xi[i] = poop_tmp_good
-                #Velocity dispersion for Vdisp/Vrot 
-                ha_good_large = np.ravel(s_n_ha)[re_large] > 5
-                med_vel_disp = np.median(np.ravel(dap_sig)[re_large][ha_good_large])
-                print('the velocity dispersion is', med_vel_disp)
-                #vdisp[i] = med_vel_disp
+                # plot velocity
+                fig = plt.figure()
+                # ax = fig.add_subplot(1,3,1)
+                # ax.set_xlim(0, size)
+                # ax.set_ylim(0, size)
+                # ax.set_yticklabels(())
+                # ax.set_xticklabels(())
+                # plt.tick_params(axis='both', length=0)
+                # plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+                # plt.imshow(dap_vel, origin='lower',
+                #            interpolation='nearest',
+                #            cmap=cm.coolwarm, vmin=-250, vmax=250)
+                # cb = plt.colorbar(shrink= .33, pad=.03)
+                # cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=5)
+                # plt.title(r'$v_{gas}$', verticalalignment='center', fontsize=8)
+                plt.suptitle(good_plates[i], x=0.1, y=0.98)
 
-                #Velocity roation for Vdisp/Vrot
-                major = yproj_kpc_map < 1.0 # within 1 kpc of major axis
-                vel_major = (dap_vel)[major] # might need np.ravel() ?
-                vrot = np.percentile(vel_major,90) # 90th percentile make sense?
-                vrot_max = np.round(np.mean(vrot, dtype=None),5)
-                print('the rotational velocity is', vrot_max)
-                #vrot[i] = vrot_max
 
-                #Vrot/Vdisp
-                med_vel_disp_vrot_max = med_vel_disp/vrot_max
-                eta[i] = med_vel_disp_vrot_max
+                # # plot velocity flip
+                # ax = fig.add_subplot(1,3, 2)
+                # ax.set_xlim(0, size)
+                # ax.set_ylim(0, size)
+                # ax.set_yticklabels(())
+                # ax.set_xticklabels(())
+                # plt.tick_params(axis='both', length=0)
+                # plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+                # plt.imshow(vel_flip, origin='lower',
+                #            interpolation='nearest',
+                #            cmap=cm.coolwarm, vmin=-250, vmax=250)
+                # cb = plt.colorbar(shrink= .33, pad=.03)
+                # cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=5)
+                # plt.title(r'$v_{gas,flipped}$', verticalalignment='center', fontsize=8)
 
-                print('the velocity dipsersion to rotation ratio is', med_vel_disp_vrot_max)
-                #disp_rot[i] = med_vel_disp_vrot_max
-                
 
-    plt.scatter(eta, xi, s=0.5, color='crimson', marker='s')
-    plt.xlim(0.01, 148)
-    plt.ylim(0.01, 100)
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.xlabel('Velocity Dispersion to Rotation ratio')
-    plt.ylabel('Velocity Asymmetry')
-    pdf.savefig()
-    plt.close()
-                    
 
+                # # plot 3
+                # ax = fig.add_subplot(1, 4, 3)
+                # ax.set_xlim(0, size)
+                # ax.set_ylim(0, size)
+                # ax.set_yticklabels(())
+                # ax.set_xticklabels(())
+                # plt.imshow(frac, origin='lower',
+                #            interpolation='nearest',
+                #            cmap=cm.coolwarm, vmin=-30, vmax=30)
+                # plt.text(0,-5,r'$ξ =$'+' '+str(poop_tmp),fontsize=8)
+                # plt.colorbar()
+                # plt.title(r'$\frac{v_{gass}-v_{gass,flipped}}{\sqrt{Err(v_{gass})^2 + Err(v_{gass,flipped})^2}}}$', verticalalignment='bottom', fontsize=10)
+                # plt.text(0, -5, r'$ξ_{sn>5} =$' + ' ' + str(poop_tmp), fontsize=8)
+
+                # plot 5
+                ax = fig.add_subplot(1, 2, 1)
+                ax.patch.set_facecolor('white')
+                ax.set_xlim(0, size)
+                ax.set_ylim(0, size)
+                ax.set_yticklabels(())
+                ax.set_xticklabels(())
+                plt.tick_params(axis='both', length=0)
+                plt.imshow(frac, origin='lower',
+                           interpolation='nearest',
+                           cmap=cm.coolwarm, vmin=-40, vmax=40)
+                plt.title('ξ', verticalalignment='center', fontsize=8)
+                cb = plt.colorbar(shrink=.50, pad=.03)
+                cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=5)
+                ax.tick_params(axis='both', reset=False, which='both', length=0, width=0)
+                plt.text(1, -8., r'$ξ =$' + ' ' + str(round(poop_tmp, 4)), fontsize=7)
+
+
+                # plot 5
+                ax = fig.add_subplot(1, 2, 2)
+                ax.patch.set_facecolor('white')
+                ax.set_xlim(0, size)
+                ax.set_ylim(0, size)
+                ax.set_yticklabels(())
+                ax.set_xticklabels(())
+                plt.tick_params(axis='both',length=0)
+                plt.imshow(frac_g, origin='lower',
+                           interpolation='nearest',
+                           cmap=cm.coolwarm, vmin=-40, vmax=40)
+                plt.title(r'$ξ_{S/N(H\alpha) > 5}$', verticalalignment='center', fontsize=8)
+                cb = plt.colorbar(shrink= .50, pad=.03)
+                cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=5)
+                ax.tick_params(axis='both', reset=False, which='both', length=0, width=0)
+                plt.text(1, -8., r'$ξ_{sn>5} =$' + ' ' + str(round(poop_tmp_good,4)), fontsize=7)
+
+
+
+                # #  plot 5
+                # ax = fig.add_subplot(2, 3, 5)
+                # ax.set_xlim(0, size)
+                # ax.set_ylim(0, size)
+                # ax.set_yticklabels(())
+                # plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+                # ax.set_xticklabels(())
+                # plt.imshow(frac, origin='lower',
+                #            interpolation='nearest',
+                #            cmap=cm.coolwarm, vmin=-40, vmax=40)
+                # plt.colorbar()
+                # plt.title(r'$\frac{v_{gass}-v_{gass,flipped}}{\sqrt{Err(v_{gass})^2 + Err(v_{gass,flipped})^2}}}$'+' (good)', verticalalignment='bottom', fontsize=10)
+                # plt.text(0, -5, r'$ξ_{sn>5} =$' + ' ' + str(poop_tmp_good), fontsize=8)
+                #
+                #
+                # #  plot 6
+                # ax = fig.add_subplot(2, 3, 6)
+                # ax.set_xlim(0, size)
+                # ax.set_ylim(0, size)
+                # ax.set_yticklabels(())
+                # plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+                # ax.set_xticklabels(())
+                # plt.imshow(frac_g, origin='lower',
+                #            interpolation='nearest',
+                #            cmap=cm.coolwarm, vmin=-40, vmax=40)
+                # plt.colorbar()
+                # plt.title(r'$\frac{v_{gass}-v_{gass,flipped}}{\sqrt{Err(v_{gass})^2 + Err(v_{gass,flipped})^2}}}$'+' (good)', verticalalignment='bottom', fontsize=10)
+                # plt.text(0, -5, r'$ξ_{sn>5} =$' + ' ' + str(poop_tmp_good), fontsize=8)
+
+                pdf.savefig(facecolor=fig.get_facecolor(), edgecolor='none')
+                plt.close()
+
+
+
+# with open('kinematic_var.pickle', 'wb') as handle:
+#     pickle.dump((xib,xig), handle, protocol=pickle.HIGHEST_PROTOCOL)
 os.system("open %s &" % filename)
+
 
 
 

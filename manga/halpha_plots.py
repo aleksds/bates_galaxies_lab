@@ -22,7 +22,7 @@ def daplot(quantity, qmin, qmax):
     ax.set_yticklabels(())
     plt.imshow(quantity, origin='lower', interpolation='nearest',
                norm=colors.LogNorm(vmin=qmin, vmax=qmax), cmap=cm.coolwarm)
-    plt.colorbar()
+    #plt.colorbar()
 
 
 def channel_dictionary(hdu, ext):
@@ -93,7 +93,7 @@ good_plates = np.sort(plateifu[blah][late][edge])
 
 filename = 'ha_plots_vel.pdf'
 with PdfPages(filename) as pdf:
-    for i in range(0, 3):  # len(good_plates)):
+    for i in range(129, 130):  # len(good_plates)):
         plate, ifu = good_plates[i].split('-')
         name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(
             ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
@@ -206,6 +206,7 @@ with PdfPages(filename) as pdf:
                 dap_smask = hdu_dap['EMLINE_SFLUX_MASK'].data[j, :, :]
                 dap_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[j, :, :]
                 dap_serr = np.sqrt(1. / dap_ha_sivar)  # *1.e-4
+                
 
 
                 vel_flip = np.zeros([size, size])
@@ -214,14 +215,21 @@ with PdfPages(filename) as pdf:
                 ha_vel_flip = np.zeros([size, size])
 
                 s_n = dap_ha_sflux/dap_serr
-                bad = (s_n < 2.5)
+                bad = (s_n < 5)
                 s_n[bad]=0
 
+                ha_hb = dap_ha_sflux / dap_hb_sflux
+            
                 dap_ha_vel[bad]= -2000
-                for i in range(0,len(dap_vel[i])):
-                    if dap_ha_vel[i].all() < -1999:
-                            dap_vel.remove(dap_vel[i].all())
+                for k in range(0,len(dap_vel[0])):
+                    if dap_ha_vel[k].all() < -1999:
+                        dap_vel.remove(dap_vel[k].all())
 
+                ha_hb[bad]= -2000
+                for k in range(0,len(ha_hb[0])):
+                    if ha_hb[k].all() < -1999:
+                        ha_hb.remove(ha_hb[k].all())
+               
 
                 for m in range(0, size):
                     for n in range(0, size):
@@ -229,11 +237,7 @@ with PdfPages(filename) as pdf:
                         test = (dist == np.min(dist))
                         vel_flip[m, n] = dap_vel[test]
                         ha_hb_flip[m, n] = ha_hb[test]
-                        ha_vel_flip[m, n]= dap_ha_vel[test]
-
-                s_n = dap_sflux / dap_serr
-                bad = (s_n < 3)
-                s_n[bad] = 0
+                    
 
                 # plot 1: plots the image of the galaxy
                 fig = plt.figure()
@@ -259,18 +263,32 @@ with PdfPages(filename) as pdf:
                 daplot(s_n, 0.1, 10.)
                 plt.title('signal to noise ratio of Halpha flux', fontsize=8)
 
-                # plot 5: Ha/Hb emission
-                ax = fig.add_subplot(3, 3, 5)
-                daplot(dap_ha_sflux / dap_hb_sflux, 0.1, 10.)
-                plt.title('Ha / Hab', fontsize=8)
+                pdf.savefig()
+                plt.close()
 
+                # plot 5: Ha/Hb emission
+                ax = fig.add_subplot(3, 3, 1)
+                daplot(ha_hb, 0.1, 10.)
+                cb = plt.colorbar(pad=.03)
+                cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=7)
+                plt.title(r'$H\alpha / H\beta$', fontsize=8)
+
+                #Ha/Hb flip
+                ax = fig.add_subplot(3, 3, 2)
+                daplot(ha_hb_flip, 0.1, 10.)
+                cb = plt.colorbar(pad=.03)
+                cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=7)
+                plt.title(r'$H\alpha / H\beta flip$', fontsize=8)
 
                 # plot 6: Ha/Hb - Ha/Hb flip
-                ax = fig.add_subplot(3, 3, 6)
-                daplot(ha_hb - ha_hb_flip, 0.1, 10.)
-                plt.title('Ha/Hb - Ha/Hb flip', fontsize=8)
+                ax = fig.add_subplot(3, 3, 3)
+                daplot(ha_hb / ha_hb_flip, 0.3, 3.)
+                cb = plt.colorbar(pad=.03)
+                cb.ax.set_yticklabels(cb.ax.get_yticklabels(), fontsize=7)
+                plt.title(r'$H\alpha/H\beta - H\alpha/H\beta_{flip}$', fontsize=8)
+                ax.set_facecolor('white')
 
-                # plot 7: Halpha velovity
+                plot 7: Halpha velovity
                 ax = fig.add_subplot(3, 3, 7)
                 ax.set_xlim(0, size)
                 ax.set_ylim(0, size)
@@ -282,7 +300,7 @@ with PdfPages(filename) as pdf:
                 plt.colorbar()
                 plt.title('Ha Vel', fontsize=8)
 
-                #plot 8: Halpha vel - halpha vel flipped
+                plot 8: Halpha vel - halpha vel flipped
                 ax = fig.add_subplot(3, 3, 8)
                 ax.set_xlim(0, size)
                 ax.set_ylim(0, size)
