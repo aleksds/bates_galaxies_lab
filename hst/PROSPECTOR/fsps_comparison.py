@@ -6,21 +6,32 @@ from matplotlib.backends.backend_pdf import PdfPages
 from astropy.io import ascii
 from astropy.cosmology import FlatLambdaCDM
 import astropy.units as u
+from datetime import datetime
+
+start = datetime.now()
+
+dust = 0.
 
 sp = fsps.StellarPopulation(compute_vega_mags=False, zcontinuous=1,
-                            sfh=0, logzsol=0.0, dust_type=2, dust2=0)
-print('done with fsps.StellarPopulation')
+                            sfh=0, logzsol=0.0, dust_type=2, dust2=dust)
+print('done with fsps.StellarPopulation', datetime.now()-start)
 
-wave30, spec30 = sp.get_spectrum(tage=0.03)
-wave8, spec8 = sp.get_spectrum(tage=0.008)
-wave6, spec6 = sp.get_spectrum(tage=0.006)
-print('done with sp.get_spectrum')
+age = np.array([30,8,6,5])
+
+wave_one, spec_one = sp.get_spectrum(tage=age[0]/1e3)
+print('done with one sp.get_spectrum', datetime.now()-start)
+wave_two, spec_two = sp.get_spectrum(tage=age[1]/1e3)
+print('done with two sp.get_spectrum', datetime.now()-start)
+wave_thr, spec_thr = sp.get_spectrum(tage=age[2]/1e3)
+print('done with thr sp.get_spectrum', datetime.now()-start)
+wave_fou, spec_fou = sp.get_spectrum(tage=age[3]/1e3)
+print('done with four sp.get_spectrum', datetime.now()-start)
+
 
 cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
 lsun = 3.8e33
 
 bands = np.array(['galex_fuv','galex_nuv','wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
-
 phottable = 'Photometry/coarse_final/atest.txt'
 catalog = ascii.read(phottable)
 ad_values = ascii.read('../autogalfit/ad_mag_size_table.dat')
@@ -29,7 +40,7 @@ mfuv = np.array(ad_values['mfuv'])
 mnuv = np.array(ad_values['mnuv'])
 ebv = np.array(ad_values['ebv'])
 
-filename = 'fsps_comparison.pdf'
+filename = 'fsps_comparison_'+str(dust)+'_'+str(age[0])+'_'+str(age[1])+'_'+str(age[2])+'_'+str(age[3])+'.pdf'
 
 with PdfPages(filename) as pdf:
     
@@ -37,9 +48,11 @@ with PdfPages(filename) as pdf:
 
         distance = cosmo.luminosity_distance(catalog['z'][j]).to('cm') / u.cm
 
-        mags30 = sp.get_mags(tage=0.03, bands=bands, redshift=catalog['z'][j])
-        mags8 = sp.get_mags(tage=0.008, bands=bands, redshift=catalog['z'][j])
-        mags6 = sp.get_mags(tage=0.006, bands=bands, redshift=catalog['z'][j])
+        mags_one = sp.get_mags(tage=age[0]/1e3, bands=bands, redshift=catalog['z'][j])
+        mags_two = sp.get_mags(tage=age[1]/1e3, bands=bands, redshift=catalog['z'][j])
+        mags_thr = sp.get_mags(tage=age[2]/1e3, bands=bands, redshift=catalog['z'][j])
+        mags_fou = sp.get_mags(tage=age[3]/1e3, bands=bands, redshift=catalog['z'][j])
+
         
         m814 = -2.5*np.log10(catalog['f_814'][j]*1e-9)
         m475 = -2.5*np.log10(catalog['f_475'][j]*1e-9)
@@ -47,28 +60,35 @@ with PdfPages(filename) as pdf:
         m814_cor = m814 - ebv[j]*1.536
         m475_cor = m475 - ebv[j]*3.248
         m160_cor = m160 - ebv[j]*0.512
-        mnuv_cor = mnuv[j] - ebv[j]*7.06
-        mfuv_cor = mfuv[j] - ebv[j]*4.37
-        mass30 = 10**((m814_cor - mags30[3])/(-2.5))
-        mass8 = 10**((m814_cor - mags8[3])/(-2.5))
-        mass6 = 10**((m814_cor - mags6[3])/(-2.5))
-
-        flux_model30 = spec30 * lsun * mass30 / (4. * np.pi * distance**2) * (1+catalog['z'][j])
-        flux_model8 = spec8 * lsun * mass8 / (4. * np.pi * distance**2) * (1+catalog['z'][j])
-        flux_model6 = spec6 * lsun * mass6 / (4. * np.pi * distance**2) * (1+catalog['z'][j])
-
+        #mnuv_cor = mnuv[j] - ebv[j]*7.06
+        #mfuv_cor = mfuv[j] - ebv[j]*4.37
+        mnuv_cor = mnuv[j] - ebv[j]*6.892
+        mfuv_cor = mfuv[j] - ebv[j]*6.738
+        mass_one = 10**((m814_cor - mags_one[3])/(-2.5))
+        mass_two = 10**((m814_cor - mags_two[3])/(-2.5))
+        mass_thr = 10**((m814_cor - mags_thr[3])/(-2.5))
+        mass_fou = 10**((m814_cor - mags_fou[3])/(-2.5))
+        
+        flux_model_one = spec_one * lsun * mass_one / (4. * np.pi * distance**2) * (1+catalog['z'][j])
+        flux_model_two = spec_two * lsun * mass_two / (4. * np.pi * distance**2) * (1+catalog['z'][j])
+        flux_model_thr = spec_thr * lsun * mass_thr / (4. * np.pi * distance**2) * (1+catalog['z'][j])
+        flux_model_fou = spec_fou * lsun * mass_fou / (4. * np.pi * distance**2) * (1+catalog['z'][j])
+        
         phot_wave = np.array([1516.,2267.,4750.,8140.,16000.])
-        mags30_flux = 10**(mags30/(-2.5))*mass30*3631.*1e-23
-        mags8_flux = 10**(mags8/(-2.5))*mass8*3631.*1e-23
-        mags6_flux = 10**(mags6/(-2.5))*mass6*3631.*1e-23
+        mags_one_flux = 10**(mags_one/(-2.5))*mass_one*3631.*1e-23
+        mags_two_flux = 10**(mags_two/(-2.5))*mass_two*3631.*1e-23
+        mags_thr_flux = 10**(mags_thr/(-2.5))*mass_thr*3631.*1e-23
+        mags_fou_flux = 10**(mags_fou/(-2.5))*mass_fou*3631.*1e-23
         
         phot_wave_rest = phot_wave / (1+catalog['z'][j])
-        phot_mag = np.array([mfuv_cor, mnuv_cor, m475_cor, m814_cor, m160_cor])
-        phot_flux =10**(phot_mag / (-2.5))*3631*1e-23
+        phot_mag = np.array([mfuv[j], mnuv[j], m475, m814, m160])
+        phot_mag_cor = np.array([mfuv_cor, mnuv_cor, m475_cor, m814_cor, m160_cor])
+        phot_flux =10**(phot_mag_cor / (-2.5))*3631*1e-23
         
         fig = plt.figure()
         plt.suptitle(catalog['ID'][j])
-        
+
+        # panel showing HST photometry and 0.25 - 1.8 micron model stellar populations
         ax = fig.add_subplot(2,2,1)
         plt.xlim(0.2500,1.8000)
         #plt.ylim(2e-28,5e-27)
@@ -79,16 +99,20 @@ with PdfPages(filename) as pdf:
         plt.ylabel(r'Flux [10$^{-27}$ erg/s/cm$^2$/Hz]')
         ax.xaxis.set_label_position('top')
         
-        plt.plot(wave30*(1+catalog['z'][j])/1e4,flux_model30/1e-27,color='red', linewidth=0.1)
-        plt.plot(wave8*(1+catalog['z'][j])/1e4,flux_model8/1e-27,color='green', linewidth=0.1)
-        plt.plot(wave6*(1+catalog['z'][j])/1e4,flux_model6/1e-27,color='blue', linewidth=0.1)
-        
-        plt.scatter(phot_wave/1e4, mags30_flux/1e-27, marker='o', color='red')
-        plt.scatter(phot_wave/1e4, mags8_flux/1e-27, marker='v', color='green')
-        plt.scatter(phot_wave/1e4, mags6_flux/1e-27, marker='s', color='blue')
+        plt.plot(wave_one*(1+catalog['z'][j])/1e4,flux_model_one/1e-27,color='red', linewidth=0.1)
+        plt.plot(wave_two*(1+catalog['z'][j])/1e4,flux_model_two/1e-27,color='orange', linewidth=0.1)
+        plt.plot(wave_thr*(1+catalog['z'][j])/1e4,flux_model_thr/1e-27,color='green', linewidth=0.1)
+        plt.plot(wave_fou*(1+catalog['z'][j])/1e4,flux_model_fou/1e-27,color='blue', linewidth=0.1)
 
+        
+        plt.scatter(phot_wave/1e4, mags_one_flux/1e-27, marker='o', color='red')
+        plt.scatter(phot_wave/1e4, mags_two_flux/1e-27, marker='v', color='orange')
+        plt.scatter(phot_wave/1e4, mags_thr_flux/1e-27, marker='s', color='green')
+        plt.scatter(phot_wave/1e4, mags_fou_flux/1e-27, marker='<', color='blue')
+        
         plt.scatter(phot_wave/1e4, phot_flux/1e-27, color='black', marker='*')
 
+        # panel showing GALEX and F475W photometry and 0.1 - 0.55 micron model stellar populations
         ax = fig.add_subplot(2,2,3)
         ax.set_xlim([1000,5500])
         #ax.set_ylim([1e-29,5e-27])
@@ -98,13 +122,15 @@ with PdfPages(filename) as pdf:
         ax.set_xlabel(r'Observed Wavelength [$\AA$]')
         ax.set_ylabel(r'Flux [10$^{-27}$ erg/s/cm$^2$/Hz]')
 
-        plt.plot(wave30*(1+catalog['z'][j]),flux_model30/1e-27,color='red', linewidth=0.1)
-        plt.plot(wave8*(1+catalog['z'][j]),flux_model8/1e-27,color='green', linewidth=0.1)
-        plt.plot(wave6*(1+catalog['z'][j]),flux_model6/1e-27,color='blue', linewidth=0.1)
+        plt.plot(wave_one*(1+catalog['z'][j]),flux_model_one/1e-27,color='red', linewidth=0.1)
+        plt.plot(wave_two*(1+catalog['z'][j]),flux_model_two/1e-27,color='orange', linewidth=0.1)
+        plt.plot(wave_thr*(1+catalog['z'][j]),flux_model_thr/1e-27,color='green', linewidth=0.1)
+        plt.plot(wave_fou*(1+catalog['z'][j]),flux_model_fou/1e-27,color='blue', linewidth=0.1)
         
-        plt.scatter(phot_wave, mags30_flux/1e-27, marker='o', color='red')
-        plt.scatter(phot_wave, mags8_flux/1e-27, marker='v', color='green')
-        plt.scatter(phot_wave, mags6_flux/1e-27, marker='s', color='blue')
+        plt.scatter(phot_wave, mags_one_flux/1e-27, marker='o', color='red')
+        plt.scatter(phot_wave, mags_two_flux/1e-27, marker='v', color='orange')
+        plt.scatter(phot_wave, mags_thr_flux/1e-27, marker='s', color='green')
+        plt.scatter(phot_wave, mags_fou_flux/1e-27, marker='<', color='blue')
 
         plt.scatter(phot_wave, phot_flux/1e-27, color='black', marker='*')
         
@@ -116,14 +142,21 @@ with PdfPages(filename) as pdf:
         ax.set_ylim([-1.0,1.0])
         ax.xaxis.set_label_position('top')
         ax.yaxis.set_label_position('right')
-        
-        # plot points for the three models
-        plt.scatter(phot_mag[3]-phot_mag[4], phot_mag[2]-phot_mag[3], color='black', marker='*', label='data')
-        plt.errorbar(phot_mag[3] - phot_mag[4], phot_mag[2] - phot_mag[3], xerr = 0.05*np.sqrt(2), yerr=0.05*np.sqrt(2), color='black',linewidth=0.5)
-        plt.scatter(mags30[3]-mags30[4], mags30[2]-mags30[3], color='red', marker='o', label='30 Myr')
-        plt.scatter(mags8[3]-mags8[4], mags8[2]-mags8[3], color='green', marker='v', label='8 Myr')
-        plt.scatter(mags6[3]-mags6[4], mags6[2]-mags6[3], color='blue', marker='s', label='6 Myr')
 
+        # plot data point with error bar
+        plt.scatter(phot_mag_cor[3]-phot_mag_cor[4], phot_mag_cor[2]-phot_mag_cor[3], color='black', marker='*', label='data')
+        plt.errorbar(phot_mag_cor[3] - phot_mag_cor[4], phot_mag_cor[2] - phot_mag_cor[3], xerr = 0.05*np.sqrt(2), yerr=0.05*np.sqrt(2), color='black',linewidth=0.5)
+        plt.scatter(phot_mag[3]-phot_mag[4], phot_mag[2]-phot_mag[3], color='black', marker='.')
+
+        # plot points for the three models
+        plt.scatter(mags_one[3]-mags_one[4], mags_one[2]-mags_one[3], color='red', marker='o', label=str(age[0])+' Myr')
+        plt.scatter(mags_two[3]-mags_two[4], mags_two[2]-mags_two[3], color='orange', marker='v', label=str(age[1])+' Myr')
+        plt.scatter(mags_thr[3]-mags_thr[4], mags_thr[2]-mags_thr[3], color='green', marker='s', label=str(age[2])+' Myr')
+        plt.scatter(mags_fou[3]-mags_fou[4], mags_fou[2]-mags_fou[3], color='blue', marker='<', label=str(age[3])+' Myr')
+
+        
+
+        
         # GALEX color-color panel
         ax = fig.add_subplot(2,2,4)
         ax.set_xlabel('[NUV] - [F475W]')
@@ -135,20 +168,27 @@ with PdfPages(filename) as pdf:
         
         # plot data point with error bar        
         #ax.errorbar(phot_mag[1] - phot_mag[2], phot_mag[0] - phot_mag[1], xerr = 0.05*np.sqrt(2), yerr=0.05*np.sqrt(2), color='magenta')
-        plt.scatter(phot_mag[1]-phot_mag[2], phot_mag[0]-phot_mag[1], color='black', marker='*', label='data')
-        plt.errorbar(phot_mag[1]-phot_mag[2], phot_mag[0]-phot_mag[1], xerr = 0.1, yerr=0.3, color='black', linewidth=0.5)
-
+        plt.scatter(phot_mag_cor[1]-phot_mag_cor[2], phot_mag_cor[0]-phot_mag_cor[1], color='black', marker='*', label='data')
+        plt.errorbar(phot_mag_cor[1]-phot_mag_cor[2], phot_mag_cor[0]-phot_mag_cor[1], xerr = 0.1, yerr=0.3, color='black', linewidth=0.5)
+        plt.scatter(phot_mag[1]-phot_mag[2], phot_mag[0]-phot_mag[1], color='black', marker='.')
+        
         # plot data point after galactic extinction correction
         #mnuv_cor = mnuv[j] - ebv[j]*7.06
         #mfuv_cor = mfuv[j] - ebv[j]*4.37
         #ax.errorbar(mnuv_cor - m475_cor, mfuv_cor- mnuv_cor, xerr = 0.05*np.sqrt(2), yerr=0.05*np.sqrt(2), color='purple')
 
         # plot points for the three models
-        ax.scatter(mags30[1]-mags30[2], mags30[0]-mags30[1], color='red', marker='o', label='30 Myr')
-        ax.scatter(mags8[1]-mags8[2], mags8[0]-mags8[1], color='green', marker='v', label='8 Myr')
-        ax.scatter(mags6[1]-mags6[2], mags6[0]-mags6[1], color='blue', marker='s', label='6 Myr')
+        plt.scatter(mags_one[1]-mags_one[2], mags_one[0]-mags_one[1], color='red', marker='o', label=str(age[0])+' Myr')
+        plt.scatter(mags_two[1]-mags_two[2], mags_two[0]-mags_two[1], color='orange', marker='v', label=str(age[1])+' Myr')
+        plt.scatter(mags_thr[1]-mags_thr[2], mags_thr[0]-mags_thr[1], color='green', marker='s', label=str(age[2])+' Myr')
+        plt.scatter(mags_fou[1]-mags_fou[2], mags_fou[0]-mags_fou[1], color='blue', marker='<', label=str(age[3])+' Myr')
 
+        plt.legend(loc='lower right', prop={'size': 9})
+
+        
         pdf.savefig()
         plt.close()
 
 os.system('open %s &' % filename)
+
+print('done ', datetime.now()-start)
