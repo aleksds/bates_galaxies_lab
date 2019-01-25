@@ -38,3 +38,11 @@ per_814_475 = (re_475 - re_814) / re_814
 print(per_814_475)
 print(np.median(per_814_475))
 print(np.mean(per_814_475))
+
+
+chi_small = np.array(ad_values['chi_small'])
+chi_large = np.array(ad_values['chi_large'])
+print(chi_small)
+print(np.median(chi_small), np.mean(chi_small))
+print(chi_large)
+print(np.median(chi_large), np.mean(chi_large))
