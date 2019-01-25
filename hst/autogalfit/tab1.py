@@ -7,10 +7,10 @@ re_avg = np.array(ad_values['re'] * 0.025)
 re_475 = np.array(ad_values['re_small'] * 0.025)
 re_814 = np.array(ad_values['re_large'] * 0.025)
 
-j2140 = np.array([re_475[11], re_avg[11], re_814[11]])
-re_avg[11] = j2140[0]
-re_475[11] = j2140[1]
-re_814[11] = j2140[2]
+#j2140 = np.array([re_475[11], re_avg[11], re_814[11]])
+#re_avg[11] = j2140[0]
+#re_475[11] = j2140[1]
+#re_814[11] = j2140[2]
 
 print(re_avg)
 
