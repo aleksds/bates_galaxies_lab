@@ -104,7 +104,7 @@ time = now.strftime("%Y%m%d-%H%M")
 
 #INDEPENDENT FITS YO
 if togetherness == 'independent':
-    for w in range(0,12):
+    for w in range(0,ngal):
         galcoords = 'galcoords_'+plate+'.dat'
         catalog = ascii.read(galcoords)
 
@@ -114,19 +114,19 @@ if togetherness == 'independent':
         ycoorlow = str(int(catalog[w][2]-(np.float(imgsize)/2)))
         xcoorhigh = str(int(catalog[w][1]+(np.float(imgsize)/2)))
         ycoorhigh = str(int(catalog[w][2]+(np.float(imgsize)/2)))
-        for i in range(0,2):
-            for j in range(0,13):
-                if j == 0:
-                    md1f[w,0] = mag_values['m475'][w]
-                    md2f[w,0] = mag_values['m814'][w]
-                else:
-                    md1f[w,j] = mag_values['m475'][w] + re_array[j-1]
-                    md2f[w,j] = mag_values['m814'][w] + re_array[j-1]
-                for q in range(0,13):
-                    if q == 0:
-                        tmp[w,0] = jc_values['re'][w]
-                    else:
-                        tmp[w,q] = jc_values['re'][w] + re_array[q-1]
+        for i in range(0,len(filters)):
+            for j in range(0,nmag):
+                #if j == 0:
+                #    md1f[w,0] = mag_values['m475'][w]
+                #    md2f[w,0] = mag_values['m814'][w]
+                #else:
+                #    md1f[w,j] = mag_values['m475'][w] + re_array[j-1]
+                #    md2f[w,j] = mag_values['m814'][w] + re_array[j-1]
+                for q in range(0,nre):
+                    #if q == 0:
+                    #    tmp[w,0] = jc_values['re'][w]
+                    #else:
+                    #    tmp[w,q] = jc_values['re'][w] + re_array[q-1]
                     if not os.path.exists(time+'_'+model+'_'+plate+'_' \
                     +togetherness+ '_'+imgsize+'_psf'+psf):
                         os.makedirs(time+'_'+model+'_'+plate+'_'\
@@ -176,7 +176,7 @@ if togetherness == 'independent':
                         contraint_text.write('1              n              4 to 4   # Soft constraint: Constrains the\n')
                         contraint_text.write('					# sersic index n to within values\n')
                         contraint_text.write('				        # from 0.7 to 5.\n')
-                        contraint_text.write('1              re         '+str(tmp[w][q]/2)+' to '+str(tmp[w][q]/2)+' \n')
+                        contraint_text.write('1              re         '+str(tmp[w][q])+' to '+str(tmp[w][q])+' \n')
                         if i==0:
                             contraint_text.write('1              mag         '+str(md1f[w][j])+' to '+str(md1f[w][j])+' \n')
                         if i==1:
@@ -203,7 +203,7 @@ if togetherness == 'independent':
                         text.write('P) 0\n') #will not change
                         text.write('#   par)    par value(s)    fit toggle(s)   \
                         # parameter description \n')
-                        text.write('# Component number: 1\n')
+                        text.write('# Component number: 1\n') 
                         
                         if model == 'psf':
                             text.write(' 0) psf\n')
@@ -229,7 +229,7 @@ if togetherness == 'independent':
                             if i==1:
                                 mag = mag_values[w][2] #the m814 values
                                 text.write(' 3) '+str(md2f[w][j])+'     1\n')
-                            text.write(' 4) '+str(tmp[w][q]/2)+'     1\n')
+                            text.write(' 4) '+str(tmp[w][q])+'     1\n')
                             text.write(' 5) 4.0      1\n')
                             text.write(' 6) 0      0\n')
                             text.write(' 7) 0      0\n')
