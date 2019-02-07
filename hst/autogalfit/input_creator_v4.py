@@ -378,10 +378,10 @@ if model == 'sersic' and togetherness == 'independent':
     text = open(file,'w')
     text.write('shopt -s expand_aliases\n')
     text.write('source ~/.bash_profile\n')
-    for w in range(0,12):
+    for w in range(0,ngal):
         for i in range(0,2):
-            for j in range (0,13):
-                for q in range (0,13):
+            for j in range (0,nmag):
+                for q in range (0,nre):
                     text.write('galfitm '+galaxies[w]+'_'+filters[i]+\
                     '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
                     '_input.txt\n')
