@@ -148,11 +148,12 @@ if togetherness == 'independent':
                     +longgal[w]+'/'+plate+'/'+filters[i]+'/final_' \
                     +filters[i]+'_drc_sci.fits\n')
                     text.write('B) '+galaxies[w]+'_'+filters[i]+\
-                    '_output.fits\n')
+                    '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
+                    '_output.txt\n')
                     text.write('C) none\n') #will not change
                     text.write('D) /Users/adiamond/physics/linux-lab/data/hst/' \
                     +longgal[w]+'/'+plate+'/'+filters[i]+'/final_psf.fits\n')
-                    text.write('E) 2\n') #will not change
+                    text.write('E) 1\n') #will not change
                     text.write('F) none\n') #will not change
                     if constraint == 'none':
                         text.write('G) \n')
