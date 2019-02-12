@@ -144,27 +144,27 @@ if togetherness == 'independent':
                     #probably not essential
                     text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n')
                     #will not change , probably not essential
-                    text.write('A) /Users/adiamond/physics/linux-lab/data/hst/' \
+                    text.write('A) /Volumes/physics/linux-lab/data/hst/' \
                     +longgal[w]+'/'+plate+'/'+filters[i]+'/final_' \
                     +filters[i]+'_drc_sci.fits\n')
                     text.write('B) '+galaxies[w]+'_'+filters[i]+\
                     '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
                     '_output.txt\n')
                     text.write('C) none\n') #will not change
-                    text.write('D) /Users/adiamond/physics/linux-lab/data/hst/' \
+                    text.write('D) /Volumes/physics/linux-lab/data/hst/' \
                     +longgal[w]+'/'+plate+'/'+filters[i]+'/final_psf.fits\n')
                     text.write('E) 1\n') #will not change
                     text.write('F) none\n') #will not change
                     if constraint == 'none':
                         text.write('G) \n')
                     if constraint == 's_index':
-                        text.write('G) /Users/adiamond/physics/linux-lab/data/sersic_\
+                        text.write('G) /Volumes/physics/linux-lab/data/sersic_\
                         index_equaltofour.txt\n')
                     if constraint == 're':
-                         text.write('G) /Users/adiamond/physics/linux-lab/data/size_\
+                         text.write('G) /Volumes/physics/linux-lab/data/size_\
                          constraint_1to1.txt\n')
                     if constraint == 's_index, re':
-                        text.write('G) /Users/adiamond/physics/linux-lab/data/s_\
+                        text.write('G) /Volumes/physics/linux-lab/data/s_\
                         index_and_size.txt\n')
 
                     if model == 'sersic':
@@ -268,12 +268,12 @@ else:
                 text.write('#  Input menu file: '+galaxies[w]+'_'+filters[i]+'_'+plate+'\n') #propably not essential
                 text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
                 text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') #will not change , probably not essential
-                text.write('A) /Users/adiamond/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Users/adiamond/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n')
+                text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Users/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n')
                 text.write('A1) V,U\n')
                 text.write('A2) 814.000,475.000\n')
                 text.write('B) '+galaxies[w]+'_F814W_F475W_'+model+'_output.fits\n')
                 text.write('C) none,none      0.000\n')
-                text.write('D) /Users/adiamond/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,/Users/adiamond/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits\n')
+                text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,/Users/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits\n')
                 text.write('E) 1\n')
                 text.write('F) none,none\n')
 
