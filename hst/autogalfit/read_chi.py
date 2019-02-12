@@ -75,7 +75,8 @@ with PdfPages(name) as pdf:
     cs = plt.contour(mag_1d, sizepix_1d, chi_2d, levels)
     plt.clabel(cs, inline=1, fontsize=10)
     plt.ylim([0, 2])
-
+    plt.ylabel('Half-Light radius in pixels')
+    plt.xlabel('Magnitude')
     labels = ['68%', '95%', '99.7%']
     #labels = ['68%', '90%','95%','99%','99.7%']
     for i in range(len(labels)):
