@@ -82,6 +82,30 @@ with PdfPages(name) as pdf:
     for i in range(len(labels)):
         cs.collections[i].set_label(labels[i])
 
+    pzero = cs.collections[0].get_paths()[0]
+    vzero = pzero.vertices
+    xzero = vzero[:,0]
+    yzero = vzero[:,1]
+
+    if (len(cs.collections[0].get_paths()) > 1):
+        pone = cs.collections[0].get_paths()[1]
+        vone = pone.vertices
+        xone = vone[:,0]
+        yone = vone[:,1]
+
+        x = np.append(xzero, xone)
+        y = np.append(yzero, yone)
+    else:
+        x = xzero
+        y = yzero
+    print(x,y)
+    print(np.min(x), np.max(x))
+    print(np.min(y), np.max(y))
+    print(np.min(y)*0.025, np.max(y)*0.025)
+    plt.axvline(x=np.min(x))
+    plt.axvline(x=np.max(x))
+    plt.axhline(y=np.min(y))
+    plt.axhline(y=np.max(y))
     plt.legend(loc='upper left')
     
     pdf.savefig()
