@@ -48,6 +48,8 @@ with PdfPages(name) as pdf:
     plt.scatter(mag, sizepix, marker='o', color='orange')
     plt.yscale('log')
     plt.ylim([0.1, 3.])
+    plt.ylabel('Half-Light radius in pixels')
+    plt.xlabel('Magnitude')
     plt.title(dir+'/'+gal+'_'+band)
 
     for i in range(0, len(files)):
@@ -62,6 +64,8 @@ with PdfPages(name) as pdf:
     #plt.clim(0,20)
     plt.colorbar()
     
+    plt.ylabel('Half-Light radius in pixels')
+    plt.xlabel('Magnitude')
     pdf.savefig()
     plt.close()
 
@@ -70,7 +74,7 @@ with PdfPages(name) as pdf:
     #plt.contour(mag_1d, sizepix_1d, chi_2d)
 
     chi_min = np.min(chi_2d)
-    #levels = np.array([chi_min, chi_min+1, chi_min+2.71, chi_min+4.00, chi_min+6.63, chi_min+9.00])##np.arange(10)/2 + chi_min
+    #levels = np.array([chi_min, chi_min+1, chi_min+2.71, chi_min+4.00, chi_min+6.63, chi_min+9.00])##np.arange(10)/2 + chi_min. these level correspond with the 68, 95.4, 99.73, value in 1 as stated by the paper labelled confidence limits on estimated model parameters. 
     levels = np.array([1.0, 4.00, 9.00])+chi_min
     cs = plt.contour(mag_1d, sizepix_1d, chi_2d, levels)
     plt.clabel(cs, inline=1, fontsize=10)
