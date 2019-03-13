@@ -22,6 +22,7 @@ either none or s_index or re or s_index, re
 jc_values = ascii.read('ad_mag_size_table.dat')
 ngal = len(jc_values)
 re_array = np.array([1/1.7, 1/1.5, 1/1.4, 1/1.3, 1/1.2, 1/1.15, 1/1.1, 1, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.7])
+re_array = np.array([1/4, 1/3, 1/2, 1/1.5, 1/1.3, 1/1.2, 1/1.1, 1, 1.1, 1.2, 1.3, 1.5, 2, 3, 4])
 nre = len(re_array)
 #re_array = np.arange(13)/10*.3+0.03
 tmp = np.zeros((ngal, nre))
@@ -69,6 +70,7 @@ galaxies = [
     'J2140']
 
 filters = ['F475W','F814W']
+filters = ['F475W','F814W','F160W']
 
 longgal = [
     'J0826+4305',
@@ -245,17 +247,31 @@ if togetherness == 'independent':
 
 #SIMULTANEOUS FITS OF VARYING DEGREE
 else:
-    now = datetime.datetime.now()
-    time = now.strftime("%Y%m%d-%H%M")
-    for w in range(0,12):
-        for i in range (0,2): # for i in range(0,2):
-            for j in range(0,13):
-                if j == 0:
-                    tmp[w,0] = jc_values['re'][w]
-                else:
-                    tmp[w,q] = jc_values['re'][w] + re_array[q-1]
-                # text = open(file,'w')
-                if not os.path.exists(time+'_'+model+'_'+plate+'_' \
+    togetherness == 'simultaneous'
+    for w in range(0,ngal):
+        galcoords = 'galcoords_'+plate+'.dat'
+        catalog = ascii.read(galcoords)
+
+        xcoor = str(catalog[w][1])
+        ycoor = str(catalog[w][2])
+        xcoorlow = str(int(catalog[w][1]-(np.float(imgsize)/2)))
+        ycoorlow = str(int(catalog[w][2]-(np.float(imgsize)/2)))
+        xcoorhigh = str(int(catalog[w][1]+(np.float(imgsize)/2)))
+        ycoorhigh = str(int(catalog[w][2]+(np.float(imgsize)/2)))
+        for i in range(0,len(filters)):
+            for j in range(0,nmag):
+                #if j == 0:
+                #    md1f[w,0] = mag_values['m475'][w]
+                #    md2f[w,0] = mag_values['m814'][w]
+                #else:
+                #    md1f[w,j] = mag_values['m475'][w] + re_array[j-1]
+                #    md2f[w,j] = mag_values['m814'][w] + re_array[j-1]
+                for q in range(0,nre):
+                    #if q == 0:
+                    #    tmp[w,0] = jc_values['re'][w]
+                    #else:
+                    #    tmp[w,q] = jc_values['re'][w] + re_array[q-1]d
+                 if not os.path.exists(time+'_'+model+'_'+plate+'_' \
                 +togetherness+'_'+imgsize+'_psf'+psf):
                     os.makedirs(time+'_'+model+'_'+plate+'_'+togetherness+'_'\
                     +imgsize+'_psf'+psf)
@@ -263,6 +279,8 @@ else:
                 file = time+'_'+model+'_'+plate+'_'+togetherness+'_'\
                 +imgsize+'_psf'+psf+'/'+galaxies[w]+\
                 '_F814WandF475W_'+model+'_effective_re'+str(q)+'_input.txt'
+
+                '_F814W,F475W,F160W_'+model+'_effective_re'+str(q)+'_input.txt'
                 text = open(file,'w')
 
                 text.write('#  Input menu file: '+galaxies[w]+'_'+filters[i]+'_'+plate+'\n') #propably not essential
@@ -276,6 +294,14 @@ else:
                 text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,/Users/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits\n')
                 text.write('E) 1\n')
                 text.write('F) none,none\n')
+                text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[2]+'/final_'+filters[2]+'_drc_sci.fits\n')
+                text.write('A1) V,U,J\n')
+                text.write('A2) 814.000,475.000,160.000\n')
+                text.write('B) '+galaxies[w]+'_F814W_F475W_F160W_'+model+'_output.fits\n')
+                text.write('C) none,none,none      0.000\n')
+                text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[2]+'/final_psf.fits\n')
+                text.write('E) 1\n')
+                text.write('F) none,none,none\n')
 
                 if model == 'psf':
                     text.write('G) \n')
@@ -319,6 +345,7 @@ else:
                 +ycoorhigh+'\n')
                 text.write('I) 150    150\n')
                 text.write('J) 25.027,25.613\n')
+                text.write('J) 25.027,25.613,26.946\n')
                 text.write('K) '+plate+'  '+plate+'\n')
                 text.write('O) regular\n')
                 text.write('P) 0\n')
@@ -326,6 +353,7 @@ else:
                 text.write('V) 0 0 50 0.800000 0.500000 100000\n')
                 text.write('W) input,sigma,psf,component,model,residual\n')
 
+                # Psf for this code does not work.....
                 if model == 'psf':
                     text.write(' 0) psf\n')
                     if togetherness == 'simultaneous':
@@ -337,22 +365,23 @@ else:
                     text.write(' 3) 19.5,19.5     1,1                 band\n')
                     text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
 
+                #Sersic for the code does work...... 
                 if model == 'sersic':
                     text.write(' 0) sersic\n')
                     if togetherness == 'simultaneous':
-                        text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
-                        text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
+                        text.write(' 1) '+xcoor+','+xcoor+','+xcoor+'    1,1,1                 band\n')
+                        text.write(' 2) '+ycoor+','+ycoor+','+ycoor+'    1,1,1                 band\n')
                     if togetherness == 'semi':
                         text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
                         text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
-                    text.write(' 3) 19.5,19.5     1,1                 band\n') 
-                    text.write(' 4) '+str(tmp[w][q]/2)+','+str(tmp[w][q]/2)+'    1,0                band\n')
-                    text.write(' 5) 4.000,4.000    1,0                 band\n')
-                    text.write(' 6) 0,0               0,0                 band\n')
-                    text.write(' 7) 0,0               0,0                 band\n')
-                    text.write(' 8) 0,0               0,0                 band\n')
-                    text.write(' 9) 1.0,1.0           1,0                 band\n')
-                    text.write(' 10) 0,0          1,0                 band\n')
+                    text.write(' 3) 19.5,19.5,18.8     1,1,1                 band\n') 
+                    text.write(' 4) '+str(tmp[w][q]/2)+','+str(tmp[w][q]/2)+'    1,0,0                band\n')
+                    text.write(' 5) 4.000,4.000,4.000    1,0,0                 band\n')
+                    text.write(' 6) 0,0,0               0,0,0                 band\n')
+                    text.write(' 7) 0,0,0              0,0,0                 band\n')
+                    text.write(' 8) 0,0,0               0,0,0                 band\n')
+                    text.write(' 9) 1.0,1.0,1.0           1,0,0                 band\n')
+                    text.write(' 10) 0,0,0          1,0,0                 band\n')
                     text.write(' Z) 0')
                 text.close()
 
@@ -409,6 +438,13 @@ if model == 'sersic' and togetherness == 'simultaneous':
         for j in range(0,13):
             text.write('galfitm '+galaxies[w]+'_F814WandF475W_'+model+ \
             '_effective_re'+str(j)+'_input.txt\n')
+    for w in range(0,ngal):
+        for i in range(0,2):
+            for j in range (0,nmag):
+                for q in range (0,nre):
+                    text.write('galfitm '+galaxies[w]+'_'+filters[i]+\
+                    '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
+                    '_input.txt\n')
     text.close()
 
 if model == 'psf' and togetherness == 'semi':
