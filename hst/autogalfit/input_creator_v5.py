@@ -265,21 +265,13 @@ else:
                 +imgsize+'_psf'+psf)
             file = time+'_'+model+'_'+plate+'_'+togetherness+'_'\
             +imgsize+'_psf'+psf+'/'+galaxies[w]+\
-            '_F814WandF475W_'+model+'_effective_re'+str(q)+'_input.txt'
+            '_F814W,F475W,F160W_'+model+'_effective_re'+str(q)+'_input.txt'
 
             text = open(file,'w')
 
             text.write('#  Input menu file: '+galaxies[w]+'_filters[475,814,160]_'+plate+'\n') #propably not essential
             text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
             text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') #will not change , probably not essential
-            text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Users/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n')
-            text.write('A1) V,U\n')
-            text.write('A2) 814.000,475.000\n')
-            text.write('B) '+galaxies[w]+'_F814W_F475W_'+model+'_output.fits\n')
-            text.write('C) none,none      0.000\n')
-            text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,/Users/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits\n')
-            text.write('E) 1\n')
-            text.write('F) none,none\n')
             text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/fine/'+filters[2]+'/final_'+filters[2]+'_drc_sci.fits\n')
             text.write('A1) V,U,J\n')
             text.write('A2) 814.000,475.000,160.000\n')
@@ -416,17 +408,13 @@ if model == 'psf' and togetherness == 'simultaneous':
 
 if model == 'sersic' and togetherness == 'simultaneous':
     file = time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+\
-    '/'+galaxies[w]+'sersic_simultaneous_run_files.sh'
+    'sersic_simultaneous_run_files.sh'
     text = open(file,'w')
     text.write('shopt -s expand_aliases\n')
     text.write('source ~/.bash_profile\n')
     for w in range(0,ngal):
-        for i in range(0,2):
-            for j in range (0,nmag):
-                for q in range (0,nre):
-                    text.write('galfitm '+galaxies[w]+'_'+filters[i]+\
-                    '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
-                    '_input.txt\n')
+        for q in range (0,nre):
+            text.write('galfitm '+galaxies[w]+'_F814W,F475W,F160W_'+model+'_effective_re'+str(q)+'_input.txt')
     text.close()
 
 if model == 'psf' and togetherness == 'semi':
