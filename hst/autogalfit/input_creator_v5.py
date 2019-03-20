@@ -20,18 +20,28 @@ either none or s_index or re or s_index, re
 """
 #Go back and make sure the table is being read in the same way
 jc_values = ascii.read('ad_mag_size_table.dat')
+re_vals = np.zeros((7, len(jc_values)))
+re_vals[0] = jc_values['re00']
+re_vals[1] = jc_values['re01']
+re_vals[2] = jc_values['re_small']
+re_vals[3] = jc_values['re']
+re_vals[4] = jc_values['re_large']
+re_vals[5] = jc_values['re05']
+re_vals[6] = jc_values['re06']
+print(revals)
 ngal = len(jc_values)
+
 re_array = np.array([1/1.7, 1/1.5, 1/1.4, 1/1.3, 1/1.2, 1/1.15, 1/1.1, 1, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.7])
 re_array = np.array([1/4, 1/3, 1/2, 1/1.5, 1/1.3, 1/1.2, 1/1.1, 1, 1.1, 1.2, 1.3, 1.5, 2, 3, 4])
 nre = len(re_array)
 #re_array = np.arange(13)/10*.3+0.03
 tmp = np.zeros((ngal, nre))
 for i in range(0,ngal):
-    for j in range(0,nre):
+    for j in range(0,re_vals):
         #if j == 0:
         #    tmp[i,0] = jc_values['re'][i]
         #else:
-        tmp[i,j] = jc_values['re'][i] * re_array[j]
+        tmp[i,j] = jc_values['re'][i] * [j]
 print(tmp)
 # Note: This part of the code looks at the independent section by
 # adding an incremental adding of 0.1 to the various mag for filters w475 and
