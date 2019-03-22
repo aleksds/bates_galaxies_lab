@@ -27,14 +27,17 @@ for i in range(0, len(files)):
         vmag[i] = np.float(content[47][4:10])
         umag[i] = np.float(content[47][11:17])
         jmag[i] = np.float(content[47][18:24])
-        sizepix[i] = np.float(content[48][4:9])
+        str = content[48]
+        end = str.index(',')
+        #print(end)
+        sizepix[i] = np.float(content[48][4:end])
         print(chi[i], umag[i], vmag[i], jmag[i], sizepix[i])
 
-print('F475W: ', np.min(umag), np.mean(umag), np.median(umag), np.max(umag), np.std(umag), (np.max(umag)-np.min(umag))/2.)
+print('F475W: ', np.min(umag), np.mean(umag), np.median(umag), (np.min(umag)+np.max(umag))/2, np.max(umag), np.std(umag), (np.max(umag)-np.min(umag))/2.)
 
-print('F814W: ', np.min(vmag), np.mean(vmag), np.median(vmag), np.max(vmag), np.std(vmag), (np.max(vmag)-np.min(vmag))/2.)
+print('F814W: ', np.min(vmag), np.mean(vmag), np.median(vmag), (np.min(vmag)+np.max(vmag))/2, np.max(vmag), np.std(vmag), (np.max(vmag)-np.min(vmag))/2.)
 
-print('F160W: ', np.min(jmag), np.mean(jmag), np.median(jmag), np.max(jmag), np.std(jmag), (np.max(jmag)-np.min(jmag))/2.)
+print('F160W: ', np.min(jmag), np.mean(jmag), np.median(jmag), (np.min(jmag)+np.max(jmag))/2, np.max(jmag), np.std(jmag), (np.max(jmag)-np.min(jmag))/2.)
 
         
 
