@@ -33,7 +33,7 @@ ngal = len(jc_values)
 
 #re_array = np.array([1/1.7, 1/1.5, 1/1.4, 1/1.3, 1/1.2, 1/1.15, 1/1.1, 1, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.7])
 #re_array = np.array([1/4, 1/3, 1/2, 1/1.5, 1/1.3, 1/1.2, 1/1.1, 1, 1.1, 1.2, 1.3, 1.5, 2, 3, 4])
-#nre = len(re_alrray)
+#nre = len(re_array)
 #re_array = np.arange(13)/10*.3+0.03
 nre = len(re_vals)
 tmp = np.zeros((ngal, len(re_vals)))
@@ -316,7 +316,7 @@ else:
                 contraint_text.write('					# sersic index n to within values\n')
                 contraint_text.write('				        # from 0.7 to 5.\n\n')
                 contraint_text.write('1              re         '+str(tmp[w][q]/2)+' to '+str(tmp[w][q]/2)+'')
-                contraint_text.write('1              q              1 to 1  \n')
+                contraint_text.write('1              q              0.99 to 0.99  \n')
                 contraint_text.write('1              pa              0 to 0  \n')
                 contraint_text.close()
 
