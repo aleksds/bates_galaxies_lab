@@ -16,13 +16,14 @@ chi = np.zeros(len(files))
 mag = np.zeros(len(files))
 sizepix = np.zeros(len(files))
 
+mag
 for i in range(0, len(files)):
     print(files[i])
     with open(files[i]) as f:
         content = f.readlines()
         chi[i] = np.float(content[3][14:19])
-        mag[i] = np.float(content[47][4:10])
-        sizepix[i] = np.float(content[48][4:8])
+        mag[i] = np.float(content[47][4:13])
+        sizepix[i] = np.float(content[48][4:13])
         print(chi[i], mag[i], sizepix[i])
 
 mag_1d = np.unique(mag)
@@ -104,7 +105,9 @@ with PdfPages(name) as pdf:
         y = yzero
     print(x,y)
     print(np.min(x), np.max(x))
+    print((np.min(x) + np.max(x))/2, (np.max(x) - np.min(x))/2)
     print(np.min(y), np.max(y))
+    print((np.min(y) + np.max(y))/2, (np.max(y) - np.min(y))/2)
     print(np.min(y)*0.025, np.max(y)*0.025)
     plt.axvline(x=np.min(x))
     plt.axvline(x=np.max(x))
