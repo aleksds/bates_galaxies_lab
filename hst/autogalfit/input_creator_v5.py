@@ -28,20 +28,21 @@ re_vals[3] = jc_values['re']
 re_vals[4] = jc_values['re_large']
 re_vals[5] = jc_values['re05']
 re_vals[6] = jc_values['re06']
-print(revals)
+print(re_vals)
 ngal = len(jc_values)
 
-re_array = np.array([1/1.7, 1/1.5, 1/1.4, 1/1.3, 1/1.2, 1/1.15, 1/1.1, 1, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.7])
-re_array = np.array([1/4, 1/3, 1/2, 1/1.5, 1/1.3, 1/1.2, 1/1.1, 1, 1.1, 1.2, 1.3, 1.5, 2, 3, 4])
-nre = len(re_array)
+#re_array = np.array([1/1.7, 1/1.5, 1/1.4, 1/1.3, 1/1.2, 1/1.15, 1/1.1, 1, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.7])
+#re_array = np.array([1/4, 1/3, 1/2, 1/1.5, 1/1.3, 1/1.2, 1/1.1, 1, 1.1, 1.2, 1.3, 1.5, 2, 3, 4])
+#nre = len(re_alrray)
 #re_array = np.arange(13)/10*.3+0.03
-tmp = np.zeros((ngal, nre))
+nre = len(re_vals)
+tmp = np.zeros((ngal, len(re_vals)))
 for i in range(0,ngal):
-    for j in range(0,re_vals):
+    for j in range(0,len(re_vals)):
         #if j == 0:
         #    tmp[i,0] = jc_values['re'][i]
         #else:
-        tmp[i,j] = jc_values['re'][i] * [j]
+        tmp[i,j] = re_vals[j,i]
 print(tmp)
 # Note: This part of the code looks at the independent section by
 # adding an incremental adding of 0.1 to the various mag for filters w475 and
@@ -315,6 +316,8 @@ else:
                 contraint_text.write('					# sersic index n to within values\n')
                 contraint_text.write('				        # from 0.7 to 5.\n\n')
                 contraint_text.write('1              re         '+str(tmp[w][q]/2)+' to '+str(tmp[w][q]/2)+'')
+                contraint_text.write('1              q              1 to 1  \n')
+                contraint_text.write('1              pa              0 to 0  \n')
                 contraint_text.close()
 
             text.write('G) parameters_constraints_'+str([q])+'_'+galaxies[w]+'.txt\n')
@@ -333,7 +336,7 @@ else:
             +ycoorhigh+'\n')
             text.write('I) 150    150\n')
             text.write('J) 25.027,25.613\n')
-            text.write('J) 25.027,25.613,26.946\n')
+            text.write('J) 25.027,25.613,25.946\n')
             text.write('K) '+plate+'  '+plate+'\n')
             text.write('O) regular\n')
             text.write('P) 0\n')
@@ -368,7 +371,7 @@ else:
                 text.write(' 6) 0,0,0               0,0,0                 band\n')
                 text.write(' 7) 0,0,0              0,0,0                 band\n')
                 text.write(' 8) 0,0,0               0,0,0                 band\n')
-                text.write(' 9) 1.0,1.0,1.0           1,0,0                 band\n')
+                text.write(' 9) 0.99,0.99,0.99           1,0,0                 band\n')
                 text.write(' 10) 0,0,0          1,0,0                 band\n')
                 text.write(' Z) 0')
             text.close()
