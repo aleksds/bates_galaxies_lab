@@ -46,15 +46,15 @@ name = 'mag_color_'+gal+'.pdf'
 with PdfPages(name) as pdf:   
     fig = plt.figure()
 
-    plt.scatter(sizepix, umag, marker='o', markersize=10,  color='blue', label="F475W")
-    plt.scatter(sizepix, vmag, marker='+', markersize=10, color='green', label="F814W")
-    plt.scatter(sizepix, jmag, marker='s', markersize=10, color='red', label="F160W")
+    plt.scatter(sizepix, umag, marker='o', s=40,  color='blue', label="F475W")
+    plt.scatter(sizepix, vmag, marker='+', s=40, color='green', label="F814W")
+    plt.scatter(sizepix, jmag, marker='s', s=40, color='red', label="F160W")
     plt.ylim([20.5, 17.5])
     plt.xlim([0, np.median(sizepix)*3])
     plt.ylabel('Magnitude', fontsize=14)
     plt.xlabel('Half-light radius in pixels', fontsize=14)
    # plt.title(dir+'/'+gal)
-    plt.legend(loc='upper right')
+    plt.legend(loc='upper right', fontsize=14)
     pdf.savefig()
     plt.close()
 
