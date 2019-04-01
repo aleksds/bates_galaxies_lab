@@ -290,8 +290,8 @@ with PdfPages(filename) as pdf:
                 #Velocity roation for Vdisp/Vrot
                 major = yproj_kpc_map < 1.0 # within 1 kpc of major axis
                 vel_major = (dap_vel)[major] # might need np.ravel() ?
-                vrot = np.percentile(vel_major,90) # 90th percentile make sense?
-                vrot_max = np.round(np.mean(vrot, dtype=None),5)
+                #vrot = np.percentile(vel_major,90) # 90th percentile make sense?
+                vrot_max = np.max(vel_major)    #np.round(np.mean(vrot, dtype=None),5)
                 print('the rotational velocity is', vrot_max)
                 #vrot[i] = vrot_max
 
@@ -301,12 +301,13 @@ with PdfPages(filename) as pdf:
 
                 print('the velocity dipsersion to rotation ratio is', med_vel_disp_vrot_max)
                 #disp_rot[i] = med_vel_disp_vrot_max
-                
 
-    plt.scatter(eta, xi, s=0.5, color='crimson', marker='s')
-    plt.xlim(0.01, 148)
-    plt.ylim(0.01, 100)
-    plt.xscale('log')
+    real = np.where(~np.isnan(xi))
+
+    plt.scatter(eta[real], xi[real], s=0.5, color='crimson', marker='s')
+    plt.xlim(0.0, 2)
+    plt.ylim(1, 100)
+    # plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('Velocity Dispersion to Rotation ratio')
     plt.ylabel('Velocity Asymmetry')
