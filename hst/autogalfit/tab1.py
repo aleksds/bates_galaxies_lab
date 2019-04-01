@@ -7,10 +7,10 @@ re_avg = np.array(ad_values['re'] * 0.025)
 re_475 = np.array(ad_values['re_small'] * 0.025)
 re_814 = np.array(ad_values['re_large'] * 0.025)
 
-j2140 = np.array([re_475[11], re_avg[11], re_814[11]])
-re_avg[11] = j2140[0]
-re_475[11] = j2140[1]
-re_814[11] = j2140[2]
+#j2140 = np.array([re_475[11], re_avg[11], re_814[11]])
+#re_avg[11] = j2140[0]
+#re_475[11] = j2140[1]
+#re_814[11] = j2140[2]
 
 print(re_avg)
 
@@ -38,3 +38,11 @@ per_814_475 = (re_475 - re_814) / re_814
 print(per_814_475)
 print(np.median(per_814_475))
 print(np.mean(per_814_475))
+
+
+chi_small = np.array(ad_values['chi_small'])
+chi_large = np.array(ad_values['chi_large'])
+print(chi_small)
+print(np.median(chi_small), np.mean(chi_small))
+print(chi_large)
+print(np.median(chi_large), np.mean(chi_large))
