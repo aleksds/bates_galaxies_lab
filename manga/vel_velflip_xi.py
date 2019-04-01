@@ -93,7 +93,7 @@ poo_n = np.zeros(total)
 
 filename = 'xi_plot.pdf'
 with PdfPages(filename) as pdf:
-    for i in range(0, total):
+    for i in range(0, 1):
         plate, ifu = good_plates[i].split('-')
         name = mpl7_dir + 'HYB10-GAU-MILESHC/' + str(plate) + '/' + str(ifu) + '/manga-' + str(plate) + '-' + str(ifu) + '-MAPS-HYB10-GAU-MILESHC.fits.gz'
         if os.path.isfile(name):
