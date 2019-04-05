@@ -20,8 +20,10 @@ files = glob.glob(dir+'/*output.fits')
 xcen = 50
 ycen = 50
 radii = np.arange(40)+1
-flux = np.zeros([len(files),len(radii)])
-func = np.zeros([len(files),len(radii)])
+vdat_flux = np.zeros([len(files),len(radii)])
+vunc_flux = np.zeros([len(files),len(radii)])
+vmod_flux = np.zeros([len(files),len(radii)])
+vres_flux = np.zeros([len(files),len(radii)])
 
 name = 'galfit_phot_'+dir+'.pdf'
 
@@ -46,23 +48,32 @@ with PdfPages(name) as pdf:
         # hdu[15] is PSF_V
         # hdu[16] is PSF_U
         # hdu[17] is PSF_J
-        data, header = hdu[0].data, hdu[0].header
-        dunc, unc_header = hdu[12].data, hdu[12].header
+        vdat, vdat_head = hdu[0].data, hdu[0].header
+        vunc, vunc_head = hdu[12].data, hdu[12].header
+        vmod, vmod_head = hdu[3].data, hdu[3].header
+        vres, vres_head = hdu[6].data, hdu[6].header        
         for j in range(0,len(radii)):
             aperture = CircularAperture([xcen, ycen], radii[j])
-            phot_table = aperture_photometry(data, aperture)
-            flux[i,j] = phot_table['aperture_sum'][0]
-            func_table = aperture_photometry(dunc, aperture)
-            func[i,j] = func_table['aperture_sum'][0]
-
+            phot_table = aperture_photometry(vdat, aperture)
+            vdat_flux[i,j] = phot_table['aperture_sum'][0]
+            vunc_table = aperture_photometry(vunc, aperture)
+            vunc_flux[i,j] = vunc_table['aperture_sum'][0]
+            vmod_table = aperture_photometry(vmod, aperture)
+            vmod_flux[i,j] = vmod_table['aperture_sum'][0]
+            vres_table = aperture_photometry(vres, aperture)
+            vres_flux[i,j] = vres_table['aperture_sum'][0]
             
         fig = plt.figure()
-
-        plt.scatter(radii, flux[i]/1e5)
-        plt.errorbar(radii,flux[i]/1e5,yerr=func[i]/1e5)
+        plt.suptitle(vdat_head['LOGFILE'])
+        
+        plt.scatter(radii, vdat_flux[i]/1e5)
+        #plt.errorbar(radii,vdat_flux[i]/1e5,yerr=vunc_flux[i]/1e5)
+        plt.scatter(radii, vunc_flux[i]/1e5, marker='s', color='red')
+        plt.scatter(radii, vmod_flux[i]/1e5, marker='o', color='green')
+        plt.scatter(radii, vres_flux[i]/1e5, marker='+', color='black')
         plt.xlabel('Radius [pixels]', fontsize=14)
         plt.ylabel('Flux [image units]', fontsize=14)
-        plt.title(header['LOGFILE'])
+        plt.title(vdat_head['EXTNAME'])
         
         pdf.savefig()
         plt.close()
