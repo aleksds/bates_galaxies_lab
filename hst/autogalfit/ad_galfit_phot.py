@@ -15,37 +15,43 @@ from photutils import aperture_photometry
 
 # the code requires the user to specify an input directory that has output fits files from GALFIT
 dir = sys.argv[1]
+gal = sys.argv[2]
 
 # find all of the relevant fits files
-files = glob.glob(dir+'/*output.fits')
+files = glob.glob(dir+'/'+gal+'*output.fits')
 
 # define relevant variables
 xcen = 50
 ycen = 50
 fmin = -2
 fmax = 12
-radii = np.arange(40)+1
+#radii = np.arange(40)+1
+#radii = 10.**(np.arange(21)/20*1.9-0.3)
+radii = np.array([1.,2.,3.,4.,5.,10.,15.,20.,25.,30.,35.,40.,45.])
 
 # arrays for v band
 vdat_flux = np.zeros([len(files),len(radii)])
 vunc_flux = np.zeros([len(files),len(radii)])
 vmod_flux = np.zeros([len(files),len(radii)])
 vres_flux = np.zeros([len(files),len(radii)])
+vres_sub = np.zeros([len(files),len(radii)])
 
 # arrays for u band
 udat_flux = np.zeros([len(files),len(radii)])
 uunc_flux = np.zeros([len(files),len(radii)])
 umod_flux = np.zeros([len(files),len(radii)])
 ures_flux = np.zeros([len(files),len(radii)])
+ures_sub = np.zeros([len(files),len(radii)])
 
 # arrays for j band
 jdat_flux = np.zeros([len(files),len(radii)])
 junc_flux = np.zeros([len(files),len(radii)])
 jmod_flux = np.zeros([len(files),len(radii)])
 jres_flux = np.zeros([len(files),len(radii)])
+jres_sub = np.zeros([len(files),len(radii)])
 
 # let's produce plots that will be saved in a pdf file
-name = 'galfit_phot_'+dir+'.pdf'
+name = 'galfit_phot_'+dir+'_'+gal+'.pdf'
 
 with PdfPages(name) as pdf:
     
@@ -106,7 +112,7 @@ with PdfPages(name) as pdf:
             udat_flux[i,j] = udat_table['aperture_sum'][0]
             jdat_table = aperture_photometry(jdat, aperture)
             jdat_flux[i,j] = jdat_table['aperture_sum'][0]
-                        
+
             # repeat for the sigma image
             vunc_table = aperture_photometry(vunc, aperture)
             vunc_flux[i,j] = vunc_table['aperture_sum'][0]
@@ -130,7 +136,17 @@ with PdfPages(name) as pdf:
             ures_flux[i,j] = ures_table['aperture_sum'][0]
             jres_table = aperture_photometry(jres, aperture)
             jres_flux[i,j] = jres_table['aperture_sum'][0]
-              
+
+            # define annular values
+            if j == 0:
+                vres_sub[i,j] = vres_flux[i,j]
+                ures_sub[i,j] = ures_flux[i,j]
+                jres_sub[i,j] = jres_flux[i,j]
+            else:
+                vres_sub[i,j] = vres_flux[i,j]-vres_flux[i,j-1]
+                ures_sub[i,j] = ures_flux[i,j]-ures_flux[i,j-1]
+                jres_sub[i,j] = jres_flux[i,j]-jres_flux[i,j-1]
+                          
         # start our figure
         fig = plt.figure()
 
@@ -180,14 +196,76 @@ with PdfPages(name) as pdf:
 
         # plot F160W / F814W ratio and F814W / F475W ratio for residual flux
         ax = fig.add_subplot(2,2,4)
-        ax.scatter(radii, jres_flux[i] / vres_flux[i], marker='+', color='red')
-        ax.scatter(radii, vres_flux[i] / ures_flux[i], marker='+', color='green')
-        ax.set_ylim(-10, 10)
+        ax.scatter(radii, jres_flux[i] / vres_flux[i], marker='D', color='red', label='F160W/F814W integrated')
+        ax.scatter(radii, jres_sub[i] / vres_sub[i], marker='*', color='red', label='F160W/F814W annulus')
+        ax.scatter(radii, vres_flux[i] / ures_flux[i], marker='D', color='green', label='F814W/F475W integrated')
+        ax.scatter(radii, vres_sub[i] / ures_sub[i], marker='*', color='green', label='F814W/F475W annulus')
+        ax.set_ylim(-5, 10)
         plt.xlabel('Radius [pixels]')
         #plt.ylabel('jres / vres')
+        plt.legend(loc='lower right', fontsize=7)
+        
         # save this page of the pdf file
         pdf.savefig()
         plt.close()
+
+
+    # additional page that explores colors vs radius as a function of model 
+    colors=['red','orange','yellow','green','blue','indigo','violet'] 
+    fig = plt.figure()
+
+    ax = fig.add_subplot(2,2,1)
+    ax.set_ylim(-5, 10)
+    plt.ylabel('F160W/F814W integrated')
+    for i in range(0, len(files)):
+        ax.scatter(radii, jres_flux[i] / vres_flux[i], marker='D', color=colors[i])
+
+    ax = fig.add_subplot(2,2,2)
+    plt.title('F160W/F814W annulus')
+    for i in range(0, len(files)):
+        ax.scatter(radii, jres_sub[i] / vres_sub[i], marker='*', color=colors[i])
+    ax.set_ylim(-5, 10)
+
+    ax = fig.add_subplot(2,2,3)
+    plt.ylabel('F814W/F475W integrated')
+    for i in range(0, len(files)):
+        ax.scatter(radii, vres_flux[i] / ures_flux[i], marker='D', color=colors[i])
+    ax.set_ylim(-5, 10)
+
+    ax = fig.add_subplot(2,2,4)
+    plt.xlabel('F814W/F475W annulus')
+    for i in range(0, len(files)):
+        ax.scatter(radii, vres_sub[i] / ures_sub[i], marker='*', color=colors[i])
+    ax.set_ylim(-5, 10)
+
+    pdf.savefig()
+    plt.close()
+    
+    # additional page that looks at colors in magnitude space
+    colors=['red','orange','yellow','green','blue','indigo','violet'] 
+    fig = plt.figure()
+
+    ax = fig.add_subplot(2,2,1)
+    ax.set_ylim(-2.5,2.5)
+    ax.set_xlim(-2.5,2.5)
+    plt.title('Integrated colors')
+    plt.ylabel('[F475W]-[F814W]')
+    plt.xlabel('[F814W]-[F160W]')
+    for i in range(0, len(files)):
+        ax.scatter(2.5*np.log10(jres_flux[i] / vres_flux[i]), 2.5*np.log10(vres_flux[i] / ures_flux[i]), marker='D', color=colors[i])
+
+
+    ax = fig.add_subplot(2,2,4)
+    ax.set_ylim(-2.5,2.5)
+    ax.set_xlim(-2.5,2.5)
+    plt.title('Annular colors')
+    plt.ylabel('[F475W]-[F814W]')
+    plt.xlabel('[F814W]-[F160W]')
+    for i in range(0, len(files)):
+        ax.scatter(2.5*np.log10(jres_sub[i] / vres_sub[i]), 2.5*np.log10(vres_sub[i] / ures_sub[i]), marker='*', color=colors[i])
+        
+    pdf.savefig()
+    plt.close
 
 # open the pdf file
 os.system('open %s &' % name)
