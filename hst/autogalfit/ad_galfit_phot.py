@@ -27,7 +27,8 @@ fmin = -2
 fmax = 12
 #radii = np.arange(40)+1
 #radii = 10.**(np.arange(21)/20*1.9-0.3)
-radii = np.array([1.,2.,3.,4.,5.,10.,15.,20.,25.,30.,35.,40.,45.])
+#radii = np.array([1.,2.,3.,4.,5.,10.,15.,20.,25.,30.,35.,40.,45.])
+radii = np.array([5.,10.,20.,30.,40.])
 
 # arrays for v band
 vdat_flux = np.zeros([len(files),len(radii)])
@@ -186,7 +187,7 @@ with PdfPages(name) as pdf:
         ax.scatter(radii, junc_flux[i]/1e5, marker='s', color='red')
         ax.scatter(radii, jmod_flux[i]/1e5, marker='o', color='green')
         ax.scatter(radii, jres_flux[i]/1e5, marker='+', color='black')
-        ax.set_ylim(fmin, fmax*3)
+        ax.set_ylim(-5, 35)
         
         # add labels for axes and a title for the name of the image extension
         plt.xlabel('Radius [pixels]')
@@ -200,10 +201,10 @@ with PdfPages(name) as pdf:
         ax.scatter(radii, jres_sub[i] / vres_sub[i], marker='*', color='red', label='F160W/F814W annulus')
         ax.scatter(radii, vres_flux[i] / ures_flux[i], marker='D', color='green', label='F814W/F475W integrated')
         ax.scatter(radii, vres_sub[i] / ures_sub[i], marker='*', color='green', label='F814W/F475W annulus')
-        ax.set_ylim(-5, 10)
+        ax.set_ylim(-5, 25)
         plt.xlabel('Radius [pixels]')
         #plt.ylabel('jres / vres')
-        plt.legend(loc='lower right', fontsize=7)
+        plt.legend(loc='upper left', fontsize=7)
         
         # save this page of the pdf file
         pdf.savefig()
@@ -215,7 +216,7 @@ with PdfPages(name) as pdf:
     fig = plt.figure()
 
     ax = fig.add_subplot(2,2,1)
-    ax.set_ylim(-5, 10)
+    ax.set_ylim(-5, 25)
     plt.ylabel('F160W/F814W integrated')
     for i in range(0, len(files)):
         ax.scatter(radii, jres_flux[i] / vres_flux[i], marker='D', color=colors[i])
@@ -224,19 +225,19 @@ with PdfPages(name) as pdf:
     plt.title('F160W/F814W annulus')
     for i in range(0, len(files)):
         ax.scatter(radii, jres_sub[i] / vres_sub[i], marker='*', color=colors[i])
-    ax.set_ylim(-5, 10)
+    ax.set_ylim(-5, 25)
 
     ax = fig.add_subplot(2,2,3)
     plt.ylabel('F814W/F475W integrated')
     for i in range(0, len(files)):
         ax.scatter(radii, vres_flux[i] / ures_flux[i], marker='D', color=colors[i])
-    ax.set_ylim(-5, 10)
+    ax.set_ylim(-5, 25)
 
     ax = fig.add_subplot(2,2,4)
     plt.xlabel('F814W/F475W annulus')
     for i in range(0, len(files)):
         ax.scatter(radii, vres_sub[i] / ures_sub[i], marker='*', color=colors[i])
-    ax.set_ylim(-5, 10)
+    ax.set_ylim(-5, 25)
 
     pdf.savefig()
     plt.close()
@@ -246,23 +247,23 @@ with PdfPages(name) as pdf:
     fig = plt.figure()
 
     ax = fig.add_subplot(2,2,1)
-    ax.set_ylim(-2.5,2.5)
-    ax.set_xlim(-2.5,2.5)
+    ax.set_ylim(-0.5,3.5)
+    ax.set_xlim(-0.5,3.5)
     plt.title('Integrated colors')
     plt.ylabel('[F475W]-[F814W]')
     plt.xlabel('[F814W]-[F160W]')
     for i in range(0, len(files)):
-        ax.scatter(2.5*np.log10(jres_flux[i] / vres_flux[i]), 2.5*np.log10(vres_flux[i] / ures_flux[i]), marker='D', color=colors[i])
+        ax.scatter(2.5*np.log10(jres_flux[i][2:len(radii)] / vres_flux[i][2:len(radii)]), 2.5*np.log10(vres_flux[i][2:len(radii)] / ures_flux[i][2:len(radii)]), marker='D', color=colors[i])
 
 
     ax = fig.add_subplot(2,2,4)
-    ax.set_ylim(-2.5,2.5)
-    ax.set_xlim(-2.5,2.5)
+    ax.set_ylim(-0.5,3.5)
+    ax.set_xlim(-0.5,3.5)
     plt.title('Annular colors')
     plt.ylabel('[F475W]-[F814W]')
     plt.xlabel('[F814W]-[F160W]')
     for i in range(0, len(files)):
-        ax.scatter(2.5*np.log10(jres_sub[i] / vres_sub[i]), 2.5*np.log10(vres_sub[i] / ures_sub[i]), marker='*', color=colors[i])
+        ax.scatter(2.5*np.log10(jres_sub[i][2:len(radii)] / vres_sub[i][2:len(radii)]), 2.5*np.log10(vres_sub[i][2:len(radii)] / ures_sub[i][2:len(radii)]), marker='*', color=colors[i])
         
     pdf.savefig()
     plt.close
