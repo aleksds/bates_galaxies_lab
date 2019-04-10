@@ -36,6 +36,7 @@ vunc_flux = np.zeros([len(files),len(radii)])
 vmod_flux = np.zeros([len(files),len(radii)])
 vres_flux = np.zeros([len(files),len(radii)])
 vres_sub = np.zeros([len(files),len(radii)])
+vdat_sub = np.zeros([len(files),len(radii)])
 
 # arrays for u band
 udat_flux = np.zeros([len(files),len(radii)])
@@ -43,6 +44,7 @@ uunc_flux = np.zeros([len(files),len(radii)])
 umod_flux = np.zeros([len(files),len(radii)])
 ures_flux = np.zeros([len(files),len(radii)])
 ures_sub = np.zeros([len(files),len(radii)])
+udat_sub = np.zeros([len(files),len(radii)])
 
 # arrays for j band
 jdat_flux = np.zeros([len(files),len(radii)])
@@ -50,6 +52,7 @@ junc_flux = np.zeros([len(files),len(radii)])
 jmod_flux = np.zeros([len(files),len(radii)])
 jres_flux = np.zeros([len(files),len(radii)])
 jres_sub = np.zeros([len(files),len(radii)])
+jdat_sub = np.zeros([len(files),len(radii)])
 
 # let's produce plots that will be saved in a pdf file
 name = 'galfit_phot_'+dir+'_'+gal+'.pdf'
@@ -143,11 +146,17 @@ with PdfPages(name) as pdf:
                 vres_sub[i,j] = vres_flux[i,j]
                 ures_sub[i,j] = ures_flux[i,j]
                 jres_sub[i,j] = jres_flux[i,j]
+                vdat_sub[i,j] = vdat_flux[i,j]
+                udat_sub[i,j] = udat_flux[i,j]
+                jdat_sub[i,j] = jdat_flux[i,j]
             else:
                 vres_sub[i,j] = vres_flux[i,j]-vres_flux[i,j-1]
                 ures_sub[i,j] = ures_flux[i,j]-ures_flux[i,j-1]
                 jres_sub[i,j] = jres_flux[i,j]-jres_flux[i,j-1]
-                          
+                vdat_sub[i,j] = vdat_flux[i,j]-vdat_flux[i,j-1]
+                udat_sub[i,j] = udat_flux[i,j]-udat_flux[i,j-1]
+                jdat_sub[i,j] = jdat_flux[i,j]-jdat_flux[i,j-1]
+                   
         # start our figure
         fig = plt.figure()
 
@@ -211,7 +220,7 @@ with PdfPages(name) as pdf:
         plt.close()
 
 
-    # additional page that explores colors vs radius as a function of model 
+    # additional page that explores residual colors vs radius as a function of model 
     colors=['red','orange','yellow','green','blue','indigo','violet'] 
     fig = plt.figure()
 
@@ -220,29 +229,34 @@ with PdfPages(name) as pdf:
     plt.ylabel('F160W/F814W integrated')
     for i in range(0, len(files)):
         ax.scatter(radii, jres_flux[i] / vres_flux[i], marker='D', color=colors[i])
+    ax.scatter(radii, jdat_flux[i] / vdat_flux[i], marker='X', color='black')
 
     ax = fig.add_subplot(2,2,2)
     plt.title('F160W/F814W annulus')
     for i in range(0, len(files)):
         ax.scatter(radii, jres_sub[i] / vres_sub[i], marker='*', color=colors[i])
+    ax.scatter(radii, jdat_sub[i] / vdat_sub[i], marker='X', color='black')
     ax.set_ylim(-5, 25)
+    
 
     ax = fig.add_subplot(2,2,3)
     plt.ylabel('F814W/F475W integrated')
     for i in range(0, len(files)):
         ax.scatter(radii, vres_flux[i] / ures_flux[i], marker='D', color=colors[i])
+    ax.scatter(radii, vdat_flux[i] / udat_flux[i], marker='X', color='black')
     ax.set_ylim(-5, 25)
 
     ax = fig.add_subplot(2,2,4)
     plt.xlabel('F814W/F475W annulus')
     for i in range(0, len(files)):
         ax.scatter(radii, vres_sub[i] / ures_sub[i], marker='*', color=colors[i])
+    ax.scatter(radii, vdat_sub[i] / udat_sub[i], marker='X', color='black')
     ax.set_ylim(-5, 25)
 
     pdf.savefig()
     plt.close()
     
-    # additional page that looks at colors in magnitude space
+    # additional page that looks at residual colors in magnitude space
     colors=['red','orange','yellow','green','blue','indigo','violet'] 
     fig = plt.figure()
 
@@ -254,8 +268,8 @@ with PdfPages(name) as pdf:
     plt.xlabel('[F814W]-[F160W]')
     for i in range(0, len(files)):
         ax.scatter(2.5*np.log10(jres_flux[i][2:len(radii)] / vres_flux[i][2:len(radii)]), 2.5*np.log10(vres_flux[i][2:len(radii)] / ures_flux[i][2:len(radii)]), marker='D', color=colors[i])
-
-
+    ax.scatter(2.5*np.log10(jdat_flux[0] / vdat_flux[0]), 2.5*np.log10(vdat_flux[0] / udat_flux[0]), marker='X', color='black')
+        
     ax = fig.add_subplot(2,2,4)
     ax.set_ylim(-0.5,3.5)
     ax.set_xlim(-0.5,3.5)
@@ -264,10 +278,12 @@ with PdfPages(name) as pdf:
     plt.xlabel('[F814W]-[F160W]')
     for i in range(0, len(files)):
         ax.scatter(2.5*np.log10(jres_sub[i][2:len(radii)] / vres_sub[i][2:len(radii)]), 2.5*np.log10(vres_sub[i][2:len(radii)] / ures_sub[i][2:len(radii)]), marker='*', color=colors[i])
+    ax.scatter(2.5*np.log10(jdat_sub[0] / vdat_sub[0]), 2.5*np.log10(vdat_sub[0] / udat_sub[0]), marker='X', color='black')
         
     pdf.savefig()
     plt.close
 
+    
 # open the pdf file
 os.system('open %s &' % name)
 
