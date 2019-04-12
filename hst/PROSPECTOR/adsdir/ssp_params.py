@@ -55,8 +55,7 @@ sdss = ['sdss_{0}0'.format(b) for b in ['u','g','r','i','z']]
 #filtersets = (galex + bessell + spitzer,
 #              galex + sdss + spitzer)
 filtersets = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
-galaxy = 11
-
+galaxy = 0
 
 def load_obs(objid=galaxy, phottable='../Photometry/coarse_final/atest.txt', **kwargs):
     """Load photometry from an ascii file.  Assumes the following columns:
@@ -89,8 +88,8 @@ def load_obs(objid=galaxy, phottable='../Photometry/coarse_final/atest.txt', **k
     #ivars = np.array([catalog['ivar_{}'.format(i)] for i in wavelengths])
     ids = catalog['ID']
     zs = catalog['z']
-    
-    # Build output dictionary. 
+
+    # Build output dictionary.
     obs = {}
     # This is a list of sedpy filter objects.    See the
     # sedpy.observate.load_filters command for more details on its syntax.
@@ -112,9 +111,7 @@ def load_obs(objid=galaxy, phottable='../Photometry/coarse_final/atest.txt', **k
     obs['spectrum'] = None
     obs['logify_spectrum'] = False
 
-    print(obs)
     return obs
-
 
 # --------------
 # SPS Object
