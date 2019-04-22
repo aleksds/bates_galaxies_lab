@@ -32,24 +32,24 @@ galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J150
 
 for i in range(0, len(z)):
     re_hi_kpc = re_hi_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
-    re_lo_kpc = re_hi_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
-    re_best_kpc = re_hi_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
+    re_lo_kpc = re_lo_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
+    re_best_kpc = re_best_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
 
     vesc_ssp_lo = np.sqrt(G * m_ssp_lo[i] / re_hi_kpc).to('km/s')
-    vesc_ssp_best = np.sqrt(G * m_ssp_best[i] / re_hi_kpc).to('km/s')
-    vesc_ssp_up = np.sqrt(G * m_ssp_up[i] / re_hi_kpc).to('km/s')
+    vesc_ssp_best = np.sqrt(G * m_ssp_best[i] / re_best_kpc).to('km/s')
+    vesc_ssp_up = np.sqrt(G * m_ssp_up[i] / re_lo_kpc).to('km/s')
 
     vesc_cal_lo = np.sqrt(G * m_cal_lo[i] / re_hi_kpc).to('km/s')
-    vesc_cal_best = np.sqrt(G * m_cal_best[i] / re_hi_kpc).to('km/s')
-    vesc_cal_up = np.sqrt(G * m_cal_up[i] / re_hi_kpc).to('km/s')
+    vesc_cal_best = np.sqrt(G * m_cal_best[i] / re_best_kpc).to('km/s')
+    vesc_cal_up = np.sqrt(G * m_cal_up[i] / re_lo_kpc).to('km/s')
 
     vesc_tau_lo = np.sqrt(G * m_tau_lo[i] / re_hi_kpc).to('km/s')
-    vesc_tau_best = np.sqrt(G * m_tau_best[i] / re_hi_kpc).to('km/s')
-    vesc_tau_up = np.sqrt(G * m_tau_up[i] / re_hi_kpc).to('km/s')
+    vesc_tau_best = np.sqrt(G * m_tau_best[i] / re_best_kpc).to('km/s')
+    vesc_tau_up = np.sqrt(G * m_tau_up[i] / re_lo_kpc).to('km/s')
 
     vesc_dtau_lo = np.sqrt(G * m_dtau_lo[i] / re_hi_kpc).to('km/s')
-    vesc_dtau_best = np.sqrt(G * m_dtau_best[i] / re_hi_kpc).to('km/s')
-    vesc_dtau_up = np.sqrt(G * m_dtau_up[i] / re_hi_kpc).to('km/s')
-    print(galaxies[i], re_hi_kpc, vesc_ssp_lo,vesc_ssp_best,vesc_ssp_up,vesc_cal_lo,vesc_cal_best,
+    vesc_dtau_best = np.sqrt(G * m_dtau_best[i] / re_best_kpc).to('km/s')
+    vesc_dtau_up = np.sqrt(G * m_dtau_up[i] / re_lo_kpc).to('km/s')
+    print(galaxies[i], vesc_ssp_lo,vesc_ssp_best,vesc_ssp_up,vesc_cal_lo,vesc_cal_best,
           vesc_cal_up,vesc_tau_lo,vesc_tau_best,vesc_tau_up,vesc_dtau_lo, vesc_dtau_best,vesc_dtau_up)
 
