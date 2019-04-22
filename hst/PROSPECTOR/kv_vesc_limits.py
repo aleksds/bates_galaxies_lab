@@ -6,6 +6,8 @@ from astropy import units as u
 from astropy.cosmology import FlatLambdaCDM
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+from astropy.io import ascii
+from astropy import units as u
 
 #constructing cosmological constant
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
@@ -31,9 +33,10 @@ m_dtau_best = np.array([6.04e9, 6.04e9, 6.08e9, 6.12e9, 6.07e9, 6.14e9, 6.15e9, 
 m_dtau_up = np.array([7.73e8, 7.70e9, 7.73e9, 7.94e9, 7.74e9, 8e9, 8.01e9, 7.74e9, 8.31e9, 7.73e9, 8.26e9, 1.21e10]) * const.M_sun #dtau 84th%
 
 #constructing effective radius limits, redshift, and galaxy notation
-re_hi_arc = np.array([0.727, 0.883, 0.434, 0.575, 1.048, 1.392, 0.392, 0.610, 2.483, 6.386, 1.057, 0.949]) * u.arcsec
-re_lo_arc = np.array([0.476, 0.584, 0.400, 0.346, 0.465, 0.904, 0.568, 0.392, 0.959, 4.048, 0.628, 0.003]) * u.arcsec
-re_best_arc = np.array([0.610, 0.697, 0.424, 0.394, 0.650, 1.187, 0.549, 0.469, 1.385, 5.310, 0.918, 0.509]) * u.arcsec
+values = ascii.read('../autogalfit/ad_mag_size_table.dat')
+re_hi_arc = np.array(values['re_large']) * 0.025 * u.arcsec
+re_lo_arc = np.array(values['re_small']) * 0.025 * u.arcsec
+re_best_arc = np.array(values['re']) * 0.025 * u.arcsec
 z = np.array([0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752])
 galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
 
@@ -171,4 +174,260 @@ with PdfPages(filename) as pdf:
 
 os.system('open %s &' % filename)
 
+#setting up values for error bars using only stellar mass uncertainties
 
+vesc_ssp_best = np.zeros(len(galaxies))
+vesc_ssp_lo = np.zeros(len(galaxies))
+vesc_ssp_up = np.zeros(len(galaxies))
+vesc_cal_up = np.zeros(len(galaxies))
+vesc_cal_lo = np.zeros(len(galaxies))
+vesc_cal_best = np.zeros(len(galaxies))
+vesc_tau_best = np.zeros(len(galaxies))
+vesc_tau_up = np.zeros(len(galaxies))
+vesc_tau_lo = np.zeros(len(galaxies))
+vesc_dtau_up = np.zeros(len(galaxies))
+vesc_dtau_lo = np.zeros(len(galaxies))
+vesc_dtau_best = np.zeros(len(galaxies))
+
+for i in range(0, len(z)):
+    re_best_kpc = re_best_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
+
+    vesc_ssp_lo[i] = np.sqrt(G * m_ssp_lo[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_best[i] = np.sqrt(G * m_ssp_best[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_up[i] = np.sqrt(G * m_ssp_up[i] / re_best_kpc).to('km/s') * u.s / u.km
+
+    vesc_cal_lo[i] = np.sqrt(G * m_cal_lo[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_cal_best[i] = np.sqrt(G * m_cal_best[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_cal_up[i] = np.sqrt(G * m_cal_up[i] / re_best_kpc).to('km/s') * u.s / u.km
+
+    vesc_tau_lo[i] = np.sqrt(G * m_tau_lo[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_tau_best[i] = np.sqrt(G * m_tau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_tau_up[i] = np.sqrt(G * m_tau_up[i] / re_best_kpc).to('km/s') * u.s / u.km
+
+    vesc_dtau_lo[i] = np.sqrt(G * m_dtau_lo[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_best[i] = np.sqrt(G * m_dtau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_up[i] = np.sqrt(G * m_dtau_up[i] / re_best_kpc).to('km/s') * u.s / u.km
+    print(galaxies[i], vesc_ssp_lo,vesc_ssp_best,vesc_ssp_up,vesc_cal_lo,vesc_cal_best,
+          vesc_cal_up,vesc_tau_lo,vesc_tau_best,vesc_tau_up,vesc_dtau_lo, vesc_dtau_best,vesc_dtau_up)
+
+#ssp plot with radius constant
+filename = 'kv_vflow_ssp_mass_unc.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_ssp_best, s=30, marker='o', c='blue')
+    lower_error_ssp = vesc_ssp_lo
+    upper_error_ssp = vesc_ssp_up
+    plt.errorbar(vflow, vesc_ssp_best, yerr=[lower_error_ssp, upper_error_ssp], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    print (x)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
+
+#cal plot with radius constant
+filename = 'kv_vflow_cal_mass_unc.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_cal_best, s=30, marker='o', c='blue')
+    lower_error_cal = vesc_cal_lo
+    upper_error_cal = vesc_cal_up
+    plt.errorbar(vflow, vesc_cal_best, yerr=[lower_error_cal, upper_error_cal], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    print (x)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
+
+#tau plot with radius constant
+filename = 'kv_vflow_tau_mass_unc.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_tau_best, s=30, marker='o', c='blue')
+    lower_error_tau = vesc_tau_lo
+    upper_error_tau = vesc_tau_up
+    plt.errorbar(vflow, vesc_tau_best, yerr=[lower_error_tau, upper_error_tau], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    print (x)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
+
+#dtau plot with radius constant
+filename = 'kv_vflow_dtau_mass_unc.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_dtau_best, s=30, marker='o', c='blue')
+    lower_error_dtau = vesc_dtau_lo
+    upper_error_dtau = vesc_dtau_up
+    plt.errorbar(vflow, vesc_dtau_best, yerr=[lower_error_dtau, upper_error_dtau], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    print (x)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
+
+#setting up values for error bars using only effective radius uncertainties
+
+vesc_ssp_best = np.zeros(len(galaxies))
+vesc_ssp_lo = np.zeros(len(galaxies))
+vesc_ssp_up = np.zeros(len(galaxies))
+vesc_cal_up = np.zeros(len(galaxies))
+vesc_cal_lo = np.zeros(len(galaxies))
+vesc_cal_best = np.zeros(len(galaxies))
+vesc_tau_best = np.zeros(len(galaxies))
+vesc_tau_up = np.zeros(len(galaxies))
+vesc_tau_lo = np.zeros(len(galaxies))
+vesc_dtau_up = np.zeros(len(galaxies))
+vesc_dtau_lo = np.zeros(len(galaxies))
+vesc_dtau_best = np.zeros(len(galaxies))
+
+for i in range(0, len(z)):
+    re_hi_kpc = re_hi_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
+    re_lo_kpc = re_lo_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
+    re_best_kpc = re_best_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
+
+    vesc_ssp_lo[i] = np.sqrt(G * m_ssp_best[i] / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_best[i] = np.sqrt(G * m_ssp_best[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_up[i] = np.sqrt(G * m_ssp_best[i] / re_lo_kpc).to('km/s') * u.s / u.km
+
+    vesc_cal_lo[i] = np.sqrt(G * m_cal_best[i] / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_cal_best[i] = np.sqrt(G * m_cal_best[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_cal_up[i] = np.sqrt(G * m_cal_best[i] / re_lo_kpc).to('km/s') * u.s / u.km
+
+    vesc_tau_lo[i] = np.sqrt(G * m_tau_best[i] / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_tau_best[i] = np.sqrt(G * m_tau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_tau_up[i] = np.sqrt(G * m_tau_best[i] / re_lo_kpc).to('km/s') * u.s / u.km
+
+    vesc_dtau_lo[i] = np.sqrt(G * m_dtau_best[i] / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_best[i] = np.sqrt(G * m_dtau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_up[i] = np.sqrt(G * m_dtau_best[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    print(galaxies[i], vesc_ssp_lo,vesc_ssp_best,vesc_ssp_up,vesc_cal_lo,vesc_cal_best,
+          vesc_cal_up,vesc_tau_lo,vesc_tau_best,vesc_tau_up,vesc_dtau_lo, vesc_dtau_best,vesc_dtau_up)
+
+#ssp plot with stellar mass constant
+filename = 'kv_vflow_ssp_re_unc.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_ssp_best, s=30, marker='o', c='blue')
+    lower_error_ssp = vesc_ssp_lo
+    upper_error_ssp = vesc_ssp_up
+    plt.errorbar(vflow, vesc_ssp_best, yerr=[lower_error_ssp, upper_error_ssp], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    print (x)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
+
+#cal plot with stellar mass constant
+filename = 'kv_vflow_cal_re_unc.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_cal_best, s=30, marker='o', c='blue')
+    lower_error_cal = vesc_cal_lo
+    upper_error_cal = vesc_cal_up
+    plt.errorbar(vflow, vesc_cal_best, yerr=[lower_error_cal, upper_error_cal], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    print (x)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
+
+#tau plot with stellar mass constant
+filename = 'kv_vflow_tau_re_unc.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_tau_best, s=30, marker='o', c='blue')
+    lower_error_tau = vesc_tau_lo
+    upper_error_tau = vesc_tau_up
+    plt.errorbar(vflow, vesc_tau_best, yerr=[lower_error_tau, upper_error_tau], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    print (x)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
+
+#dtau plot with stellar mass constant
+filename = 'kv_vflow_dtau_re_unc.pdf'
+
+with PdfPages(filename) as pdf:
+
+    fig = plt.figure()
+    plt.scatter(vflow, vesc_dtau_best, s=30, marker='o', c='blue')
+    lower_error_dtau = vesc_dtau_lo
+    upper_error_dtau = vesc_dtau_up
+    plt.errorbar(vflow, vesc_dtau_best, yerr=[lower_error_dtau, upper_error_dtau], fmt='o')
+    plt.xlabel('Observed Outflow Speed (km/s)')
+    plt.ylabel('Estimated Escape Velocity')
+    plt.xlim(0,3000)
+    plt.ylim(0,3000)
+    x = np.arange(0,3001)
+    print (x)
+    y = x
+    plt.plot(x,y,linestyle=':',color='red',linewidth=1, label='x = y')
+    pdf.savefig()
+    plt.close()
+
+os.system('open %s &' % filename)
