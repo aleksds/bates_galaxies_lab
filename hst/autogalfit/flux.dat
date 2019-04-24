@@ -1,0 +1,20 @@
+Galaxy Nanomaggies_475 Nanomaggies_814  Nanomaggies_160 Flux_475 Flux_814 Flux_160 Uncertainty_Flux_475 Uncertainty_Flux_814 Uncertainty_Flux_160 Inverse_Variance_475 Inverse_Variance_814 Inverse_Variance_160
+J0826  17.539          23.768           29.923          1.75e-8  2.38e-8  2.99e-8  1.78e-9              2.85e-9              1.93e-9              3.15e17              1.23e17              2.67e17
+J0901  17.378          26.546           33.420          1.74e-8  2.65e-8  3.34e-8  1.44e-9              2.45e-9              2.16e-9              4.79e17              1.66e17              2.14e17
+J0905  16.749          24.889           25.586          1.67e-8  2.49e-8  2.56e-8  7.74e-10             1.38e-9              4.73e-10             1.67e18              5.26e17              4.48e18
+J0944  12.942          21.878           34.041          1.29e-8  2.19e-8  3.40e-8  9.56e-10             1.62e-9              1.26e-9              1.09e18              3.83e17              6.32e17
+J1107  16.293          22.080           26.062          1.63e-8  2.21e-8  2.61e-8  1.96e-9              3.26e-9              2.89e-9              2.61e17              9.39e16              1.20e17
+J1219  14.997          31.915           44.875          1.50e-8  3.19e-8  4.49e-8  2.22e-9              5.01e-9              4.97e-9              2.04e17              3.98e16              4.04e16
+J1341  26.062          32.211           25.351          2.61e-8  3.22e-8  2.54e-8  1.44e-9              1.79e-9              7.03e-10             4.79e17              3.14e17              2.03e18
+J1506  24.889          28.576           29.648          2.49e-8  2.86e-8  2.96e-8  1.38e-9              3.17e-9              1.10e-9              5.26e17              9.97e16              8.33e17
+J1558  16.293          20.893           31.046          1.63e-8  2.09e-8  3.10e-8  3.91e-9              5.40e-9              6.31e-9              6.53e17              3.42e16              2.51e16
+J1613  15.560          36.308           69.823          1.56e-8  3.63e-8  6.98e-8  2.59e-9              7.04e-9              1.16e-8              1.49e17              2.02e16              7.42e15
+J2116  10.568          19.588           20.893          1.06e-8  1.96e-8  2.09e-8  1.56e-9              2.90e-9              3.86e-9              4.10e17              1.19e17              6.71e16
+J2140  8.472           18.535           24.210          8.47e-9  1.85e-8  2.42e-8  1.10e-9              2.57e-9              1.79e-9              8.33e17              1.52e17              3.12e17
+
+#Cristopher Thompson 
+#2019/04/24
+#Note: These values are created using the read_mag.py files along with a double check with Aleks.
+#These values are correct and are values that have been triple check. If there are problems, please 
+# refer to Cristopher Thompson and we can correct these values using the excel sheet I used to 
+# solve for these values.
