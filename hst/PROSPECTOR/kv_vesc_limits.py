@@ -9,6 +9,7 @@ from astropy.io import ascii
 from astropy import units as u
 import xlrd
 
+galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
 #constructing cosmological constant
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
@@ -18,42 +19,42 @@ wb = xlrd.open_workbook(loc)
 mass_sheet = wb.sheet_by_index(0)
 
 #setting up stellar mass array
-m_ssp_lo = np.zeros([])
-m_ssp_best = np.zeros([])
-m_ssp_up = np.zeros([])
+m_ssp_lo = np.zeros(len(galaxies))
+m_ssp_best = np.zeros(len(galaxies))
+m_ssp_up = np.zeros(len(galaxies))
 
-m_cal_lo = np.zeros([])
-m_cal_best = np.zeros([])
-m_cal_up = np.zeros([])
+m_cal_lo = np.zeros(len(galaxies))
+m_cal_best = np.zeros(len(galaxies))
+m_cal_up = np.zeros(len(galaxies))
 
-m_tau_lo = np.zeros([])
-m_tau_best = np.zeros([])
-m_tau_up = np.zeros([])
+m_tau_lo = np.zeros(len(galaxies))
+m_tau_best = np.zeros(len(galaxies))
+m_tau_up = np.zeros(len(galaxies))
 
-m_dtau_lo = np.zeros([])
-m_dtau_best = np.zeros([])
-m_dtau_up = np.zeros([])
+m_dtau_lo = np.zeros(len(galaxies))
+m_dtau_best = np.zeros(len(galaxies))
+m_dtau_up = np.zeros(len(galaxies))
 
 for i in range(0, mass_sheet.nrows-1):
     # total SSP stellar mass
-    m_ssp_lo = np.array([mass_sheet.cell_value(i+1,9)]) * const.M_sun #default ssp stellar mass values for 16th percentile
-    m_ssp_best = np.array([mass_sheet.cell_value(i+1,1)]) * const.M_sun #50th percentile
-    m_ssp_up = np.array([mass_sheet.cell_value(i+1,5)]) * const.M_sun #84th percentile
+    m_ssp_lo[i] = mass_sheet.cell_value(i+1,9)  #default ssp stellar mass values for 16th percentile
+    m_ssp_best[i] = mass_sheet.cell_value(i+1,1)  #50th percentile
+    m_ssp_up[i] = mass_sheet.cell_value(i+1,5)  #84th percentile
 
     #calzetti dust law
-    m_cal_lo = np.array([mass_sheet.cell_value(i+1,10)]) * const.M_sun
-    m_cal_best = np.array([mass_sheet.cell_value(i+1,2)]) * const.M_sun
-    m_cal_up = np.array([mass_sheet.cell_value(i+1,6)]) * const.M_sun
+    m_cal_lo[i] = mass_sheet.cell_value(i+1,10)
+    m_cal_best[i] = mass_sheet.cell_value(i+1,2)
+    m_cal_up[i] = mass_sheet.cell_value(i+1,6)
 
     #SFH tau model
-    m_tau_lo = np.array([mass_sheet.cell_value(i+1,11)]) * const.M_sun
-    m_tau_best = np.array([mass_sheet.cell_value(i+1,3)]) * const.M_sun
-    m_tau_up = np.array([mass_sheet.cell_value(i+1,7)]) * const.M_sun
+    m_tau_lo[i] = mass_sheet.cell_value(i+1,11)
+    m_tau_best[i] = mass_sheet.cell_value(i+1,3)
+    m_tau_up[i] = mass_sheet.cell_value(i+1,7)
 
     #SFH Delayed tau model
-    m_dtau_lo = np.array([mass_sheet.cell_value(i+1,12)]) * const.M_sun
-    m_dtau_best = np.array([mass_sheet.cell_value(i+1,4)]) * const.M_sun
-    m_dtau_up = np.array([mass_sheet.cell_value(i+1,8)]) * const.M_sun
+    m_dtau_lo[i] = mass_sheet.cell_value(i+1,12)
+    m_dtau_best[i] = mass_sheet.cell_value(i+1,4)
+    m_dtau_up[i] = mass_sheet.cell_value(i+1,8)
 
 
 #constructing effective radius limits, redshift, and galaxy notation
@@ -62,7 +63,7 @@ re_hi_arc = np.array(values['re_large']) * 0.025 * u.arcsec
 re_lo_arc = np.array(values['re_small']) * 0.025 * u.arcsec
 re_best_arc = np.array(values['re']) * 0.025 * u.arcsec
 z = np.array([0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.449, 0.728, 0.752])
-galaxies = ['J0826', 'J0901', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1506', 'J1558', 'J1613', 'J2116', 'J2140']
+
 
 vesc_ssp_best = np.zeros(len(galaxies))
 vesc_ssp_lo = np.zeros(len(galaxies))
@@ -83,24 +84,23 @@ for i in range(0, len(z)):
     re_lo_kpc = re_lo_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
     re_best_kpc = re_best_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
 
-    vesc_ssp_lo[i] = np.sqrt(G * m_ssp_lo[i] / re_hi_kpc).to('km/s') * u.s / u.km
-    vesc_ssp_best[i] = np.sqrt(G * m_ssp_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_ssp_up[i] = np.sqrt(G * m_ssp_up[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_lo[i] = np.sqrt(G * m_ssp_lo[i] * const.M_sun / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_best[i] = np.sqrt(G * m_ssp_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_up[i] = np.sqrt(G * m_ssp_up[i] * const.M_sun / re_lo_kpc).to('km/s') * u.s / u.km
 
-    vesc_cal_lo[i] = np.sqrt(G * m_cal_lo[i] / re_hi_kpc).to('km/s') * u.s / u.km
-    vesc_cal_best[i] = np.sqrt(G * m_cal_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_cal_up[i] = np.sqrt(G * m_cal_up[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    vesc_cal_lo[i] = np.sqrt(G * m_cal_lo[i] * const.M_sun / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_cal_best[i] = np.sqrt(G * m_cal_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_cal_up[i] = np.sqrt(G * m_cal_up[i] * const.M_sun / re_lo_kpc).to('km/s') * u.s / u.km
 
-    vesc_tau_lo[i] = np.sqrt(G * m_tau_lo[i] / re_hi_kpc).to('km/s') * u.s / u.km
-    vesc_tau_best[i] = np.sqrt(G * m_tau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_tau_up[i] = np.sqrt(G * m_tau_up[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    vesc_tau_lo[i] = np.sqrt(G * m_tau_lo[i] * const.M_sun / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_tau_best[i] = np.sqrt(G * m_tau_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_tau_up[i] = np.sqrt(G * m_tau_up[i] * const.M_sun / re_lo_kpc).to('km/s') * u.s / u.km
 
-    vesc_dtau_lo[i] = np.sqrt(G * m_dtau_lo[i] / re_hi_kpc).to('km/s') * u.s / u.km
-    vesc_dtau_best[i] = np.sqrt(G * m_dtau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_dtau_up[i] = np.sqrt(G * m_dtau_up[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_lo[i] = np.sqrt(G * m_dtau_lo[i] * const.M_sun / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_best[i] = np.sqrt(G * m_dtau_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_up[i] = np.sqrt(G * m_dtau_up[i] * const.M_sun / re_lo_kpc).to('km/s') * u.s / u.km
     print(galaxies[i], vesc_ssp_lo,vesc_ssp_best,vesc_ssp_up,vesc_cal_lo,vesc_cal_best,
           vesc_cal_up,vesc_tau_lo,vesc_tau_best,vesc_tau_up,vesc_dtau_lo, vesc_dtau_best,vesc_dtau_up)
-"""
 #plotting escape velocities
 
 #outflow velocities
@@ -216,21 +216,21 @@ vesc_dtau_best = np.zeros(len(galaxies))
 for i in range(0, len(z)):
     re_best_kpc = re_best_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
 
-    vesc_ssp_lo[i] = np.sqrt(G * m_ssp_lo[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_ssp_best[i] = np.sqrt(G * m_ssp_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_ssp_up[i] = np.sqrt(G * m_ssp_up[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_lo[i] = np.sqrt(G * m_ssp_lo[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_best[i] = np.sqrt(G * m_ssp_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_up[i] = np.sqrt(G * m_ssp_up[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
 
-    vesc_cal_lo[i] = np.sqrt(G * m_cal_lo[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_cal_best[i] = np.sqrt(G * m_cal_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_cal_up[i] = np.sqrt(G * m_cal_up[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_cal_lo[i] = np.sqrt(G * m_cal_lo[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_cal_best[i] = np.sqrt(G * m_cal_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_cal_up[i] = np.sqrt(G * m_cal_up[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
 
-    vesc_tau_lo[i] = np.sqrt(G * m_tau_lo[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_tau_best[i] = np.sqrt(G * m_tau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_tau_up[i] = np.sqrt(G * m_tau_up[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_tau_lo[i] = np.sqrt(G * m_tau_lo[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_tau_best[i] = np.sqrt(G * m_tau_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_tau_up[i] = np.sqrt(G * m_tau_up[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
 
-    vesc_dtau_lo[i] = np.sqrt(G * m_dtau_lo[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_dtau_best[i] = np.sqrt(G * m_dtau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_dtau_up[i] = np.sqrt(G * m_dtau_up[i] / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_lo[i] = np.sqrt(G * m_dtau_lo[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_best[i] = np.sqrt(G * m_dtau_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_up[i] = np.sqrt(G * m_dtau_up[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
     print(galaxies[i], vesc_ssp_lo,vesc_ssp_best,vesc_ssp_up,vesc_cal_lo,vesc_cal_best,
           vesc_cal_up,vesc_tau_lo,vesc_tau_best,vesc_tau_up,vesc_dtau_lo, vesc_dtau_best,vesc_dtau_up)
 
@@ -346,21 +346,21 @@ for i in range(0, len(z)):
     re_lo_kpc = re_lo_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
     re_best_kpc = re_best_arc[i] / cosmo.arcsec_per_kpc_proper(z[i])
 
-    vesc_ssp_lo[i] = np.sqrt(G * m_ssp_best[i] / re_hi_kpc).to('km/s') * u.s / u.km
-    vesc_ssp_best[i] = np.sqrt(G * m_ssp_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_ssp_up[i] = np.sqrt(G * m_ssp_best[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_lo[i] = np.sqrt(G * m_ssp_best[i] * const.M_sun / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_best[i] = np.sqrt(G * m_ssp_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_ssp_up[i] = np.sqrt(G * m_ssp_best[i] * const.M_sun / re_lo_kpc).to('km/s') * u.s / u.km
 
-    vesc_cal_lo[i] = np.sqrt(G * m_cal_best[i] / re_hi_kpc).to('km/s') * u.s / u.km
-    vesc_cal_best[i] = np.sqrt(G * m_cal_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_cal_up[i] = np.sqrt(G * m_cal_best[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    vesc_cal_lo[i] = np.sqrt(G * m_cal_best[i] * const.M_sun / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_cal_best[i] = np.sqrt(G * m_cal_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_cal_up[i] = np.sqrt(G * m_cal_best[i] * const.M_sun / re_lo_kpc).to('km/s') * u.s / u.km
 
-    vesc_tau_lo[i] = np.sqrt(G * m_tau_best[i] / re_hi_kpc).to('km/s') * u.s / u.km
-    vesc_tau_best[i] = np.sqrt(G * m_tau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_tau_up[i] = np.sqrt(G * m_tau_best[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    vesc_tau_lo[i] = np.sqrt(G * m_tau_best[i] * const.M_sun / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_tau_best[i] = np.sqrt(G * m_tau_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_tau_up[i] = np.sqrt(G * m_tau_best[i] * const.M_sun / re_lo_kpc).to('km/s') * u.s / u.km
 
-    vesc_dtau_lo[i] = np.sqrt(G * m_dtau_best[i] / re_hi_kpc).to('km/s') * u.s / u.km
-    vesc_dtau_best[i] = np.sqrt(G * m_dtau_best[i] / re_best_kpc).to('km/s') * u.s / u.km
-    vesc_dtau_up[i] = np.sqrt(G * m_dtau_best[i] / re_lo_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_lo[i] = np.sqrt(G * m_dtau_best[i] * const.M_sun / re_hi_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_best[i] = np.sqrt(G * m_dtau_best[i] * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+    vesc_dtau_up[i] = np.sqrt(G * m_dtau_best[i] * const.M_sun / re_lo_kpc).to('km/s') * u.s / u.km
     print(galaxies[i], vesc_ssp_lo,vesc_ssp_best,vesc_ssp_up,vesc_cal_lo,vesc_cal_best,
           vesc_cal_up,vesc_tau_lo,vesc_tau_best,vesc_tau_up,vesc_dtau_lo, vesc_dtau_best,vesc_dtau_up)
 
@@ -454,4 +454,4 @@ with PdfPages(filename) as pdf:
     pdf.savefig()
     plt.close()
 
-os.system('open %s &' % filename)"""
+os.system('open %s &' % filename)
