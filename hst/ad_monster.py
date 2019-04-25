@@ -228,7 +228,7 @@ for i in range(0, len(area)):
         area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 
-with PdfPages('sg_MONSTER.pdf') as pdf:
+with PdfPages('ad_MONSTER.pdf') as pdf:
     for w in range(0,len(galaxies)):
 
     #for w in range(0,len(galaxies)):
@@ -399,4 +399,5 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
             pdf.savefig()
             plt.close()
         
-os.system('open %s &' % 'sg_MONSTER.pdf')
+os.system('open %s &' % 'ad_MONSTER.pdf')
+            chi_sq_pix = (data-model)**2 / (res)**2
