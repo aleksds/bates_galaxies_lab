@@ -204,7 +204,7 @@ wavelengths = np.array([475, 814, 1600]) #*u.nm
 
 flux = np.zeros([len(filters),len(radii)]) #*u.Jy
 subflux = np.zeros([len(filters),len(radii)])
-fluxpix = np.zeros([len(filters), width, width])
+fluxpix = np.zeros([len(filters), width, width]) #important
 
 pixNoise = np.zeros([len(filters), width, width])
 SNR = np.zeros([len(filters), width, width])
@@ -215,17 +215,18 @@ rSky = np.zeros([len(galaxies),len(filters)])
 
 #calculate area of each bagel
 for i in range(0, len(area)):
-    area[i] = math.pi*math.pow(radii[i],2)
+    area[i] = np.pi*math.pow(radii[i],2)
     if i == 0:
-        area[i] = math.pi*math.pow(radii[0],2)
+        area[i] = np.pi*math.pow(radii[0],2)
     else:
-        area[i] = math.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
+        area[i] = np.pi*(math.pow(radii[i],2)-math.pow(radii[i-1],2))
 
 
 with PdfPages('sg_MONSTER.pdf') as pdf:
     #for w in range(0,1):
 
     for w in range(0,len(galaxies)):
+    #for w in range(0,len(galaxies)):
         #print(galaxies[w].name)
         mxs = [0,0,0]
         mys = [0,0,0]
@@ -275,7 +276,7 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
             nbin = len(use)
     
             # estimate the errors in each bin by assuming poisson statistics: sqrt(n)
-            errors = np.sqrt(hist)
+            errors = np.sqrt(hist) #skynoise
     
             # decide on initial parameters for the gaussian
             params_initial = [1e4, 0, 10]
@@ -293,7 +294,8 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
                 for k in range(0,width):
                     # In data numbers? In electrons?
                     fluxpix[i,width-j-1,k] = data[i][int(j+round(galaxies[w].y)-pixr+1)][int(k+round(galaxies[w].x)-pixr+1)]
-                    pixNoise[i,width-j-1,k] =  math.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
+                   # pixNoise[i,width-j-1,k] =  np.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
+                    pixNoise[i,width-j-1,k] =  np.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+RN[i]**2+dark[i]*1*exp[i])
                                               
                     SNR[i,width-j-1,k] = fluxpix[i,width-j-1,k]/pixNoise[i,width-j-1,k]
 
@@ -336,11 +338,13 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
                 plt.title(galaxies[w].name+' Mass Profile in Solar Masses at ' + filters[i], fontsize = 12)
                 pdf.savefig()
                 plt.close()
-        # Plotting UV color map and pixel restrictions.                     
+        # Plotting UV color map and pixel restrictions.
+        """
         fig = plt.figure()
-        plt.imshow(colorUV)
+        #plt.imshow(colorUV)
+        plt.imshow(SNR[i])
         plt.colorbar()
-        plt.title(galaxies[w].name+'ColorUV map and constrictions')
+        plt.title(galaxies[w].name+'SNR map and constrictions')
         pdf.savefig()
         plt.close()
         wb.save('updated.xlsx')
@@ -353,5 +357,43 @@ with PdfPages('sg_MONSTER.pdf') as pdf:
         plt.title(galaxies[w].name+'ColorVJ map and constrictions')
         pdf.savefig()
         plt.close()
-        
+
+        fig = plt.figure()
+        plt.imshow(fluxpix[i])
+        plt.colorbar()
+        plt.title(galaxies[w].name + 'Fluxpix map and constrictions')
+        pdf.savefig()
+        plt.close()
+
+        fig = plt.figure()
+        plt.imshow(pixNoise[i])
+        plt.colorbar()
+        plt.title(galaxies[w].name + 'pixNoise map and constrictions')
+        pdf.savefig()
+        plt.close()
+        """
+        read_noise = np.sqrt(RN[i]**2*1)
+        fig = plt.figure()
+        plt.imshow(read_noise[i])
+        plt.colorbar()
+        plt.title(galaxies[w].name + 'read noise map')
+        pdf.savefig()
+        plt.close()
+
+        sky_noise = rSky[w][i]*1
+        fig = plt.figure()
+        plt.imshow(sky_noise[w][i])
+        plt.colorbar()
+        plt.title(galaxies[w].name + 'read noise map')
+        pdf.savefig()
+        plt.close()
+
+        dark_c = np.sqrt(dark[i]*1*exp[i])
+        fig = plt.figure()
+        plt.imshow(dark_c[i])
+        plt.colorbar()
+        plt.title(galaxies[w].name + 'read noise map')
+        pdf.savefig()
+        plt.close()
+
 os.system('open %s &' % 'sg_MONSTER.pdf')
