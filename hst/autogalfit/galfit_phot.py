@@ -1,6 +1,6 @@
 # Aleks Diamond-Stanic
 # 20190404
-# Goal: Starting with a suite of suite of output fits files from GALFIT, perform aperture photometry of the data and model to measure total and residual flux
+# Goal: Starting with a suite of output fits files from GALFIT, perform aperture photometry of the data and model to measure total and residual flux
 
 import numpy as np
 import sys

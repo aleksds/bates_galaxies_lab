@@ -229,7 +229,7 @@ for i in range(0, len(area)):
 
 
 with PdfPages('sg_MONSTER.pdf') as pdf:
-    for w in range(0,1):
+    for w in range(0,len(galaxies)):
 
     #for w in range(0,len(galaxies)):
         #print(galaxies[w].name)
