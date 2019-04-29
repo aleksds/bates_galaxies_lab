@@ -56,7 +56,7 @@ for i in range (0, len(files)):
         chi[i] = np.float(content[3][31:40])
     print(chi_from_our_calculations[i])
     print(chi_from_our_calculations_with_dof[i])
-    file_object.write(files[i]+' '+str(chi[i])+" "+str(chi2[i])+" "+str(chi_from_our_calculations[i])+'\n')
+    file_object.write(files[i]+' '+str(chi[i])+" "+str(chi2[i])+" "+str(chi_from_our_calculations[i])+" "+str(chi_from_our_calculations_with_dof[i])+'\n')
 file_object.close
 # Up to this part, it creates a code which works and produces all of the chi values in a colum
 # and a name is printed out for each of the data that are given by the galfit file. 
