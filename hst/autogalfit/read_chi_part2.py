@@ -46,12 +46,12 @@ for i in range (0, len(files)):
     jmod, jmod_head = hdu[5].data, hdu[5].header
     jres, jres_head = hdu[8].data, hdu[8].header
     chi_from_our_calculations[i] = np.sum((vres/vunc)**2) + np.sum((ures/uunc)**2) + np.sum((jres/junc)**2)
-    chi_from_our_calculations_with_dof[i] = np.sum((vres/vunc)**2)/((101**2)*3)
+    chi_from_our_calculations_with_dof[i] = chi_from_our_calculations[i]/((101**2)*3)
     print(files[i])
     with open(files[i]) as f:
         content = f.readlines()
-        print(content[3][15:19])
-        chi2[i] = np.float(content[3][15:19])
+        print(content[3][14:20])
+        chi2[i] = np.float(content[3][14:20])
         print(content[3][31:40])
         chi[i] = np.float(content[3][31:40])
     print(chi_from_our_calculations[i])
