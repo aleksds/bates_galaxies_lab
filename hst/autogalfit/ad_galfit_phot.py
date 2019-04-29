@@ -1,6 +1,6 @@
 # Aleks Diamond-Stanic
 # 20190404
-# Goal: Starting with a suite of suite of output fits files from GALFIT, perform aperture photometry of the data and model to measure total and residual flux
+# Goal: Starting with a suite of output fits files from GALFIT, perform aperture photometry of the data and model to measure total and residual flux
 
 # import relevant packages
 import numpy as np
@@ -12,10 +12,15 @@ from matplotlib.backends.backend_pdf import PdfPages
 from astropy.io import fits
 from photutils import CircularAperture
 from photutils import aperture_photometry
+import img_scale
 
 # the code requires the user to specify an input directory that has output fits files from GALFIT
 dir = sys.argv[1]
 gal = sys.argv[2]
+
+#defining galaxies
+#galaxies =['j0826', 'j0901','j0905', 'j0944', 'j1107', 'j1219', 'j1341', 'j1506', 'j1558', 'j1613', 'j2116','j2140']
+galaxies = 'j0826'
 
 # find all of the relevant fits files
 files = glob.glob(dir+'/'+gal+'*output.fits')
@@ -156,6 +161,40 @@ with PdfPages(name) as pdf:
                 vdat_sub[i,j] = vdat_flux[i,j]-vdat_flux[i,j-1]
                 udat_sub[i,j] = udat_flux[i,j]-udat_flux[i,j-1]
                 jdat_sub[i,j] = jdat_flux[i,j]-jdat_flux[i,j-1]
+
+        #the following figures produce the galfit sigma images in a logscale
+
+        fig = plt.figure()
+        shotimg = img_scale.log(uunc, scale_min=1, scale_max=500)
+        plt.imshow(shotimg)
+        plt.colorbar()
+        plt.title('J0826_' + 'pixnoise_' + 'F475W')
+        pdf.savefig()
+        plt.close()
+
+        fig = plt.figure()
+        shotimg = img_scale.log(junc, scale_min=1, scale_max=500)
+        plt.imshow(shotimg)
+        plt.colorbar()
+        plt.title('J0826_' + 'pixnoise_' + 'F160W')
+        pdf.savefig()
+        plt.close()
+
+        fig = plt.figure()
+        shotimg = img_scale.log(vunc, scale_min=1, scale_max=500)
+        plt.imshow(shotimg)
+        plt.colorbar()
+        plt.title('J0826_' + 'pixnoise_' + 'F814W')
+        pdf.savefig()
+        plt.close()
+
+        fig = plt.figure()
+        shotimg = img_scale.log(uunc, scale_min=1, scale_max=500)
+        plt.imshow(shotimg)
+        plt.colorbar()
+        plt.title('j0826' + 'pixnoise' + 'F745W')
+        pdf.savefig()
+        plt.close()
                    
         # start our figure
         fig = plt.figure()

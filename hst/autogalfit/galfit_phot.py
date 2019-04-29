@@ -25,11 +25,13 @@ vunc_flux = np.zeros([len(files),len(radii)])
 vmod_flux = np.zeros([len(files),len(radii)])
 vres_flux = np.zeros([len(files),len(radii)])
 
-name = 'galfit_phot_'+dir+'.pdf'
+#name = 'galfit_phot_'+dir+'.pdf'
+name = dir+'.pdf'
+
 
 with PdfPages(name) as pdf:   
-    for i in range(0, len(files)):
-        hdu = fits.open(files[i])
+    for i in range(0, 0):
+        hdu = fits.open(0)
         # hdu[0] is INPUT_V
         # hdu[1] is INPUT_U
         # hdu[2] is INPUT_J
@@ -51,7 +53,9 @@ with PdfPages(name) as pdf:
         vdat, vdat_head = hdu[0].data, hdu[0].header
         vunc, vunc_head = hdu[12].data, hdu[12].header
         vmod, vmod_head = hdu[3].data, hdu[3].header
-        vres, vres_head = hdu[6].data, hdu[6].header        
+        vres, vres_head = hdu[6].data, hdu[6].header
+        #uunc, uunc_head = hdu[13].data, hdu[13].header
+        #uunc, uunc_head = hdu[13].data, hdu[13].header
         for j in range(0,len(radii)):
             aperture = CircularAperture([xcen, ycen], radii[j])
             phot_table = aperture_photometry(vdat, aperture)
@@ -65,7 +69,6 @@ with PdfPages(name) as pdf:
             
         fig = plt.figure()
         plt.suptitle(vdat_head['LOGFILE'])
-        
         plt.scatter(radii, vdat_flux[i]/1e5)
         #plt.errorbar(radii,vdat_flux[i]/1e5,yerr=vunc_flux[i]/1e5)
         plt.scatter(radii, vunc_flux[i]/1e5, marker='s', color='red')
