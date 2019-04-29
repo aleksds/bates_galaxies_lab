@@ -291,6 +291,7 @@ with PdfPages('ad_MONSTER.pdf') as pdf:
             params_fit = results.x
             model = gaussian(bin_mids, *params_fit)
             rSky[w][i]= params_fit[2]
+
 # BEGINNING SNR CODE: 
             
             # do pixel analysis
@@ -400,4 +401,4 @@ with PdfPages('ad_MONSTER.pdf') as pdf:
             plt.close()
         
 os.system('open %s &' % 'ad_MONSTER.pdf')
-            chi_sq_pix = (data-model)**2 / (res)**2
+
