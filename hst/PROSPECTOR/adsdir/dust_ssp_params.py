@@ -2,44 +2,37 @@ import numpy as np
 from prospect.models import priors, sedmodel
 from prospect.sources import CSPSpecBasis
 from sedpy.observate import load_filters
-photfile = 'sgflux.dat'
+from astropy.io import ascii
+
 # --------------
 # RUN_PARAMS
 # --------------
 
 run_params = {'verbose':True,
               'debug':False,
-              'outfile':'done',
-              # Optimization parameters
-              'do_powell': False,
-              'ftol':0.5e-5, 'maxfev':5000,
-              'initial_disp':0.1,
-              'do_levenburg': True,
-              'nmin': 10,
+              'outfile':'j2140_dust_ssp',
               # Fitter parameters
               'nwalkers':128,
               'nburn':[10, 10, 10], 'niter':512,
-              # nestle Fitter parameters
-              'nestle_method': 'single',
-              'nestle_npoints': 200,
-              'nestle_maxcall': int(1e6),
+              'do_powell': False,
+              'do_levenburg': False,
+              'ftol':0.5e-5, 'maxfev':5000,
+              'initial_disp':0.1,
               # Obs data parameters
-              'objid':0,
-              'phottable': photfile,
+              #'objid':1,
+              'phottable': '../Photometry/coarse_final/atest.txt',
               'logify_spectrum':False,
               'normalize_spectrum':False,
               'wlo':3750., 'whi':7200.,
               # SPS parameters
               'zcontinuous': 1,
-              # Input mock model parameters
-              'mass': 5e11,
+              'mass': 1e10,
               'logzsol': 0.19,
-              'tage': 7.9,
-              'tau': 9.6,
+              'tage': 0.01,
+              'tau': 0.01,
               'dust2': 0.18,
               'zred': 0.6,
               }
-
 
 # --------------
 # OBS
@@ -62,10 +55,9 @@ sdss = ['sdss_{0}0'.format(b) for b in ['u','g','r','i','z']]
 #filtersets = (galex + bessell + spitzer,
 #              galex + sdss + spitzer)
 filtersets = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
+galaxy = 11
 
-galaxy = 0
-
-def load_obs(objid=0, phottable=photfile, **kwargs):
+def load_obs(objid=galaxy, phottable='../Photometry/coarse_final/atest.txt', **kwargs):
     """Load photometry from an ascii file.  Assumes the following columns:
     `objid`, `filterset`, [`mag0`,....,`magN`] where N >= 11.  The User should
     modify this function (including adding keyword arguments) to read in their
@@ -81,74 +73,30 @@ def load_obs(objid=0, phottable=photfile, **kwargs):
     :returns obs:
         Dictionary of observational data.
     """
-    from astropy.io import ascii
     # Writes your code here to read data.  Can use FITS, h5py, astropy.table,
     # sqlite, whatever.
-    # NO YOU CANT YOU CANT USE .DAT SO DON'T WHATEVER ME, MISTER
     # e.g.:
-    import astropy.io.fits as pyfits
-    #catalog = pyfits.getdata(phottable)
-    global catalog
-    catalog = ascii.read(phottable)
+    # import astropy.io.fits as pyfits
+    # catalog = pyfits.getdata(phottable)
 
-    #ind = catalog['objid'] == float(objid)
-    # Pick up data from our file, yo.
-    wavelengths = [475,814,1600]
-    mags = np.array([catalog['f_{}'.format(i)] for i in wavelengths])
-    ivars = np.array([catalog['ivar_{}'.format(i)] for i in wavelengths])
+    catalog = ascii.read(phottable)
+    print(catalog)
+    wavelengths = np.array([475,814,1600])
+    #mags = np.array(catalog[0]['f_475'], catalog[0]['f_814'], catalog[0]['f_1600'])
+    mags = np.array([catalog[objid]['f_{}'.format(i)] for i in wavelengths])
+    print(mags)
+    #ivars = np.array([catalog['ivar_{}'.format(i)] for i in wavelengths])
     ids = catalog['ID']
     zs = catalog['z']
 
-    # Build output dictionary. 
+    # Build output dictionary.
     obs = {}
     # This is a list of sedpy filter objects.    See the
     # sedpy.observate.load_filters command for more details on its syntax.
     obs['filters'] = load_filters(filtersets)
-    # sg_flux feeds nanomaggies, oops
-    obs['all_maggies'] = np.squeeze(mags*10**(-9))
-    #obs['maggies_unc'] = np.squeeze(ivars*10**(-9))
-    #obs['maggies'] = np.squeeze(10**(-mags/2.5))
-    obs['all_maggies_unc'] = obs['all_maggies'] * 0.07
-    # Here we mask out any NaNs or infs
-    obs['all_phot_mask'] = np.isfinite(np.squeeze(mags))
-    # We have no spectrum.
-    obs['wavelength'] = None
-    obs['objid'] = ids
-    obs['z'] = zs
-    obs['spectrum'] = None
-    obs['logify_spectrum'] = False
-
-    return obs
-
-    '''
-    print(catalog)
-    # Here we will read in an ascii catalog of magnitudes as a numpy structured
-    # array
-    with open(phottable, 'r') as f:
-        # drop the comment hash
-        header = f.readline().split()[1:]
-    catalog = np.genfromtxt(phottable, comments='#',
-                            dtype=np.dtype([(n, np.float) for n in header]))
-
-    # Find the right row
-    ind = catalog['objid'] == float(objid)
-    # Here we are dynamically choosing which filters to use based on the object
-    # and a flag in the catalog.  Feel free to make this logic more (or less)
-    # complicated.
-    filternames = filtersets#[ int(catalog[ind]['filterset']) ]
-    print(filternames)
-    # And here we loop over the magnitude columns
-    mags = [catalog[ind]['mag{}'.format(i)] for i in range(len(filternames))]
-    mags = np.array(mags)
-
-    # Build output dictionary. 
-    obs = {}
-    # This is a list of sedpy filter objects.    See the
-    # sedpy.observate.load_filters command for more details on its syntax.
-    obs['filters'] = load_filters(filternames)
     # This is a list of maggies, converted from mags.  It should have the same
     # order as `filters` above.
-    obs['maggies'] = np.squeeze(10**(-mags/2.5))
+    obs['maggies'] = np.squeeze(mags*1e-9)
     # HACK.  You should use real flux uncertainties
     obs['maggies_unc'] = obs['maggies'] * 0.07
     # Here we mask out any NaNs or infs
@@ -158,11 +106,13 @@ def load_obs(objid=0, phottable=photfile, **kwargs):
 
     # Add unessential bonus info.  This will be stored in output
     #obs['dmod'] = catalog[ind]['dmod']
-    obs['objid'] = objid
+    obs['objid'] = ids[objid]
+    obs['z'] = zs[objid]
+    obs['spectrum'] = None
+    obs['logify_spectrum'] = False
 
     return obs
 
-    '''
 # --------------
 # SPS Object
 # --------------
@@ -216,10 +166,10 @@ model_params.append({'name': 'sfh', 'N': 1,
 # mass formed.
 model_params.append({'name': 'mass', 'N': 1,
                         'isfree': True,
-                        'init': 1e9,
-                        'init_disp': 1e9,
+                        'init': 5e9,
+                        'init_disp': 3e9,
                         'units': r'M_\odot',
-                        'prior':priors.LogUniform(mini=1e7, maxi=1e12)})
+                        'prior':priors.TopHat(mini=1e7, maxi=1e12)})
 
 # Since we have zcontinuous=1 above, the metallicity is controlled by the
 # ``logzsol`` parameter.
@@ -235,7 +185,7 @@ model_params.append({'name': 'logzsol', 'N': 1,
 #                        'isfree': True,
 #                        'init': 1.0,
 #                        'units': 'Gyr',
-#                        'prior':priors.LogUniform(mini=0.1, maxi=100)})
+#                        'prior':priors.LogUniform(mini=0.001, maxi=10)})
 
 # FSPS parameter
 model_params.append({'name': 'tage', 'N': 1,
@@ -243,8 +193,8 @@ model_params.append({'name': 'tage', 'N': 1,
                         'init': 0.01,
                         'init_disp': 0.01,
                         'units': 'Gyr',
-                        'prior':priors.LogUniform(mini=0.004, maxi=0.01)})
-
+                        #'prior':priors.TopHat(mini=0.01, maxi=10.0)})
+                        'prior':priors.LogUniform(mini=0.003, maxi=0.1)})
 
 # FSPS parameter
 #model_params.append({'name': 'tburst', 'N': 1,
@@ -262,18 +212,18 @@ model_params.append({'name': 'tage', 'N': 1,
 
 # --- Dust ---------
 # FSPS parameter
-#model_params.append({'name': 'dust1', 'N': 1,
-#                        'isfree': False,
-#                        'init': 0.2,
-#                        'units': '',
-#                        'prior':priors.TopHat(mini=0.01, maxi=2.0)})
+model_params.append({'name': 'dust1', 'N': 1,
+                        'isfree': False,
+                        'init': 0.0,
+                        'units': '',
+                        'prior':priors.TopHat(mini=0.1, maxi=2.0)})
 
 # FSPS parameter
 model_params.append({'name': 'dust2', 'N': 1,
                         'isfree': True,
-                        'init': 0.2,
+                        'init': 0.35,
                         'reinit': True,
-                        'init_disp': 0.1,
+                        'init_disp': 0.3,
                         'units': '',
                         'prior':priors.TopHat(mini=0.0, maxi=2.0)})
 
@@ -296,13 +246,12 @@ model_params.append({'name': 'dust_tesc', 'N': 1,
                         'isfree': False,
                         'init': 7.0,
                         'units': 'log(Gyr)',
-                        'prior_name': None})#,
-                         #None})
+                        'prior': None})
 
 # FSPS parameter
 model_params.append({'name': 'dust_type', 'N': 1,
                         'isfree': False,
-                        'init': 0,
+                        'init': 2,
                         'units': 'index'})
 
 # FSPS parameter
@@ -381,129 +330,9 @@ model_params.append({'name': 'phot_jitter', 'N': 1,
                         'units': 'mags',
                         'prior':priors.TopHat(mini=0.0, maxi=0.2)})
 
-#LET ME FUCK THIS SHIT UP
-
-def getthisdata(filename, *args, **kwargs):
-    """
-    Get the data from an extension of a FITS file (and optionally the
-    header).
-
-    Parameters
-    ----------
-    filename : file path, file object, or file like object
-        File to get data from.  If opened, mode must be one of the
-        following rb, rb+, or ab+.
-
-    ext
-        The rest of the arguments are for extension specification.
-        They are flexible and are best illustrated by examples.
-
-        No extra arguments implies the primary header::
-
-            getdata('in.fits')
-
-        By extension number::
-
-            getdata('in.fits', 0)      # the primary header
-            getdata('in.fits', 2)      # the second extension
-            getdata('in.fits', ext=2)  # the second extension
-
-        By name, i.e., ``EXTNAME`` value (if unique)::
-
-            getdata('in.fits', 'sci')
-            getdata('in.fits', extname='sci')  # equivalent
-
-        Note ``EXTNAME`` values are not case sensitive
-
-        By combination of ``EXTNAME`` and EXTVER`` as separate
-        arguments or as a tuple::
-
-            getdata('in.fits', 'sci', 2)  # EXTNAME='SCI' & EXTVER=2
-            getdata('in.fits', extname='sci', extver=2)  # equivalent
-            getdata('in.fits', ('sci', 2))  # equivalent
-
-        Ambiguous or conflicting specifications will raise an exception::
-
-            getdata('in.fits', ext=('sci',1), extname='err', extver=2)
-
-    header : bool, optional
-        If `True`, return the data and the header of the specified HDU as a
-        tuple.
-
-    lower, upper : bool, optional
-        If ``lower`` or ``upper`` are `True`, the field names in the
-        returned data object will be converted to lower or upper case,
-        respectively.
-
-    view : ndarray, optional
-        When given, the data will be returned wrapped in the given ndarray
-        subclass by calling::
-
-           data.view(view)
-
-    kwargs
-        Any additional keyword arguments to be passed to
-        `astropy.io.fits.open`.
-
-    Returns
-    -------
-    array : array, record array or groups data object
-        Type depends on the type of the extension being referenced.
-
-        If the optional keyword ``header`` is set to `True`, this
-        function will return a (``data``, ``header``) tuple.
-    """
-
-    mode, closed = _get_file_mode(filename)
-    header = kwargs.pop('header', None)
-    lower = kwargs.pop('lower', None)
-    upper = kwargs.pop('upper', None)
-    view = kwargs.pop('view', None)
-
-    hdulist, extidx = _getext(filename, mode, *args, **kwargs)
-    try:
-        hdu = hdulist[extidx]
-        data = hdu.data
-        if data is None and extidx == 0:
-            try:
-                hdu = hdulist[1]
-                data = hdu.data
-            except IndexError:
-                raise IndexError('No data in this HDU.')
-        if data is None:
-            raise IndexError('No data in this HDU.')
-        if header:
-            hdr = hdu.header
-    finally:
-        hdulist.close(closed=closed)
-
-    # Change case of names if requested
-    trans = None
-    if lower:
-        trans = lambda s: s.lower()
-    elif upper:
-        trans = lambda s: s.upper()
-    if trans:
-        if data.dtype.names is None:
-            # this data does not have fields
-            return
-        if data.dtype.descr[0][0] == '':
-            # this data does not have fields
-            return
-        data.dtype.names = [trans(n) for n in data.dtype.names]
-
-    # allow different views into the underlying ndarray.  Keep the original
-    # view just in case there is a problem
-    if isinstance(view, type) and issubclass(view, np.ndarray):
-        data = data.view(view)
-
-    if header:
-        return data, hdr
-    else:
-        return data
-
 def load_model(**extras):
     # In principle (and we've done it) you could have the model depend on
     # command line arguments (or anything in run_params) by making changes to
     # `model_params` here before instantiation the SedModel object.  Up to you.
     return sedmodel.SedModel(model_params)
+
