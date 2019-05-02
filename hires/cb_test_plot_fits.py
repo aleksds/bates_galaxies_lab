@@ -4,6 +4,22 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.constants import c as lightspeed
 
+#Functions
+
+def cb_match_lambda(lam,element,dec=1):
+    where = ([],)
+    while len(where[0]) == 0:
+        where = np.where(np.around(lam, decimals=dec) == np.around(element, decimals=dec))
+        dec-=1
+
+    print('WHERE: ', where, ' TYPE: ', type(where))
+    diff_arr = [np.abs(lam[x] - element) for x in where[0]]
+    min_indx = np.where(diff_arr == np.amin(diff_arr))
+    print('MIN_INDX ', min_indx[0])
+    closest_position = where[0][min_indx[0][0]]
+
+    return closest_position
+
 
 def get_fits_data(filepath):
     fits_file = fits.open(filepath)
@@ -64,13 +80,27 @@ def wspread(filepath,emission,vel):
 
     return spread, em_wav
 
-#gets something, don't know what yet but it's related to the final flux value
+#gets flux value (does the sums and stuff)
 def get_flux(filepath,wavel,wspread):
     coadd, specobj, spzline, linewave, linename, linez = get_fits_data(filepath)
-    flux = 10**coadd['loglam']
-    em_position = np.where(np.around(flux) == wavel)
+    flux = coadd['flux']
+    lam = 10**coadd['loglam']
+    #next we get indeces to mark regions over which we will sum up
+    em_center = cb_match_lambda(lam,wavel)
+    em_lowlim = cb_match_lambda(lam,wavel - wspread)
+    em_maxlim = cb_match_lambda(lam,wavel + wspread)
+    cont_high = cb_match_lambda(lam,wavel + 4*wspread)
+    cont_low = cb_match_lambda(lam,wavel - 4*wspread)
 
+    #continuum = np.mean([np.mean(flux[cont_low:em_lowlim]),np.mean(flux[em_maxlim:cont_high])])
+    continuum = np.median(np.concatenate((flux[cont_low:em_lowlim],flux[em_maxlim:cont_high])))
+    dlambda = [lam[x+1]-lam[x] for x in range(em_lowlim,em_maxlim+1)]
+    print('DLAMBDA: ',dlambda)
+    print('FLUX EMISSION',flux[em_lowlim:em_maxlim+1])
+    prelim_flux_integral = np.sum(dlambda*flux[em_lowlim:em_maxlim+1])
+    flux_val = prelim_flux_integral-continuum
 
+    return flux_val
 
 #vars
 filepath = "/Users/cbradna/Documents/spec-0761-54524-0409.fits"
@@ -88,6 +118,8 @@ outputfile = "plotpdftest.pdf"
 #            '[Ar_III] 7135'
 
 #Run routine
+
 data = get_quantities(wfilepath)
-pdfplot_flux_deffit(data,outputfile)
-hb_spread, hb_wav = wspread(wfilepath,'H_beta',10)
+#pdfplot_flux_deffit(data,outputfile) don't need to call this for figuring out flux
+hb_spread, hb_wav = wspread(wfilepath,'H_beta',300)
+hb_flux = get_flux(wfilepath,hb_wav,hb_spread)
