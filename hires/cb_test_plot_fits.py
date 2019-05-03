@@ -93,12 +93,14 @@ def get_flux(filepath,wavel,wspread):
     cont_low = cb_match_lambda(lam,wavel - 4*wspread)
 
     #continuum = np.mean([np.mean(flux[cont_low:em_lowlim]),np.mean(flux[em_maxlim:cont_high])])
-    continuum = np.median(np.concatenate((flux[cont_low:em_lowlim],flux[em_maxlim:cont_high])))
-    dlambda = [lam[x+1]-lam[x] for x in range(em_lowlim,em_maxlim+1)]
-    print('DLAMBDA: ',dlambda)
+    continuum_const = np.median(np.concatenate((flux[cont_low:em_lowlim],flux[em_maxlim:cont_high])))
+    print('CONTINUUM CONST: ',continuum_const)
+    dlambda = np.array([lam[x+1]-lam[x] for x in range(em_lowlim,em_maxlim+1)])
+    print('DLAMBDA: ',dlambda, 'TYPE: ', type(dlambda))
+    continuum_area = np.sum(float(continuum_const)*dlambda)
     print('FLUX EMISSION',flux[em_lowlim:em_maxlim+1])
     prelim_flux_integral = np.sum(dlambda*flux[em_lowlim:em_maxlim+1])
-    flux_val = prelim_flux_integral-continuum
+    flux_val = prelim_flux_integral-continuum_area
 
     return flux_val
 
@@ -121,5 +123,5 @@ outputfile = "plotpdftest.pdf"
 
 data = get_quantities(wfilepath)
 #pdfplot_flux_deffit(data,outputfile) don't need to call this for figuring out flux
-hb_spread, hb_wav = wspread(wfilepath,'H_beta',300)
+hb_spread, hb_wav = wspread(wfilepath,'H_beta',400)
 hb_flux = get_flux(wfilepath,hb_wav,hb_spread)
