@@ -20,7 +20,7 @@ run_params = {'verbose':True,
               'initial_disp':0.1,
               # Obs data parameters
               #'objid':1,
-              'phottable': '../hst/autogalfit/flux.txt',
+              'phottable': '../../autogalfit/flux.txt',
               'logify_spectrum':False,
               'normalize_spectrum':False,
               'wlo':3750., 'whi':7200.,
@@ -57,7 +57,7 @@ sdss = ['sdss_{0}0'.format(b) for b in ['u','g','r','i','z']]
 filtersets = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
 galaxy = 0
 
-def load_obs(objid=galaxy, phottable='../hst/autogalfit/flux.txt', **kwargs):
+def load_obs(objid=galaxy, phottable='../../autogalfit/flux.txt', **kwargs):
     """Load photometry from an ascii file.  Assumes the following columns:
     `objid`, `filterset`, [`mag0`,....,`magN`] where N >= 11.  The User should
     modify this function (including adding keyword arguments) to read in their
