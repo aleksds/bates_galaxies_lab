@@ -6,6 +6,7 @@ from scipy.constants import c as lightspeed
 
 #Functions
 
+#looks for a specific lambda in array, returns the position of the closest value
 def cb_match_lambda(lam,element,dec=1):
     where = ([],)
     while len(where[0]) == 0:
@@ -20,7 +21,7 @@ def cb_match_lambda(lam,element,dec=1):
 
     return closest_position
 
-
+#gets some relevant data (to avoid passing the data as argument as much as possible)
 def get_fits_data(filepath):
     fits_file = fits.open(filepath)
     coadd = fits_file['COADD'].data
@@ -31,7 +32,7 @@ def get_fits_data(filepath):
     linez = spzline['LINEZ']
     return coadd,specobj,spzline,linewave,linename,linez
 
-#read relevant quantities (pending - implement get_fits_data)
+#read relevant quantities (pending - implement get_fits_data; generalize for any wavelength/emission)
 def get_quantities(filepath):
     #open file given filepath
     fits_file = fits.open(filepath)
@@ -80,8 +81,28 @@ def wspread(filepath,emission,vel):
 
     return spread, em_wav
 
+#plots a wavelength range, shows continuum constant and the range over which the
+def plot_area_of_interest(data):
+    em_lowlim,em_maxlim,cont_low,cont_high,flux,lam,cont_const = data[0],data[1],data[2],data[3],data[4],data[5],data[6]
+    lam_c = lam[cont_low:cont_high+1]
+    flux_c = flux[cont_low:cont_high+1]
+    with PdfPages('Emissionline.pdf') as pdf:
+        fig, ax = plt.subplots(dpi=1200)
+        ax.axvspan(lam[em_lowlim], lam[em_maxlim], alpha=0.5, color='red', label='Area of Emission')
+        plt.axhline(y=cont_const, color='blue', label='Continuum', alpha=0.4)
+        ax.plot(lam_c, flux_c, color='black', linewidth=0.3)
+
+
+        plt.xlabel("$\AA ngstr \ddot{o} ms$")
+        plt.ylabel("Flux [$10^{-17}$ erg/$cm^{2}$/s/$\AA$]")
+        plt.legend()
+
+        plt.grid(True)
+        pdf.savefig()
+        plt.close('all')
+
 #gets flux value (does the sums and stuff)
-def get_flux(filepath,wavel,wspread):
+def get_flux(filepath,wavel,wspread,plot_interest_area):
     coadd, specobj, spzline, linewave, linename, linez = get_fits_data(filepath)
     flux = coadd['flux']
     lam = 10**coadd['loglam']
@@ -94,15 +115,22 @@ def get_flux(filepath,wavel,wspread):
 
     #continuum = np.mean([np.mean(flux[cont_low:em_lowlim]),np.mean(flux[em_maxlim:cont_high])])
     continuum_const = np.median(np.concatenate((flux[cont_low:em_lowlim],flux[em_maxlim:cont_high])))
-    print('CONTINUUM CONST: ',continuum_const)
     dlambda = np.array([lam[x+1]-lam[x] for x in range(em_lowlim,em_maxlim+1)])
-    print('DLAMBDA: ',dlambda, 'TYPE: ', type(dlambda))
     continuum_area = np.sum(float(continuum_const)*dlambda)
-    print('FLUX EMISSION',flux[em_lowlim:em_maxlim+1])
     prelim_flux_integral = np.sum(dlambda*flux[em_lowlim:em_maxlim+1])
     flux_val = prelim_flux_integral-continuum_area
 
+    #print tests
+    print(lam[cont_low:cont_high])
+
+    data = [em_lowlim,em_maxlim,cont_low,cont_high,flux,lam,continuum_const]
+    if plot_interest_area:
+        plot_area_of_interest(data)
+
     return flux_val
+
+
+
 
 #vars
 filepath = "/Users/cbradna/Documents/spec-0761-54524-0409.fits"
@@ -124,4 +152,4 @@ outputfile = "plotpdftest.pdf"
 data = get_quantities(wfilepath)
 #pdfplot_flux_deffit(data,outputfile) don't need to call this for figuring out flux
 hb_spread, hb_wav = wspread(wfilepath,'H_beta',400)
-hb_flux = get_flux(wfilepath,hb_wav,hb_spread)
+hb_flux = get_flux(wfilepath,hb_wav,hb_spread,plot_interest_area=True)
