@@ -10,7 +10,7 @@ from astropy.io import ascii
 
 run_params = {'verbose':True,
               'debug':False,
-              'outfile':'j2140_dust_ssp',
+              'outfile':'J0826_new_ssp',
               # Fitter parameters
               'nwalkers':128,
               'nburn':[10, 10, 10], 'niter':512,
@@ -20,7 +20,7 @@ run_params = {'verbose':True,
               'initial_disp':0.1,
               # Obs data parameters
               #'objid':1,
-              'phottable': '../Photometry/coarse_final/atest.txt',
+              'phottable': '../../autogalfit/flux.txt',
               'logify_spectrum':False,
               'normalize_spectrum':False,
               'wlo':3750., 'whi':7200.,
@@ -55,9 +55,9 @@ sdss = ['sdss_{0}0'.format(b) for b in ['u','g','r','i','z']]
 #filtersets = (galex + bessell + spitzer,
 #              galex + sdss + spitzer)
 filtersets = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
-galaxy = 11
+galaxy = 0
 
-def load_obs(objid=galaxy, phottable='../Photometry/coarse_final/atest.txt', **kwargs):
+def load_obs(objid=galaxy, phottable='../../autogalfit/flux.txt', **kwargs):
     """Load photometry from an ascii file.  Assumes the following columns:
     `objid`, `filterset`, [`mag0`,....,`magN`] where N >= 11.  The User should
     modify this function (including adding keyword arguments) to read in their
@@ -83,10 +83,10 @@ def load_obs(objid=galaxy, phottable='../Photometry/coarse_final/atest.txt', **k
     print(catalog)
     wavelengths = np.array([475,814,1600])
     #mags = np.array(catalog[0]['f_475'], catalog[0]['f_814'], catalog[0]['f_1600'])
-    mags = np.array([catalog[objid]['f_{}'.format(i)] for i in wavelengths])
+    mags = np.array([catalog[objid]['Nanomaggies_{}'.format(i)] for i in wavelengths])
     print(mags)
     #ivars = np.array([catalog['ivar_{}'.format(i)] for i in wavelengths])
-    ids = catalog['ID']
+    ids = catalog['Galaxy']
     zs = catalog['z']
 
     # Build output dictionary.
@@ -251,7 +251,7 @@ model_params.append({'name': 'dust_tesc', 'N': 1,
 # FSPS parameter
 model_params.append({'name': 'dust_type', 'N': 1,
                         'isfree': False,
-                        'init': 2,
+                        'init': 0,
                         'units': 'index'})
 
 # FSPS parameter

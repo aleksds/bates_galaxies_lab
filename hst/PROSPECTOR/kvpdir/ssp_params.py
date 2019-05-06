@@ -10,7 +10,7 @@ from astropy.io import ascii
 
 run_params = {'verbose':True,
               'debug':False,
-              'outfile':'dtau_ssp',
+              'outfile':'J2140_ssp',
               # Fitter parameters
               'nwalkers':128,
               'nburn':[10, 10, 10], 'niter':512,
@@ -157,7 +157,7 @@ model_params.append({'name': 'zred', 'N': 1,
 # FSPS parameter.  sfh=4 is a delayed-tau SFH
 model_params.append({'name': 'sfh', 'N': 1,
                         'isfree': False,
-                        'init': 4,
+                        'init': 0,
                         'units': 'type'
                     })
 
