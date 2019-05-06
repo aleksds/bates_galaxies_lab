@@ -1,9 +1,5 @@
 """
-Input_creator_V3.py: V3 means Variation 3. Varition 3: This code automates
-the creation and running of galfit input files. I would recommend only running
-this code with 'fine psf' only. This Variation 3 contains contraint file that
-alerts galfit to maintain these contraints. Only creates constraint file for 
-psf fine 200 simultaneous.
+This code only works for simultaneous coarse images
 """
 
 import os
@@ -80,8 +76,8 @@ galaxies = [
     'J2116',
     'J2140']
 
-filters = ['F475W','F814W']
-filters = ['F475W','F814W','F160W']
+filters2 = ['F475W','F814W']
+#filters = ['F475W','F814W','F160W']
 
 longgal = [
     'J0826+4305',
@@ -115,7 +111,7 @@ constraint = sys.argv[6]
 now = datetime.datetime.now()
 time = now.strftime("%Y%m%d-%H%M")
 
-#INDEPENDENT FITS YO
+#INDEPENDENT FITS
 if togetherness == 'independent':
     for w in range(0,ngal):
         galcoords = 'galcoords_'+plate+'.dat'
@@ -127,7 +123,7 @@ if togetherness == 'independent':
         ycoorlow = str(int(catalog[w][2]-(np.float(imgsize)/2)))
         xcoorhigh = str(int(catalog[w][1]+(np.float(imgsize)/2)))
         ycoorhigh = str(int(catalog[w][2]+(np.float(imgsize)/2)))
-        for i in range(0,len(filters)):
+        for i in range(0,len(filters2)):
             for j in range(0,nmag):
                 #if j == 0:
                 #    md1f[w,0] = mag_values['m475'][w]
@@ -146,26 +142,26 @@ if togetherness == 'independent':
                         +togetherness+'_' +imgsize+'_psf'+psf)
 
                     file = time+'_'+model+'_'+plate+'_'+togetherness+'_' \
-                        +imgsize+'_psf'+psf+'/'+galaxies[w]+'_'+filters[i]+ \
+                        +imgsize+'_psf'+psf+'/'+galaxies[w]+'_'+filters2[i]+ \
                         '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
                         '_input.txt'
                     text = open(file,'w')
                     text.write('#  Input menu file: '+galaxies[w]+'_' \
-                    +filters[i]+'_'
+                    +filters2[i]+'_'
                     +plate+'\n') #probably not essential
                     text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n')
                     #probably not essential
                     text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n')
                     #will not change , probably not essential
                     text.write('A) /Volumes/physics/linux-lab/data/hst/' \
-                    +longgal[w]+'/'+plate+'/'+filters[i]+'/final_' \
-                    +filters[i]+'_drc_sci.fits\n')
-                    text.write('B) '+galaxies[w]+'_'+filters[i]+\
+                    +longgal[w]+'/'+plate+'/'+filters2[i]+'/final_' \
+                    +filters2[i]+'_drc_sci.fits\n')
+                    text.write('B) '+galaxies[w]+'_'+filters2[i]+\
                     '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
-                    '_output.txt\n')
+                    '_output.fits\n')
                     text.write('C) none\n') #will not change
                     text.write('D) /Volumes/physics/linux-lab/data/hst/' \
-                    +longgal[w]+'/'+plate+'/'+filters[i]+'/final_psf.fits\n')
+                    +longgal[w]+'/'+plate+'/'+filters2[i]+'/final_psf.fits\n')
                     text.write('E) 1\n') #will not change
                     text.write('F) none\n') #will not change
                     if constraint == 'none':
@@ -182,7 +178,7 @@ if togetherness == 'independent':
 
                     if model == 'sersic':
                         text.write('G) \n')
-                        constraintfile= time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+'/'+'parameters_constraints_'+filters[i]+'_'+str([j])+'_'+str([q])+'_'+galaxies[w]+'.txt'
+                        constraintfile= time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+'/'+'parameters_constraints_'+filters2[i]+'_'+str([j])+'_'+str([q])+'_'+galaxies[w]+'.txt'
                     
                         contraint_text = open(constraintfile, 'w')
                         contraint_text.write('# Component/    parameter   constraint	Comment\n')
@@ -199,7 +195,7 @@ if togetherness == 'independent':
                         contraint_text.write('1              q              1 to 1  \n')
                         contraint_text.write('1              pa              0 to 0  \n')
                         contraint_text.close()
-                        text.write('G) parameters_constraints_'+filters[i]+'_'+str([j])+'_'+str([q])+'_'+galaxies[w]+'.txt\n')
+                        text.write('G) parameters_constraints_'+filters2[i]+'_'+str([j])+'_'+str([q])+'_'+galaxies[w]+'.txt\n')
                         
 
 
@@ -215,6 +211,7 @@ if togetherness == 'independent':
                         
                         text.write('O) regular\n') #will not change
                         text.write('P) 0\n') #will not change
+                        text.write('W) input,sigma,psf,component,model,residual\n')
                         text.write('#   par)    par value(s)    fit toggle(s)   \
                         # parameter description \n')
                         text.write('# Component number: 1\n') 
@@ -286,7 +283,7 @@ else:
             text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+plate+'/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+plate+'/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+plate+'/'+filters[2]+'/final_'+filters[2]+'_drz_sci.fits\n')
             text.write('A1) V,U,J\n')
             text.write('A2) 814.000,475.000,160.000\n')
-            text.write('B) '+galaxies[w]+'_F814W_F475W_F160W_'+model+'_output.fits\n')
+            text.write('B) '+galaxies[w]+'_F814W_F475W_F160W_'+model+'_effective_re'+str(q)+'output.fits\n')
             text.write('C) none,none,none      0.000\n')
             text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[2]+'/final_psf.fits\n')
             text.write('E) 1\n')# change to one when we are using a fine image
@@ -403,7 +400,7 @@ if model == 'sersic' and togetherness == 'independent':
         for i in range(0,2):
             for j in range (0,nmag):
                 for q in range (0,nre):
-                    text.write('galfitm '+galaxies[w]+'_'+filters[i]+\
+                    text.write('galfitm '+galaxies[w]+'_'+filters2[i]+\
                     '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
                     '_input.txt\n')
     text.close()
