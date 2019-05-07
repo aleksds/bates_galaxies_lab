@@ -1,5 +1,5 @@
 """
-This code only works for simultaneous coarse images
+This code only works for simultaneous coarse images and independent fine images.
 """
 
 import os
@@ -26,23 +26,15 @@ re_vals[5] = jc_values['re05']
 re_vals[6] = jc_values['re06']
 print(re_vals)
 ngal = len(jc_values)
-
-#re_array = np.array([1/1.7, 1/1.5, 1/1.4, 1/1.3, 1/1.2, 1/1.15, 1/1.1, 1, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.7])
-#re_array = np.array([1/4, 1/3, 1/2, 1/1.5, 1/1.3, 1/1.2, 1/1.1, 1, 1.1, 1.2, 1.3, 1.5, 2, 3, 4])
-#nre = len(re_array)
-#re_array = np.arange(13)/10*.3+0.03
 nre = len(re_vals)
 tmp = np.zeros((ngal, len(re_vals)))
 for i in range(0,ngal):
     for j in range(0,len(re_vals)):
-        #if j == 0:
-        #    tmp[i,0] = jc_values['re'][i]
-        #else:
         tmp[i,j] = re_vals[j,i]
 print(tmp)
 # Note: This part of the code looks at the independent section by
-# adding an incremental adding of 0.1 to the various mag for filters w475 and
-# w814.
+# adding an incremental adding of 0.1 to the various mag for filters w475 and,
+# F814W, F160W
 mag_values = ascii.read('ad_mag_size_table.dat')
 #re_array = np.arange(13)/10+0.1
 mag_array = np.array([-0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
@@ -53,10 +45,6 @@ md1f = np.zeros((ngal, nmag))
 md2f = np.zeros((ngal, nmag))
 for i in range(0, ngal):
     for j in range(0, nmag):
-        #if j == 0:
-        #    md1f[i,0] = mag_values['m475'][i]
-        #    md2f[i,0] = mag_values['m814'][i]
-        #else:
         md1f[i,j] = mag_values['m475'][i] + mag_array[j]
         md2f[i,j] = mag_values['m814'][i] + mag_array[j]
 print(md1f)
@@ -250,8 +238,6 @@ if togetherness == 'independent':
                             text.write(' Z) 0      \n')
                         
                         text.close()
-
-
 
 #SIMULTANEOUS FITS OF VARYING DEGREE
 else:
