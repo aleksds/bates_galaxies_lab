@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.constants import c as lightspeed
+from scipy.constants import parsec as prsc
+from astropy.cosmology import WMAP9 as cosmo
+import astropy.units as u
 
 #Functions
 
@@ -129,6 +132,26 @@ def get_flux(filepath,wavel,wspread,plot_interest_area):
 
     return flux_val
 
+#function to calculte flux
+def get_lum(filepath,flux_value):
+    coadd, specobj, spzline, linewave, linename, linez = get_fits_data(filepath)
+    current_z = specobj['Z'][0]
+    lum_dis = (cosmo.luminosity_distance(current_z))*(1/u.Mpc)*(100*(prsc*10**6))
+    print('LUMDIST',lum_dis)
+    luminosity = (flux_value*10**-17)*4*np.pi*(lum_dis**2)
+
+    return luminosity
+
+#function got get sfr
+def get_sfr_hbeta(hbet_lum):
+    halpha_lum = hbet_lum*2.468
+    sfrlog = np.log10(halpha_lum)-41.27
+    sfr = 10**sfrlog
+
+    return sfr
+
+
+
 
 
 
@@ -152,4 +175,6 @@ outputfile = "plotpdftest.pdf"
 data = get_quantities(wfilepath)
 #pdfplot_flux_deffit(data,outputfile) don't need to call this for figuring out flux
 hb_spread, hb_wav = wspread(wfilepath,'H_beta',400)
-hb_flux = get_flux(wfilepath,hb_wav,hb_spread,plot_interest_area=True)
+hb_flux = get_flux(wfilepath,hb_wav,hb_spread,plot_interest_area=False)
+hb_lum = get_lum(wfilepath,hb_flux)
+sfr = get_sfr_hbeta(hb_lum)
