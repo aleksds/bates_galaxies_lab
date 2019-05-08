@@ -49,7 +49,7 @@ for i in range(0, len(files)):
 
 mag_1d = np.unique(mag)
 sizepix_1d = np.unique(sizepix)
-chi_2d = np.zeroes([len(mag_1d), len(size_1d)])
+chi_2d = np.zeros([len(mag_1d), len(sizepix_1d)])
 for i in range(0,len(mag_1d)):
     for j in range(0, len(sizepix_1d)):
         test = np.where((mag == mag_1d[i]) & (sizepix == sizepix_1d[j]))
