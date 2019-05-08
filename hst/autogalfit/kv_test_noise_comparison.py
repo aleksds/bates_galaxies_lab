@@ -59,13 +59,12 @@ ws = wb.add_sheet('Galaxy Data')
 res = ['fine', 'coarse']
 t = 0
 
-# type = ['final','final','final']
-# type = ['final','final']
-# type = ['convolved_image', 'convolved_image', 'final']
+#type of image we are using
 type = ['convolved_image', 'final']
 
 # wbo = open_workbook(res[t]+'data.xlsx')
-loc = ('/Users/adiamond/github/bates_galaxies_lab/hst/galaxydata.xlsx')
+#loc = ('/Users/adiamond/github/bates_galaxies_lab/hst/galaxydata.xlsx')
+loc = ('../finedata.xlsx')
 wbo = open_workbook(loc)
 # wbo = open_workbook('update.xls')
 for sheet in wbo.sheets():
@@ -87,40 +86,34 @@ for sheet in wbo.sheets():
 dx = 5
 dy = dx
 
+#plot image function
+def plot_image(posx,posy, count, prevstds):
+    #We have to redefine the stamp every time, otherwise the program doesn't woek
+    stamp = data[i][int(round(posy-dy)):int(round(posy+dy)), int(round(posx-dx)):int(round(posx+dx))]
+    #this is just to keep track of how much recursing we do
+    count = count +1
 
-# Maybe we could make a weighted average? Idk.
-# plot_image is our centroid code. I have defined it to be recursive, but it
-# seems that we don't need it. we give plot image the estimated position in x and y
-# in relation to the whole image
-def plot_image(posx, posy, count, prevstds):
-    # We have to redefine the stamp every time, otherwise the program doesn't woek
-    stamp = data[i][int(round(posy - dy)):int(round(posy + dy)), int(round(posx - dx)):int(round(posx + dx))]
-    # this is just to keep track of how much recursing we do
-    count = count + 1
-
-    std = np.std(stamp[stamp == stamp])
+    std = np.std(stamp[stamp==stamp])
     x1, y1 = centroid_com(stamp)
     x2, y2 = centroid_1dg(stamp)
     x3, y3 = centroid_2dg(stamp)
-    xavg = np.average([x2, x3])
-    yavg = np.average([y2, y3])
-    xstd = np.std([x2, x3])
-    ystd = np.std([y2, y3])
-    # xavg = np.average([x1,x2,x3])
-    # yavg = np.average([y1,y2,y3])
-    # xstd = np.std([x1,x2,x3])
-    # ystd = np.std([y1,y2,y3])
-    # print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
+    xavg = np.average([x2,x3])
+    yavg = np.average([y2,y3])
+    xstd = np.std([x2,x3])
+    ystd = np.std([y2,y3])
+    #xavg = np.average([x1,x2,x3])
+    #yavg = np.average([y1,y2,y3])
+    #xstd = np.std([x1,x2,x3])
+    #ystd = np.std([y1,y2,y3])
+    #print(count, posx-dx+xavg, posy-dy+yavg, xstd, ystd)
     # RECURSION BITCH limit 100 times, while either std is higher than our 0.1 threshold
     # and as long as the std is getting smaller
-    if (xstd + ystd > prevstds[0] + prevstds[1]):
-        return posx, posy, prevstds[0] ** (-2), prevstds[1] ** (-2), count - 1
+    if (xstd + ystd > prevstds[0]+prevstds[1]):
+        return posx, posy, prevstds[0]**(-2), prevstds[1]**(-2), count-1
     if count < 100 and (xstd > 0.1 or ystd > 0.1) and (xstd <= prevstds[0] and ystd <= prevstds[1]):
-    #if count < 80 and (xstd > 0.1 or ystd > 0.1) and (xstd <= prevstds[0] and ystd <= prevstds[1]):
-        return plot_image(posx - dx + xavg, posy - dy + yavg, count, [xstd, ystd])
+        return plot_image(posx-dx+xavg, posy-dy+yavg, count, [xstd,ystd])
     else:
-        return posx - dx + xavg, posy - dy + yavg, 1 / (xstd ** 2), 1 / (ystd ** 2), count
-
+        return posx-dx+xavg, posy-dy+yavg, 1/(xstd**2), 1/(ystd**2), count
 
 ### THINGS FOR RSKY #######
 
@@ -141,41 +134,14 @@ def objective_function(params):
 def mag(val):
     return -2.5 * np.log10(val / 3631)
 
-
-# flux makes luminosity defined by Hogg 1999??
-def luminosity(wavelength, flux, lDistcm):
-    return const.c * u.s / u.m / (wavelength * 10 ** -9) * flux * 10 ** -23 * (4 * math.pi * lDistcm ** 2) / solarLum
-
-
-# Given two coefficients and the color will return the mass-to-light ratio
-# as defined by Bell and DeJong 2000
-def mLR(a, b, color):
-    return 10 ** (a + b * color)
-
-
 ##### ACTUAL PROGRAM BITS #####
 
 # define the directory that contains the images
 dir = os.environ['HSTDIR']
 
-# coefficients from Bell & de Jong 2001, note: our photometry does not correspond exactly with restframe B, V, and J.
-# We could apply k-corrections to estimate restframe magnitudes at these wavelengths but are not doing so currently.
-# The plan going forward is to use uhm... models that do not require k-corrections.
-# Don't uhm me. Aleks is the best. Those models are iSEDfit ft. Moustakas and Prospector.
-Ba = [-1.019, -1.113, -1.026, -.990, -1.110, -.994, -.888]
-Bb = [1.937, 2.065, 1.954, 1.883, 2.018, 1.804, 1.758]
-B_coeff = [Ba, Bb]
-Va = [-.759, -.853, -.766, -.730, -.850, -.734, -.628]
-Vb = [1.537, 1.665, 1.554, 1.483, 1.618, 1.404, 1.358]
-V_coeff = [Va, Vb]
-Ja = [-.540, -.658, -.527, -.514, -.659, -.621, -.550]
-Jb = [.757, .907, .741, .704, .878, .794, .801]
-J_coeff = [Ja, Jb]
-# coeff has three bracket sets: [wavelength][a coef][b coef]
-coeff = [B_coeff, V_coeff, J_coeff]
-
 # setting up arrays with three elements, all zeros - placeholders
-filters = ['F475W', 'F814W', 'F160W']
+#filters = ['F475W', 'F814W', 'F160W']
+filters = ['F475W', 'F814W']
 
 data = [0 for x in range(len(filters))]
 header = [0 for x in range(len(filters))]
@@ -186,15 +152,11 @@ dark = [0.0022, 0.0022, 0.045]
 RN = [0 for x in range(len(filters))]
 
 # width MUST be odd.
-#width = 81
-width = 101
+width = 15000
 pixr = int((width - 1) / 2)
 radii = np.arange(40) + 1
 #radii = np.arange(30) + 1
 area = [0 for x in range(len(radii))]
-area = [0 for x in range(len(radii))]
-annNoise = np.zeros([len(filters), len(radii)])
-annSNR = np.zeros([len(filters), len(radii)])
 
 solarLum = 3.846 * 10 ** 33
 
@@ -234,10 +196,10 @@ with PdfPages('ad_MONSTER.pdf') as pdf:
         mys = [0, 0, 0]
         mstdx = [0, 0, 0]
         mstdy = [0, 0, 0]
-        for i in range(0, len(filters)):
+        for i in range(0, 2):#len(filters)):
             # file = glob.glob(dir+galaxies[w].name+'_final_'+filters[i]+'*sci.fits')
-            file = glob.glob(dir + galaxies[w].name + '*/' + res[1] + '/' + str(filters[i]) + '/' + type[1] + '_' + str(
-                filters[i]) + '*sci.fits')
+            file = glob.glob(dir + galaxies[w].name + '*/' + res[0] + '/' + str(filters[i]) + '/' + type[1] + '_' + str(
+                filters[i]) + '*sci.fits') #res[0]=fine; res[1]=coarse
 
             hdu = fits.open(file[0])
             data[i], header[i] = hdu[0].data, hdu[0].header
@@ -287,141 +249,102 @@ with PdfPages('ad_MONSTER.pdf') as pdf:
             # find the best-fit gaussian
             results = minimize(objective_function, params_initial, method='Powell')
             params_fit = results.x
-            model = gaussian(bin_mids, *params_fit)
+            #model = gaussian(bin_mids, *params_fit)
             rSky[w][i] = params_fit[2]
 
-            # BEGINNING SNR CODE:
-
-            # do pixel analysis
-            for j in range(0, width):
-
-                for k in range(0, width):
-                    # In data numbers? In electrons?
-                    fluxpix[i, width - j - 1, k] = data[i][int(j + round(galaxies[w].y) - pixr + 1)][
-                        int(k + round(galaxies[w].x) - pixr + 1)]
-                    # pixNoise[i,width-j-1,k] =  np.sqrt((rSky[w][i]*1)**2+fluxpix[i][width-j-1][k]+(RN[i]**2+(gain[i]/2)**2)*1+dark[i]*1*exp[i])
-                    pixNoise[i, width - j - 1, k] = np.sqrt(
-                        (rSky[w][i]) ** 2 + np.abs(fluxpix[i][width - j - 1][k]) + RN[i] ** 2 + dark[i] * exp[i])
-                    pixshot[i, width - j - 1, k] = np.sqrt(np.abs(fluxpix[i][width - j - 1][k]))
-                    pixsky[i, width - j - 1, k] = rSky[w][i]
-                    pixread[i, width - j - 1, k] = RN[i]
-                    pixdark[i, width - j - 1, k] = np.sqrt(dark[i] * exp[i])
-                    SNR[i, width - j - 1, k] = fluxpix[i, width - j - 1, k] / pixNoise[i, width - j - 1, k]
+            fluxpix[i] = data[i]
+            pixNoise[i] = np.sqrt((rSky[w][i]) ** 2 + np.abs(fluxpix[i]) + RN[i] ** 2 + dark[i] * exp[i])
+            pixshot[i] = np.sqrt(np.abs(fluxpix[i]))
+            pixsky[i] = rSky[w][i]
+            pixread[i] = RN[i]
+            pixdark[i] = np.sqrt(dark[i] * exp[i])
+            SNR[i] = fluxpix[i] / pixNoise[i]
 
             #storing sigma images
             hdu1 = hdu
-            hdu1[0].data = pixNoise
-            sigma_name = dir+gal+filters+'sigma'+'.fits'
+            hdu1[0].data = pixNoise[i]
+            sigma_name = galaxies[w].name + '_' +filters[i] + '_' + res[0] + '_sigma'+'.fits'
             hdu1.writeto(sigma_name)
 
-            # do photometry on images
-            # convert to proper units
-            for j in range(0, len(radii)):
-                aperture = CircularAperture([galaxies[w].x, galaxies[w].y], radii[j])
-                phot_table = aperture_photometry(data[i], aperture)
-                # flux[i,j] = phot_table['aperture_sum'][0]*(fnu[i]/exp[i])/(3.631*10**-6)
-                flux[i, j] = phot_table['aperture_sum'][0]  # *gain[i]*exp[i]
-                if j == 0:
-                    subflux[i, j] = flux[i, j]
-                else:
-                    subflux[i, j] = flux[i, j] - flux[i, j - 1]
-
-                annNoise[i, j] = np.sqrt(
-                    (rSky[w][i] * area[j]) ** 2 + flux[i][j] + (RN[i] ** 2) * area[j] + dark[i] * area[j] * exp[i])
-                annSNR[i, j] = flux[i, j] / annNoise[i, j]
-
-        m = np.ma.masked_where(SNR < 10, SNR)
-        n = np.ma.masked_where(SNR < 10, fluxpix)
-        # BEGINNING MLR CODE BUT ONLY IN PIXELS???:
-        for i in range(0, len(wavelengths)):
-            m[i] = np.ma.masked_where(SNR[0] < 10, SNR[i])
-            n[i] = np.ma.masked_where(SNR[0] < 10, fluxpix[i])
-            n[i] = n[i] * fnu[i] / exp[i]
-        # making uv color
-        colorUV = mag(n[0]) - mag(n[1])
-        for i in range(0, len(wavelengths)):
-            lD = galaxies[w].lDcm
-            lum = luminosity(wavelengths[i], n, lD)
-
-            # Plotting UV color map and pixel restrictions.
-            fig = plt.figure()
-            # plt.imshow(colorUV)
-            plt.imshow(SNR[i])
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'SNR_linear' + str(i))
-            pdf.savefig()
-            plt.close()
-
-            
-            fig = plt.figure()
-            # plt.imshow(colorUV)
-            snrimg = img_scale.log(SNR[i], scale_min=1, scale_max=500)
-            plt.imshow(snrimg)
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'SNR_log' + str(i))
-            pdf.savefig()
-            plt.close()
-            wb.save('updated.xlsx')
-
-            # Plotting VJ color map and pixel restrictions.
-            fig = plt.figure()
-            plt.imshow(pixNoise[i])
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'pixNoise_linear' + str(i))
-            pdf.savefig()
-            plt.close()
-
-            fig = plt.figure()
-            noiseimg = img_scale.log(pixNoise[i], scale_min=1, scale_max=500)
-            plt.imshow(noiseimg)
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'pixNoise_log' + str(i))
-            pdf.savefig()
-            plt.close()
-
-            # plot the flux values
-            fig = plt.figure()
-            plt.imshow(fluxpix[i])
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'fluxpix_linear' + str(i))
-            pdf.savefig()
-            plt.close()
-            
-            fig = plt.figure()
-            fluximg = img_scale.log(fluxpix[i], scale_min=1, scale_max=500)
-            plt.imshow(fluximg)
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'fluxpix_log' + str(i))
-            pdf.savefig()
-            plt.close()
-
-            fig = plt.figure()
-            plt.imshow(pixshot[i])
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'pixshot' + str(i))
-            pdf.savefig()
-            plt.close()
-            
-            fig = plt.figure()
-            shotimg = img_scale.log(pixshot[i], scale_min=1, scale_max=500)
-            plt.imshow(shotimg)
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'pixshot' + str(i))
-            pdf.savefig()
-            plt.close()
-
-            fig = plt.figure()
-            plt.imshow(pixsky[i])
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'pixsky' + str(i))
-            pdf.savefig()
-            plt.close()
-
-            fig = plt.figure()
-            plt.imshow(pixdark[i])
-            plt.colorbar()
-            plt.title(galaxies[w].name + 'pixdark' + str(i))
-            pdf.savefig()
-            plt.close()
+        # for i in range(0, len(wavelengths)):
+        #     # Linear signal to noise ratio
+        #     fig = plt.figure()
+        #     plt.imshow(SNR[i])
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'SNR_linear' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #
+        #     fig = plt.figure()
+        #     # plt.imshow(colorUV)
+        #     snrimg = img_scale.log(SNR[i], scale_min=1, scale_max=500)
+        #     plt.imshow(snrimg)
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'SNR_log' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #     wb.save('updated.xlsx')
+        #
+        #     # Plotting VJ color map and pixel restrictions.
+        #     fig = plt.figure()
+        #     plt.imshow(pixNoise[i])
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'pixNoise_linear' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #     fig = plt.figure()
+        #     noiseimg = img_scale.log(pixNoise[i], scale_min=1, scale_max=500)
+        #     plt.imshow(noiseimg)
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'pixNoise_log' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #     # plot the flux values
+        #     fig = plt.figure()
+        #     plt.imshow(fluxpix[i])
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'fluxpix_linear' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #     fig = plt.figure()
+        #     fluximg = img_scale.log(fluxpix[i], scale_min=1, scale_max=500)
+        #     plt.imshow(fluximg)
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'fluxpix_log' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #     fig = plt.figure()
+        #     plt.imshow(pixshot[i])
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'pixshot' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #     fig = plt.figure()
+        #     shotimg = img_scale.log(pixshot[i], scale_min=1, scale_max=500)
+        #     plt.imshow(shotimg)
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'pixshot' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #     fig = plt.figure()
+        #     plt.imshow(pixsky[i])
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'pixsky' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
+        #
+        #     fig = plt.figure()
+        #     plt.imshow(pixdark[i])
+        #     plt.colorbar()
+        #     plt.title(galaxies[w].name + 'pixdark' + str(i))
+        #     pdf.savefig()
+        #     plt.close()
 
 os.system('open %s &' % 'ad_MONSTER.pdf')
