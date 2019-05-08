@@ -2,8 +2,8 @@
 """
 Fit the SED using Prospector.
 
-run bgl_sedfit.py --sedfit --nproc=4 --priors='delayed-tau' --galaxy='j0901'
-run bgl_sedfit.py --qaplots --nproc=4 --priors='delayed-tau' --galaxy='j0901'
+run bgl_sedfit.py --nproc=4 --priors='delayed-tau' --galaxy='j0901' --sedfit  --verbose
+run bgl_sedfit.py --nproc=4 --priors='delayed-tau' --galaxy='j0901' --qaplots --verbose
 
 """
 import os, time, argparse, pdb
@@ -566,9 +566,13 @@ def main():
         if args.priors=='ssp':
             subtriangle(result, showpars=['logzsol', 'dust2', 'tage', 'logmass', 'dust_ratio'], png=png)
                     #logify=['tage'], png=png)
-        else:
+
+        if args.priors=='delayed-tau':
             subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust_ratio'],
                     logify=['tau'], png=png)
+
+        if args.priors=='bursty':
+            subtriangle(result, showpars=['logzsol', 'dust2', 'tage', 'tau', 'logmass', 'fburst', 'fage_burst', 'dust_ratio'], png=png)
 
         #reader.subcorner(result, start=0, thin=1, fig=plt.subplots(5,5,figsize=(27,27))[0])
 
