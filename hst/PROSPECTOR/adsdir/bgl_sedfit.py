@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """
-Fit the SED of J0826 using Prospector.
+Fit the SED using Prospector.
+
+run bgl_sedfit.py --sedfit --nproc=4 --priors='delayed-tau' --galaxy='j0901'
+run bgl_sedfit.py --qaplots --nproc=4 --priors='delayed-tau' --galaxy='j0901'
 
 """
 import os, time, argparse, pdb
@@ -159,7 +162,7 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
     # Add an inset with the posterior probability distribution.
     ax1 = fig.add_axes([0.23, 0.68, 0.22, 0.22])
     if priors=='ssp':
-        ax1.hist(chain[:, 3], bins=20, histtype='step', linewidth=2, 
+        ax1.hist(chain[:, 3], bins=40, histtype='step', linewidth=2, 
              edgecolor='k',fill=True)
     else:
         ax1.hist(chain[:, 4], bins=50, histtype='step', linewidth=2, 
@@ -254,8 +257,8 @@ def subtriangle(results, showpars=None, truths=None, start=0, thin=2,
 def logmass2mass(logmass=11.0, **extras):
     return 10**logmass
 
-def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None):
-    """Load the photometry for J0826.
+def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
+    """Load the photometry
     
     From Christy:
       W1      14.8739    0.0154054
@@ -303,11 +306,13 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None):
     #    i=(3.63049e-08, 1.53877e+18),
 
     data = ascii.read('../../autogalfit/flux.dat')
+
+    match = data.field('Galaxy') == galaxy
     
     phot = dict(
-        uvis_f475w=(data['Flux_475'][0], data['Inverse_Variance_475'][0]),
-        uvis_f814w=(data['Flux_814'][0], data['Inverse_Variance_814'][0]),
-        ir_f160w=(data['Flux_160'][0], data['Inverse_Variance_160'][0]))
+        uvis_f475w=(data['Flux_475'][match][0], data['Inverse_Variance_475'][match][0]),
+        uvis_f814w=(data['Flux_814'][match][0], data['Inverse_Variance_814'][match][0]),
+        ir_f160w=(data['Flux_160'][match][0], data['Inverse_Variance_160'][match][0]))
 
     #galex = ['galex_FUV', 'galex_NUV']
     #sdss = ['sdss_{}0'.format(b) for b in ['u','g','r','i','z']]
@@ -318,7 +323,7 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None):
     
     
     obs = {}
-    obs['redshift'] = data['z'][0] #0.603
+    obs['redshift'] = data['z'][match][0] #0.603
     obs["filters"] = sedpy.observate.load_filters(filternames)
 
     obs["maggies"] = np.array([phot[filt][0] for filt in phot.keys()])
@@ -412,6 +417,10 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params['tage']['prior'] = priors.LogUniform(mini=0.001, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
         model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
+        add_duste = {"N": 1, "isfree": False, "init": False}
+        model_params["add_dust_emission"] = add_duste
+
+        
         #print('HACK!!!!!!!!!!!!!')
         #model_params['tau']['isfree'] = False
         #model_params['tage']['isfree'] = False
@@ -439,11 +448,12 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
 
         add_duste = {"N": 1, "isfree": False, "init": False}
         model_params["add_dust_emission"] = add_duste
+        
         return model_params
         
     if template_library == 'ssp':
         model_params = base_ssp()
-        print(model_params)
+        #print(model_params)
     
     if template_library == 'delayed-tau':
         # Underlying delayed tau model.
@@ -509,7 +519,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--priors', default='delayed-tau', type=str, choices=['delayed-tau', 'bursty', 'ssp'],
                         help='Choose the model priors.')
-    parser.add_argument('--prefix', default='j0826', type=str, help='Output file prefix.')
+    parser.add_argument('--galaxy', default='j0826', type=str, help='Output file galaxy.')
     parser.add_argument('--seed', default=1, type=int, help='Seed for random number generation.')
     parser.add_argument('--nproc', default=1, type=int, help='Number of cores to use.')
     parser.add_argument('--sedfit', action='store_true', help='Do the SED fit.')
@@ -517,8 +527,8 @@ def main():
     parser.add_argument('--verbose', action='store_true', help='Be verbose.')
     args = parser.parse_args()
 
-    j0826dir = os.getcwd() #os.path.join(os.getenv('HIZEA_PROJECT'), 'j2118-nebula')
-    hfile = os.path.join(j0826dir, '{}-{}.h5'.format(args.prefix, args.priors))
+    datadir = os.getcwd() #os.path.join(os.getenv('HIZEA_PROJECT'), 'j2118-nebula')
+    hfile = os.path.join(datadir, '{}-{}.h5'.format(args.galaxy, args.priors))
 
     if args.sedfit:
         import prospect.io
@@ -527,7 +537,7 @@ def main():
         # Initialize the SPS library (takes a bit), the photometry, the "run
         # parameters" dictionary, and the model priors.
         sps = load_sps(verbose=args.verbose)
-        obs, rp = load_obs(seed=args.seed, nproc=args.nproc, verbose=args.verbose, sps=sps)
+        obs, rp = load_obs(seed=args.seed, nproc=args.nproc, verbose=args.verbose, sps=sps, galaxy=args.galaxy)
         model = load_model(obs, args.priors, verbose=args.verbose)
         
         #with multiprocessing.Pool(args.nproc) as P:
@@ -552,7 +562,7 @@ def main():
         result, obs, _ = reader.results_from(hfile, dangerous=False)
         print('...took {:.2f} sec'.format(time.time()-t0))
 
-        png = os.path.join(j0826dir, '{}-{}-corner.png'.format(args.prefix, args.priors))
+        png = os.path.join(datadir, '{}-{}-corner.png'.format(args.galaxy, args.priors))
         if args.priors=='ssp':
             subtriangle(result, showpars=['logzsol', 'dust2', 'tage', 'logmass', 'dust_ratio'], png=png)
                     #logify=['tage'], png=png)
@@ -568,7 +578,7 @@ def main():
         sps = load_sps(verbose=args.verbose)
         model = load_model(obs, args.priors, verbose=args.verbose)
 
-        png = os.path.join(j0826dir, '{}-{}-sed.png'.format(args.prefix, args.priors))
+        png = os.path.join(datadir, '{}-{}-sed.png'.format(args.galaxy, args.priors))
         bestfit_sed(obs, chain=result['chain'], lnprobability=result['lnprobability'], 
                     sps=sps, model=model, seed=1, nrand=100, png=png, priors=args.priors)
     
