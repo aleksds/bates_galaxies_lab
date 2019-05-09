@@ -162,10 +162,10 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
     # Add an inset with the posterior probability distribution.
     ax1 = fig.add_axes([0.23, 0.68, 0.22, 0.22])
     if priors=='ssp':
-        ax1.hist(chain[:, 3], bins=40, histtype='step', linewidth=2, 
+        ax1.hist(chain[:, 2], bins=40, histtype='step', linewidth=2, 
              edgecolor='k',fill=True)
     else:
-        ax1.hist(chain[:, 4], bins=50, histtype='step', linewidth=2, 
+        ax1.hist(chain[:, 3], bins=50, histtype='step', linewidth=2, 
              edgecolor='k',fill=True)
     ax1.set_xlim(9.3, 11.3)
     ax1.set_yticklabels([])
@@ -258,52 +258,11 @@ def logmass2mass(logmass=11.0, **extras):
     return 10**logmass
 
 def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
-    """Load the photometry
-    
-    From Christy:
-      W1      14.8739    0.0154054
-      W2      14.1342    0.0283280
-      W3      10.4872    0.0699660
-      W4      8.02651     0.179578
-
-    Jim’s latest 2mm measurement: 32+/-11 micro-Jy; bandpass to use is a tophat
-    over 143.5-146.5 GHz.
-
-    https://speclite.readthedocs.io/en/latest/filters.html
-    
-    import speclite.filters ; import numpy as np ; import astropy.units as u
-    wave = 2.995e18/(1e9*np.hstack([143.4999, np.arange(143.5, 146.6, 0.01), 146.6001]))
-    resp = np.hstack([0, np.ones(len(wave)-2), 0])
-    filt = speclite.filters.FilterResponse(wavelength=wave*u.Angstrom,
-      response=resp, meta=dict(group_name='alma', band_name='alma'))
-
+    """Load the photometry    
     """
     import sedpy
     from prospect.utils.obsutils import fix_obs
     from astropy.io import ascii
-
-    #phot = dict(
-    #    FUV=(1.82491e-09, 1.15115e+19),
-    #    NUV=(8.06441e-09, 2.25963e+19),
-    #    u=(1.27666e-08, 1.53319e+18),
-    #    g=(1.59991e-08, 7.47418e+18),
-    #    r=(3.15573e-08, 2.18797e+18),
-    #    i=(3.63049e-08, 1.53877e+18),
-    #    z=(4.14564e-08, 2.71207e+17),
-    #    ch1=(9.25971e-08, 3.91873e+17),
-    #    ch2=(9.67009e-08, 3.54276e+17),
-    #    W1=(9.40651e-08, 5.61366e+17),
-    #    W2=(1.02882e-07, 1.38784e+17),
-    #    W3=(5.44324e-07, 8.12757e+14),
-    #    W4=(1.38524e-06, 1.90498e+13))
-
-    #phot = dict(
-    #    uvis_f475w=(1.75e-8, 3.15e17),
-    #    uvis_f814w=(2.38e-8, 1.23e17),
-    #    ir_f160w=(2.99e-8, 2.67e17))
-    #    g=(1.59991e-08, 7.47418e+18),
-    #    r=(3.15573e-08, 2.18797e+18),
-    #    i=(3.63049e-08, 1.53877e+18),
 
     data = ascii.read('../../autogalfit/flux.dat')
 
@@ -314,16 +273,10 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
         uvis_f814w=(data['Flux_814'][match][0], data['Inverse_Variance_814'][match][0]),
         ir_f160w=(data['Flux_160'][match][0], data['Inverse_Variance_160'][match][0]))
 
-    #galex = ['galex_FUV', 'galex_NUV']
-    #sdss = ['sdss_{}0'.format(b) for b in ['u','g','r','i','z']]
-    #spitzer = ['spitzer_irac_ch{}'.format(n) for n in ['1','2']]
-    #wise = ['wise_w{}'.format(n) for n in ['1','2', '3', '4']]
-    #filternames = galex + sdss + spitzer + wise
     filternames = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
-    
-    
+
     obs = {}
-    obs['redshift'] = data['z'][match][0] #0.603
+    obs['redshift'] = data['z'][match][0] 
     obs["filters"] = sedpy.observate.load_filters(filternames)
 
     obs["maggies"] = np.array([phot[filt][0] for filt in phot.keys()])
@@ -400,11 +353,14 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         # Initialize with sensible numbers.
         model_params['tau']['init'] = 10.0
         model_params['tage']['init'] = 0.1 # --> 0.1
-        model_params['logzsol']['init'] = 0.2
+        #model_params['logzsol']['init'] = 0.2
 
+        model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
+
+        
         # optimize log-stellar mass, not linear stellar mass
         model_params['logmass'] = {'N': 1, 'isfree': True, 'init': 10.0, # 11 --> 10
-                                   'prior': priors.TopHat(mini=8.0, maxi=12.0), # 10 --> 8
+                                   'prior': priors.TopHat(mini=8.5, maxi=11.5), # 10 --> 8
                                    'units': '$M_{\odot}$'}
 
         model_params['mass']['isfree'] = False
@@ -415,7 +371,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         # Adjust the prior ranges.
         model_params['tau']['prior'] = priors.LogUniform(mini=0.001, maxi=30.0) # 0.01 --> 0.001
         model_params['tage']['prior'] = priors.LogUniform(mini=0.001, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
-        model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
+        #model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         add_duste = {"N": 1, "isfree": False, "init": False}
         model_params["add_dust_emission"] = add_duste
@@ -432,10 +388,12 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
     def base_ssp():
         model_params = TemplateLibrary['ssp']
         model_params['tage']['init'] = 0.01
-        model_params['logzsol']['init'] = 0.2
+        #model_params['logzsol']['init'] = 0.2
 
+        model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
+        
         model_params['logmass'] = {'N': 1, 'isfree': True, 'init': 10.0, # 11 --> 10
-                                   'prior': priors.TopHat(mini=8.0, maxi=12.0), # 10 --> 8
+                                   'prior': priors.TopHat(mini=8.5, maxi=11.5), # 10 --> 8
                                    'units': '$M_{\odot}$'}
         model_params['mass']['isfree'] = False
         model_params['mass']['init'] = 10**model_params['logmass']['init']
@@ -444,7 +402,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
 
         # Adjust prior ranges
         model_params['tage']['prior'] = priors.LogUniform(mini=0.001, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
-        model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
+        #model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         add_duste = {"N": 1, "isfree": False, "init": False}
         model_params["add_dust_emission"] = add_duste
@@ -484,13 +442,17 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
     model_params['dust_type'] = {'N': 1, 'isfree': False, 'init': 0, 'units': 'dust model'}
     model_params['dust_index'] = {'N': 1, 'isfree': False, 'init': -0.7,
                                   'units': 'power-law index', 'prior': None}
+
+    model_params['dust1'] = {'N': 1, 'isfree': True, 'init': 1.0, 'prior': priors.TopHat(mini=0.0, maxi=4.0),
+                             'units': 'optical depth towards young stars'}#,
+    #                         'depends_on': dustratio_to_dust1}
     
-    model_params['dust1'] = {'N': 1, 'isfree': False, 'init': 0.0, 'prior': None,
-                             'units': 'optical depth towards young stars',
-                             'depends_on': dustratio_to_dust1}
-    model_params['dust_ratio'] = {'N': 1, 'isfree': True, 'init': 1.0,
-                                  'prior': priors.TopHat(mini=1.0, maxi=10.0),
-                                  'units': 'dust1/dust2 ratio (optical depth to young stars vs diffuse)'}
+    #model_params['dust1'] = {'N': 1, 'isfree': False, 'init': 0.0, 'prior': None,
+    #                         'units': 'optical depth towards young stars',
+    #                         'depends_on': dustratio_to_dust1}
+    #model_params['dust_ratio'] = {'N': 1, 'isfree': True, 'init': 1.0,
+    #                              'prior': priors.TopHat(mini=1.0, maxi=10.0),
+    #                              'units': 'dust1/dust2 ratio (optical depth to young stars vs diffuse)'}
 
     ## Add nebular emission.
     #model_params.update(TemplateLibrary['nebular'])
@@ -502,7 +464,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
     model_params['zred']['isfree'] = False 
 
     # Change the IMF from Kroupa to Salpeter.
-    model_params['imf_type']['init'] = 0
+    #model_params['imf_type']['init'] = 0
         
     # Now instantiate the model using this new dictionary of parameter specifications
     model = SedModel(model_params)
@@ -564,15 +526,15 @@ def main():
 
         png = os.path.join(datadir, '{}-{}-corner.png'.format(args.galaxy, args.priors))
         if args.priors=='ssp':
-            subtriangle(result, showpars=['logzsol', 'dust2', 'tage', 'logmass', 'dust_ratio'], png=png)
+            subtriangle(result, showpars=['logmass', 'tage', 'dust2', 'dust1'], png=png)
                     #logify=['tage'], png=png)
 
         if args.priors=='delayed-tau':
-            subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust_ratio'],
+            subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust1'],
                     logify=['tau'], png=png)
 
         if args.priors=='bursty':
-            subtriangle(result, showpars=['logzsol', 'dust2', 'tage', 'tau', 'logmass', 'fburst', 'fage_burst', 'dust_ratio'], png=png)
+            subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust1', 'fburst', 'fage_burst'], png=png)
 
         #reader.subcorner(result, start=0, thin=1, fig=plt.subplots(5,5,figsize=(27,27))[0])
 
