@@ -36,12 +36,14 @@ def get_fits_data(filepath):
     linez = spzline['LINEZ']
     return coadd,specobj,spzline,linewave,linename,linez
 
-#read relevant quantities (pending - implement get_fits_data; generalize for any wavelength/emission)
-def get_quantities(filepath):
+#read relevant quantities
+def get_quantities(filepath,emission_name):
     #open file given filepath
     coadd,specobj,spzline,linewave,linename,linez = get_fits_data(filepath)
 
-    HBWAV = spzline['LINEWAVE'][15]*(1+spzline['LINEZ'][15])
+    hb_ind = np.where(linename == emission_name)
+
+    HBWAV = spzline['LINEWAVE'][hb_ind]*(1+spzline['LINEZ'][hb_ind])
     #note the magic number 15 (happens to be index of Hbeta)
 
     minw = specobj['WAVEMIN']

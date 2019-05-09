@@ -14,7 +14,7 @@ with PdfPages('Emissionlines.pdf') as pdf:
     for file in fitsfiles:
         print('\nPlotting file: ', file,'..........')
         filepath = galfolpath+file
-        data = cbfits.get_quantities(filepath)
+        data = cbfits.get_quantities(filepath,'H_beta')
         hb_spread, hb_wav = cbfits.wspread(filepath,'H_beta',400)
         hb_flux, plot_data = cbfits.get_flux(filepath,hb_wav,hb_spread)
         hb_lum = cbfits.get_lum(filepath,hb_flux)
