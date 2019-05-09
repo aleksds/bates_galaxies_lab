@@ -30,11 +30,11 @@ for i in range(0, len(files)):
     data, header = hdu[0].data, hdu[0].header
     with open(files[i]) as f:
         # F814W corresponds roughly to rest-frame U-band
-        vunc, vunc_head = hdu[12].data, hdu[12].header
-        vres, vres_head = hdu[6].data, hdu[6].header
+        vunc, vunc_head = hdu[4].data, hdu[4].header
+        vres, vres_head = hdu[2].data, hdu[2].header
         # F475W corresponds roughly to rest-frame U-band
-        uunc, uunc_head = hdu[13].data, hdu[13].header
-        ures, ures_head = hdu[8].data, hdu[8].header
+        uunc, uunc_head = hdu[4].data, hdu[4].header
+        ures, ures_head = hdu[2].data, hdu[2].header
 
         vunc_image_stamp = vunc[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
         vres_image_stamp = vres[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
