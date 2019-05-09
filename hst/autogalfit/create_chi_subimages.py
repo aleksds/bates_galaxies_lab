@@ -23,9 +23,9 @@ sizepix = np.zeros(len(band_files))
 chi_from_our_calculations = np.zeros(len(band_files))
 
 xcen = 100
-ycen = 100
-dx = 5
-dy = 5
+ycen = xcen
+dx = 20
+dy = dx
 
 for i in range(0, len(fits_files)):
     print(fits_files[i], band_files[i])
@@ -33,21 +33,17 @@ for i in range(0, len(fits_files)):
     data, header = hdu[0].data, hdu[0].header
     with open(band_files[i]) as f:
         content = f.readlines()
-        #print(content)
-        # F814W corresponds roughly to rest-frame U-band
-        vunc, vunc_head = hdu[4].data, hdu[4].header
-        vres, vres_head = hdu[2].data, hdu[2].header
-        # F475W corresponds roughly to rest-frame U-band
-        uunc, uunc_head = hdu[4].data, hdu[4].header
-        ures, ures_head = hdu[2].data, hdu[2].header
+        unc, unc_head = hdu[4].data, hdu[4].header
+        res, res_head = hdu[2].data, hdu[2].header
 
-        vunc_image_stamp = vunc[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
-        vres_image_stamp = vres[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
-        uunc_image_stamp = uunc[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
-        ures_image_stamp = ures[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
-        #chi_from_our_calculations_for_v[i] = np.sum((vres_image_stamp/vunc_image_stamp)**2)/((101**2)*3)
-        #chi_from_our_calculations_for_u[i] = np.sum((ures_image_stamp/uunc_image_stamp)**2)/((101**2)*3)
-        chi_from_our_calculations[i] = np.sum((ures_image_stamp/uunc_image_stamp)**2)/((len(ures_image_stamp)**2)*1)
+        unc_image_stamp = unc[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
+        res_image_stamp = res[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
+
+        #print(res_image_stamp)
+        #print(unc_image_stamp)
+        #chi_from_our_calculations_for_v[i] = np.sum((res_image_stamp/unc_image_stamp)**2)/((101**2)*3)
+        #chi_from_our_calculations_for_u[i] = np.sum((res_image_stamp/unc_image_stamp)**2)/((101**2)*3)
+        chi_from_our_calculations[i] = np.sum((res_image_stamp/unc_image_stamp)**2)/((len(res_image_stamp)**2)*1)
         mag[i] = np.float(content[47][4:13])
         sizepix[i] = np.float(content[48][4:13])
         print(chi_from_our_calculations[i])
