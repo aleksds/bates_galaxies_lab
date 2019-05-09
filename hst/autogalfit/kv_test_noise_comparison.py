@@ -192,15 +192,15 @@ with PdfPages('ad_MONSTER.pdf') as pdf:
 
         # for w in range(0,len(galaxies)):
         # print(galaxies[w].name)
-        mxs = [0, 0, 0]
-        mys = [0, 0, 0]
-        mstdx = [0, 0, 0]
-        mstdy = [0, 0, 0]
-        for i in range(0, 2):#len(filters)):
+        #mxs = [0, 0, 0]
+        #mys = [0, 0, 0]
+        #mstdx = [0, 0, 0]
+        #mstdy = [0, 0, 0]
+        for i in range(0, len(filters)):
             # file = glob.glob(dir+galaxies[w].name+'_final_'+filters[i]+'*sci.fits')
             file = glob.glob(dir + galaxies[w].name + '*/' + res[0] + '/' + str(filters[i]) + '/' + type[1] + '_' + str(
                 filters[i]) + '*sci.fits') #res[0]=fine; res[1]=coarse
-
+            print(file)
             hdu = fits.open(file[0])
             data[i], header[i] = hdu[0].data, hdu[0].header
             fnu[i] = header[i]['PHOTFNU']
@@ -209,17 +209,17 @@ with PdfPages('ad_MONSTER.pdf') as pdf:
             RN[i] = header[i]['READNSEA']
             # CENTROID STUFF AKA SG STEAL YO BIIIITCH
             # define positions for photometry
-            positions = [galaxies[w].x, galaxies[w].y]
+            #positions = [galaxies[w].x, galaxies[w].y]
 
-            mxs[i], mys[i], mstdx[i], mstdy[i], count = plot_image(positions[0], positions[1], 0, [100, 100])
-        galaxies[w].x = np.average(mxs, weights=mstdx)
-        galaxies[w].y = np.average(mys, weights=mstdy)
+            #mxs[i], mys[i], mstdx[i], mstdy[i], count = plot_image(positions[0], positions[1], 0, [100, 100])
+        #galaxies[w].x = np.average(mxs, weights=mstdx)
+        #galaxies[w].y = np.average(mys, weights=mstdy)
         # ws.write(w+1, 0, galaxies[w].name)
         # ws.write(w+1, 1, galaxies[w].z)
-        ws.write(w + 1, 2, galaxies[w].x)
-        ws.write(w + 1, 3, galaxies[w].y)
+        #ws.write(w + 1, 2, galaxies[w].x)
+        #ws.write(w + 1, 3, galaxies[w].y)
 
-        print(galaxies[w].x, galaxies[w].y)
+        #print(galaxies[w].x, galaxies[w].y)
         ###    ##I now think i may need to exit and reenter the program? no that's not right.. we could do a different center for each wavelength? i'll ask aleks.
         for i in range(0, len(filters)):
             # GAU IMG BKG TO FIND RSKY TERM:
