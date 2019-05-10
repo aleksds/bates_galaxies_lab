@@ -93,8 +93,8 @@ with PdfPages(name) as pdf:
     cs = plt.contour(sizepix_1d, mag_1d, chi_2d, levels, colors=['blue', 'green', 'red'])
     plt.clabel(cs, inline=1, fontsize=14)
     #plt.ylim([0, 2])
-    plt.ylabel('Half-Light radius in pixels', fontsize=14)
-    plt.xlabel('Magnitude', fontsize=14)
+    plt.xlabel('Half-Light radius in pixels', fontsize=14)
+    plt.ylabel('Magnitude', fontsize=14)
     labels = ['68%', '95%', '99.7%']
     #for i in range(len(labels)):
     #    cs.collections[i].set_label(labels[i])
