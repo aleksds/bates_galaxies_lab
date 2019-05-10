@@ -24,7 +24,7 @@ chi_from_our_calculations = np.zeros(len(band_files))
 
 xcen = 100
 ycen = xcen
-dx = 20
+dx = 25
 dy = dx
 
 for i in range(0, len(fits_files)):
@@ -66,8 +66,8 @@ with PdfPages(name) as pdf:
     plt.scatter(mag, sizepix, marker='o', color='orange')
     plt.yscale('log')
     plt.ylim([0.1, 3.])
-    plt.ylabel('Half-Light radius in pixels')
-    plt.xlabel('Magnitude')
+    plt.xlabel('Half-Light radius in pixels')
+    plt.ylabel('Magnitude')
     plt.title(dir+'/'+gal+'_'+band)
 
     for i in range(0, len(band_files)):
@@ -81,15 +81,15 @@ with PdfPages(name) as pdf:
     plt.contourf(sizepix_1d, mag_1d, chi_2d, 20, cmap='RdGy')
     plt.colorbar()
 
-    plt.ylabel('Half-Light radius in pixels')
-    plt.xlabel('Magnitude')
+    plt.xlabel('Half-Light radius in pixels')
+    plt.ylabel('Magnitude')
     pdf.savefig()
     plt.close()
 
     fig = plt.figure()
 
     chi_min = np.min(chi_2d)
-    levels = np.array([1.0, 4.00, 9.00])*chi_min+chi_min
+    levels = np.array([1.0, 4.00, 9.00])+chi_min
     cs = plt.contour(sizepix_1d, mag_1d, chi_2d, levels, colors=['blue', 'green', 'red'])
     plt.clabel(cs, inline=1, fontsize=14)
     #plt.ylim([0, 2])
