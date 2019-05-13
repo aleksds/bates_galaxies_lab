@@ -115,7 +115,7 @@ total = len(good_plates)
 print('The total number of late-type, edge-on MaNGA galaxies is ' + str(total))
 
 
-for i in range(len(good_plates)):
+for i in range(5):
     plate, ifu = good_plates[i].split('-')
     name = mpl8_dir+'HYB10-MILESHC-MILESHC/'+str(plate)+'/'+ str(ifu)+'/manga-'+str(plate)+'-'+str(ifu)+'-MAPS-HYB10-MILESHC-MILESHC.fits.gz'
     dap_name = mpl8_dir+ 'manga-' + str(good_plates[i]) + '-MAPS-HYB10-MILESHC-MILESHC.fits.gz'
@@ -141,10 +141,8 @@ for i in range(len(good_plates)):
         obs_ha_flux = obs_ha_flux * 10**-17 * u.erg/u.s/(u.cm ** 2)
 
         lum = 4 * math.pi * z**2 * obs_ha_flux
-        log_sfr = math.log(lum.value) - 41.27
+        log_sfr = math.log(lum.value, 10) - 41.27
 
         manga_star[i] = log_sfr
 
         # mpl8_sfr = dap_data['SFR_TOT']
-
-
