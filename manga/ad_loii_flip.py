@@ -204,8 +204,12 @@ fmax = 1e-16
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
 # directory for relevant Data Reduction Pipeline (drp) and Data Analysis Pipeline (DAP) information
-mpl5_dir = os.environ['MANGADIR_MPL5']  # Be aware that this directory syntax might need revision
-drp = fits.open(mpl5_dir + 'drpall-v2_0_1.fits')
+# mpl5_dir = os.environ['MANGADIR_MPL5']  # Be aware that this directory syntax might need revision
+# drp = fits.open(mpl5_dir + 'drpall-v2_0_1.fits')
+mpl8_dir = os.environ['MANGADIR_MPL8']  # Be aware that this directory syntax might need revision
+
+drp = fits.open(mpl8_dir + 'drpall-v2_5_3.fits')    # read in information from drpall file
+
 drpdata = drp[1].data
 
 # specific the plate of interest
@@ -217,18 +221,25 @@ from os.path import isdir, join
 eml = ['OIId---3728', 'Hb-----4862', 'OIII---4960', 'OIII---5008', 'OI-----6302', 'OI-----6365', 'NII----6549',
    'Ha-----6564', 'NII----6585', 'SII----6718', 'SII----6732']
 
-filename = 'ad_loii_flip.pdf'
+filename ='scrap.pdf' #'ad_loii_flip.pdf'
 
-with PdfPages(filename) as pdf: 
+with PdfPages(filename) as pdf:
     for i in range(0,50):#len(good_galaxies)):#15):
         #all_plates = [f for f in os.listdir(mpl5_dir + 'SPX-GAU-MILESHC/') if
         #    isdir(join(mpl5_dir + 'SPX-GAU-MILESHC/', f))]
         galaxy_c = good_galaxies[i]
         gal_indx = galaxy_c[3]
         plate = galaxy_c[0]
+        ifu = galaxy_c[1]
         denom_and_rating = str(galaxy_c[0]) + '-' + str(galaxy_c[1]) + " Rating: " + str(galaxy_c[2])
-        lines = glob.glob(mpl5_dir + 'SPX-GAU-MILESHC/*/*/*' + str(plate) + '*MAPS-SPX-GAU-MILESHC.fits*')
-        name = lines[gal_indx]
+        # lines = glob.glob(mpl5_dir + 'SPX-GAU-MILESHC/*/*/*' + str(plate) + '*MAPS-SPX-GAU-MILESHC.fits*')
+        # lines = glob.glob(mpl8_dir + 'HYB10-MILESHC-MILESHC/' + str(plate) + '/' + \
+        #        str(ifu) + '/manga-' + str(plate) + '-' + \
+        #        str(ifu) + '-MAPS-HYB10-MILESHC-MILESHC.fits.gz')
+        # name = lines[gal_indx]
+        name = mpl8_dir + 'HYB10-MILESHC-MILESHC/' + str(plate) + '/' + \
+               str(ifu) + '/manga-' + str(plate) + '-' + \
+               str(ifu) + '-MAPS-HYB10-MILESHC-MILESHC.fits.gz'
 
         # THIS PART NEEDS ADJUSTING. THERE IS ONE PLATE WITH MORE THAN 4 NUMBERS; done
         # parse the plate and galaxy information from the filename

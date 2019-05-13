@@ -6,8 +6,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy import units as u
- 
-drp = fits.open('drpall-v2_4_3.fits')
+
+mpl8_dir = os.environ['MANGADIR_MPL8']
+drp = fits.open(mpl8_dir + 'drpall-v2_5_3.fits')
 drpdata = drp[1].data 
 
 
@@ -19,15 +20,15 @@ filename = 'histograms.pdf'
 plateifu = drpdata.field('plateifu')
 
 # read in MPA-JHU catalog information
-gal = fits.open('gal_info_dr7_v5_2.fit.gz')
+gal = fits.open(mpl8_dir + 'gal_info_dr7_v5_2.fit')
 galdata = gal[1].data
-sfr = fits.open('gal_totsfr_dr7_v5_2.fits.gz')
+sfr = fits.open(mpl8_dir + 'gal_totsfr_dr7_v5_2.fits')
 sfrdata = sfr[1].data
-mass = fits.open('totlgm_dr7_v5_2.fit.gz')
+mass = fits.open(mpl8_dir + 'gal_totsfr_dr7_v5_2.fits')
 massdata = mass[1].data
 
 # read in information from NSA catalog
-nsa = fits.open('1-nsa_v1_0_1.fits')
+nsa = fits.open(mpl8_dir + '1-nsa_v1_0_1.fits')
 nsa_data = nsa[1].data
 
 # check on a galaxy of interest

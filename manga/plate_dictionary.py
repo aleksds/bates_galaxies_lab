@@ -1,5 +1,5 @@
 # Rebecca Minsley
-# Tuesday July 10th, 2018
+# Friday April 26th, 2018
 
 import os
 from astropy.io import fits
@@ -34,30 +34,27 @@ def channel_dictionary(hdu, ext):
 
 mpl8_dir = os.environ['MANGADIR_MPL8']  # directory should be saved in .bash_profile
 
-drp = fits.open(mpl8_dir + 'drpall-v2_5_3.fits')    # read in information from drpall file
-drpdata = drp[1].data
+drp = fits.open(mpl8_dir + 'drpall-v2_5_3.fits')            # read in information from drpall file
+nsa = fits.open(mpl8_dir + '1-nsa_v1_0_1.fits')             # read in information from NSA catalog
+gal = fits.open(mpl8_dir + 'gal_info_dr7_v5_2.fit')         # MPA-JHU catalog galaxy data
+sfr = fits.open(mpl8_dir + 'gal_totsfr_dr7_v5_2.fits')      # MPA-JHU catalog star-formation
+mass = fits.open(mpl8_dir + 'gal_totsfr_dr7_v5_2.fits')     # MPA-JHU catalog galactic mass
 
-nsa = fits.open(mpl8_dir + '1-nsa_v1_0_1.fits')     # read in information from NSA catalog
-nsa_data = nsa[1].data
+drpdata = drp[1].data       # drpall
+nsa_data = nsa[1].data      # nsa catalog
+galdata = gal[1].data       # MPA-Jhu
+sfrdata = sfr[1].data       # MPA-Jhu
+massdata = mass[1].data     # MPA-Jhu
 
 blah = drpdata.field('srvymode') == 'MaNGA dither'  # boolian where True = Manga Galaxies
 
 stellar_mass = drpdata.field('nsa_sersic_mass')
 ba = drpdata.field('nsa_sersic_ba')[blah]           # sersic profile of Manga Galaxies
 plateifu = drpdata.field('plateifu')
-
 manga_ra = drpdata.field('objra')
 manga_dec = drpdata.field('objdec')
 nsa_ra = nsa_data.field('RA')
 nsa_dec = nsa_data.field('DEC')
-
-# read in MPA-JHU catalog information
-gal = fits.open(mpl8_dir + 'gal_info_dr7_v5_2.fit')
-galdata = gal[1].data
-sfr = fits.open(mpl8_dir + 'gal_totsfr_dr7_v5_2.fits')
-sfrdata = sfr[1].data
-mass = fits.open(mpl8_dir + 'gal_totsfr_dr7_v5_2.fits')
-massdata = mass[1].data
 
 
 # define a standard cosmology
@@ -123,7 +120,7 @@ for i in range(total):
         hdu_dap = fits.open(name)
         print(str(plate) + '-' + str(ifu))
 
-        # pulling data for specified galaxy
+        # Build a dictionary with the emission-line and spectral-index channel names to ease selection and get the spectral-index units
         emlc = channel_dictionary(hdu_dap, 'EMLINE_SFLUX')
         dap_ha_sflux = hdu_dap['EMLINE_SFLUX'].data[emlc['Ha-6564'], :, :]
         dap_ha_sivar = hdu_dap['EMLINE_SFLUX_IVAR'].data[emlc['Ha-6564'], :, :]
@@ -282,8 +279,8 @@ df.to_csv('galaxy_dictionary.csv')
 filename = 'mpl8_sfr_density'
 with PdfPages(filename) as pdf:
     plt.scatter(mass_manga_gal, sfr_manga_gal, s=0.1, color='lightsteelblue', marker='s')
-    # plt.xlim(8, 12)
-    # plt.ylim(-2, 1.5)
+    plt.xlim(8, 12)
+    plt.ylim(-2, 1.5)
     plt.xlabel('Log(Stellar Mass)')
     plt.ylabel('Log(Star Formation Rate)')
     pdf.savefig()
