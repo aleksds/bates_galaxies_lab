@@ -10,7 +10,7 @@ from astropy.io import ascii
 
 run_params = {'verbose':True,
               'debug':False,
-              'outfile':'J2140_new_ssp',
+              'outfile':'J2140_new_tau_ssp',
               # Fitter parameters
               'nwalkers':128,
               'nburn':[10, 10, 10], 'niter':512,
@@ -55,7 +55,7 @@ sdss = ['sdss_{0}0'.format(b) for b in ['u','g','r','i','z']]
 #filtersets = (galex + bessell + spitzer,
 #              galex + sdss + spitzer)
 filtersets = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
-galaxy = 0
+galaxy = 11
 
 def load_obs(objid=galaxy, phottable='../../autogalfit/flux.txt', **kwargs):
     """Load photometry from an ascii file.  Assumes the following columns:
@@ -157,7 +157,7 @@ model_params.append({'name': 'zred', 'N': 1,
 # FSPS parameter.  sfh=4 is a delayed-tau SFH
 model_params.append({'name': 'sfh', 'N': 1,
                         'isfree': False,
-                        'init': 0,
+                        'init': 1,
                         'units': 'type'
                     })
 
