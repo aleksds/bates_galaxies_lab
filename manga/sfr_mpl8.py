@@ -115,7 +115,7 @@ total = len(good_plates)
 print('The total number of late-type, edge-on MaNGA galaxies is ' + str(total))
 
 
-for i in range(5):
+for i in range(len(good_plates)):
     plate, ifu = good_plates[i].split('-')
     name = mpl8_dir+'HYB10-MILESHC-MILESHC/'+str(plate)+'/'+ str(ifu)+'/manga-'+str(plate)+'-'+str(ifu)+'-MAPS-HYB10-MILESHC-MILESHC.fits.gz'
     dap_name = mpl8_dir+ 'manga-' + str(good_plates[i]) + '-MAPS-HYB10-MILESHC-MILESHC.fits.gz'
