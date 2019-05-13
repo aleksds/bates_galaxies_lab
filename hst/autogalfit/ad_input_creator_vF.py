@@ -1,19 +1,19 @@
-"""
-This code only works for simultaneous coarse images and independent fine images.
-"""
+#Cristopher Thompson
+#Last Edit: 05/07/2019
+
+"""Input_creator_V5.py: V5 means Variation 5. Varition 5: This code automates
+the creation and running of galfit input files. This final version is capable
+of producing both independent and simultaneous file that are sersic solely.
+This code can also handle coarse and fine pixels all in the s_index of coarse.
+This is the final """
 
 import os
 import numpy as np
 from astropy.io import ascii
 import datetime
 import sys
+import glob
 
-"""
-sys.argv[1] is psf or sersic (model), sys.arg[2] is coarse or fine (plate
-scale), sys.arg[3] is a number (image region size), sys.arg[4] is coarse or
-fine (psf), sys.arg[5] is simultaneous or independent or semi, sys.arg[6] is
-either none or s_index or re or s_index, re
-"""
 #Go back and make sure the table is being read in the same way
 jc_values = ascii.read('ad_mag_size_table.dat')
 re_vals = np.zeros((7, len(jc_values)))
@@ -32,12 +32,11 @@ for i in range(0,ngal):
     for j in range(0,len(re_vals)):
         tmp[i,j] = re_vals[j,i]
 print(tmp)
-# Note: This part of the code looks at the independent section by
-# adding an incremental adding of 0.1 to the various mag for filters w475 and,
-# F814W, F160W
+
 mag_values = ascii.read('ad_mag_size_table.dat')
-#re_array = np.arange(13)/10+0.1
-mag_array = np.array([-0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
+mag_array = np.array([-0.5, -0.3, -0.2, -0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5])
+#mag_array = np.array([-0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2,\
+#0.3, 0.4, 0.5, 0.6, 0.7])
 nmag = len(mag_array)
 #'md1f' stands for "magnitude difference of 1st filter"(i.e. 475W). 
 md1f = np.zeros((ngal, nmag))
@@ -65,7 +64,7 @@ galaxies = [
     'J2140']
 
 filters2 = ['F475W','F814W']
-#filters = ['F475W','F814W','F160W']
+filters = ['F475W','F814W','F160W']
 
 longgal = [
     'J0826+4305',
@@ -74,7 +73,7 @@ longgal = [
     'J0944+0930',
     'J1107+0417',
     'J1219+0336',
-    'J1341+0321',
+    'J1341-0321',
     'J1506+5402',
     'J1558+3957',
     'J1613+2834',
@@ -87,8 +86,11 @@ photzeromag = ['25.613',
 kind = ['independent',
         'simultaneous']
 
-# The words below 'model' 'plate' 'imgsize' 'psf' ' togetherness' and 
-# 'constraint' are the input constraints. 
+""" sys.argv[1] is psf or sersic (model), sys.arg[2] is coarse or fine (plate
+scale), sys.arg[3] is a number (image region size), sys.arg[4] is coarse or
+fine (psf), sys.arg[5] is simultaneous or independent or semi, sys.arg[6] is
+either none or s_index or re or s_index, re """
+
 model = sys.argv[1]
 plate = sys.argv[2]
 imgsize = sys.argv[3]
@@ -98,6 +100,8 @@ constraint = sys.argv[6]
 
 now = datetime.datetime.now()
 time = now.strftime("%Y%m%d-%H%M")
+
+hstdir = os.environ['HSTDIR']
 
 #INDEPENDENT FITS
 if togetherness == 'independent':
@@ -112,6 +116,7 @@ if togetherness == 'independent':
         xcoorhigh = str(int(catalog[w][1]+(np.float(imgsize)/2)))
         ycoorhigh = str(int(catalog[w][2]+(np.float(imgsize)/2)))
         for i in range(0,len(filters2)):
+            sigma_file = glob.glob(hstdir+'sigma/'+longgal[w]+'_'+filters2[i]+'_'+plate+'_sigma.fits')
             for j in range(0,nmag):
                 #if j == 0:
                 #    md1f[w,0] = mag_values['m475'][w]
@@ -141,53 +146,68 @@ if togetherness == 'independent':
                     #probably not essential
                     text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n')
                     #will not change , probably not essential
-                    text.write('A) /Volumes/physics/linux-lab/data/hst/' \
+                    text.write('A) /Users/adiamond/physics/linux-lab/data/hst/' \
                     +longgal[w]+'/'+plate+'/'+filters2[i]+'/final_' \
                     +filters2[i]+'_drc_sci.fits\n')
                     text.write('B) '+galaxies[w]+'_'+filters2[i]+\
                     '_'+model+'_effective_re'+str(q)+'_magnitude'+str(j)+\
                     '_output.fits\n')
-                    text.write('C) none\n') #will not change
-                    text.write('D) /Volumes/physics/linux-lab/data/hst/' \
+                    text.write('C) '+sigma_file[0]+' \n') #will not change
+                    text.write('D) /Users/adiamond/physics/linux-lab/data/hst/' \
                     +longgal[w]+'/'+plate+'/'+filters2[i]+'/final_psf.fits\n')
                     text.write('E) 1\n') #will not change
                     text.write('F) none\n') #will not change
-                    if constraint == 'none':
-                        text.write('G) \n')
-                    if constraint == 's_index':
-                        text.write('G) /Volumes/physics/linux-lab/data/sersic_\
-                        index_equaltofour.txt\n')
-                    if constraint == 're':
-                         text.write('G) /Volumes/physics/linux-lab/data/size_\
-                         constraint_1to1.txt\n')
-                    if constraint == 's_index, re':
-                        text.write('G) /Volumes/physics/linux-lab/data/s_\
-                        index_and_size.txt\n')
+                    #if constraint == 'none':
+                    #    text.write('G) \n')
+                    #if constraint == 's_index':
+                    #    text.write('G) /Users/adiamond/physics/linux-lab/data/sersic\
+                    #    _index_equaltofour.txt\n')
+                    #if constraint == 're':
+                    #     text.write('G) /Users/adiamond/physics/linux-lab/data/size_\
+                    #     constraint_1to1.txt\n')
+                    #if constraint == 's_index, re':
+                    #    text.write('G) /Users/adiamond/physics/linux-lab/data/s_\
+                    #    index_and_size.txt\n')
 
                     if model == 'sersic':
                         text.write('G) \n')
-                        constraintfile= time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+'/'+'parameters_constraints_'+filters2[i]+'_'+str([j])+'_'+str([q])+'_'+galaxies[w]+'.txt'
+                        constraintfile= time+'_'+model+'_'+plate+'_'\
+                        +togetherness+'_'+imgsize+'_psf'+psf+'/'+'parameters_constraints_'\
+                        +filters2[i]+'_'+str([j])+'_'+str([q])+\
+                        '_'+galaxies[w]+'.txt'
                     
                         contraint_text = open(constraintfile, 'w')
-                        contraint_text.write('# Component/    parameter   constraint	Comment\n')
-                        contraint_text.write('# operation	(see below)   range\n\n')
-                        contraint_text.write('1              n              4 to 4   # Soft constraint: Constrains the\n')
-                        contraint_text.write('					# sersic index n to within values\n')
-                        contraint_text.write('				        # from 0.7 to 5.\n')
-                        contraint_text.write('1              re         '+str(tmp[w][q])+' to '+str(tmp[w][q])+' \n')
+                        contraint_text.write('# Component/    parameter\
+                        constraint	Comment\n')
+                        contraint_text.write('# operation	(see below)\
+                        range\n\n')
+                        contraint_text.write('1              n             \
+                        4 to 4   # Soft constraint: Constrains the\n')
+                        contraint_text.write('					# sersic\
+                        index n to within values\n')
+                        contraint_text.write('				        # from\
+                        0.7 to 5.\n')
+                        contraint_text.write('1              re         '\
+                        +str(tmp[w][q])+' to '+str(tmp[w][q])+' \n')
                         if i==0:
-                            contraint_text.write('1              mag         '+str(md1f[w][j])+' to '+str(md1f[w][j])+' \n')
+                            contraint_text.write('1              mag     \
+                            '+str(md1f[w][j])+' to '+str(md1f[w][j])+' \n')
                         if i==1:
-                            contraint_text.write('1              mag         '+str(md2f[w][j])+' to '+str(md2f[w][j])+' \n')
+                            contraint_text.write('1              mag     \
+                            '+str(md2f[w][j])+' to '+str(md2f[w][j])+' \n')
                         
-                        contraint_text.write('1              q              1 to 1  \n')
-                        contraint_text.write('1              pa              0 to 0  \n')
+                        contraint_text.write('1              q            \
+                        1 to 1  \n')
+                        contraint_text.write('1              pa           \
+                        0 to 0  \n')
                         contraint_text.close()
-                        text.write('G) parameters_constraints_'+filters2[i]+'_'+str([j])+'_'+str([q])+'_'+galaxies[w]+'.txt\n')
+                        text.write('G) parameters_constraints_'+filters2[i]+\
+                        '_'+str([j])+'_'+str([q])+'_'+galaxies[w]+'.txt\n')
                         
 
 
-                        text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' \
+                        text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+\
+                        ' \
                         '+ycoorhigh+'\n')
                         text.write('I) 150    150\n')
                         text.write('J) '+photzeromag[i]+'\n')
@@ -200,8 +220,8 @@ if togetherness == 'independent':
                         text.write('O) regular\n') #will not change
                         text.write('P) 0\n') #will not change
                         text.write('W) input,sigma,psf,component,model,residual\n')
-                        text.write('#   par)    par value(s)    fit toggle(s)   \
-                        # parameter description \n')
+                        text.write('#   par)    par value(s)    fit\
+                        toggle(s)   # parameter description \n')
                         text.write('# Component number: 1\n') 
                         
                         if model == 'psf':
@@ -214,9 +234,10 @@ if togetherness == 'independent':
                             if i==1:
                                 mag = mag_values[w][2] #the m814 values
                                 text.write(' 3) '+str(md2f[w][j])+'     1\n')
-                                #change it to where it is pulling from Aleks' data 
-                                #table.Just one by itself
-                            text.write(' Z) 0 #Skip this model in output image? \
+                                #change it to where it is pulling from Aleks'
+                                #data table.Just one by itself
+                            text.write(' Z) 0 #Skip this model in output\
+                            image? \
                             (yes=1, no=0)\n')
                         if model == 'sersic':
                             text.write(' 0) sersic\n')
@@ -263,47 +284,77 @@ else:
 
             text = open(file,'w')
 
-            text.write('#  Input menu file: '+galaxies[w]+'_filters[475,814,160]_'+plate+'\n') #propably not essential
-            text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n') #probably not essential
-            text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') #will not change , probably not essential
-            text.write('A) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+plate+'/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+plate+'/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+plate+'/'+filters[2]+'/final_'+filters[2]+'_drz_sci.fits\n')
+            text.write('#  Input menu file: '+galaxies[w]+\
+            '_filters[475,814,160]_'+plate+'\n') #propably not essential
+            text.write('#  Chi^2/nu = ,  Chi^2 = ,  Ndof = \n')
+            #probably not essential
+            text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n')
+            #will not change , probably not essential
+            text.write('A) /Users/adiamond/physics/linux-lab/data/hst/'\
+            +longgal[w]+'/'+plate+'/'+filters[1]+'/final_'+filters[1]+\
+            '_drc_sci.fits,/Users/adiamond/physics/linux-lab/data/hst/'+longgal[w]+\
+            '/'+plate+'/'+filters[0]+'/final_'+filters[0]+\
+            '_drc_sci.fits,/Users/adiamond/physics/linux-lab/data/hst/'+longgal[w]+\
+            '/'+plate+'/'+filters[2]+'/final_'+filters[2]+'_drz_sci.fits\n')
             text.write('A1) V,U,J\n')
             text.write('A2) 814.000,475.000,160.000\n')
-            text.write('B) '+galaxies[w]+'_F814W_F475W_F160W_'+model+'_effective_re'+str(q)+'output.fits\n')
+            text.write('B) '+galaxies[w]+'_F814W_F475W_F160W_'+model+\
+            '_effective_re'+str(q)+'output.fits\n')
             text.write('C) none,none,none      0.000\n')
-            text.write('D) /Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits,/Volumes/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[2]+'/final_psf.fits\n')
+            text.write('D) /Users/adiamond/physics/linux-lab/data/hst/'+longgal[w]+\
+            '/'+psf+'/'+filters[1]+'/final_psf.fits,/Users/adiamond/physics/linux-\
+            lab/data/hst/'+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits\
+            ,/Users/adiamond/physics/linux-lab/data/hst/'+longgal[w]+'/'+psf+'/'\
+            +filters[2]+'/final_psf.fits\n')
             text.write('E) 1\n')# change to one when we are using a fine image
             text.write('F) none,none,none\n')
 
             if model == 'psf':
                 text.write('G) \n')
-                constraintfile= time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+'/'+'parameters_constraints_'+galaxies[w]+'.txt'
+                constraintfile= time+'_'+model+'_'+plate+'_'+togetherness+\
+                '_'+imgsize+'_psf'+psf+'/'+'parameters_constraints_'\
+                +galaxies[w]+'.txt'
 
                 contraint_text = open(constraintfile, 'w')
-                contraint_text.write('# Component/    parameter   constraint	Comment\n')
+                contraint_text.write('# Component/    parameter   constraint\
+                Comment\n')
                 contraint_text.write('# operation	(see below)   range\n\n')
-                contraint_text.write('1              n              4 to 4   # Soft constraint: Constrains the\n')
-                contraint_text.write('					# sersic index n to within values\n')
-                contraint_text.write('				        # from 0.7 to 5.\n\n')
-                contraint_text.write('1              re         '+str(tmp[w][q]/2)+' to '+str(tmp[w][q]/2)+'')
+                contraint_text.write('1              n              4 to 4  \
+                # Soft constraint: Constrains the\n')
+                contraint_text.write('					# sersic index n to\
+                within values\n')
+                contraint_text.write('				        # from 0.7 to\
+                5.\n\n')
+                contraint_text.write('1              re         '\
+                +str(tmp[w][q]/2)+' to '+str(tmp[w][q]/2)+'')
                 contraint_text.close()
 
             if model == 'sersic':
                 text.write('G) \n')
-                constraintfile= time+'_'+model+'_'+plate+'_'+togetherness+'_'+imgsize+'_psf'+psf+'/'+'parameters_constraints_'+str([q])+'_'+galaxies[w]+'.txt'
+                constraintfile= time+'_'+model+'_'+plate+'_'+togetherness+'_'\
+                +imgsize+'_psf'+psf+'/'+'parameters_constraints_'+str([q])+\
+                '_'+galaxies[w]+'.txt'
 
                 contraint_text = open(constraintfile, 'w')
-                contraint_text.write('# Component/    parameter   constraint	Comment\n')
+                contraint_text.write('# Component/    parameter   constraint\
+                Comment\n')
                 contraint_text.write('# operation	(see below)   range\n\n')
-                contraint_text.write('1              n              4 to 4   # Soft constraint: Constrains the\n')
-                contraint_text.write('					# sersic index n to within values\n')
-                contraint_text.write('				        # from 0.7 to 5.\n\n')
-                contraint_text.write('1              re         '+str(tmp[w][q]/2)+' to '+str(tmp[w][q]/2)+'')
-                contraint_text.write('1              q              0.99 to 0.99  \n')
-                contraint_text.write('1              pa              0 to 0  \n')
+                contraint_text.write('1              n              4 to 4\
+                # Soft constraint: Constrains the\n')
+                contraint_text.write('					# sersic index n to\
+                within values\n')
+                contraint_text.write('				        # from 0.7 to\
+                5.\n\n')
+                contraint_text.write('1              re         '\
+                +str(tmp[w][q]/2)+' to '+str(tmp[w][q]/2)+'')
+                contraint_text.write('1              q           \
+                0.99 to 0.99  \n')
+                contraint_text.write('1              pa          \
+                0 to 0  \n')
                 contraint_text.close()
 
-            text.write('G) parameters_constraints_'+str([q])+'_'+galaxies[w]+'.txt\n')
+            text.write('G) parameters_constraints_'+str([q])+'_'\
+            +galaxies[w]+'.txt\n')
 
             galcoords = 'galcoords_'+plate+'.dat'
             catalog = ascii.read(galcoords)
@@ -331,37 +382,53 @@ else:
             if model == 'psf':
                 text.write(' 0) psf\n')
                 if togetherness == 'simultaneous':
-                    text.write(' 1) '+xcoor+','+xcoor+'    1,1                 band\n')
-                    text.write(' 2) '+ycoor+','+ycoor+'    1,1                 band\n')
+                    text.write(' 1) '+xcoor+','+xcoor+'    1,1              \
+                    band\n')
+                    text.write(' 2) '+ycoor+','+ycoor+'    1,1              \
+                    band\n')
                 if togetherness == 'semi':
-                    text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
-                    text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
+                    text.write(' 1) '+xcoor+','+xcoor+'    1,0              \
+                    band\n')
+                    text.write(' 2) '+ycoor+','+ycoor+'    1,0              \
+                    band\n')
                 text.write(' 3) 19.5,19.5     1,1                 band\n')
-                text.write(' Z) 0                  #  Skip this model in output image?  (yes=1, no=0)\n')
+                text.write(' Z) 0                  #  Skip this model in \
+                output image?  (yes=1, no=0)\n')
 
             #Sersic for the code does work...... 
             if model == 'sersic':
                 text.write(' 0) sersic\n')
                 if togetherness == 'simultaneous':
-                    text.write(' 1) '+xcoor+','+xcoor+','+xcoor+'    1,1,1                 band\n')
-                    text.write(' 2) '+ycoor+','+ycoor+','+ycoor+'    1,1,1                 band\n')
+                    text.write(' 1) '+xcoor+','+xcoor+','+xcoor+'    1,1,1  \
+                    band\n')
+                    text.write(' 2) '+ycoor+','+ycoor+','+ycoor+'    1,1,1  \
+                    band\n')
                 if togetherness == 'semi':
-                    text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
-                    text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
-                text.write(' 3) 19.5,19.5,18.8     1,1,1                 band\n') 
-                text.write(' 4) '+str(tmp[w][q]/2)+','+str(tmp[w][q]/2)+','+str(tmp[w][q]/2)+'    1,0,0                band\n')
-                text.write(' 5) 4.000,4.000,4.000    1,0,0                 band\n')
-                text.write(' 6) 0,0,0               0,0,0                 band\n')
-                text.write(' 7) 0,0,0              0,0,0                 band\n')
-                text.write(' 8) 0,0,0               0,0,0                 band\n')
-                text.write(' 9) 0.99,0.99,0.99           1,0,0                 band\n')
+                    text.write(' 1) '+xcoor+','+xcoor+'    1,0              \
+                    band\n')
+                    text.write(' 2) '+ycoor+','+ycoor+'    1,0              \
+                    band\n')
+                text.write(' 3) 19.5,19.5,18.8     1,1,1                \
+                band\n') 
+                text.write(' 4) '+str(tmp[w][q]/2)+','+str(tmp[w][q]/2)+\
+                ','+str(tmp[w][q]/2)+'    1,0,0                band\n')
+                text.write(' 5) 4.000,4.000,4.000    1,0,0               \
+                band\n')
+                text.write(' 6) 0,0,0               0,0,0                \
+                band\n')
+                text.write(' 7) 0,0,0              0,0,0                \
+                band\n')
+                text.write(' 8) 0,0,0               0,0,0                \
+                band\n')
+                text.write(' 9) 0.99,0.99,0.99           1,0,0            \
+                band\n')
                 text.write(' 10) 0,0,0          1,0,0                 band\n')
                 text.write(' Z) 0')
             text.close()
 
 
-#below we create shell scripts, sh, to run galfit on the input files. NOTE! that 
-# the only one that are written to produce a proper sh, shell file, have a 
+#below we create shell scripts, sh, to run galfit on the input files. NOTE! 
+#that the only one that are written to produce a proper sh, shell file, have a 
 # model of 'sersic' and a togetherness equal to 'independent' or
 #'simulataneous'.
 if model == 'psf' and togetherness == 'independent':
@@ -410,7 +477,8 @@ if model == 'sersic' and togetherness == 'simultaneous':
     text.write('source ~/.bash_profile\n')
     for w in range(0,ngal):
         for q in range (0,nre):
-            text.write('galfitm '+galaxies[w]+'_F814W,F475W,F160W_'+model+'_effective_re'+str(q)+'_input.txt\n')
+            text.write('galfitm '+galaxies[w]+'_F814W,F475W,F160W_'+model+\
+            '_effective_re'+str(q)+'_input.txt\n')
     text.close()
 
 if model == 'psf' and togetherness == 'semi':
