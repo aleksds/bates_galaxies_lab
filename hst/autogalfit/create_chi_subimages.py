@@ -24,11 +24,11 @@ chi_from_our_calculations = np.zeros(len(band_files))
 
 xcen = 100
 ycen = xcen
-dx = 25
+dx = 10 
 dy = dx
 
 for i in range(0, len(fits_files)):
-    print(fits_files[i], band_files[i])
+    #print(fits_files[i], band_files[i])
     hdu = fits.open(fits_files[i])
     data, header = hdu[0].data, hdu[0].header
     with open(band_files[i]) as f:
@@ -46,7 +46,7 @@ for i in range(0, len(fits_files)):
         chi_from_our_calculations[i] = np.sum((res_image_stamp/unc_image_stamp)**2)/((len(res_image_stamp)**2)*1)
         mag[i] = np.float(content[47][4:13])
         sizepix[i] = np.float(content[48][4:13])
-        print(chi_from_our_calculations[i])
+        #print(chi_from_our_calculations[i])
         #print(chi_from_our_calculations_for_u[i])
 
 mag_1d = np.unique(mag)
@@ -89,13 +89,15 @@ with PdfPages(name) as pdf:
     fig = plt.figure()
 
     chi_min = np.min(chi_2d)
-    levels = np.array([1.0, 4.00, 9.00])+chi_min
+    #levels = np.array([1.0, 4.00, 9.00])+chi_min
+    levels = np.array([2.3, 4.61, 9.21])+chi_min
     cs = plt.contour(sizepix_1d, mag_1d, chi_2d, levels, colors=['blue', 'green', 'red'])
     plt.clabel(cs, inline=1, fontsize=14)
+    plt.xlim([0,np.max(sizepix)*0.5])
     #plt.ylim([0, 2])
     plt.xlabel('Half-Light radius in pixels', fontsize=14)
     plt.ylabel('Magnitude', fontsize=14)
-    labels = ['68%', '95%', '99.7%']
+    labels = ['68%', '90%', '99%']
     #for i in range(len(labels)):
     #    cs.collections[i].set_label(labels[i])
 
@@ -120,7 +122,7 @@ with PdfPages(name) as pdf:
     print((np.min(x) + np.max(x))/2, (np.max(x) - np.min(x))/2)
     print(np.min(y), np.max(y))
     print((np.min(y) + np.max(y))/2, (np.max(y) - np.min(y))/2)
-    print(np.min(y)*0.025, np.max(y)*0.025)
+    print(np.min(x)*0.025, np.max(x)*0.025)
     plt.legend(loc='upper right', prop={'size': 15})
 
     pdf.savefig()
