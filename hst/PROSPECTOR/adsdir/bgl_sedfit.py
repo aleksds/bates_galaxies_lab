@@ -351,8 +351,8 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params = TemplateLibrary['parametric_sfh']
 
         # Initialize with sensible numbers.
-        model_params['tau']['init'] = 10.0
-        model_params['tage']['init'] = 0.1 # --> 0.1
+        model_params['tau']['init'] = 1.0
+        model_params['tage']['init'] = 0.01 # --> 0.1
         #model_params['logzsol']['init'] = 0.2
 
         model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
@@ -370,7 +370,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         
         # Adjust the prior ranges.
         model_params['tau']['prior'] = priors.LogUniform(mini=0.001, maxi=30.0) # 0.01 --> 0.001
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.001, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
+        model_params['tage']['prior'] = priors.LogUniform(mini=0.005, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
         #model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         add_duste = {"N": 1, "isfree": False, "init": False}
@@ -401,7 +401,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params['mass']['depends_on'] = logmass2mass
 
         # Adjust prior ranges
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.001, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
+        model_params['tage']['prior'] = priors.LogUniform(mini=0.005, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
         #model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         add_duste = {"N": 1, "isfree": False, "init": False}

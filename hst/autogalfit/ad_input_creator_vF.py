@@ -26,11 +26,14 @@ re_vals[5] = jc_values['re05']
 re_vals[6] = jc_values['re06']
 print(re_vals)
 ngal = len(jc_values)
-nre = len(re_vals)
-tmp = np.zeros((ngal, len(re_vals)))
+#nre = len(re_vals)
+re_array = np.array([1/10, 1/5, 1/3, 1/2, 1/1.5, 1/1.2, 1, 1.2, 1.5, 2, 3, 5, 10])
+nre = len(re_array)
+tmp = np.zeros((ngal, nre))
 for i in range(0,ngal):
-    for j in range(0,len(re_vals)):
-        tmp[i,j] = re_vals[j,i]
+    for j in range(0,nre):
+        #tmp[i,j] = re_vals[j,i]
+        tmp[i,j] = re_vals[3][i] * re_array[j]
 print(tmp)
 
 mag_values = ascii.read('ad_mag_size_table.dat')

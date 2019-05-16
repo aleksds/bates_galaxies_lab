@@ -10,7 +10,7 @@ from astropy.io import ascii
 
 run_params = {'verbose':True,
               'debug':False,
-              'outfile':'J0826_new_ssp',
+              'outfile':'J2140_new_ssp',
               # Fitter parameters
               'nwalkers':128,
               'nburn':[10, 10, 10], 'niter':512,
