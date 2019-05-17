@@ -1,5 +1,5 @@
-# automating the crecd ation and running of galfit input files
-# this version is for when we allow galfit to find the best-fit parameters for F475W and F814W
+# automating the creation and running of galfit input files
+# this version is for when we want to explore parameter space for re and magnitude
 
 import os
 import numpy as np
@@ -204,7 +204,7 @@ else:
                 text.write('A) '+hstdir+longgal[w]+'/'+plate+'/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,'+hstdir+longgal[w]+'/'+plate+'/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits\n')
                 text.write('A1) V,U\n')
                 text.write('A2) 814.000,475.000\n')
-                text.write('B) '+galaxies[w]+'_F814WandF475W_'+model+'re'+str(q)+'_mag'+str(j)+'_output.fits\n')
+                text.write('B) '+galaxies[w]+'_F814WandF475W_'+model+'_re'+str(q)+'_mag'+str(j)+'_output.fits\n')
                 text.write('C) '+sigma_file_814[0]+','+sigma_file_475[0]+' \n') 
                 text.write('D) '+hstdir+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,'+hstdir+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits\n')
                 if (plate == 'fine' and psf == 'fine'):
@@ -218,7 +218,7 @@ else:
                 text.write('F) none,none\n')
 
                 if model == 'sersic':
-                    text.write('G) \n')
+                    #text.write('G) \n')
                     constraintfile= time+'_'+model+'_'+plate+'_'+togetherness+'_'\
                     +imgsize+'_psf'+psf+'/'+'parameters_constraints_'+galaxies[w]+'_re'+str(q)+'_mag'+str(j)+'.txt'
                 
@@ -235,7 +235,7 @@ else:
                     contraint_text.write('1              re         '\
                         +str(tmp[w][q])+' to '+str(tmp[w][q])+' \n')
                     contraint_text.write('1              MAG_V     \
-                            '+str(md1f[w][j])+' to '+str(md1f[w][j])+' \n')
+                            '+str(md2f[w][j])+' to '+str(md2f[w][j])+' \n')
                     contraint_text.write('1              MAG_U     \
                             '+str(bgl_values['m475'][w])+' to '+str(bgl_values['m475'][w])+' \n')                            
                     contraint_text.write('1              q           '+\
@@ -279,7 +279,7 @@ else:
                     if togetherness == 'semi':
                         text.write(' 1) '+xcoor+','+xcoor+'    1,0                 band\n')
                         text.write(' 2) '+ycoor+','+ycoor+'    1,0                 band\n')
-                    text.write(' 3) '+str(md1f[w][j])+','+str(bgl_values['m475'][w])+'     1,1                 band\n')
+                    text.write(' 3) '+str(md2f[w][j])+','+str(bgl_values['m475'][w])+'     1,1                 band\n')
                     text.write(' 4)  '+str(tmp[w][q])+',0    1,0                 cheb\n')
                     text.write(' 5) 4.000,0    1,0                 cheb\n')
                     text.write(' 6) 0,0               0,0                 cheb\n')
