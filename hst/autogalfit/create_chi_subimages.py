@@ -24,7 +24,7 @@ chi_from_our_calculations = np.zeros(len(band_files))
 
 xcen = 100
 ycen = xcen
-dx = 10 
+dx = 10
 dy = dx
 
 for i in range(0, len(fits_files)):
@@ -59,7 +59,9 @@ for i in range(0,len(mag_1d)):
         chi_2d[i,j] = chi_from_our_calculations[test[0][0]]
 
 name = 'chi_values_'+gal+'_'+band+'.pdf'
-
+file = 'chi_values_'+gal+'_'+band+'.dat'
+file_object = open('chi_values_'+gal+'_'+band+'.dat','a+')
+file_object.write('Chi Value from Galfit'+gal+'_'+band+'\n')
 with PdfPages(name) as pdf:
     fig = plt.figure()
 
@@ -118,15 +120,25 @@ with PdfPages(name) as pdf:
         x = xzero
         y = yzero
     print(x,y)
+    #Prints value of the min and max half life radii
     print(np.min(x), np.max(x))
+    file_object.write("Min x:"+str(np.min(x))+" Max x:"+str(np.max(x))+"\n")
+    #Prints the average value and then the uncertainty value
     print((np.min(x) + np.max(x))/2, (np.max(x) - np.min(x))/2)
+    file_object.write("Average Value of x:"+str(np.max(x)/2)+'\n' "Uncertainty Value:"+str(np.max(x) - np.min(x)/2)+'\n')
+    #Prints value of the min and max mag values
     print(np.min(y), np.max(y))
+    file_object.write('Min y:'+str(np.min(y))+' Max y:'+str(np.max(y))+'\n')
+    #Prints the average value and then the uncertainty value 
     print((np.min(y) + np.max(y))/2, (np.max(y) - np.min(y))/2)
+    file_object.write('Average Value of y:'+str(np.min(y)+np.max(y)/2)+'\n' 'Uncertainty Value:'+str(np.max(y) - np.min(y)/2)+'\n')
+    #Prints the converted pixels to arcesc with the knowledge of arcsecs of 
+    #of the sky on Earth based on redshift
     print(np.min(x)*0.025, np.max(x)*0.025)
+    file_object.write('Arcsecs for min x:'+str(np.min(x)*0.025)+'\n' 'Arcsecs for max x:'+str(np.max(x)*0.025))
     plt.legend(loc='upper right', prop={'size': 15})
 
     pdf.savefig()
     plt.close()
 
 os.system('open %s &' % name)
-
