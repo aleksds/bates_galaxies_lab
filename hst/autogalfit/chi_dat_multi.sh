@@ -1,0 +1,25 @@
+#sh file to run for the loop of dat to produce dat files for all of the galaxies
+python create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J0826 475
+python create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J0826 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J0901 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J0901 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J0905 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J0905 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J0944 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J0944 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1107 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1107 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1219 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1219 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1341 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1341 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1506 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1506 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1558 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1558 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1613 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J1613 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J2116 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J2116 814
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J2140 475
+python  create_chi_subimages.py 20190516-1524_sersic_fine_independent_200_psffine J2140 814
