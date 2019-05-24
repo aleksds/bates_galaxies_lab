@@ -80,7 +80,9 @@ def pdfplot_flux_deffit(data,outputfile):
 def wspread(filepath,emission,vel):
     coadd,specobj,spzline,linewave,linename,linez = get_fits_data(filepath)
     indx = np.where(linename == emission)
-    em_wav = linewave[indx]*(1+linez[indx])
+    #not sure this one is correct
+    # em_wav = linewave[indx]*(1+linez[indx])
+    em_wav = linewave[indx]*(1+specobj['Z'][0])
     spread = (vel*1000*em_wav)/lightspeed
 
     return spread, em_wav
@@ -95,7 +97,7 @@ def get_plot_title(filepath):
     return title
 
 #plots a wavelength range, shows continuum constant and the range over which the emission is calculated to extend
-def plot_area_of_interest(plot_data,txt_data,filepath):
+def plot_area_of_interest(plot_data,txt_data,filepath,ppxf_data=False):
     #Get relevant stuff for generating a figure
     em_lowlim,em_maxlim,cont_low,cont_high,flux,lam,cont_const = plot_data[0],plot_data[1],plot_data[2],plot_data[3],\
                                                                  plot_data[4],plot_data[5],plot_data[6]
@@ -112,8 +114,17 @@ def plot_area_of_interest(plot_data,txt_data,filepath):
 
     ax = fig.add_subplot(1, 2, 1)
     ax.axvspan(lam[em_lowlim], lam[em_maxlim], alpha=0.5, color='red', label='Area of Emission')
-    plt.axhline(y=cont_const, color='blue', label='Continuum', alpha=0.4)
     ax.plot(lam_c, flux_c, color='black', linewidth=0.3)
+
+    if ppxf_data:
+        galfit_c = cont_const[0][cont_low:cont_high+1]
+        gasfit_c = cont_const[1][cont_low:cont_high+1]
+        ax.plot(lam_c, galfit_c, color='orange', linewidth=0.3)
+        ax.plot(lam_c, gasfit_c, color='red', linewidth=0.3)
+        ax.plot(lam_c, galfit_c-gasfit_c, color='blue', linewidth=0.3)
+    elif not ppxf_data:
+        plt.axhline(y=cont_const, color='blue', label='Continuum', alpha=0.4)
+
 
     ax.set_xlabel("$\AA ngstr \ddot{o} ms$")
     ax.set_ylabel("Flux [$10^{-17}$ erg/$cm^{2}$/s/$\AA$]")
