@@ -9,6 +9,7 @@ run bgl_sedfit.py --nproc=4 --priors='delayed-tau' --galaxy='j0901' --qaplots --
 import os, time, argparse, pdb
 import numpy as np
 import multiprocessing
+import prospect
 
 ang2micron = 1e-4 # Angstrom --> micron
 maggies2mJy = 10**(0.4*16.4) # maggies --> mJy
@@ -507,6 +508,10 @@ def main():
                                             optimize=False, dynesty=True, emcee=False,
                                             #nested_posterior_thresh=0.05,
                                             pool=None, **rp)
+        #output = prospect.fitting.run_emcee_sampler(obs, model, sps, noise=(None, None),
+         #                                           optimize = False, dynesty = True, emcee = False,
+          #                                          # nested_posterior_thresh=0.05,
+           #                                         pool = None, ** rp)
 
         if os.path.isfile(hfile):
             os.remove(hfile)
