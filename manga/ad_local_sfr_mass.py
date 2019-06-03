@@ -7,7 +7,8 @@ import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
-mpl8_dir = os.environ['MANGADIR_MPL8']
+#mpl8_dir = os.environ['MANGADIR_MPL8']
+mpl8_dir = 'local/'
 drp = fits.open(mpl8_dir + 'drpall-v2_5_3.fits')
 drpdata = drp[1].data 
 
