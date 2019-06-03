@@ -43,8 +43,8 @@ def get_quantities(filepath,emission_name):
 
     hb_ind = np.where(linename == emission_name)
 
-    HBWAV = spzline['LINEWAVE'][hb_ind]*(1+spzline['LINEZ'][hb_ind])
-    #note the magic number 15 (happens to be index of Hbeta)
+    #HBWAV = spzline['LINEWAVE'][hb_ind]*(1+spzline['LINEZ'][hb_ind])
+    HBWAV = spzline['LINEWAVE'][hb_ind]*(1+specobj['Z'][0])
 
     minw = specobj['WAVEMIN']
     maxw = specobj['WAVEMAX']
