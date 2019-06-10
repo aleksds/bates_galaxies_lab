@@ -265,25 +265,60 @@ def subtriangle(results, showpars=None, truths=None, start=0, thin=2,
 def logmass2mass(logmass=11.0, **extras):
     return 10 ** logmass
 
+# function to return a flux in maggies given an AB magnitude
+def flux(mag):
+    flux = 10.**(mag/(-2.5))
+    return flux
+
+# function to return an inverse variance in maggies given a magnitude and uncertainty
+def ivar(mag, unc):
+    flux = 10.**(mag/(-2.5))
+    func = flux / 1.086 * unc
+    ivar = 1 / func**2
+    return ivar
+
 
 def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
-    """Load the photometry
-    """
+    #Load the photometry
+
+    # import relevant modules
     import sedpy
     from prospect.utils.obsutils import fix_obs
+    import numpy as np
+    import argparse
     from astropy.io import ascii
 
-    data = ascii.read('../../autogalfit/flux.dat')
+    # Here is photometric information for one galaxy.
+    # This includes the following:
+    # [0] flux in units of maggies
+    # [1] inverse variance in units of maggies
+    # [2] effective wavelength in units of microns
 
-    match = data.field('Galaxy') == galaxy
+    # function to return a flux in maggies given an AB magnitude
+    def flux(mag):
+        flux = 10. ** (mag / (-2.5))
+        return flux
 
-    #old phot variable
-    # phot = dict(
-    #     uvis_f475w=(data['Flux_475'][match][0], data['Inverse_Variance_475'][match][0]),
-    #     uvis_f814w=(data['Flux_814'][match][0], data['Inverse_Variance_814'][match][0]),
-    #     ir_f160w=(data['Flux_160'][match][0], data['Inverse_Variance_160'][match][0]))
+    # function to return an inverse variance in maggies given a magnitude and uncertainty
+    def ivar(mag, unc):
+        flux = 10. ** (mag / (-2.5))
+        func = flux / 1.086 * unc
+        ivar = 1 / func ** 2
+        return ivar
 
-    #new phot variable
+    # read in data from a table
+    table = ascii.read('/Users/kvaldez/github/bates_galaxies_lab/hst/umeh_table.dat')
+    print("now printing table")
+    print(table)
+    print("done printing table ")
+
+    # match to the galaxy you want
+    match = table.field('Galaxy') == galaxy
+    print("now printing match")
+    print(match)
+    print("done printing match")
+
+    # create a photometry dictionary
     phot = dict(
         FUV=(flux(table.field('fuv_mag')[match][0]),
              ivar(table.field('fuv_mag')[match][0], table.field('fuv_unc')[match][0]), 0.1528),
@@ -307,11 +342,6 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
             ivar(table.field('w3_mag')[match][0], table.field('w3_unc')[match][0]) * (29.0448 / 3631) ** 2, 12.082),
         w4=(flux(table.field('w4_mag')[match][0]) * 8.2839 / 3631,
             ivar(table.field('w4_mag')[match][0], table.field('w4_unc')[match][0]) * (8.2839 / 3631) ** 2, 22.194))
-
-    galex = ['galex_FUV', 'galex_NUV']
-    sdss = ['sdss_{}0'.format(b) for b in ['u', 'g', 'r', 'i', 'z']]
-    wise = ['wise_w{}'.format(n) for n in ['1', '2', '3', '4']]
-    filternames = galex + sdss + wise
 
     #filternames = (['wfc3_uvis_f475w', 'wfc3_uvis_f814w', 'wfc3_ir_f160w'])
 
