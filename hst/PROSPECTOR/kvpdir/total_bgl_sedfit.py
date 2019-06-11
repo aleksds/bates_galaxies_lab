@@ -343,10 +343,16 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
         w4=(flux(table.field('w4_mag')[match][0]) * 8.2839 / 3631,
             ivar(table.field('w4_mag')[match][0], table.field('w4_unc')[match][0]) * (8.2839 / 3631) ** 2, 22.194))
 
+    galex = ['galex_FUV', 'galex_NUV']
+    sdss = ['sdss_{}0'.format(b) for b in ['u', 'g', 'r', 'i', 'z']]
+    #spitzer = ['spitzer_irac_ch{}'.format(n) for n in ['1', '2']]
+    wise = ['wise_w{}'.format(n) for n in ['1', '2', '3', '4']]
+    filternames = galex + sdss + wise
+
     #filternames = (['wfc3_uvis_f475w', 'wfc3_uvis_f814w', 'wfc3_ir_f160w'])
 
     obs = {}
-    obs['redshift'] = data['z'][match][0]
+    obs['redshift'] = table['z'][match][0]
     obs["filters"] = sedpy.observate.load_filters(filternames)
 
     obs["maggies"] = np.array([phot[filt][0] for filt in phot.keys()])
