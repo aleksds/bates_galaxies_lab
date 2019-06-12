@@ -18,6 +18,10 @@ penmass = ascii.read('Penultimate_Mass_PPD.csv')
 penage = ascii.read('Penultimate_Age_PPD.csv')
 pendust2 = ascii.read('Penultimate_Dust2_PPD.csv')
 pendust1 = ascii.read('Penultimate_Dust1_PPD.csv')
+totalmass = ascii.read('/Users/kvaldez/github/bates_galaxies_lab/hst/total_PPD_Mass.csv')
+totalage = ascii.read('/Users/kvaldez/github/bates_galaxies_lab/hst/total_PPD_Age.csv')
+totaldust1 = ascii.read('/Users/kvaldez/github/bates_galaxies_lab/hst/total_PPD_Dust1.csv')
+totaldust2 = ascii.read('/Users/kvaldez/github/bates_galaxies_lab/hst/total_PPD_Dust2.csv')
 
 # this gives the names of the columns
 oldmass.colnames
@@ -48,6 +52,11 @@ pen_best_mass = np.array(penmass['best'])
 pen_up_mass = np.array(penmass['up unc'])
 pen_lo_mass = np.array(penmass['lo unc'])
 
+#total SED mass
+net_best_mass = np.array(totalmass['best'])
+net_up_mass = np.array(totalmass['up unc'])
+net_lo_mass = np.array(totalmass['lo unc'])
+
 ###AGE###
 #old age variables
 old_ssp_best_age = np.array(oldage['SSP Best'])
@@ -64,6 +73,11 @@ pen_best_age = np.array(penage['best'])
 pen_up_age = np.array(penage['up unc'])
 pen_lo_age = np.array(penage['lo unc'])
 
+#total SED age
+net_best_age = np.array(totalage['best'])
+net_up_age = np.array(totalage['up unc'])
+net_lo_age = np.array(totalage['lo unc'])
+
 ###DUST###
 #linear of old dust variables
 old_ssp_best_dust = np.array(olddust['SSP Best'])
@@ -74,6 +88,26 @@ old_ssp_lo_dust = np.array(olddust['SSP Lo Unc'])
 new_ssp_best_dust = np.array(newdust['SSP Best Mass'])
 new_ssp_up_dust = np.array(newdust['SSP Up Unc'])
 new_ssp_lo_dust = np.array(newdust['SSP Lo Unc'])
+
+#pen dust1
+pen_best_dust1 = np.array(pendust1['best'])
+pen_up_dust1 = np.array(pendust1['up unc'])
+pen_lo_dust1 = np.array(pendust1['lo unc'])
+
+#pen dust2
+pen_best_dust2 = np.array(pendust2['best'])
+pen_up_dust2 = np.array(pendust2['up unc'])
+pen_lo_dust2 = np.array(pendust2['lo unc'])
+
+#total SED dust1
+net_best_dust1 = np.array(totaldust1['best'])
+net_up_dust1 = np.array(totaldust1['up unc'])
+net_lo_dust1 = np.array(totaldust1['lo unc'])
+
+#total SED dust2
+net_best_dust2 = np.array(totaldust2['best'])
+net_up_dust2 = np.array(totaldust2['up unc'])
+net_lo_dust2 = np.array(totaldust2['lo unc'])
 
 filename = 'kv_PPD_comparison.pdf'
 
