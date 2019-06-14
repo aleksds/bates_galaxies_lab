@@ -430,7 +430,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
 
         # Initialize with sensible numbers.
         model_params['tau']['init'] = 1.0
-        model_params['tage']['init'] = 0.01  # --> 0.1
+        model_params['tage']['init'] = 1.0  # --> 0.1
         # model_params['logzsol']['init'] = 0.2
 
         model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
