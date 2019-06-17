@@ -429,15 +429,13 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params = TemplateLibrary['parametric_sfh']
 
         # Initialize with sensible numbers.
-        model_params['tau']['init'] = 1.0
-        model_params['tage']['init'] = 1.0  # --> 0.1
-        # model_params['logzsol']['init'] = 0.2
-
-        model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
+        model_params['tau']['init'] = 10.0
+        model_params['tage']['init'] = 1.0
+        model_params['logzsol']['init'] = 0.2
 
         # optimize log-stellar mass, not linear stellar mass
-        model_params['logmass'] = {'N': 1, 'isfree': True, 'init': 10.0,  # 11 --> 10
-                                   'prior': priors.TopHat(mini=8.5, maxi=11.5),  # 10 --> 8
+        model_params['logmass'] = {'N': 1, 'isfree': True, 'init': 11.0,
+                                   'prior': priors.TopHat(mini=10.0, maxi=12.0),
                                    'units': '$M_{\odot}$'}
 
         model_params['mass']['isfree'] = False
@@ -446,12 +444,9 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params['mass']['depends_on'] = logmass2mass
 
         # Adjust the prior ranges.
-        model_params['tau']['prior'] = priors.LogUniform(mini=0.001, maxi=30.0)  # 0.01 --> 0.001
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.005, maxi=0.1)  # 0.01 --> 0.001, 10.0 --> 0.1
-        # model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
-
-        add_duste = {"N": 1, "isfree": False, "init": False}
-        model_params["add_dust_emission"] = add_duste
+        model_params['tau']['prior'] = priors.LogUniform(mini=0.1, maxi=30.0)
+        model_params['tage']['prior'] = priors.LogUniform(mini=0.01, maxi=10.0)
+        model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         # print('HACK!!!!!!!!!!!!!')
         # model_params['tau']['isfree'] = False
@@ -460,34 +455,6 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         # model_params['dust2']['isfree'] = False
 
         return model_params
-
-    def base_ssp():
-        model_params = TemplateLibrary['ssp']
-        model_params['tage']['init'] = 0.01
-        # model_params['logzsol']['init'] = 0.2
-
-        model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
-
-        model_params['logmass'] = {'N': 1, 'isfree': True, 'init': 10.0,  # 11 --> 10
-                                   'prior': priors.TopHat(mini=8.5, maxi=11.5),  # 10 --> 8
-                                   'units': '$M_{\odot}$'}
-        model_params['mass']['isfree'] = False
-        model_params['mass']['init'] = 10 ** model_params['logmass']['init']
-        model_params['mass']['prior'] = None
-        model_params['mass']['depends_on'] = logmass2mass
-
-        # Adjust prior ranges
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.005, maxi=0.1)  # 0.01 --> 0.001, 10.0 --> 0.1
-        # model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
-
-        add_duste = {"N": 1, "isfree": False, "init": False}
-        model_params["add_dust_emission"] = add_duste
-
-        return model_params
-
-    if template_library == 'ssp':
-        model_params = base_ssp()
-        # print(model_params)
 
     if template_library == 'delayed-tau':
         # Underlying delayed tau model.
@@ -509,7 +476,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params['fage_burst']['prior'] = priors.TopHat(mini=0.5, maxi=1.0)
 
     # Add dust emission (with fixed dust SED parameters).
-    # model_params.update(TemplateLibrary['dust_emission'])
+    model_params.update(TemplateLibrary['dust_emission'])
 
     model_params['dust2']['init'] = 1.0  # diffuse dust
     model_params['dust2']['prior'] = priors.TopHat(mini=0.0, maxi=4.0)
@@ -519,16 +486,12 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
     model_params['dust_index'] = {'N': 1, 'isfree': False, 'init': -0.7,
                                   'units': 'power-law index', 'prior': None}
 
-    model_params['dust1'] = {'N': 1, 'isfree': True, 'init': 1.0, 'prior': priors.TopHat(mini=0.0, maxi=4.0),
-                             'units': 'optical depth towards young stars'}  # ,
-    #                         'depends_on': dustratio_to_dust1}
-
-    # model_params['dust1'] = {'N': 1, 'isfree': False, 'init': 0.0, 'prior': None,
-    #                         'units': 'optical depth towards young stars',
-    #                         'depends_on': dustratio_to_dust1}
-    # model_params['dust_ratio'] = {'N': 1, 'isfree': True, 'init': 1.0,
-    #                              'prior': priors.TopHat(mini=1.0, maxi=10.0),
-    #                              'units': 'dust1/dust2 ratio (optical depth to young stars vs diffuse)'}
+    model_params['dust1'] = {'N': 1, 'isfree': False, 'init': 0.0, 'prior': None,
+                             'units': 'optical depth towards young stars',
+                             'depends_on': dustratio_to_dust1}
+    model_params['dust_ratio'] = {'N': 1, 'isfree': True, 'init': 1.0,
+                                  'prior': priors.TopHat(mini=1.0, maxi=10.0),
+                                  'units': 'dust1/dust2 ratio (optical depth to young stars vs diffuse)'}
 
     ## Add nebular emission.
     # model_params.update(TemplateLibrary['nebular'])
@@ -540,7 +503,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
     model_params['zred']['isfree'] = False
 
     # Change the IMF from Kroupa to Salpeter.
-    # model_params['imf_type']['init'] = 0
+    model_params['imf_type']['init'] = 0
 
     # Now instantiate the model using this new dictionary of parameter specifications
     model = SedModel(model_params)
