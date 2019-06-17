@@ -320,7 +320,7 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
 
     # create a photometry dictionary
     phot = dict(
-        FUV=(flux(table.field('fuv_mag')[match][0]),
+        FUV=(flux(table.field('fuv_mag')[match][0] - table.field('ebv')[match][0] * number),
              ivar(table.field('fuv_mag')[match][0], table.field('fuv_unc')[match][0]), 0.1528),
         NUV=(flux(table.field('nuv_mag')[match][0]),
              ivar(table.field('nuv_mag')[match][0], table.field('nuv_unc')[match][0]), 0.2271),
@@ -573,8 +573,12 @@ def main():
             subtriangle(result, showpars=['logmass', 'tage', 'dust2', 'dust1'], png=png)
             # logify=['tage'], png=png)
 
+        # if args.priors == 'delayed-tau':
+        #     subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust1'],
+        #                 logify=['tau'], png=png)
+        #
         if args.priors == 'delayed-tau':
-            subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust1'],
+            subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2'],
                         logify=['tau'], png=png)
 
         if args.priors == 'bursty':
