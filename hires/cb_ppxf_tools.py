@@ -180,7 +180,7 @@ def ppxf_example_population_gas_sdss(file,tie_balmer, limit_doublets):
     if plotpp:
         plot_pp()
 
-    return [pp,wave,galaxy]
+    return [pp,wave,galaxy,flux]
 
 
 #gets flux value (does the sums and stuff). Parameters: file of galaxy, wavelength of emission line from which flux
@@ -189,7 +189,8 @@ def pp_get_flux(wavel,wspread,fits_data):
     cbfits = importlib.import_module('cb_galaxy_fits_sfr_analysis_tools')
 
     pp,wave = fits_data[0],fits_data[1]
-    galaxy = fits_data [2]
+    galaxy = fits_data[2]
+    fluxdata = fits_data[3]
     #make galaxy not normalized
     # galaxy = fits_data[2]*np.median(fits_data[2])
     gas_fit = pp.gas_bestfit
@@ -218,13 +219,13 @@ def pp_get_flux(wavel,wspread,fits_data):
     dlambda = np.array([lam[x+1]-lam[x] for x in range(em_lowlim,em_maxlim+1)])
     #continuum_area = np.sum(float(continuum_const)*dlambda)
     #prelim_flux_integral = np.sum(dlambda*flux[em_lowlim:em_maxlim+1])
-    flux_val = np.sum(dlambda*flux[em_lowlim:em_maxlim+1])
+    flux_val = np.sum(dlambda*fluxdata[em_lowlim:em_maxlim+1])
     #flux_val = prelim_flux_integral-continuum_area
 
     ##print tests
     #print(lam[cont_low:cont_high])
     #since we don't deal with continuum constant, we change it to be useful data we can plot
-    continuum_const = [pp.bestfit,pp.gas_bestfit]
+    continuum_const = [pp.bestfit,pp.gas_bestfit,fluxdata]
 
     plot_data = [em_lowlim,em_maxlim,cont_low,cont_high,flux,lam,continuum_const]
 

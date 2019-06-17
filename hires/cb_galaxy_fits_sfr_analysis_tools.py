@@ -122,6 +122,7 @@ def plot_area_of_interest(plot_data,txt_data,filepath,ppxf_data=False):
         ax.plot(lam_c, galfit_c, color='orange', linewidth=0.3)
         ax.plot(lam_c, gasfit_c, color='red', linewidth=0.3)
         ax.plot(lam_c, galfit_c-gasfit_c, color='blue', linewidth=0.3)
+        ax.plot(lam_c, cont_const[2][cont_low:cont_high+1], color='grey', linewidth=0.3)
     elif not ppxf_data:
         plt.axhline(y=cont_const, color='blue', label='Continuum', alpha=0.4)
 
