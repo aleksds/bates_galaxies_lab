@@ -41,6 +41,15 @@ def calc_vel(lam_or,lam_obs): # lambda in units of Angstroms, return vel in km/s
 
     return velocity
 
+def get_plot_title(filepath):
+    file_char_list = list(filepath)
+    spec_pos = filepath.find('spec-')
+    title_list = file_char_list[spec_pos:-5]
+    title = ''.join(title_list)
+
+    return title
+
+
 
 
 def main(file):
@@ -208,6 +217,9 @@ def main(file):
     fig = plt.figure()
     ax = fig.add_subplot(1, 2, 1)
     matplotlib.rcParams.update({'font.size': 4})
+    plot_title = get_plot_title(file)
+    fig.suptitle(plot_title)
+
 
     rect = Rectangle((zmg_wave[np.where(yl_fit == np.amax(yl_fit))]-(EqW/2)/u.AA, 0), EqW/u.AA,
                      np.median(fluxdata[zmg_mask]), alpha=0.4, color='red', label='EW Rectangle')
@@ -231,7 +243,7 @@ def main(file):
 
     ax2 = fig.add_subplot(2, 2, 2)
     ax2.plot(zmg_wave, fluxdata[zmg_mask], color='black', linewidth=0.3)
-    ax2.axvline(x=(mgII * (1 + z)), color='blue', label='Expected Centroid', alpha=0.4)
+    ax2.axvline(x=(mgII * (1 + z)), color='red', label='Expected Centroid', alpha=0.4)
     ax2.axvline(x=zmg_wave[np.where(yl_fit == np.amax(yl_fit))], color='green', label='Actual Centroid', alpha=0.4)
     ax2.axhline(y=np.median(fluxdata[zmg_mask]), color='cyan', label='Continuum', alpha=0.4)
     ax2.axvspan(zmg_wave[red_end - v50_indx_span],
@@ -243,6 +255,7 @@ def main(file):
     ax3 = fig.add_subplot(2, 2, 4)
     ax3.plot(zmg_wave, fluxdata[zmg_mask], color='black', linewidth=0.3)
     ax3.axvline(x=(mgIIl * (1 + z)), color='blue', label='Expected MgII Blue', alpha=0.4)
+    ax3.axvline(x=(mgII * (1 + z)), color='red', label='Expected Centroid', alpha=0.4)
     ax3.axvline(x=zmg_wave[np.where(yl_fit == np.amax(yl_fit))], color='green', label='Emission Centroid', alpha=0.4)
     ax3.axhline(y=np.median(fluxdata[zmg_mask]), color='cyan', label='Continuum', alpha=0.4)
     ax3.axvspan(zmg_wave[red_end - v98_indx_span],
