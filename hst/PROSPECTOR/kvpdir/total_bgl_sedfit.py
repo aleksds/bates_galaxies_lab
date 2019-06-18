@@ -130,7 +130,7 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
     # print(modelspec.min(), modelspec.max())
 
     # Establish the wavelength and flux limits.
-    minwave, maxwave = 0.3, 2.0  # 0.1, 1000.0
+    minwave, maxwave = 0.1, 30  # 0.1, 1000.0
     # minwave, maxwave = np.min(weff - 5*fwhm), np.max(weff + fwhm)
 
     inrange = (modelwave > minwave) * (modelwave < maxwave)
@@ -167,13 +167,9 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
 
     # Add an inset with the posterior probability distribution.
     ax1 = fig.add_axes([0.23, 0.68, 0.22, 0.22])
-    if priors == 'ssp':
-        ax1.hist(chain[:, 2], bins=40, histtype='step', linewidth=2,
-                 edgecolor='k', fill=True)
-    else:
-        ax1.hist(chain[:, 3], bins=50, histtype='step', linewidth=2,
-                 edgecolor='k', fill=True)
-    ax1.set_xlim(9.3, 11.3)
+    ax1.hist(chain[:, 4], bins=50, histtype='step', linewidth=2,
+             edgecolor='k', fill=True)
+    ax1.set_xlim(10.5, 11.5)
     ax1.set_yticklabels([])
     ax1.set_xlabel(r'$\log_{10}(\mathcal{M}/\mathcal{M}_{\odot})$')
     ax1.set_ylabel(r'$P(\mathcal{M})$')
@@ -319,8 +315,9 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
     print("done printing match")
 
     # create a photometry dictionary
+    #- table.field('ebv')[match][0] * number
     phot = dict(
-        FUV=(flux(table.field('fuv_mag')[match][0] - table.field('ebv')[match][0] * number),
+        FUV=(flux(table.field('fuv_mag')[match][0]),
              ivar(table.field('fuv_mag')[match][0], table.field('fuv_unc')[match][0]), 0.1528),
         NUV=(flux(table.field('nuv_mag')[match][0]),
              ivar(table.field('nuv_mag')[match][0], table.field('nuv_unc')[match][0]), 0.2271),
@@ -337,11 +334,11 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
         w1=(flux(table.field('w1_mag')[match][0]) * 306.681 / 3631,
             ivar(table.field('w1_mag')[match][0], table.field('w1_unc')[match][0]) * (3631 / 306.681) ** 2, 3.368),
         w2=(flux(table.field('w2_mag')[match][0]) * 170.663 / 3631,
-            ivar(table.field('w2_mag')[match][0], table.field('w2_unc')[match][0]) * (170.663 / 3631) ** 2, 4.618),
+            ivar(table.field('w2_mag')[match][0], table.field('w2_unc')[match][0]) * (3631 / 170.663) ** 2, 4.618),
         w3=(flux(table.field('w3_mag')[match][0]) * 29.0448 / 3631,
-            ivar(table.field('w3_mag')[match][0], table.field('w3_unc')[match][0]) * (29.0448 / 3631) ** 2, 12.082),
+            ivar(table.field('w3_mag')[match][0], table.field('w3_unc')[match][0]) * (3631 / 29.0448) ** 2, 12.082),
         w4=(flux(table.field('w4_mag')[match][0]) * 8.2839 / 3631,
-            ivar(table.field('w4_mag')[match][0], table.field('w4_unc')[match][0]) * (8.2839 / 3631) ** 2, 22.194))
+            ivar(table.field('w4_mag')[match][0], table.field('w4_unc')[match][0]) * (3631 / 8.2839) ** 2, 22.194))
 
     galex = ['galex_FUV', 'galex_NUV']
     sdss = ['sdss_{}0'.format(b) for b in ['u', 'g', 'r', 'i', 'z']]
@@ -581,8 +578,10 @@ def main():
             subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2'],
                         logify=['tau'], png=png)
 
+        # if args.priors == 'bursty':
+        #     subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust1', 'fburst', 'fage_burst'], png=png)
         if args.priors == 'bursty':
-            subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust1', 'fburst', 'fage_burst'], png=png)
+              subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'fburst', 'fage_burst'], png=png)
 
         # reader.subcorner(result, start=0, thin=1, fig=plt.subplots(5,5,figsize=(27,27))[0])
 
