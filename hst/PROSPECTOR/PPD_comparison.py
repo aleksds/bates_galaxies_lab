@@ -224,9 +224,9 @@ with PdfPages(filename) as pdf:
     # this figure shows the relationship between the centroid mass and total galactic mass
     fig = plt.figure()
 
-    net_ratio = pen_best_mass/net_best_mass
-    cen_err = (pen_up_mass+pen_lo_mass)/2
-    net_err = (net_up_mass+net_lo_mass)/2
+    net_ratio = (10**pen_best_mass)/(10**net_best_mass)
+    cen_err = (10**pen_up_mass+10**pen_lo_mass)/2
+    net_err = (10**net_up_mass+10**net_lo_mass)/2
     net_ratio_err = net_ratio*np.sqrt((cen_err/pen_best_mass)**2 + (net_err/net_best_mass)**2)
     plt.scatter(net_best_mass,net_ratio)
     plt.errorbar(x=net_best_mass, y=net_ratio, xerr=[net_lo_mass, net_up_mass],
