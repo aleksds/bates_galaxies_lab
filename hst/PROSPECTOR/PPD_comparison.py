@@ -209,7 +209,7 @@ with PdfPages(filename) as pdf:
                  yerr=[pen_lo_mass,pen_up_mass], ls='none')
     plt.xlabel('log(New SSP Mass)')
     plt.ylabel('Penultimate SSP Mass')
-    plt.title('Pneultimate vs New SSP Mass Comparison')
+    plt.title('Penultimate vs New SSP Mass Comparison')
     plt.xlim(9, 11)
     plt.ylim(9, 11)
     a = np.arange(15)
@@ -217,6 +217,24 @@ with PdfPages(filename) as pdf:
 
     print(len(b))
     plt.plot(a, b, linestyle=':', color='red', linewidth=1, label='x = y')
+
+    pdf.savefig()
+    plt.close()
+
+    # this figure shows the relationship between the centroid mass and total galactic mass
+    fig = plt.figure()
+
+    net_ratio = pen_best_mass/net_best_mass
+    cen_err = (pen_up_mass+pen_lo_mass)/2
+    net_err = (net_up_mass+net_lo_mass)/2
+    net_ratio_err = net_ratio*np.sqrt((cen_err/pen_best_mass)**2 + (net_err/net_best_mass)**2)
+    plt.scatter(net_best_mass,net_ratio)
+    plt.errorbar(x=net_best_mass, y=net_ratio, xerr=[net_lo_mass, net_up_mass],
+                 yerr=[net_ratio_err,net_ratio_err], ls='none')
+    plt.xlabel('Total Galactic Stellar Mass')
+    plt.ylabel('Ratio of Centroid Stellar Mass to Total Galactic Stellar Mass')
+    plt.title('Centroid-Galactic Stellar Mass Comparison')
+    plt.ylim(0,1)
 
     pdf.savefig()
     plt.close()

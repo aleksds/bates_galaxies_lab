@@ -11,7 +11,6 @@ mpl8_dir = os.environ['MANGADIR_MPL8']
 drp = fits.open(mpl8_dir + 'drpall-v2_5_3.fits')
 drpdata = drp[1].data 
 
-
 ba = drpdata.field('nsa_sersic_ba')
 stellar_mass = drpdata.field('nsa_sersic_mass')
 absmag = drpdata.field('nsa_elpetro_absmag')
@@ -32,7 +31,7 @@ nsa = fits.open(mpl8_dir + '1-nsa_v1_0_1.fits')
 nsa_data = nsa[1].data
 
 # check on a galaxy of interest
-plate = 7977
+ plate = 7977
 galaxy = 12704
 match = np.where((drpdata.field('plate') == plate) & (drpdata.field('ifudsgn') == str(galaxy)))
 mangaid = drpdata[match].field('mangaid')[0]
@@ -55,12 +54,12 @@ idx, d2d, d3d = c.match_to_catalog_sky(catalog)
 
 
 # match the MPA-JHU and MaNGA catalogs on the basis of RA and DEC
-mpa_ra = galdata.field('RA')
-mpa_dec = galdata.field('DEC')
-bad = mpa_dec < -90
-mpa_dec[bad] = -90
-mpa_cat = SkyCoord(ra=mpa_ra*u.degree, dec=mpa_dec*u.degree)
-idx_mpa, d2d_mpa, d3d_mpa = c.match_to_catalog_sky(mpa_cat)  
+# mpa_ra = galdata.field('RA')
+#mpa_dec = galdata.field('DEC')
+#bad = mpa_dec < -90
+#mpa_dec[bad] = -90
+#mpa_cat = SkyCoord(ra=mpa_ra*u.degree, dec=mpa_dec*u.degree)
+#idx_mpa, d2d_mpa, d3d_mpa = c.match_to_catalog_sky(mpa_cat)
 
 # define th50, th90, and concentration arrays
 th50 = nsa_data.field('ELPETRO_TH50_R')
