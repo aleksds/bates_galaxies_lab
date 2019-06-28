@@ -304,37 +304,31 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
 
     # read in data from a table
     table = ascii.read('/Users/kvaldez/github/bates_galaxies_lab/hst/umeh_table.dat')
-    print("now printing table")
-    print(table)
-    print("done printing table ")
 
     # match to the galaxy you want
     match = table.field('Galaxy') == galaxy
-    print("now printing match")
-    print(match)
-    print("done printing match")
 
     # create a photometry dictionary
-    #- table.field('ebv')[match][0] * number
+    #
     phot = dict(
-        FUV=(flux(table.field('fuv_mag')[match][0]),
-             ivar(table.field('fuv_mag')[match][0], table.field('fuv_unc')[match][0]), 0.1528),
-        NUV=(flux(table.field('nuv_mag')[match][0]),
-             ivar(table.field('nuv_mag')[match][0], table.field('nuv_unc')[match][0]), 0.2271),
-        u=(flux(table.field('u_mag')[match][0]), ivar(table.field('u_mag')[match][0], table.field('u_unc')[match][0]),
-           0.3543),
-        g=(flux(table.field('g_mag')[match][0]), ivar(table.field('g_mag')[match][0], table.field('u_unc')[match][0]),
-           0.4770),
-        r=(flux(table.field('r_mag')[match][0]), ivar(table.field('r_mag')[match][0], table.field('u_unc')[match][0]),
-           0.6231),
-        i=(flux(table.field('i_mag')[match][0]), ivar(table.field('i_mag')[match][0], table.field('u_unc')[match][0]),
-           0.7625),
-        z=(flux(table.field('z_mag')[match][0]), ivar(table.field('z_mag')[match][0], table.field('u_unc')[match][0]),
-           0.9134),
-        w1=(flux(table.field('w1_mag')[match][0]) * 306.681 / 3631,
-            ivar(table.field('w1_mag')[match][0], table.field('w1_unc')[match][0]) * (3631 / 306.681) ** 2, 3.368),
-        w2=(flux(table.field('w2_mag')[match][0]) * 170.663 / 3631,
-            ivar(table.field('w2_mag')[match][0], table.field('w2_unc')[match][0]) * (3631 / 170.663) ** 2, 4.618),
+        FUV=(flux(table.field('fuv_mag')[match][0] - table.field('ebv')[match][0] * 6.892),
+             ivar(table.field('fuv_mag')[match][0] - table.field('ebv')[match][0] * 6.892, table.field('fuv_unc')[match][0]), 0.1528),
+        NUV=(flux(table.field('nuv_mag')[match][0] - table.field('ebv')[match][0] * 6.738),
+             ivar(table.field('nuv_mag')[match][0] - table.field('ebv')[match][0] * 6.738, table.field('nuv_unc')[match][0]), 0.2271),
+        u=(flux(table.field('u_mag')[match][0] - table.field('ebv')[match][0] * 4.239), ivar(table.field('u_mag')[match][0] - table.field('ebv')[match][0] * 4.239,
+           table.field('u_unc')[match][0]), 0.3543),
+        g=(flux(table.field('g_mag')[match][0] - table.field('ebv')[match][0] * 3.303), ivar(table.field('g_mag')[match][0] - table.field('ebv')[match][0] * 3.303,
+           table.field('u_unc')[match][0]),0.4770),
+        r=(flux(table.field('r_mag')[match][0] - table.field('ebv')[match][0] * 2.285), ivar(table.field('r_mag')[match][0] - table.field('ebv')[match][0] * 2.285,
+           table.field('u_unc')[match][0]), 0.6231),
+        i=(flux(table.field('i_mag')[match][0] - table.field('ebv')[match][0] * 1.698), ivar(table.field('i_mag')[match][0] - table.field('ebv')[match][0] * 1.698,
+           table.field('u_unc')[match][0]),0.7625),
+        z=(flux(table.field('z_mag')[match][0] - table.field('ebv')[match][0] * 1.263), ivar(table.field('z_mag')[match][0] - table.field('ebv')[match][0] * 1.263,
+           table.field('u_unc')[match][0]),0.9134),
+        w1=(flux(table.field('w1_mag')[match][0] - table.field('ebv')[match][0] * 0.171) * 306.681 / 3631,
+            ivar(table.field('w1_mag')[match][0] - table.field('ebv')[match][0] * 0.171, table.field('w1_unc')[match][0]) * (3631 / 306.681) ** 2, 3.368),
+        w2=(flux(table.field('w2_mag')[match][0] - table.field('ebv')[match][0] * 0.096) * 170.663 / 3631,
+            ivar(table.field('w2_mag')[match][0] - table.field('ebv')[match][0] * 0.096, table.field('w2_unc')[match][0]) * (3631 / 170.663) ** 2, 4.618),
         w3=(flux(table.field('w3_mag')[match][0]) * 29.0448 / 3631,
             ivar(table.field('w3_mag')[match][0], table.field('w3_unc')[match][0]) * (3631 / 29.0448) ** 2, 12.082),
         w4=(flux(table.field('w4_mag')[match][0]) * 8.2839 / 3631,
