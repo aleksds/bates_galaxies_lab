@@ -109,7 +109,7 @@ with PdfPages(name) as pdf:
     #levels = np.array([1.0, 4.00, 9.00])+chi_min
     levels = np.array([2.3, 4.61, 9.21])+chi_min
     cs = plt.contour(sizepix_1d, mag_1d, chi_2d, levels, colors=['blue', 'green', 'red'])
-    plt.clabel(cs, inline=1, fontsize=14)
+    #plt.clabel(cs, inline=1, fontsize=14)
     plt.xlim([0,np.max(sizepix)*0.5])
     #plt.ylim([0, 2])
     plt.xlabel('Half-Light radius in pixels', fontsize=14)
@@ -162,7 +162,7 @@ with PdfPages(name) as pdf:
     #levels = np.array([1.0, 4.00, 9.00])+chi_min
     levels = np.array([2.3, 4.61, 9.21])+chi_min
     cs = plt.contour(sizepix_1d, mag_1d, chi_one, levels, colors=['blue', 'green', 'red'])
-    plt.clabel(cs, inline=1, fontsize=14)
+    #plt.clabel(cs, inline=1, fontsize=14)
     plt.xlim([0,np.max(sizepix)*0.5])
     #plt.ylim([0, 2])
     plt.xlabel('Half-Light radius in pixels', fontsize=14)

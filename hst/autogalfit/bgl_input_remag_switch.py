@@ -1,6 +1,8 @@
 # automating the creation and running of galfit input files
 # this version is for when we want to explore parameter space for re and magnitude
 
+# run bgl_input_remag.py sersic fine 200 fine simultaneous s_index
+
 import os
 import numpy as np
 from astropy.io import ascii
