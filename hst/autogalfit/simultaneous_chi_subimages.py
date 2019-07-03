@@ -25,7 +25,8 @@ chi_one_our_calculations = np.zeros(len(band_files))
 
 xcen = 100
 ycen = xcen
-dx = 10 
+#dx = 10 
+dx = 10
 dy = dx
 
 for i in range(0, len(fits_files)):

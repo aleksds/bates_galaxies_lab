@@ -2,7 +2,7 @@
 # images given. We do this by taking the subimage of a galaxy
 # starting at the center and moving out
 #
-# run simultaneous_chi_magmag.py 20190703-1034_sersic_fine_simultaneous_200_psffine J0826 F814W
+# run simultaneous_chi_magir.py 20190703-1345_sersic_coarse_simultaneous_100_psfcoarse J0826 F814W
 #
 import sys
 import os
@@ -26,9 +26,11 @@ mag2 = np.zeros(len(band_files))
 chi_from_our_calculations = np.zeros(len(band_files))
 chi_one_our_calculations = np.zeros(len(band_files))
 
-xcen = 100
+#xcen = 100
+xcen = 50
 ycen = xcen
-dx = 10 
+dx = 5 
+#dx = 5
 dy = dx
 
 for i in range(0, len(fits_files)):
@@ -44,17 +46,17 @@ for i in range(0, len(fits_files)):
         v_unc_image_stamp = v_unc[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
         v_res_image_stamp = v_res[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
 
-        u_unc, u_unc_head = hdu[9].data, hdu[9].header
-        u_res, u_res_head = hdu[5].data, hdu[5].header
+        j_unc, j_unc_head = hdu[9].data, hdu[9].header
+        j_res, j_res_head = hdu[5].data, hdu[5].header
 
-        u_unc_image_stamp = u_unc[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
-        u_res_image_stamp = u_res[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
+        j_unc_image_stamp = j_unc[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
+        j_res_image_stamp = j_res[(ycen-dy):(ycen+dy), (xcen-dx):(xcen+dx)]
         
         #print(res_image_stamp)
         #print(unc_image_stamp)
         #chi_from_our_calculations_for_v[i] = np.sum((res_image_stamp/unc_image_stamp)**2)/((101**2)*3)
         #chi_from_our_calculations_for_u[i] = np.sum((res_image_stamp/unc_image_stamp)**2)/((101**2)*3)
-        chi_from_our_calculations[i] = (np.sum((u_res_image_stamp/u_unc_image_stamp)**2)+np.sum((v_res_image_stamp/v_unc_image_stamp)**2))/(((len(v_res_image_stamp)**2+len(u_res_image_stamp)**2))*1)
+        chi_from_our_calculations[i] = (np.sum((j_res_image_stamp/j_unc_image_stamp)**2)+np.sum((v_res_image_stamp/v_unc_image_stamp)**2))/(((len(v_res_image_stamp)**2+len(j_res_image_stamp)**2))*1)
 
         chi_one_our_calculations[i] = np.sum((v_res_image_stamp/v_unc_image_stamp)**2)/(((len(v_res_image_stamp))**2)*1)
         
@@ -77,7 +79,7 @@ for i in range(0,len(mag1_1d)):
         chi_2d[i,j] = chi_from_our_calculations[test[0][0]]
         chi_one[i,j] = chi_one_our_calculations[test[0][0]]
 
-name = 'chi_values_'+gal+'_magmag_'+band+'.pdf'
+name = 'chi_values_'+gal+'_magir_'+band+'.pdf'
 
 with PdfPages(name) as pdf:
     fig = plt.figure()
@@ -86,7 +88,7 @@ with PdfPages(name) as pdf:
     #plt.yscale('log')
     #plt.ylim([0.1, 3.])
     plt.xlabel('mag1: F814W')
-    plt.ylabel('mag2: F475W')
+    plt.ylabel('mag2: F160W')
     plt.title(dir+'/'+gal+'_'+band)
 
     for i in range(0, len(band_files)):
@@ -101,7 +103,7 @@ with PdfPages(name) as pdf:
     plt.contourf(mag2_1d, mag1_1d, chi_2d, 20, cmap='RdGy')
     plt.colorbar()
 
-    plt.xlabel('mag2: F475W')
+    plt.xlabel('mag2: F160W')
     plt.ylabel('mag1: F814W')
     pdf.savefig()
     plt.close()
@@ -110,12 +112,12 @@ with PdfPages(name) as pdf:
 
     chi_min = np.min(chi_2d)
     #levels = np.array([1.0, 4.00, 9.00])+chi_min
-    levels = np.array([2.3, 4.61, 9.21])+chi_min
+    levels = np.array([2.3, 4.61, 9.21])*4.+chi_min
     cs = plt.contour(mag2_1d, mag1_1d, chi_2d, levels, colors=['blue', 'green', 'red'])
     #plt.clabel(cs, inline=1, fontsize=14)
     #plt.xlim([0,np.max(mag2)*0.5])
     #plt.ylim([0, 2])
-    plt.xlabel('mag2: F475W', fontsize=14)
+    plt.xlabel('mag2: F160W', fontsize=14)
     plt.ylabel('mag1: F814W', fontsize=14)
     labels = ['68%', '90%', '99%']
     #for i in range(len(labels)):
@@ -155,7 +157,7 @@ with PdfPages(name) as pdf:
     plt.colorbar()
 
     plt.xlabel('mag1: F814W')
-    plt.ylabel('mag2: F475W')
+    plt.ylabel('mag2: F160W')
     pdf.savefig()
     plt.close()
 
@@ -168,7 +170,7 @@ with PdfPages(name) as pdf:
     #plt.clabel(cs, inline=1, fontsize=14)
     #plt.xlim([0,np.max(mag2)*0.5])
     #plt.ylim([0, 2])
-    plt.xlabel('mag2: F475W', fontsize=14)
+    plt.xlabel('mag2: F160W', fontsize=14)
     plt.ylabel('mag1: F814W', fontsize=14)
     labels = ['68%', '90%', '99%']
     #for i in range(len(labels)):
