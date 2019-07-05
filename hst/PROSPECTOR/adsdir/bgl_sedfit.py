@@ -286,12 +286,12 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
     #    uvis_f814w=(data['Flux_814'][match][0], data['Inverse_Variance_814'][match][0]),
     #    ir_f160w=(data['Flux_160'][match][0], data['Inverse_Variance_160'][match][0]))
     phot = dict(
-        uvis_f475w=(flux(data['m475'][match][0]),
-                    ivar(data['m475'][match][0], data['u475'][match[0])), 
-        uvis_f814w=(flux(data['m814'][match][0]),
-                    ivar(data['m814'][match][0], data['u814'][match[0])),
-        ir_f160w=(flux(data['m160'][match][0]),
-                    ivar(data['m160'][match][0], data['m160'][match[0]))
+        uvis_f475w=(flux(data['m475'][match][0] - data['ebv'][match][0] * 3.248),
+                    ivar(data['m475'][match][0] - data['ebv'][match][0] * 3.248, data['u475'][match][0])), 
+        uvis_f814w=(flux(data['m814'][match][0] - data['ebv'][match][0] * 1.536),
+                    ivar(data['m814'][match][0] - data['ebv'][match][0] * 1.536, data['u814'][match][0])),
+        ir_f160w=(flux(data['m160'][match][0] - data['ebv'][match][0] * 0.512),
+                    ivar(data['m160'][match][0] - data['ebv'][match][0] * 0.512, data['u160'][match][0])))
     
     filternames = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
 
