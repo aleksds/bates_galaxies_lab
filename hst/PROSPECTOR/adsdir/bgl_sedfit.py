@@ -484,7 +484,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
     model_params['zred']['isfree'] = False 
 
     # Change the IMF from Kroupa to Salpeter.
-    #model_params['imf_type']['init'] = 0
+    model_params['imf_type']['init'] = 0
         
     # Now instantiate the model using this new dictionary of parameter specifications
     model = SedModel(model_params)
