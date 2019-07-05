@@ -265,15 +265,34 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
     from prospect.utils.obsutils import fix_obs
     from astropy.io import ascii
 
-    data = ascii.read('../../autogalfit/flux.dat')
+    # function to return a flux in maggies given an AB magnitude
+    def flux(mag):
+        flux = 10. ** (mag / (-2.5))
+        return flux
+
+    # function to return an inverse variance in maggies given a magnitude and uncertainty
+    def ivar(mag, unc):
+        flux = 10. ** (mag / (-2.5))
+        func = flux / 1.086 * unc
+        ivar = 1 / func ** 2
+        return ivar
+    
+    data = ascii.read('../../autogalfit/bgl_phot.dat')
 
     match = data.field('Galaxy') == galaxy
     
+    #phot = dict(
+    #    uvis_f475w=(data['Flux_475'][match][0], data['Inverse_Variance_475'][match][0]),
+    #    uvis_f814w=(data['Flux_814'][match][0], data['Inverse_Variance_814'][match][0]),
+    #    ir_f160w=(data['Flux_160'][match][0], data['Inverse_Variance_160'][match][0]))
     phot = dict(
-        uvis_f475w=(data['Flux_475'][match][0], data['Inverse_Variance_475'][match][0]),
-        uvis_f814w=(data['Flux_814'][match][0], data['Inverse_Variance_814'][match][0]),
-        ir_f160w=(data['Flux_160'][match][0], data['Inverse_Variance_160'][match][0]))
-
+        uvis_f475w=(flux(data['m475'][match][0]),
+                    ivar(data['m475'][match][0], data['u475'][match[0])), 
+        uvis_f814w=(flux(data['m814'][match][0]),
+                    ivar(data['m814'][match][0], data['u814'][match[0])),
+        ir_f160w=(flux(data['m160'][match][0]),
+                    ivar(data['m160'][match][0], data['m160'][match[0]))
+    
     filternames = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
 
     obs = {}
