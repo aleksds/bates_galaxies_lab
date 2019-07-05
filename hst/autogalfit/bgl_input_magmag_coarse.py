@@ -259,7 +259,7 @@ else:
         
                 text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
                 text.write('I) 150    150\n')
-                text.write('J) 25.027,25.946\n')
+                text.write('J) 25.027,25.613\n')
                 text.write('K) '+plate+'  '+plate+'\n')
                 text.write('O) regular\n')
                 text.write('P) 0\n')
