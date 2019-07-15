@@ -390,7 +390,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         
         # Adjust the prior ranges.
         model_params['tau']['prior'] = priors.LogUniform(mini=0.001, maxi=30.0) # 0.01 --> 0.001
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.005, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
+        model_params['tage']['prior'] = priors.LogUniform(mini=0.003, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
         #model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         add_duste = {"N": 1, "isfree": False, "init": False}
