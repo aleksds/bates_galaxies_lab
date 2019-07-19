@@ -248,7 +248,8 @@ def subtriangle(results, showpars=None, truths=None, start=0, thin=2,
     corner_kwargs.update(kwargs)
     
     fig = triangle.corner(xx, labels=niceparnames, truths=xx_truth,
-                          quantiles=[0.25, 0.5, 0.75], weights=wghts,
+                          #quantiles=[0.25, 0.5, 0.75], weights=wghts,
+                          quantiles=[0.16, 0.5, 0.84], weights=wghts,
                           color='k', **corner_kwargs)
 
     if png:
@@ -421,7 +422,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params['mass']['depends_on'] = logmass2mass
 
         # Adjust prior ranges
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.005, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
+        model_params['tage']['prior'] = priors.LogUniform(mini=0.003, maxi=0.1) # 0.01 --> 0.001, 10.0 --> 0.1
         #model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         add_duste = {"N": 1, "isfree": False, "init": False}
