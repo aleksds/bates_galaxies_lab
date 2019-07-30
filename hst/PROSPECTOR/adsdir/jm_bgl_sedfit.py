@@ -552,8 +552,17 @@ def main():
         pdb.set_trace()
         
         png = os.path.join(j2118dir, '{}-{}-corner.png'.format(args.galaxy, args.priors))
-        subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust_ratio'],
-                    logify=['tau'], png=png)
+
+        #subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust_ratio'],
+        #            logify=['tau'], png=png)
+        
+        if args.priors=='delayed-tau':
+            subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust_ratio'], png=png)
+
+        if args.priors=='bursty':
+            subtriangle(result, showpars=['logmass', 'tage', 'tau', 'dust2', 'dust_ratio', 'fburst', 'fage_burst'], png=png)
+        
+
 
         #reader.subcorner(result, start=0, thin=1, fig=plt.subplots(5,5,figsize=(27,27))[0])
 
