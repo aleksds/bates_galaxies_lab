@@ -26,10 +26,10 @@ with PdfPages(filename) as pdf:
     #colors = ['violet', 'indigo', 'blue', 'green', 'cyan', 'orange', 'red', 'darkviolet', 'midnightblue', 'darkgoldenrod', 'chocolate']
     #colors = ['darkviolet', 'violet', 'purple', 'indigo', 'midnightblue', 'blue', 'cyan', 'green', 'orange', 'red']
     #colors = ['cyan', 'indigo', 'violet', 'darkviolet', 'midnightblue', 'blue', 'purple', 'green', 'orange', 'red']
-    t = np.array([0.010,0.025,0.050,0.100,0.200,0.300])
+    t = np.array([0.005,0.010,0.025,0.050,0.100,0.200])
     colors = ['violet', 'magenta', 'blue', 'green', 'orange', 'red']
     #markers = ['.', 'o', 'v', '8', 's', 'p', '*', 'h', 'x', 'D']
-    markers = ['o', 'v', '8', 's', 'h', 'D']
+    markers = ['o', 'v', 'p', 's', 'h', 'D']
     for i in range(0,len(t)):
          wave, spec = sp.get_spectrum(tage=t[i])
          plt.plot(wave,spec,color=colors[i], label=str(int(t[i]*1e3))+' Myr')
@@ -71,8 +71,9 @@ with PdfPages(filename) as pdf:
         mass = 10**((m814 - mags[:,1])/(-2.5))
         mass_dust = 10**((m814 - mags_dust[:,1])/(-2.5))
         #mass_must = 10**((m814 - mags_must[:,1])/(-2.5))
-        
-        ax.errorbar(x=m814 - m160, y=m475 - m814, xerr=oir_color_unc, yerr=uvo_color_unc, color='black', label='data', elinewidth=2)
+
+        ax.scatter(m814 - m160, m475 - m814, label='data', marker='+', s=20, color='black')
+        ax.errorbar(x=m814 - m160, y=m475 - m814, xerr=oir_color_unc, yerr=uvo_color_unc, color='black', elinewidth=2)
         #ax.scatter(mags[:,1]-mags[:,2], mags[:,0]-mags[:,1], color='blue', marker='o', label='model', s=10)
         for i in range(0,len(mags)):
             #ax.text(mags[i,1]-mags[i,2], mags[i,0]-mags[i,1],str(int(t[i]*1e3)), fontsize=5)
@@ -91,23 +92,31 @@ with PdfPages(filename) as pdf:
         #ax.scatter(m814 - m160, m475 - m814, color='magenta', marker='*', s=20)
         if j==0:
             ax.set_ylabel('[F475W] - [F814W]', fontsize=8)
-            ax.arrow(0.7, 0.7, oir_color_dust - oir_color, uvo_color_dust - uvo_color, head_width=0.05, head_length=0.1, length_includes_head=1, fc='k', ec='k')
+            ax.arrow(0.5, 0.5, oir_color_dust - oir_color, uvo_color_dust - uvo_color, head_width=0.05, head_length=0.1, length_includes_head=1, fc='k', ec='k')
             #ax.legend(fontsize=8, loc='upper right', bbox_to_anchor=(1.0, 2.5))
         if j==1:
-            ax.legend(loc='upper center', fontsize=6, bbox_to_anchor=(0.5, 1.05,0.7,0.2), ncol=7, fancybox=True)
-        if j==4:
+            ax.legend(loc='upper center', fontsize=6, bbox_to_anchor=(0.75, 1.05,0.7,0.2), ncol=7, fancybox=True)
+            ax.set_yticklabels(['','','',''])
+        #if j==4:
+        #    ax.set_ylabel('[F475W] - [F814W]', fontsize=8)
+        #if j==8:
+        #    ax.set_ylabel('[F475W] - [F814W]', fontsize=8)
+        ylabel = [0,4,8]
+        if j in ylabel:
             ax.set_ylabel('[F475W] - [F814W]', fontsize=8)
-        if j==8:
-            ax.set_ylabel('[F475W] - [F814W]', fontsize=8)
+        else:
+            ax.set_yticklabels(['','','',''])
         ax.set_xlabel('[F814W] - [F160W]', fontsize=8)
         #plt.xlim([-0.4,1.4])
-        ax.set_xlim([-0.5,2.0])
-        ax.set_ylim([-0.5,2.0])
+        ax.set_xlim([-0.8,1.3])
+        ax.set_ylim([-0.2,1.6])
         #plt.title(data['Galaxy'][j])
-        ax.text(-0.3,-0.3,data['Galaxy'][j], fontsize=8)
+        ax.text(0.5,1.3,data['Galaxy'][j], fontsize=8)
         plt.rc('xtick',labelsize=8)
         plt.rc('ytick',labelsize=8)
         #ax.legend(loc='lower right', prop={'size': 10})
+        #extraticks = [-0.5, 0.5]
+        #ax.set_xticks(list(ax.get_xticks()) + extraticks)
     pdf.savefig()
     plt.close()
 
