@@ -87,7 +87,7 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
 
     """
     import matplotlib.pyplot as plt
-    from matplotlib.ticker import MultipleLocator, ScalarFormatter, FuncFormatter
+    from matplotlib.ticker import MultipleLocator, ScalarFormatter, FuncFormatter, FormatStrFormatter, NullFormatter
     
     import seaborn as sns
     sns.set(style='ticks', font_scale=1.6, palette='Set2')
@@ -153,12 +153,33 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
     ax.set_ylim(minflux, maxflux)
     ax.set_xscale('log')
     ax.invert_yaxis()
+    #locs, labels = plt.xticks()
+    #print(locs, labels)
+    #ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    #ax.xaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks([0.3, 0.4, 0.6,1.0,2.0])
+    ax.xaxis.set_ticklabels(['0.3', '0.4', '0.6', '1.0', '2.0'])
+    #ax.xaxis.set_ticklabels([r'$0.3$',r'$0.4$','',r'$0.6$','','','',r'$1.0$', 
+    #    r'$2.0$'],minor=True)
     #ax.set_yscale('log')
     #ax.legend(loc='upper right', fontsize=16, frameon=True)
     # https://stackoverflow.com/questions/21920233/matplotlib-log-scale-tick-label-number-formatting
-    ax.get_xaxis().set_major_formatter(FuncFormatter(lambda y, _: '{:.16g}'.format(y)))
+    #ax.get_xaxis().set_major_formatter(FuncFormatter(lambda y, _: '{:.16g}'.format(y)))
+    #ax.get_xaxis().set_major_formatter(FuncFormatter(lambda y, _: '{:.1f}'.format(y)))
+    #ax.get_xaxis().set_minor_formatter(FuncFormatter(lambda y, _: '{:.1f}'.format(y)))
     #ax.get_xaxis().set_major_formatter(ScalarFormatter())
     plt.subplots_adjust(left=0.15, right=0.95, bottom=0.15, top=0.95)
+
+    loc = png.find('J')
+    name = png[loc:loc+5]
+    model = png[loc+6:loc+9]
+    if model=='ssp':
+        name = name+' SSP'
+    if model=='bursty':
+        name = name+' bursty'
+    print(png)
+    plt.text(1,16,name)
 
     # Add an inset with the posterior probability distribution.
     ax1 = fig.add_axes([0.23, 0.68, 0.22, 0.22])
