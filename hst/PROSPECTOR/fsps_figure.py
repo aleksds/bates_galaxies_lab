@@ -9,9 +9,9 @@ from astropy.io import ascii
 #rc('text', usetex=True)
 
 sp = fsps.StellarPopulation(compute_vega_mags=False, zcontinuous=1,
-                                sfh=0, logzsol=0.0, dust_type=0, dust2=0.0)
+                                sfh=0, logzsol=0.0, dust_type=0, dust2=0.0, imf_type=0)
 sp_dust = fsps.StellarPopulation(compute_vega_mags=False, zcontinuous=1,
-                                sfh=0, logzsol=0.0, dust_type=0, dust2=1.0)
+                                sfh=0, logzsol=0.0, dust_type=0, dust2=1.0, imf_type=0)
 #sp_must = fsps.StellarPopulation(compute_vega_mags=False, zcontinuous=1,
 #                                sfh=0, logzsol=0.0, dust_type=0, dust2=0.8)
 
@@ -77,6 +77,7 @@ with PdfPages(filename) as pdf:
         
         #m814 = -2.5*np.log10(catalog['f_814'][j]*1e-9)
         mass = 10**((m814 - mags[:,1])/(-2.5))
+        print(mass)
         mass_dust = 10**((m814 - mags_dust[:,1])/(-2.5))
         #mass_must = 10**((m814 - mags_must[:,1])/(-2.5))
 
