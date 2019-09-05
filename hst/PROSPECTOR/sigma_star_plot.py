@@ -37,39 +37,46 @@ z = np.array([0.603, 0.459, 0.712, 0.514, 0.467, 0.451, 0.658, 0.608, 0.402, 0.4
 cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
 re_best_kpc = re_best_arc / cosmo.arcsec_per_kpc_proper(z)
-vesc_best = np.sqrt(G * 10**nuc_best_mass * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
-vesc_hi = np.sqrt(G * 10**(nuc_best_mass + nuc_up_mass) * const.M_sun / (re_best_kpc-(re_unc/re_best*re_best_kpc))).to('km/s') * u.s / u.km
-vesc_lo = np.sqrt(G * 10**(nuc_best_mass - nuc_lo_mass) * const.M_sun / (re_best_kpc+(re_unc/re_best*re_best_kpc))).to('km/s') * u.s / u.km
 
-vesc_hi_re = np.sqrt(G * 10**(nuc_best_mass) * const.M_sun / (re_best_kpc-(re_unc/re_best*re_best_kpc))).to('km/s') * u.s / u.km
-vesc_lo_re = np.sqrt(G * 10**(nuc_best_mass) * const.M_sun / (re_best_kpc+(re_unc/re_best*re_best_kpc))).to('km/s') * u.s / u.km
+sigma_star_best = 10**nuc_best_mass / (2. * np.pi * re_best_kpc**2) * u.kpc * u.kpc
 
-vesc_hi_mass = np.sqrt(G * 10**(nuc_best_mass + nuc_up_mass) * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
-vesc_lo_mass = np.sqrt(G * 10**(nuc_best_mass - nuc_lo_mass) * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
+sigma_star_hi = 10**(nuc_best_mass + nuc_up_mass) / (2. * np.pi * (re_best_kpc-(re_unc/re_best*re_best_kpc))**2) * u.kpc * u.kpc
+
+sigma_star_lo = 10**(nuc_best_mass - nuc_lo_mass) / (2. * np.pi * (re_best_kpc+(re_unc/re_best*re_best_kpc))**2) * u.kpc * u.kpc
+
+sigma_star_hi_re = 10**(nuc_best_mass) / (2. * np.pi * (re_best_kpc-(re_unc/re_best*re_best_kpc))**2) * u.kpc * u.kpc
+
+sigma_star_lo_re = 10**(nuc_best_mass) / (2. * np.pi * (re_best_kpc+(re_unc/re_best*re_best_kpc))**2) * u.kpc * u.kpc
+
+sigma_star_hi_mass = 10**(nuc_best_mass + nuc_up_mass) / (2. * np.pi * (re_best_kpc)**2) * u.kpc * u.kpc
+
+sigma_star_lo_mass = 10**(nuc_best_mass - nuc_lo_mass) / (2. * np.pi * (re_best_kpc)**2) * u.kpc * u.kpc
 
 
 
-filename = 'vesc_plot.pdf'
+filename = 'sigma_star_plot.pdf'
 
 with PdfPages(filename) as pdf:
     
     fig = plt.figure()
 
     vel_array = np.arange(101)*30
-
-    plt.scatter(vflow, vesc_best)
-    plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo, vesc_hi-vesc_best], fmt='o', elinewidth=1)
+    
+    plt.scatter(vflow, sigma_star_best)
+    #plt.plot(vel_array, vel_array)
+    plt.errorbar(vflow, sigma_star_best, yerr=[sigma_star_best-sigma_star_lo, sigma_star_hi-sigma_star_best], fmt='o', elinewidth=1)
     #plt.plot(vel_array, vel_array/3, linestyle='--')
-    #plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo_mass, vesc_hi_mass-vesc_best], fmt='o')    
-    plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo_re, vesc_hi_re-vesc_best], fmt='o', elinewidth=3)
+    #plt.errorbar(vflow, sigma_star_best, yerr=[sigma_star_best-sigma_star_lo_mass, sigma_star_hi_mass-sigma_star_best], fmt='o')    
+    plt.errorbar(vflow, sigma_star_best, yerr=[sigma_star_best-sigma_star_lo_re, sigma_star_hi_re-sigma_star_best], fmt='o', elinewidth=3)
+    #plt.xlim(0,3500)
     plt.xlim(800,3200)
-    plt.ylim(0,2500)
+    #plt.ylim(0,2500)
     plt.xlabel('Observed Outflow Velocity [km/s]')
-    plt.ylabel('Central Escape Velocity [km/s]')
-    plt.plot(vel_array, vel_array)
+    plt.ylabel('Central Stellar Surface Density')
+    plt.yscale('log')
 
     for i in range(0, len(galaxies)):
-        plt.text(vflow[i], vesc_best[i], galaxies[i])
+        plt.text(vflow[i], sigma_star_best[i], galaxies[i])
     
     pdf.savefig()
     plt.close()
