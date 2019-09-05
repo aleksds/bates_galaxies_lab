@@ -174,9 +174,10 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
     loc = png.find('J')
     name = png[loc:loc+5]
     model = png[loc+6:loc+9]
+    print('model for plot: ', model)
     if model=='ssp':
         name = name+' SSP'
-    if model=='bursty':
+    if model=='bur':
         name = name+' bursty'
     print(png)
     plt.text(1,16,name)
@@ -194,6 +195,7 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
     ax1.set_xlabel(r'$\log_{10}(\mathcal{M}/\mathcal{M}_{\odot})$')
     ax1.set_ylabel(r'$P(\mathcal{M})$')
     ax1.xaxis.set_major_locator(MultipleLocator(0.5))
+    #ax1.set_ylim([0,1.0])
     for item in ([ax1.title, ax1.xaxis.label, ax1.yaxis.label] +
              ax1.get_xticklabels() + ax1.get_yticklabels()):
         item.set_fontsize(16)
