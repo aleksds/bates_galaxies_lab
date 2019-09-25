@@ -61,7 +61,9 @@ for w in range(0,ngal):
     text.write('# IMAGE and GALFIT CONTROL PARAMETERS\n') 
                 
     text.write('A) '+hstdir+longgal[w]+'/'+plate+'/'+filters[1]+'/final_'+filters[1]+'_drc_sci.fits,'+
+                     #hstdir+longgal[w]+'/'+plate+'/'+filters[1]+'/convolved_image_'+filters[1]+'.fits,'+
                      hstdir+longgal[w]+'/'+plate+'/'+filters[0]+'/final_'+filters[0]+'_drc_sci.fits,'+
+                     #hstdir+longgal[w]+'/'+plate+'/'+filters[0]+'/convolved_image_'+filters[0]+'.fits,'+
                      hstdir+longgal[w]+'/'+plate+'/'+filters[2]+'/final_'+filters[2]+'_drz_sci.fits\n')
     text.write('A1) V,U,J\n')
     text.write('A2) 814.000,475.000,160.000\n')
@@ -69,7 +71,9 @@ for w in range(0,ngal):
     text.write('B) '+galaxies[w]+'_F814W_F475W_F160W_3conv_output.fits\n')
     text.write('C) '+sigma_file_814[0]+','+sigma_file_475[0]+','+sigma_file_160[0]+' \n') 
     text.write('D) '+hstdir+longgal[w]+'/'+psf+'/'+filters[1]+'/final_psf.fits,'+
+                     #hstdir+longgal[w]+'/'+psf+'/'+filters[1]+'/psf_convol.fits,'+
                      hstdir+longgal[w]+'/'+psf+'/'+filters[0]+'/final_psf.fits,'+
+                     #hstdir+longgal[w]+'/'+psf+'/'+filters[0]+'/psf_convol.fits,'+
                      hstdir+longgal[w]+'/'+psf+'/'+filters[2]+'/final_psf.fits\n')
     text.write('E) 1\n')
     text.write('F) none,none,none\n')
@@ -104,13 +108,14 @@ for w in range(0,ngal):
     ycoorhigh = str(int(catalog[w][2]+(np.float(imgsize)/2)))
                 
     text.write('H) '+xcoorlow+' '+xcoorhigh+' '+ycoorlow+' '+ycoorhigh+'\n')
-    text.write('I) '+str(np.float(imgsize)/2)+'    '+str(np.float(imgsize)/2)+'\n') 
+    #text.write('I) '+str(np.float(imgsize)/2)+'    '+str(np.float(imgsize)/2)+'\n')
+    text.write('I) 150     150   \n')
     text.write('J) 25.027,25.613,25.946\n')
-    text.write('K) '+plate+'  '+plate+'\n')
+    text.write('K) 0.05  0.05  \n')
     text.write('O) regular\n')
     text.write('P) 0\n')
-    text.write('U) 0 0.750000 25 4 40\n')
-    text.write('V) 0 0 50 0.800000 0.500000 100000\n')
+    #text.write('U) 0 0.750000 25 4 40\n')
+    #text.write('V) 0 0 50 0.800000 0.500000 100000\n')
     text.write('W) input,sigma,psf,component,model,residual\n')
                 
     text.write(' 0) sersic\n')
