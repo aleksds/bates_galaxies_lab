@@ -13,6 +13,11 @@ from astropy.io import fits
 from photutils import CircularAperture
 from photutils import aperture_photometry
 
+
+# calculate magnitude for a given flux in Jy
+def mag(flux):
+    return -2.5*np.log10(flux/3631)
+
 # the code requires the user to specify an input directory that has output fits files from GALFIT
 dir = sys.argv[1]
 
@@ -26,10 +31,12 @@ xcen = 100
 ycen = 100
 fmin = -2
 fmax = 12
-#radii = np.arange(40)+1
+#radii = np.arange(60)+1
 #radii = np.array([1,2,3,4,5,6,7,8,9,10,15,20,30,40,50])
 #radii = np.array([5,10,15,20,30,40,60])
-radii = np.array([5,15,30,45])
+#radii = np.array([5,15,30,45])
+#radii = np.array([5,10,20,50])
+radii = np.array([8,10,12,15,25,50])
 
 # arrays for v band
 vdat_flux = np.zeros([len(files),len(radii)])
@@ -64,8 +71,18 @@ junc_annulus = np.zeros([len(files),len(radii)])
 jmod_annulus = np.zeros([len(files),len(radii)])
 jres_annulus = np.zeros([len(files),len(radii)])
 
+# array to store information from headers
+vfnu = np.zeros(len(files))
+vexp = np.zeros(len(files))
+
+ufnu = np.zeros(len(files))
+uexp = np.zeros(len(files))
+
+jfnu = np.zeros(len(files))
+jexp = np.zeros(len(files))
+
 # let's produce plots that will be saved in a pdf file
-name = 'galfit_phot_'+dir+'.pdf'
+name = 'galfit_phot_'+dir+'_'+str(len(radii))+'_'+str(np.max(radii))+'.pdf'
 
 with PdfPages(name) as pdf:
     
@@ -97,18 +114,24 @@ with PdfPages(name) as pdf:
 
         # F814W corresponds roughly to rest-frame V-band
         vdat, vdat_head = hdu[0].data, hdu[0].header
+        vfnu[i] = vdat_head['PHOTFNU']
+        vexp[i] = vdat_head['EXPTIME']
         vunc, vunc_head = hdu[12].data, hdu[12].header
         vmod, vmod_head = hdu[3].data, hdu[3].header
         vres, vres_head = hdu[6].data, hdu[6].header
 
         # F475W corresponds roughly to rest-frame U-band
         udat, udat_head = hdu[1].data, hdu[1].header
+        ufnu[i] = udat_head['PHOTFNU']
+        uexp[i] = udat_head['EXPTIME']
         uunc, uunc_head = hdu[13].data, hdu[13].header
         umod, umod_head = hdu[4].data, hdu[4].header
         ures, ures_head = hdu[7].data, hdu[7].header        
 
         # F160W corresponds roughly to rest-frame J-band
         jdat, jdat_head = hdu[2].data, hdu[2].header
+        jfnu[i] = jdat_head['PHOTFNU']
+        jexp[i] = jdat_head['EXPTIME']
         junc, junc_head = hdu[14].data, hdu[14].header
         jmod, jmod_head = hdu[5].data, hdu[5].header
         jres, jres_head = hdu[8].data, hdu[8].header  
@@ -192,12 +215,12 @@ with PdfPages(name) as pdf:
 
         # plot flux vs radius for the data, uncertainty, model, and residual
         ax = fig.add_subplot(2,2,1)
-        ax.scatter(radii, vdat_flux[i]/1e5)
+        ax.scatter(radii, mag(vdat_flux[i]*vfnu[i]/vexp[i]))#/1e5)
         #plt.errorbar(radii,vdat_flux[i]/1e5,yerr=vunc_flux[i]/1e5)
-        ax.scatter(radii, vunc_flux[i]/1e5, marker='s', color='red')
-        ax.scatter(radii, vmod_flux[i]/1e5, marker='o', color='green')
-        ax.scatter(radii, vres_flux[i]/1e5, marker='+', color='black')
-        ax.set_ylim(fmin, fmax)
+        ax.scatter(radii, mag(vunc_flux[i]*vfnu[i]/vexp[i]), marker='s', color='red')
+        ax.scatter(radii, mag(vmod_flux[i]*vfnu[i]/vexp[i]), marker='o', color='green')
+        ax.scatter(radii, mag(vres_flux[i]*vfnu[i]/vexp[i]), marker='+', color='black')
+        ax.set_ylim(27, 18)
 
         # add labels for axes and a title for the name of the image extension
         #plt.xlabel('Radius [pixels]')#, fontsize=14)
@@ -206,11 +229,12 @@ with PdfPages(name) as pdf:
 
         # repeat for F475W
         ax = fig.add_subplot(2,2,2)
-        ax.scatter(radii, udat_flux[i]/1e5)
-        ax.scatter(radii, uunc_flux[i]/1e5, marker='s', color='red')
-        ax.scatter(radii, umod_flux[i]/1e5, marker='o', color='green')
-        ax.scatter(radii, ures_flux[i]/1e5, marker='+', color='black')
-        ax.set_ylim(fmin, fmax)
+        ax.scatter(radii, mag(udat_flux[i]*ufnu[i]/uexp[i]))
+        ax.scatter(radii, mag(uunc_flux[i]*ufnu[i]/uexp[i]), marker='s', color='red')
+        ax.scatter(radii, mag(umod_flux[i]*ufnu[i]/uexp[i]), marker='o', color='green')
+        ax.scatter(radii, mag(ures_flux[i]*ufnu[i]/uexp[i]), marker='+', color='black')
+        #ax.set_ylim(fmin, fmax)
+        ax.set_ylim(27, 18)
         
         # add labels for axes and a title for the name of the image extension
         #plt.xlabel('Radius [pixels]')
@@ -219,11 +243,12 @@ with PdfPages(name) as pdf:
 
         # repeat for F160W
         ax = fig.add_subplot(2,2,3)
-        ax.scatter(radii, jdat_flux[i]/1e5)
-        ax.scatter(radii, junc_flux[i]/1e5, marker='s', color='red')
-        ax.scatter(radii, jmod_flux[i]/1e5, marker='o', color='green')
-        ax.scatter(radii, jres_flux[i]/1e5, marker='+', color='black')
-        ax.set_ylim(fmin, fmax*3)
+        ax.scatter(radii, mag(jdat_flux[i]*jfnu[i]/jexp[i]))
+        ax.scatter(radii, mag(junc_flux[i]*jfnu[i]/jexp[i]), marker='s', color='red')
+        ax.scatter(radii, mag(jmod_flux[i]*jfnu[i]/jexp[i]), marker='o', color='green')
+        ax.scatter(radii, mag(jres_flux[i]*jfnu[i]/jexp[i]), marker='+', color='black')
+        #ax.set_ylim(fmin, fmax*3)
+        ax.set_ylim(27, 18)
         
         # add labels for axes and a title for the name of the image extension
         plt.xlabel('Radius [pixels]')
@@ -233,9 +258,12 @@ with PdfPages(name) as pdf:
 
         # plot F160W / F814W ratio and F814W / F475W ratio for residual flux
         ax = fig.add_subplot(2,2,4)
-        ax.scatter(radii, jres_flux[i] / vres_flux[i], marker='+', color='red')
-        ax.scatter(radii, vres_flux[i] / ures_flux[i], marker='+', color='green')
-        ax.set_ylim(-10, 10)
+        #ax.scatter(radii, jres_flux[i] / vres_flux[i], marker='+', color='red')
+        ax.scatter(radii, mag(vres_flux[i]*vfnu[i]/vexp[i]) - mag(jres_flux[i]*jfnu[i]/jexp[i]), marker='+', color='red')
+        #ax.scatter(radii, vres_flux[i] / ures_flux[i], marker='+', color='green')
+        ax.scatter(radii, mag(ures_flux[i]*ufnu[i]/uexp[i]) - mag(vres_flux[i]*vfnu[i]/vexp[i]), marker='+', color='green')
+        #ax.set_ylim(-10, 10)
+        ax.set_ylim(-1,3)
         plt.xlabel('Radius [pixels]')
         #plt.ylabel('jres / vres')
         # save this page of the pdf file
@@ -250,35 +278,43 @@ with PdfPages(name) as pdf:
 
         # plot flux vs radius for the data, uncertainty, model, and residual
         ax = fig.add_subplot(2,2,1)
-        ax.scatter(radii, vdat_annulus[i]/1e5)
-        ax.scatter(radii, vunc_annulus[i]/1e5, marker='s', color='red')
-        ax.scatter(radii, vmod_annulus[i]/1e5, marker='o', color='green')
-        ax.scatter(radii, vres_annulus[i]/1e5, marker='+', color='black')
+        ax.scatter(radii, mag(vdat_annulus[i]*vfnu[i]/vexp[i]))
+        ax.scatter(radii, mag(vunc_annulus[i]*vfnu[i]/vexp[i]), marker='s', color='red')
+        ax.scatter(radii, mag(vmod_annulus[i]*vfnu[i]/vexp[i]), marker='o', color='green')
+        ax.scatter(radii, mag(vres_annulus[i]*vfnu[i]/vexp[i]), marker='+', color='black')
         plt.ylabel('Flux [image units]')#, fontsize=14)
         plt.title(vdat_head['EXTNAME'])
+        ax.set_ylim(27,18)
 
         # repeat for F475W
         ax = fig.add_subplot(2,2,2)
-        ax.scatter(radii, udat_annulus[i]/1e5)
-        ax.scatter(radii, uunc_annulus[i]/1e5, marker='s', color='red')
-        ax.scatter(radii, umod_annulus[i]/1e5, marker='o', color='green')
-        ax.scatter(radii, ures_annulus[i]/1e5, marker='+', color='black')
+        ax.scatter(radii, mag(udat_annulus[i]*ufnu[i]/uexp[i]))
+        ax.scatter(radii, mag(uunc_annulus[i]*ufnu[i]/uexp[i]), marker='s', color='red')
+        ax.scatter(radii, mag(umod_annulus[i]*ufnu[i]/uexp[i]), marker='o', color='green')
+        ax.scatter(radii, mag(ures_annulus[i]*ufnu[i]/uexp[i]), marker='+', color='black')
         plt.title(udat_head['EXTNAME'])
-
+        ax.set_ylim(27,18)
+        
         # repeat for F160W
         ax = fig.add_subplot(2,2,3)
-        ax.scatter(radii, jdat_annulus[i]/1e5)
-        ax.scatter(radii, junc_annulus[i]/1e5, marker='s', color='red')
-        ax.scatter(radii, jmod_annulus[i]/1e5, marker='o', color='green')
-        ax.scatter(radii, jres_annulus[i]/1e5, marker='+', color='black')
+        ax.scatter(radii, mag(jdat_annulus[i]*jfnu[i]/jexp[i]))
+        ax.scatter(radii, mag(junc_annulus[i]*jfnu[i]/jexp[i]), marker='s', color='red')
+        ax.scatter(radii, mag(jmod_annulus[i]*jfnu[i]/jexp[i]), marker='o', color='green')
+        ax.scatter(radii, mag(jres_annulus[i]*jfnu[i]/jexp[i]), marker='+', color='black')
         plt.xlabel('Radius [pixels]')
-        plt.ylabel('Annulus for '+jdat_head['EXTNAME'])
+        plt.ylabel('Flux for '+jres_head['EXTNAME'])
+        ax.set_ylim(27,18)
         
         # plot F160W / F814W ratio and F814W / F475W ratio for residual flux
         ax = fig.add_subplot(2,2,4)
-        ax.scatter(radii, jres_annulus[i] / vres_annulus[i], marker='+', color='red')
-        ax.scatter(radii, vres_annulus[i] / ures_annulus[i], marker='+', color='green')
-        ax.set_ylim(-10, 10)
+        #ax.scatter(radii, jres_annulus[i] / vres_annulus[i], marker='+', color='red')
+        #ax.scatter(radii, vres_annulus[i] / ures_annulus[i], marker='+', color='green')
+        uv_color = mag(ures_annulus[i]*ufnu[i]/uexp[i]) - mag(vres_annulus[i]*vfnu[i]/vexp[i])
+        vj_color = mag(vres_annulus[i]*vfnu[i]/vexp[i]) - mag(jres_annulus[i]*jfnu[i]/jexp[i])
+        ax.scatter(radii, vj_color, marker='+', color='red')
+        ax.scatter(radii, uv_color, marker='+', color='green')
+        #ax.set_ylim(-10, 10)
+        ax.set_ylim(-1,3)
         plt.xlabel('Radius [pixels]')
         
         pdf.savefig()
@@ -295,13 +331,13 @@ with PdfPages(name) as pdf:
         plt.xlabel('Radius [pixels]')
 
         ax = fig.add_subplot(2,2,4)
-        uv_color = -2.5*np.log10(ures_annulus[i] / vres_annulus[i])
-        vj_color = -2.5*np.log10(vres_annulus[i] / jres_annulus[i])
+        #uv_color = -2.5*np.log10(ures_annulus[i] / vres_annulus[i])
+        #vj_color = -2.5*np.log10(vres_annulus[i] / jres_annulus[i])
         ax.scatter(vj_color, uv_color)
         plt.xlabel('[F814W]-[F160W]')
         plt.ylabel('[F475W]-[F814W]')
-        ax.set_xlim([-0.5,3.5])
-        ax.set_ylim([-0.5,3.5])
+        ax.set_xlim([-0.5,3.0])
+        ax.set_ylim([-0.5,3.0])
         
         pdf.savefig()
         plt.close() 
