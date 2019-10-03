@@ -264,11 +264,13 @@ with PdfPages(name) as pdf:
 
         # have the title at the top of the page be the name of the galfit output 
         plt.suptitle(vdat_head['LOGFILE'])
+        print(vdat_head['LOGFILE'])
 
         # plot flux vs radius for the data, uncertainty, model, and residual
         ax = fig.add_subplot(2,2,1)
         ax.scatter(radii, mag(vdat_flux[i]*vfnu[i]/vexp[i]))#/1e5)
         print('vmag: ', mag(vdat_flux[i]*vfnu[i]/vexp[i]))
+        print(mag(vdat_flux[i]*vfnu[i]/vexp[i])[39], np.std(mag(vdat_flux[i]*vfnu[i]/vexp[i])[35:44]))
         #plt.errorbar(radii,vdat_flux[i]/1e5,yerr=vunc_flux[i]/1e5)
         ax.scatter(radii, mag(vunc_flux[i]*vfnu[i]/vexp[i]), marker='s', color='red')
         ax.scatter(radii, mag(vmod_flux[i]*vfnu[i]/vexp[i]), marker='o', color='green')
@@ -284,6 +286,7 @@ with PdfPages(name) as pdf:
         ax = fig.add_subplot(2,2,2)
         ax.scatter(radii, mag(udat_flux[i]*ufnu[i]/uexp[i]))
         print('umag: ', mag(udat_flux[i]*ufnu[i]/uexp[i]))
+        print(mag(udat_flux[i]*ufnu[i]/uexp[i])[39], np.std(mag(udat_flux[i]*ufnu[i]/uexp[i])[35:44]))
         ax.scatter(radii, mag(uunc_flux[i]*ufnu[i]/uexp[i]), marker='s', color='red')
         ax.scatter(radii, mag(umod_flux[i]*ufnu[i]/uexp[i]), marker='o', color='green')
         ax.scatter(radii, mag(ures_flux[i]*ufnu[i]/uexp[i]), marker='+', color='black')
@@ -299,6 +302,7 @@ with PdfPages(name) as pdf:
         ax = fig.add_subplot(2,2,3)
         ax.scatter(radii, mag(jdat_flux[i]*jfnu[i]/jexp[i]))
         print('jmag: ', mag(jdat_flux[i]*jfnu[i]/jexp[i]))
+        print(mag(jdat_flux[i]*jfnu[i]/jexp[i])[39], np.std(mag(jdat_flux[i]*jfnu[i]/jexp[i])[35:44]))
         ax.scatter(radii, mag(junc_flux[i]*jfnu[i]/jexp[i]), marker='s', color='red')
         ax.scatter(radii, mag(jmod_flux[i]*jfnu[i]/jexp[i]), marker='o', color='green')
         ax.scatter(radii, mag(jres_flux[i]*jfnu[i]/jexp[i]), marker='+', color='black')
