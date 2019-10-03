@@ -10,14 +10,19 @@ import glob
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from astropy.io import fits
+from astropy.io import ascii
+from astropy import units as u
 from photutils import CircularAperture
 from photutils import aperture_photometry
 import img_scale
+from astropy.cosmology import FlatLambdaCDM 
 
 
 # calculate magnitude for a given flux in Jy
 def mag(flux):
     return -2.5*np.log10(flux/3631)
+
+cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
 # the code requires the user to specify an input directory that has output fits files from GALFIT
 dir = sys.argv[1]
@@ -82,6 +87,8 @@ uexp = np.zeros(len(files))
 jfnu = np.zeros(len(files))
 jexp = np.zeros(len(files))
 
+data = ascii.read('bgl_phot.dat')
+
 # let's produce plots that will be saved in a pdf file
 name = 'galfit_image_'+dir+'_'+str(len(radii))+'_'+str(np.max(radii))+'.pdf'
 
@@ -136,6 +143,10 @@ with PdfPages(name) as pdf:
         junc, junc_head = hdu[14].data, hdu[14].header
         jmod, jmod_head = hdu[5].data+0.89, hdu[5].header
         jres, jres_head = hdu[8].data+0.89, hdu[8].header  
+
+        redshift = data['z'][i]
+        arcsecperkpc = cosmo.arcsec_per_kpc_proper(redshift)
+        radpix_15kpc = arcsecperkpc * 12.5 / 0.05 * u.kpc / u.arcsec
         
         # loop over each aperture
         for j in range(0,len(radii)):
@@ -264,18 +275,22 @@ with PdfPages(name) as pdf:
 
         # have the title at the top of the page be the name of the galfit output 
         plt.suptitle(vdat_head['LOGFILE'])
-        print(vdat_head['LOGFILE'])
+        print(vdat_head['LOGFILE'], radpix_15kpc)
 
+        #aper = 39
+        aper = int(radpix_15kpc)
+        
         # plot flux vs radius for the data, uncertainty, model, and residual
         ax = fig.add_subplot(2,2,1)
         ax.scatter(radii, mag(vdat_flux[i]*vfnu[i]/vexp[i]))#/1e5)
         print('vmag: ', mag(vdat_flux[i]*vfnu[i]/vexp[i]))
-        print(mag(vdat_flux[i]*vfnu[i]/vexp[i])[39], np.std(mag(vdat_flux[i]*vfnu[i]/vexp[i])[35:44]))
+        print(mag(vdat_flux[i]*vfnu[i]/vexp[i])[aper], np.std(mag(vdat_flux[i]*vfnu[i]/vexp[i])[aper-4:aper+5]))
         #plt.errorbar(radii,vdat_flux[i]/1e5,yerr=vunc_flux[i]/1e5)
         ax.scatter(radii, mag(vunc_flux[i]*vfnu[i]/vexp[i]), marker='s', color='red')
         ax.scatter(radii, mag(vmod_flux[i]*vfnu[i]/vexp[i]), marker='o', color='green')
         ax.scatter(radii, mag(vres_flux[i]*vfnu[i]/vexp[i]), marker='+', color='black')
         ax.set_ylim(27, 18)
+        plt.axvline(x=aper)
 
         # add labels for axes and a title for the name of the image extension
         #plt.xlabel('Radius [pixels]')#, fontsize=14)
@@ -286,7 +301,7 @@ with PdfPages(name) as pdf:
         ax = fig.add_subplot(2,2,2)
         ax.scatter(radii, mag(udat_flux[i]*ufnu[i]/uexp[i]))
         print('umag: ', mag(udat_flux[i]*ufnu[i]/uexp[i]))
-        print(mag(udat_flux[i]*ufnu[i]/uexp[i])[39], np.std(mag(udat_flux[i]*ufnu[i]/uexp[i])[35:44]))
+        print(mag(udat_flux[i]*ufnu[i]/uexp[i])[aper], np.std(mag(udat_flux[i]*ufnu[i]/uexp[i])[35:44]))
         ax.scatter(radii, mag(uunc_flux[i]*ufnu[i]/uexp[i]), marker='s', color='red')
         ax.scatter(radii, mag(umod_flux[i]*ufnu[i]/uexp[i]), marker='o', color='green')
         ax.scatter(radii, mag(ures_flux[i]*ufnu[i]/uexp[i]), marker='+', color='black')
@@ -302,7 +317,7 @@ with PdfPages(name) as pdf:
         ax = fig.add_subplot(2,2,3)
         ax.scatter(radii, mag(jdat_flux[i]*jfnu[i]/jexp[i]))
         print('jmag: ', mag(jdat_flux[i]*jfnu[i]/jexp[i]))
-        print(mag(jdat_flux[i]*jfnu[i]/jexp[i])[39], np.std(mag(jdat_flux[i]*jfnu[i]/jexp[i])[35:44]))
+        print(mag(jdat_flux[i]*jfnu[i]/jexp[i])[aper], np.std(mag(jdat_flux[i]*jfnu[i]/jexp[i])[35:44]))
         ax.scatter(radii, mag(junc_flux[i]*jfnu[i]/jexp[i]), marker='s', color='red')
         ax.scatter(radii, mag(jmod_flux[i]*jfnu[i]/jexp[i]), marker='o', color='green')
         ax.scatter(radii, mag(jres_flux[i]*jfnu[i]/jexp[i]), marker='+', color='black')
@@ -344,6 +359,7 @@ with PdfPages(name) as pdf:
         plt.ylabel('Flux [image units]')#, fontsize=14)
         plt.title(vdat_head['EXTNAME'])
         ax.set_ylim(27,18)
+        plt.axvline(x=aper)
 
         # repeat for F475W
         ax = fig.add_subplot(2,2,2)
@@ -388,6 +404,7 @@ with PdfPages(name) as pdf:
         ax.scatter(radii, jres_annulus[i] / junc_annulus[i], color='red')
         plt.ylabel('SNR')
         plt.xlabel('Radius [pixels]')
+        plt.axvline(x=aper)
 
         ax = fig.add_subplot(2,2,4)
         #uv_color = -2.5*np.log10(ures_annulus[i] / vres_annulus[i])
