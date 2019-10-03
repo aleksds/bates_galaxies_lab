@@ -131,7 +131,7 @@ def bestfit_sed(obs, chain=None, lnprobability=None, theta=None, sps=None,
     inrange = (modelwave > minwave) * (modelwave < maxwave)
     #maxflux = np.hstack( (galphot + 5*galphoterr, modelspec[inrange]) ).max() * 1.2
     #minflux = -0.05 * maxflux
-    minflux, maxflux = (15, 22)#(9, 24)
+    minflux, maxflux = (17, 24)#(9, 24)
 
     fig, ax = plt.subplots(figsize=(8, 6))
     if chain is not None and nrand > 0:
@@ -310,19 +310,36 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
     nuc_flux_f814w = flux(data['m814'][match][0] - data['ebv'][match][0] * 1.536)
     nuc_flux_f160w = flux(data['m160'][match][0] - data['ebv'][match][0] * 0.512)
 
+    nuc_unc_f475w = nuc_flux_f475w / 1.086 * data['u475'][match][0]
+    nuc_unc_f814w = nuc_flux_f814w / 1.086 * data['u814'][match][0]
+    nuc_unc_f160w = nuc_flux_f160w / 1.086 * data['u160'][match][0]
+    
     tot_flux_f475w = flux(dtot['m475'][match][0] - dtot['ebv'][match][0] * 3.248)
     tot_flux_f814w = flux(dtot['m814'][match][0] - dtot['ebv'][match][0] * 1.536)
     tot_flux_f160w = flux(dtot['m160'][match][0] - dtot['ebv'][match][0] * 0.512)
 
+    tot_unc_f475w = tot_flux_f475w / 1.086 * np.sqrt((dtot['u475'][match][0])**2 + 0.03**2)
+    tot_unc_f814w = tot_flux_f814w / 1.086 * np.sqrt((dtot['u814'][match][0])**2 + 0.03**2)
+    tot_unc_f160w = tot_flux_f160w / 1.086 * np.sqrt((dtot['u160'][match][0])**2 + 0.03**2)
+    
     res_mag_f475w = -2.5*np.log10(tot_flux_f475w-nuc_flux_f475w)
     res_mag_f814w = -2.5*np.log10(tot_flux_f814w-nuc_flux_f814w)
     res_mag_f160w = -2.5*np.log10(tot_flux_f160w-nuc_flux_f160w)
 
-    print('res mags: ', res_mag_f475w, res_mag_f814w, res_mag_f160w)
+    #res_unc_f475w = 1.086 * np.sqrt(nuc_unc_f475w**2+tot_unc_f475w**2) / (tot_flux_f475w-nuc_flux_f475w)    
+    #res_unc_f814w = 1.086 * np.sqrt(nuc_unc_f814w**2+tot_unc_f814w**2) / (tot_flux_f814w-nuc_flux_f814w)
+    #res_unc_f160w = 1.086 * np.sqrt(nuc_unc_f160w**2+tot_unc_f160w**2) / (tot_flux_f160w-nuc_flux_f160w)
+    res_unc_f475w = 1.086 * tot_unc_f475w / (tot_flux_f475w-nuc_flux_f475w)
+    res_unc_f814w = 1.086 * tot_unc_f814w / (tot_flux_f814w-nuc_flux_f814w)
+    res_unc_f160w = 1.086 * tot_unc_f160w / (tot_flux_f160w-nuc_flux_f160w)    
+
     
-    unc_mag_f475w = np.sqrt((data['u475'][match][0])**2+(dtot['u475'][match][0])**2)
-    unc_mag_f814w = np.sqrt((data['u814'][match][0])**2+(dtot['u814'][match][0])**2)
-    unc_mag_f160w = np.sqrt((data['u160'][match][0])**2+(dtot['u160'][match][0])**2)
+    print('res mags: ', res_mag_f475w, res_unc_f475w, res_mag_f814w, res_unc_f814w, res_mag_f160w, res_unc_f160w)
+    print('nuc frac: ', nuc_flux_f475w / tot_flux_f475w, nuc_flux_f814w / tot_flux_f814w, nuc_flux_f160w / tot_flux_f160w)
+    
+    #unc_mag_f475w = np.sqrt((data['u475'][match][0])**2+(dtot['u475'][match][0])**2)
+    #unc_mag_f814w = np.sqrt((data['u814'][match][0])**2+(dtot['u814'][match][0])**2)
+    #unc_mag_f160w = np.sqrt((data['u160'][match][0])**2+(dtot['u160'][match][0])**2)
 
     #phot = dict(
     #    uvis_f475w=(flux(data['m475'][match][0] - data['ebv'][match][0] * 3.248),
@@ -334,11 +351,11 @@ def load_obs(seed=1, nproc=1, nmin=10, verbose=False, sps=None, galaxy=None):
     
     phot = dict(
         uvis_f475w=(flux(res_mag_f475w),
-                    ivar(res_mag_f475w, unc_mag_f475w)), 
+                    ivar(res_mag_f475w, res_unc_f475w)), 
         uvis_f814w=(flux(res_mag_f814w),
-                    ivar(res_mag_f160w, unc_mag_f814w)),
+                    ivar(res_mag_f160w, res_unc_f814w)),
         ir_f160w=(flux(res_mag_f160w),
-                    ivar(res_mag_f160w, unc_mag_f160w)))
+                    ivar(res_mag_f160w, res_unc_f160w)))
     
     filternames = (['wfc3_uvis_f475w','wfc3_uvis_f814w','wfc3_ir_f160w'])
 
