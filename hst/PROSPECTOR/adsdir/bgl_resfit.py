@@ -444,7 +444,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         
         # optimize log-stellar mass, not linear stellar mass
         model_params['logmass'] = {'N': 1, 'isfree': True, 'init': 10.5, # 11 --> 10
-                                   'prior': priors.TopHat(mini=8.5, maxi=11.5), # 10 --> 8
+                                   'prior': priors.TopHat(mini=8.5, maxi=12.5), # 10 --> 8
                                    'units': '$M_{\odot}$'}
 
         model_params['mass']['isfree'] = False
@@ -477,7 +477,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
         
         model_params['logmass'] = {'N': 1, 'isfree': True, 'init': 10.5, # 11 --> 10
-                                   'prior': priors.TopHat(mini=8.5, maxi=11.5), # 10 --> 8
+                                   'prior': priors.TopHat(mini=8.5, maxi=12.5), # 10 --> 8
                                    'units': '$M_{\odot}$'}
         model_params['mass']['isfree'] = False
         model_params['mass']['init'] = 10**model_params['logmass']['init']
