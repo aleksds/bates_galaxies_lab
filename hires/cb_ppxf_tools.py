@@ -4,6 +4,7 @@ from os import path
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
+from uncertainties import ufloat
 
 import ppxf as ppxf_package
 from ppxf.ppxf import ppxf
@@ -34,6 +35,7 @@ def ppxf_example_population_gas_sdss(file,tie_balmer, limit_doublets):
     # z = float(hdu[1].header["Z"]) # SDSS redshift estimate
     z = hdu['SPECOBJ'].data['Z'][0]
 
+
     # Only use the wavelength range in common between galaxy and stellar library.
     coadd = hdu['COADD'].data
     fluxdata = coadd['flux']
@@ -42,6 +44,10 @@ def ppxf_example_population_gas_sdss(file,tie_balmer, limit_doublets):
     flux = fluxdata[mask]
     galaxy = flux / np.median(flux)  # Normalize spectrum to avoid numerical issues
     wave = wavelength[mask]
+
+    # Get an array with the uncertainty
+    uncert_arr = np.sqrt(1/coadd['ivar'])[mask]
+    uncert = np.array([ufloat(flux[x], uncert_arr[x]) for x in range(0, len(uncert_arr))])
 
     # The SDSS wavelengths are in vacuum, while the MILES ones are in air.
     # For a rigorous treatment, the SDSS vacuum wavelengths should be
@@ -180,7 +186,7 @@ def ppxf_example_population_gas_sdss(file,tie_balmer, limit_doublets):
     if plotpp:
         plot_pp()
 
-    return [pp,wave,galaxy,flux]
+    return [pp,wave,galaxy,flux,uncert]
 
 
 #gets flux value (does the sums and stuff). Parameters: file of galaxy, wavelength of emission line from which flux
@@ -194,6 +200,8 @@ def pp_get_flux(wavel,wspread,fits_data):
     #make galaxy not normalized
     # galaxy = fits_data[2]*np.median(fits_data[2])
     gas_fit = pp.gas_bestfit
+    gal_fit = pp.bestfit
+    continuum = (gal_fit - gas_fit)*np.median(fluxdata)
     flux = galaxy
     lam=wave
     #next we get indeces to mark regions over which we can find the peak of the fit
@@ -219,8 +227,19 @@ def pp_get_flux(wavel,wspread,fits_data):
     dlambda = np.array([lam[x+1]-lam[x] for x in range(em_lowlim,em_maxlim+1)])
     #continuum_area = np.sum(float(continuum_const)*dlambda)
     #prelim_flux_integral = np.sum(dlambda*flux[em_lowlim:em_maxlim+1])
-    flux_val = np.sum(dlambda*fluxdata[em_lowlim:em_maxlim+1])
+    flux_area = np.sum(dlambda*fluxdata[em_lowlim:em_maxlim+1])
+    cont_area = np.sum(dlambda * continuum[em_lowlim:em_maxlim+1])
+    flux_val = flux_area - cont_area
     #flux_val = prelim_flux_integral-continuum_area
+
+    ##### Uncertainty Calculations #### (separated as they came after the completion of the first stage of this code)
+    flux_uncert = fits_data[4]
+
+    # It would be good if we had uncertainty for the ppxf fits to take into account
+    flux_area_unc = np.sum(dlambda * flux_uncert[em_lowlim:em_maxlim + 1])
+    flux_val_unc = flux_area_unc - cont_area
+
+    #### /Uncertainty Calculations ####
 
     ##print tests
     #print(lam[cont_low:cont_high])
@@ -228,9 +247,10 @@ def pp_get_flux(wavel,wspread,fits_data):
     continuum_const = [pp.bestfit,pp.gas_bestfit,fluxdata]
 
     plot_data = [em_lowlim,em_maxlim,cont_low,cont_high,flux,lam,continuum_const]
+    #flux_vals = [flux_val, flux_val_unc]
 
 
-    return flux_val, plot_data
+    return flux_val_unc, plot_data
 
 
 

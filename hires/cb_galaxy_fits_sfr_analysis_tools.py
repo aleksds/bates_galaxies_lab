@@ -1,11 +1,15 @@
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
+from uncertainties.umath import *
+from uncertainties import ufloat_fromstr
+from uncertainties import ufloat
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.constants import c as lightspeed
 from scipy.constants import parsec as prsc
 from astropy.cosmology import WMAP9 as cosmo
 import astropy.units as u
+import matplotlib
 import matplotlib.gridspec as gridspec
 
 #Functions
@@ -89,23 +93,41 @@ def wspread(filepath,emission,vel):
 
 #gets the title for the figure based on the file that is being plotted
 def get_plot_title(filepath):
+    fits_file = fits.open(filepath)
+
     file_char_list = list(filepath)
     spec_pos = filepath.find('spec-')
     title_list = file_char_list[spec_pos:-5]
     title = ''.join(title_list)
-
+    headers = fits_file['PRIMARY'].header
+    hh = str(int(headers['PLUG_RA'] * (24/360)))
+    if not (len(hh) == 2):
+        hh = '0' + hh
+    mm = str(int((headers['PLUG_RA'] * (24/360) * 60) % 60))
+    if not (len(mm) == 2):
+        mm = '0' + mm
+    ss = str(np.round((headers['PLUG_RA'] * (24/360) * 60 * 60) % 60, decimals=2))
+    if not (len(str(int(np.round((headers['PLUG_RA'] * (24/360) * 60 * 60) % 60)))) == 2):
+        ss = '0' + ss
+    title = title + '/J' + hh + mm + ss
     return title
 
 #plots a wavelength range, shows continuum constant and the range over which the emission is calculated to extend
 def plot_area_of_interest(plot_data,txt_data,filepath,ppxf_data=False):
+    matplotlib.rcParams.update({'font.size': 12})
+
     #Get relevant stuff for generating a figure
     em_lowlim,em_maxlim,cont_low,cont_high,flux,lam,cont_const = plot_data[0],plot_data[1],plot_data[2],plot_data[3],\
                                                                  plot_data[4],plot_data[5],plot_data[6]
-    hbflux,hblum,sfr = txt_data[0],txt_data[1],txt_data[2]
+    hbflux,hblum,sfr_ufloat = txt_data[0],txt_data[1],txt_data[2]
+    sfr = sfr_ufloat.n
+    sfr_u = sfr_ufloat.s
     halum = hblum*2.468
     lam_c = lam[cont_low:cont_high+1]
     flux_c = flux[cont_low:cont_high+1]
     plot_title = get_plot_title(filepath)
+
+    fluxdata = cont_const[2]
 
     #Generating that figure
     #with PdfPages('Emissionline.pdf') as pdf:
@@ -122,7 +144,8 @@ def plot_area_of_interest(plot_data,txt_data,filepath,ppxf_data=False):
         ax.plot(lam_c, galfit_c, color='orange', linewidth=0.3)
         ax.plot(lam_c, gasfit_c, color='red', linewidth=0.3)
         ax.plot(lam_c, galfit_c-gasfit_c, color='blue', linewidth=0.3)
-        ax.plot(lam_c, cont_const[2][cont_low:cont_high+1], color='grey', linewidth=0.3)
+        ax.plot(lam_c, (galfit_c-gasfit_c)*np.median(fluxdata), color='blue', linewidth=0.3)
+        ax.plot(lam_c, fluxdata[cont_low:cont_high+1], color='grey', linewidth=0.3)
     elif not ppxf_data:
         plt.axhline(y=cont_const, color='blue', label='Continuum', alpha=0.4)
 
@@ -145,7 +168,7 @@ def plot_area_of_interest(plot_data,txt_data,filepath,ppxf_data=False):
     ax4.axes.axis('off')
 
     ax5 = fig.add_subplot(6, 2, 10)
-    ax5.text(0,1,'Star formation rate: '+str(sfr), fontsize=11,wrap=True)
+    ax5.text(0,1,'Star formation rate: '+str(sfr_ufloat), fontsize=11,wrap=True)
     ax5.axes.axis('off')
 
 
@@ -190,10 +213,24 @@ def get_lum(filepath,flux_value):
     return luminosity
 
 #function got get sfr
-def get_sfr_hbeta(hbet_lum):
+def get_sfr_hbeta(hbet_lum_u):
+    #print('HBETU',hbet_lum_u)
+    hbet_lum = ufloat_fromstr(str(hbet_lum_u))
     halpha_lum = hbet_lum*2.468
-    sfrlog = np.log10(halpha_lum)-41.27
-    sfr = 10**sfrlog
+    #print('HALPHALUM TYPE ',type(halpha_lum))
+    if halpha_lum > 0:
+        sfrlog = log10(halpha_lum)-41.27
+        sfr = 10 ** sfrlog
+
+    elif halpha_lum <= 0:
+        sfrlog = -1000
+        print("Error: Negative luminosity; corresponding sfr has been set to 1/1000")
+        sfr = ufloat(0,0)
+    else:
+        print("--------------->Halpha lum isn't a number. Type: ",type(halpha_lum))
+        sfr = ufloat(0,0)
+
+
 
     return sfr
 

@@ -14,7 +14,7 @@ ppcbfits = importlib.import_module('cb_ppxf_tools')
 #Execution sequence
 
 
-with PdfPages('Emissionlines_PPXF.pdf') as pdf:
+with PdfPages('Emissionlines_PPXF_U.pdf') as pdf:
     for file in fitsfiles:
         print('\nPlotting file: ', file, '..........')
         filepath = galfolpath + file

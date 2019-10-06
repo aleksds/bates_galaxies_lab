@@ -20,6 +20,8 @@ import scipy.constants as const
 from matplotlib.patches import Rectangle
 from os import listdir
 from matplotlib.backends.backend_pdf import PdfPages
+from uncertainties import ufloat
+from uncertainties import unumpy as unp
 
 
 #### Variables that I could generalize
@@ -41,12 +43,25 @@ def calc_vel(lam_or,lam_obs): # lambda in units of Angstroms, return vel in km/s
 
     return velocity
 
+#gets the title for the figure based on the file that is being plotted
 def get_plot_title(filepath):
+    fits_file = fits.open(filepath)
+
     file_char_list = list(filepath)
     spec_pos = filepath.find('spec-')
     title_list = file_char_list[spec_pos:-5]
     title = ''.join(title_list)
-
+    headers = fits_file['PRIMARY'].header
+    hh = str(int(headers['PLUG_RA'] * (24/360)))
+    if not (len(hh) == 2):
+        hh = '0' + hh
+    mm = str(int((headers['PLUG_RA'] * (24/360) * 60) % 60))
+    if not (len(mm) == 2):
+        mm = '0' + mm
+    ss = str(np.round((headers['PLUG_RA'] * (24/360) * 60 * 60) % 60, decimals=2))
+    if not (len(str(int(np.round((headers['PLUG_RA'] * (24/360) * 60 * 60) % 60)))) == 2):
+        ss = '0' + ss
+    title = title + '/J' + hh + mm + ss
     return title
 
 
@@ -95,6 +110,7 @@ def main(file):
 
     yl_fit = mgl_fit(zmg_wave*u.AA)
     yr_fit = mgr_fit(zmg_wave*u.AA)
+    gauss_plot = (yr_fit/u.Jy-np.median(fluxdata[zmg_mask]))*(-1)
 
     square_l = closest_position(zmg_wave[np.where(yl_fit == np.amax(yl_fit))]-(3*std),zmg_wave)[0][0]
     square_r = closest_position(zmg_wave[np.where(yl_fit == np.amax(yl_fit))]+(3*std),zmg_wave)[0][0]
@@ -216,7 +232,7 @@ def main(file):
     plt.close('all')
     fig = plt.figure()
     ax = fig.add_subplot(1, 2, 1)
-    matplotlib.rcParams.update({'font.size': 4})
+    matplotlib.rcParams.update({'font.size': 6})
     plot_title = get_plot_title(file)
     fig.suptitle(plot_title)
 
@@ -228,16 +244,21 @@ def main(file):
                zmg_wave[np.where(yl_fit == np.amax(yl_fit))]+(3*std), alpha=0.3, color='C5', label='Area of emission')
 
     ax.add_patch(rect)
-
+    ax.grid(True)
 
     ax.axvline(x=zmg_wave[np.where(yl_fit == np.amax(yl_fit))], color='blue', label='Centroid', alpha=0.4)
     ax.axhline(y=np.median(fluxdata[zmg_mask]), color='cyan', label='Continuum', alpha=0.4)
 
-    ax.plot(zmg_wave, zmg_flux, color='black', linewidth=0.3)
-    ax.plot(zmg_wave, yl_fit, color='green', linewidth=0.3)
-    ax.plot(zmg_wave, yr_fit, color='orange', linewidth=0.3)
-    ax.plot(zmg_wave, fluxdata[zmg_mask], color='m', linewidth=0.3)
+    #ax.plot(zmg_wave, zmg_flux, color='black', linewidth=0.3)
+    # ax.plot(zmg_wave, yl_fit, color='green', linewidth=0.3)
+    #ax.plot(zmg_wave, yr_fit, color='orange', linewidth=0.3)
+    ax.plot(zmg_wave, gauss_plot, color='m', linewidth=0.3)
+    ax.plot(zmg_wave, fluxdata[zmg_mask], color='black', linewidth=0.3)
     ax.set_title("General Information Plot; Centroid Vel: "+ str(centroid_vel) + r"$\frac{km}{s}$")
+    ax.tick_params(labelsize=6)
+    ax.set_xlabel("$\AA ngstr \ddot{o} ms$")
+    ax.set_ylabel("Flux [$10^{-17}$ erg/$cm^{2}$/s/$\AA$]")
+
 
     ax.legend()
 
@@ -249,8 +270,13 @@ def main(file):
     ax2.axvspan(zmg_wave[red_end - v50_indx_span],
                zmg_wave[red_end], alpha=0.3, color='m', label='Area of v50')
     ax2.set_title("v50 Info Plot; $v=$" + str(v50_vel) + r"$\frac{km}{s}$")
+    ax2.set_xlabel("$\AA ngstr \ddot{o} ms$")
+    ax2.set_ylabel("Flux [$10^{-17}$ erg/$cm^{2}$/s/$\AA$]")
+
 
     ax2.legend()
+    ax2.grid(True)
+
 
     ax3 = fig.add_subplot(2, 2, 4)
     ax3.plot(zmg_wave, fluxdata[zmg_mask], color='black', linewidth=0.3)
@@ -261,10 +287,14 @@ def main(file):
     ax3.axvspan(zmg_wave[red_end - v98_indx_span],
                zmg_wave[red_end], alpha=0.3, color='m', label='Area of v98')
     ax3.set_title("v98 Info Plot; $v=$" + str(v98_vel) + r"$\frac{km}{s}$")
+    ax3.set_xlabel("$\AA ngstr \ddot{o} ms$")
+    ax3.set_ylabel("Flux [$10^{-17}$ erg/$cm^{2}$/s/$\AA$]")
+
 
     ax3.legend()
+    ax3.grid(True)
 
-    plt.grid(True)
+
 
 galfolpath = 'C:/Users/Chris/Documents/GitHub/bates_galaxies_lab/hires/galaxies_fits/'
 fitsfiles = [f for f in listdir(galfolpath)]
