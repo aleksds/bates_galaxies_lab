@@ -17,7 +17,7 @@ nuc_best_mass =  np.array([10.27, 10.11,  10.41,  10.20,  10.11,  10.45,  10.51,
 nuc_lo_mass =     np.array([0.04,  0.06,   0.24,   0.16,   0.32,   0.07,   0.25,   0.20,  0.11,   0.13,   0.26,   0.07])
 nuc_up_mass =     np.array([0.05,  0.05,   0.29,   0.11,   0.33,   0.10,   0.15,   0.21,  0.11,   0.07,   0.15,   0.10])
 
-ext_best_mass =  np.array([10.66, 10.55,  10.12,  10.54,  10.67,  10.99,  10.43,  11.03,  10.63,   9.88,  10.98,  10.42])
+ext_best_mass =  np.array([10.66, 10.55,  10.12,  10.54,  10.67,  10.99,  10.43,  11.03,  10.63,  10.65,  10.98,  10.42])
 ext_lo_mass =     np.array([0.32,  0.26,   0.18,   0.14,   0.17,   0.16,   0.44,   0.16,   0.15,   0.47,   0.27,   0.25])
 ext_up_mass =     np.array([0.21,  0.19,   0.17,   0.13,   0.13,   0.10,   0.43,   0.15,   0.13,   0.47,   0.19,   0.20])
 
@@ -65,26 +65,36 @@ for i in range(0,len(data)):
 
 name = 'light_mass_frac.pdf'
 
+
+numbers = np.arange(110)/100.
+
 with PdfPages(name) as pdf:
     fig = plt.figure()
 
-    plt.scatter(frac_475, mass_frac, color='blue')
-    #plt.errorbar(frac_475, mass_frac, yerr=[diff_frac_lo, diff_frac_hi], xerr=func_475, color='blue', fmt='o')
-    #plt.errorbar(frac_475, mass_frac, xerr=func_814, fmt='o', color='blue')
-    plt.scatter(frac_814, mass_frac, color='green')
-    #plt.errorbar(frac_814, mass_frac, xerr=func_814, fmt='o', color='green')
-    plt.scatter(frac_160, mass_frac, color='red')
-    #plt.errorbar(frac_160, mass_frac, xerr=func_160, fmt='o', color='red')
-    plt.errorbar(frac_160, mass_frac, yerr=[diff_frac_lo, diff_frac_hi], xerr=func_160, color='red', fmt='o')
+    plt.scatter(frac_475, mass_frac, color='blue', marker='*', label='F475W')
+    #plt.errorbar(frac_475, mass_frac, yerr=[diff_frac_lo, diff_frac_hi], xerr=func_475, color='blue', fmt='*', elinewidth=1)
+    plt.errorbar(frac_475, mass_frac, xerr=func_814, fmt='*', color='blue',elinewidth=1)
+    plt.scatter(frac_814, mass_frac, color='green', marker='^', label='F814W')
+    #plt.errorbar(frac_814, mass_frac, xerr=func_814, fmt='^', color='green',elinewidth=1)
+    plt.errorbar(frac_814, mass_frac, yerr=[diff_frac_lo, diff_frac_hi], xerr=func_814, color='green', fmt='^', elinewidth=1)
+    plt.scatter(frac_160, mass_frac, color='red', marker='o', label='F160W')
+    plt.errorbar(frac_160, mass_frac, xerr=func_160, fmt='o', color='red', elinewidth=1)
+    #plt.errorbar(frac_160, mass_frac, yerr=[diff_frac_lo, diff_frac_hi], xerr=func_160, color='red', fmt='o', elinewidth=1)
+    plt.plot(numbers, numbers, color='black', label='mass fraction = light fraction')
     plt.xlabel('Fraction of light associated with compact starburst')
-    plt.ylabel('Fraction of stellar mass associated with nuclear starburst')
-    plt.xlim(0,1)
+    plt.ylabel('Fraction of stellar mass associated with compact starburst')
+    plt.xlim(0.35,1)
     plt.ylim(0,1)
+
     
     for i in range(0,len(galaxies)):
-        plt.text(frac_475[i], mass_frac[i], galaxies[i])
+        #plt.text(frac_475[i], mass_frac[i], galaxies[i])
+        plt.plot(np.array([frac_475[i], frac_814[i], frac_160[i]]), np.zeros(3)+mass_frac[i], color='gray', linestyle=':')
     
-    
+
+    plt.plot(np.array([frac_475[0], frac_814[0], frac_160[0]]), np.zeros(3)+mass_frac[0], color='gray', linestyle=':', label='range of light fractions')
+    plt.legend()
+        
     pdf.savefig()
     plt.close
 
