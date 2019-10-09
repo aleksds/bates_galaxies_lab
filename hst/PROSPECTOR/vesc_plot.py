@@ -16,16 +16,18 @@ nuc_up_mass =     np.array([0.04,  0.05,   0.29,   0.11,   0.34,   0.10,   0.15,
 nuc_lo_mass =     np.array([0.05,  0.06,   0.24,   0.16,   0.31,   0.07,   0.25,   0.20,  0.11,   0.13,   0.25,   0.07])
 
 #vflow = np.array([          1228,  1206,   2470,   1778,   1828,   1830,    875,   1211,   829,   2416,   1456,    606])
-vflow = np.array([           1600,  1700,   3000,   2100,   1828,   2250,   2000,   2050,  1350,   2600,   1900,   1100])
+#vflow = np.array([           1600,  1700,   3000,   2100,   1828,   2250,   2000,   2050,  1350,   2600,   1900,   1100])
+vflow = np.array([         1456.2, 1575.4, 2884.8, 1878.3, 2015.6, 1962.6, 1995.2, 1768.8,1151.2, 2374.1, 1915.1,  950.4])   
+
 
 nuc_up_mass = np.sqrt(nuc_up_mass**2 + 0.1**2)
 nuc_lo_mass = np.sqrt(nuc_lo_mass**2 + 0.1**2)
 
 tot_best_mass = np.array([10.57, 10.47, 10.67, 10.52, 10.57, 11.40, 10.53, 10.57, 10.79, 11.50, 10.94, 10.92])
 tot_up_mass = np.array([0.01, 0.01, 0.03, 0.03, 0.02, 0.11, 0.04, 0.02, 0.09, 0.10, 0.06, 0.02])
-tot_up_mass = np.sqrt(tot_up_mass**2 + 0.075**2)
+tot_up_mass = np.sqrt(tot_up_mass**2 + 0.1**2)
 tot_lo_mass = np.array([0.01, 0.01, 0.03, 0.02, 0.01, 0.11, 0.03, 0.02, 0.06, 0.11, 0.06, 0.03])
-tot_lo_mass = np.sqrt(tot_lo_mass**2 + 0.075**2)
+tot_lo_mass = np.sqrt(tot_lo_mass**2 + 0.1**2)
 
 re_best = np.array([0.0151, 0.0149, 0.0105, 0.0099, 0.0156, 0.0257, 0.0127, 0.0118, 0.0387, 0.1289, 0.0216, 0.0145]) 
 re_unc = np.array([0.0031, 0.0033, 0.0027, 0.0030, 0.0041, 0.0038, 0.0023, 0.0025, 0.0064, 0.0157, 0.0046, 0.0045])
@@ -58,18 +60,21 @@ with PdfPages(filename) as pdf:
     vel_array = np.arange(101)*30
 
     plt.scatter(vflow, vesc_best)
-    plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo, vesc_hi-vesc_best], fmt='o', elinewidth=1)
+    plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo, vesc_hi-vesc_best], fmt='.', elinewidth=1, label=r'$r_e$ and mass uncertainty')
     #plt.plot(vel_array, vel_array/3, linestyle='--')
     #plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo_mass, vesc_hi_mass-vesc_best], fmt='o')    
-    plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo_re, vesc_hi_re-vesc_best], fmt='o', elinewidth=3)
-    plt.xlim(800,3200)
-    plt.ylim(0,2500)
-    plt.xlabel('Observed Outflow Velocity [km/s]')
-    plt.ylabel('Central Escape Velocity [km/s]')
-    plt.plot(vel_array, vel_array)
+    plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo_re, vesc_hi_re-vesc_best], fmt='o', elinewidth=3, label=r'$r_e$ uncertainty')
+    plt.xlim(800,3000)
+    plt.ylim(0,2900)
+    plt.xlabel(r'Observed Outflow Velocity [km s$^{-1}$]', fontsize=13)
+    plt.ylabel(r'Central Escape Velocity [km s$^{-1}$]', fontsize=13)
+    plt.plot(vel_array, vel_array, label=r'$v_{escape} = v_{outflow}$')
+    #plt.plot(vel_array, vel_array/3, label=r'$3\times v_{esc} = v_{out}$')
+    plt.tick_params(axis='both', which='major', labelsize=12)
+    plt.legend(fontsize=12, loc='upper left')
 
-    for i in range(0, len(galaxies)):
-        plt.text(vflow[i], vesc_best[i], galaxies[i])
+    #for i in range(0, len(galaxies)):
+    #    plt.text(vflow[i], vesc_best[i], galaxies[i])
     
     pdf.savefig()
     plt.close()

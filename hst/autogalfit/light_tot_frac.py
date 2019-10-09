@@ -21,6 +21,10 @@ nuc_up_mass =     np.array([0.05,  0.05,   0.29,   0.11,   0.33,   0.10,   0.15,
 #ext_lo_mass =     np.array([0.32,  0.26,   0.18,   0.14,   0.17,   0.16,   0.44,   0.16,   0.15,   0.47,   0.27,   0.25])
 #ext_up_mass =     np.array([0.21,  0.19,   0.17,   0.13,   0.13,   0.10,   0.43,   0.15,   0.13,   0.47,   0.19,   0.20])
 
+tremonti_mass =  np.array([11.03, 10.98,  10.74,  10.69,  10.73,  10.71,  10.98,  10.96,  10.91,  10.98,  10.92,  11.18])
+tremonti_vavg = np.array([1131.2,1210.1, 2395.3, 1172.4, 1359.8, 1543.7,  766.9, 1378.9,  807.1, 1437.5, 1056.2,  343.8])   
+tremonti_vmax = np.array([1456.2,1575.4, 2884.8, 1878.3, 2015.6, 1962.6, 1995.2, 1768.8, 1151.2, 2374.1, 1915.1,  950.4])   
+
 tot_best_mass =  np.array([10.71, 10.59,  10.75,  10.74,  10.68,  11.34,  10.61,  10.65,  10.97,  11.34,  11.16,  11.12])
 tot_lo_mass =     np.array([0.01,  0.01,   0.02,   0.03,   0.02,   0.02,   0.02,   0.03,   0.02,   0.01,   0.05,   0.05])
 tot_up_mass =     np.array([0.02,  0.02,   0.02,   0.04,   0.02,   0.02,   0.02,   0.02,   0.02,   0.02,   0.04,   0.05])
@@ -123,8 +127,10 @@ with PdfPages(name) as pdf:
 
     yo = np.arange(101)/50+9.5
     
-    plt.scatter(tot_best_mass, nuc_best_mass)
-    plt.errorbar(tot_best_mass, nuc_best_mass, yerr=[np.sqrt(nuc_lo_mass**2+0.1**2), np.sqrt(nuc_up_mass**2+0.1**2)], xerr=[np.sqrt(tot_lo_mass**2+0.1**2), np.sqrt(tot_up_mass**2+0.1**2)], fmt='o', elinewidth=1)
+    #plt.scatter(tot_best_mass, nuc_best_mass)
+    plt.scatter(tremonti_mass, nuc_best_mass)
+    #plt.errorbar(tot_best_mass, nuc_best_mass, yerr=[np.sqrt(nuc_lo_mass**2+0.1**2), np.sqrt(nuc_up_mass**2+0.1**2)], xerr=[np.sqrt(tot_lo_mass**2+0.1**2), np.sqrt(tot_up_mass**2+0.1**2)], fmt='o', elinewidth=1)
+    plt.errorbar(tremonti_mass, nuc_best_mass, yerr=[np.sqrt(nuc_lo_mass**2+0.1**2), np.sqrt(nuc_up_mass**2+0.1**2)], xerr=[np.sqrt(tot_lo_mass**2+0.1**2), np.sqrt(tot_up_mass**2+0.1**2)], fmt='o', elinewidth=1)
 
     plt.plot(yo,yo)
     plt.plot(yo,yo, label=r'${M}_{*,central}=M_{*,total}$' )
