@@ -235,7 +235,8 @@ def subtriangle(results, showpars=None, truths=None, start=0, thin=2,
     corner_kwargs.update(kwargs)
     
     fig = triangle.corner(xx, labels=niceparnames, truths=xx_truth,
-                          quantiles=[0.25, 0.5, 0.75], weights=wghts,
+                          #quantiles=[0.25, 0.5, 0.75], weights=wghts,
+                          quantiles=[0.16, 0.5, 0.84], weights=wghts,
                           color='k', **corner_kwargs)
 
     if png:
@@ -410,7 +411,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
 
         # Initialize with sensible numbers.
         model_params['tau']['init'] = 10.0
-        model_params['tage']['init'] = 1.0
+        model_params['tage']['init'] = 2.0
         model_params['logzsol']['init'] = 0.2
 
         # optimize log-stellar mass, not linear stellar mass
@@ -425,7 +426,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         
         # Adjust the prior ranges.
         model_params['tau']['prior'] = priors.LogUniform(mini=0.1, maxi=30.0)
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.3, maxi=10.0)
+        model_params['tage']['prior'] = priors.LogUniform(mini=1.0, maxi=7.0)
         model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         #print('HACK!!!!!!!!!!!!!')
@@ -449,7 +450,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         
         model_params['fburst']['isfree'] = True
         model_params['fburst']['init'] = 0.1
-        model_params['fburst']['prior'] = priors.TopHat(mini=0.0, maxi=1.0)
+        model_params['fburst']['prior'] = priors.TopHat(mini=0.0, maxi=0.5)
 
         model_params['fage_burst']['isfree'] = True
         model_params['fage_burst']['init'] = 0.9
