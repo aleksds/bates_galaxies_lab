@@ -436,7 +436,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
 
         # Initialize with sensible numbers.
         model_params['tau']['init'] = 10.
-        model_params['tage']['init'] = 1.0 # --> 0.1
+        model_params['tage']['init'] = 2.0 # --> 0.1
         #model_params['logzsol']['init'] = 0.2
 
         model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
@@ -454,7 +454,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         
         # Adjust the prior ranges.
         model_params['tau']['prior'] = priors.LogUniform(mini=0.1, maxi=30.0) # 0.01 --> 0.001
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.01, maxi=10.0) # 0.01 --> 0.001, 10.0 --> 0.1
+        model_params['tage']['prior'] = priors.LogUniform(mini=1.0, maxi=7.0) # 0.01 --> 0.001, 10.0 --> 0.1
         #model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         add_duste = {"N": 1, "isfree": False, "init": False}
@@ -471,7 +471,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
 
     def base_ssp():
         model_params = TemplateLibrary['ssp']
-        model_params['tage']['init'] = 1.0
+        model_params['tage']['init'] = 2.0
         #model_params['logzsol']['init'] = 0.2
 
         model_params['logzsol'] = {"N": 1, "isfree": False, "init": 0}
@@ -485,7 +485,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         model_params['mass']['depends_on'] = logmass2mass
 
         # Adjust prior ranges
-        model_params['tage']['prior'] = priors.LogUniform(mini=0.01, maxi=10.0) # 0.01 --> 0.001, 10.0 --> 0.1
+        model_params['tage']['prior'] = priors.LogUniform(mini=1.0, maxi=7.0) # 0.01 --> 0.001, 10.0 --> 0.1
         #model_params['logzsol']['prior'] = priors.TopHat(mini=-0.5, maxi=0.3)
 
         add_duste = {"N": 1, "isfree": False, "init": False}
@@ -510,7 +510,7 @@ def load_model(obs, template_library='delayed-tau', verbose=False):
         
         model_params['fburst']['isfree'] = True
         model_params['fburst']['init'] = 0.1
-        model_params['fburst']['prior'] = priors.TopHat(mini=0.0, maxi=1.0)
+        model_params['fburst']['prior'] = priors.TopHat(mini=0.0, maxi=0.5)
 
         model_params['fage_burst']['isfree'] = True
         model_params['fage_burst']['init'] = 0.9
