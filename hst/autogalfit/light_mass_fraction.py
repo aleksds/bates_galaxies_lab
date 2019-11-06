@@ -88,7 +88,7 @@ with PdfPages(name) as pdf:
 
     
     for i in range(0,len(galaxies)):
-        #plt.text(frac_475[i], mass_frac[i], galaxies[i])
+        plt.text(frac_475[i], mass_frac[i], galaxies[i])
         plt.plot(np.array([frac_475[i], frac_814[i], frac_160[i]]), np.zeros(3)+mass_frac[i], color='gray', linestyle=':')
     
 
