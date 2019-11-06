@@ -47,5 +47,16 @@ with PdfPages(filename) as pdf:
 
     pdf.savefig()
     plt.close()
+
+
+    fig = plt.figure()
+    
+    plt.scatter(ebv, (ebv-phot[1].data['EBV_MW'])/ebv)
+    plt.xlabel('E(B-V) from SFDQuery()')
+    plt.ylabel('EBV_MW % difference (SFDQuery - EBV_SFRD)/SFDQuery')
+    #plt.ylim([-0.05, 0.05])
+
+    pdf.savefig()
+    plt.close()
     
 os.system('open %s &' % filename)
