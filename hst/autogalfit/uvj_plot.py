@@ -14,6 +14,8 @@ with PdfPages(filename) as pdf:
     
     fig = plt.figure()
 
+    #test_u_flux = 10.**(totdata['umag'])
+    
     ext_uv_color = extdata['umag']-extdata['vmag']
     ext_vj_color = extdata['vmag']-extdata['jmag']
 
@@ -29,8 +31,8 @@ with PdfPages(filename) as pdf:
     nuc_uv_err = np.sqrt(nucdata['uerr']**2+nucdata['verr']**2)
     nuc_vj_err = np.sqrt(nucdata['verr']**2+nucdata['jerr']**2)
 
-    tot_uv_err = np.sqrt(totdata['uerr']**2+totdata['verr']**2+0.02**2)
-    tot_vj_err = np.sqrt(totdata['verr']**2+totdata['jerr']**2+0.02**2)
+    tot_uv_err = np.sqrt(totdata['uerr']**2+totdata['verr']**2+0.03**2)
+    tot_vj_err = np.sqrt(totdata['verr']**2+totdata['jerr']**2+0.03**2)
     
     #plt.scatter(ext_vj_color, ext_uv_color, color='red')
     plt.errorbar(ext_vj_color, ext_uv_color, xerr=ext_vj_err, yerr=ext_uv_err, fmt='o', marker=',', elinewidth=1, color='red', label='extended')
