@@ -6,6 +6,7 @@ from astropy.io import ascii
 
 extdata = ascii.read('bgl_uvj_ext.dat')
 nucdata = ascii.read('bgl_uvj_nuc.dat')
+totdata = ascii.read('bgl_uvj_tot.dat')
 
 filename = 'uvj_plot.pdf'
 
@@ -18,18 +19,28 @@ with PdfPages(filename) as pdf:
 
     nuc_uv_color = nucdata['umag']-nucdata['vmag']
     nuc_vj_color = nucdata['vmag']-nucdata['jmag']
+
+    tot_uv_color = totdata['umag']-totdata['vmag']
+    tot_vj_color = totdata['vmag']-totdata['jmag']
     
     ext_uv_err = np.sqrt(extdata['uerr']**2+extdata['verr']**2)
     ext_vj_err = np.sqrt(extdata['verr']**2+extdata['jerr']**2)
 
     nuc_uv_err = np.sqrt(nucdata['uerr']**2+nucdata['verr']**2)
     nuc_vj_err = np.sqrt(nucdata['verr']**2+nucdata['jerr']**2)
+
+    tot_uv_err = np.sqrt(totdata['uerr']**2+totdata['verr']**2+0.02**2)
+    tot_vj_err = np.sqrt(totdata['verr']**2+totdata['jerr']**2+0.02**2)
     
     #plt.scatter(ext_vj_color, ext_uv_color, color='red')
-    plt.errorbar(ext_vj_color, ext_uv_color, xerr=ext_vj_err, yerr=ext_uv_err, fmt='o', marker='.', elinewidth=1, color='red', label='extended')
+    plt.errorbar(ext_vj_color, ext_uv_color, xerr=ext_vj_err, yerr=ext_uv_err, fmt='o', marker=',', elinewidth=1, color='red', label='extended')
 
     #plt.scatter(nuc_vj_color, nuc_uv_color, color='blue', marker='*')
     plt.errorbar(nuc_vj_color, nuc_uv_color, xerr=nuc_vj_err, yerr=nuc_uv_err, fmt='o', marker='*', elinewidth=1, color='blue', label='central')
+
+    #plt.scatter(tot_vj_color, tot_uv_color, color='green', marker='o')
+    plt.errorbar(tot_vj_color, tot_uv_color, xerr=tot_vj_err, yerr=tot_uv_err, fmt='o', marker='.', elinewidth=1, color='green', label='total')
+    
     
     plt.xlabel('V-J')
     plt.ylabel('U-V')
@@ -56,6 +67,7 @@ with PdfPages(filename) as pdf:
     #for i in range(0, len(extdata)):
     #    plt.text(ext_vj_color[i], ext_uv_color[i], extdata['Galaxy'][i])
     #    plt.text(nuc_vj_color[i], nuc_uv_color[i], nucdata['Galaxy'][i])
+    #    plt.text(tot_vj_color[i], tot_uv_color[i], totdata['Galaxy'][i])
     
     pdf.savefig()
     plt.close()
