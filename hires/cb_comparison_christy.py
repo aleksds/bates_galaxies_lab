@@ -175,8 +175,8 @@ for i in range(0, len(ourgals)):
 # plotting LV vs SFR
 ax3 = fig.add_subplot(2, 2, 3)
 ax3.scatter(ChrstUmehSFR, vf)
-ax3.set_xlabel("Christy SFR")
-ax3.set_ylabel(r"$\nu$ $L_{\nu}$")
+ax3.set_xlabel(r"Christy SFR $\frac{M_{\bigodot}}{year}$")
+ax3.set_ylabel(r"$\nu$ $L_{\nu}$ $\frac{erg}{s}$")
 
 # -------------------- PLOT 4
 # Plotting my velocities versus Christy's
