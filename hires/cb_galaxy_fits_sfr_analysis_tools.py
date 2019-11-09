@@ -1,6 +1,8 @@
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
+import importlib
+
 from uncertainties.umath import *
 from uncertainties import ufloat_fromstr
 from uncertainties import ufloat
@@ -12,28 +14,39 @@ import astropy.units as u
 import matplotlib
 import matplotlib.gridspec as gridspec
 
+#Vars
+ppcbfits = importlib.import_module('cb_ppxf_tools')
+
+
 #Functions
 
 #looks for a specific lambda in array, returns the position of the closest value
-def cb_match_lambda(lam,element,dec=1):
-    where = ([],)
-    while len(where[0]) == 0:
-        where = np.where(np.around(lam, decimals=dec) == np.around(element, decimals=dec))
-        dec-=1
+# def cb_match_lambda(lam,element,dec=1):
+# def cb_match_lambda(lam,element,dec=1):
+#     where = ([],)
+#     while len(where[0]) == 0:
+#         where = np.where(np.around(lam, decimals=dec) == np.around(element, decimals=dec))
+#         dec-=1
+#
+#     #print('WHERE: ', where, ' TYPE: ', type(where))
+#     diff_arr = [np.abs(lam[x] - element) for x in where[0]]
+#     min_indx = np.where(diff_arr == np.amin(diff_arr))
+#     #print('MIN_INDX ', min_indx[0])
+#     closest_position = where[0][min_indx[0][0]]
+#
+#     return closest_position
 
-    #print('WHERE: ', where, ' TYPE: ', type(where))
-    diff_arr = [np.abs(lam[x] - element) for x in where[0]]
-    min_indx = np.where(diff_arr == np.amin(diff_arr))
-    #print('MIN_INDX ', min_indx[0])
-    closest_position = where[0][min_indx[0][0]]
+def cb_match_lambda(lam, element):
+    diff_arr = lam - element
+    closest_pos = np.where(np.abs(diff_arr) == np.amin(np.abs(diff_arr)))[0][0]
 
-    return closest_position
+    return closest_pos
 
 #gets some relevant data from the fits file (to avoid passing the data as argument as much as possible)
 def get_fits_data(filepath):
     fits_file = fits.open(filepath)
     coadd = fits_file['COADD'].data
-    specobj = fits_file['SPECOBJ'].data
+    specobj = fits_file[2].data #replacing 'SPECOBJ' with index 2 since galaxy J1506 doesn't have name SPECOBJ
     spzline = fits_file['SPZLINE'].data
     linewave = spzline['LINEWAVE']
     linename = spzline['LINENAME']
@@ -48,7 +61,7 @@ def get_quantities(filepath,emission_name):
     hb_ind = np.where(linename == emission_name)
 
     #HBWAV = spzline['LINEWAVE'][hb_ind]*(1+spzline['LINEZ'][hb_ind])
-    HBWAV = spzline['LINEWAVE'][hb_ind]*(1+specobj['Z'][0])
+    HBWAV = spzline['LINEWAVE'][hb_ind]*(1+ppcbfits.get_z(filepath))
 
     minw = specobj['WAVEMIN']
     maxw = specobj['WAVEMAX']
@@ -86,7 +99,7 @@ def wspread(filepath,emission,vel):
     indx = np.where(linename == emission)
     #not sure this one is correct
     # em_wav = linewave[indx]*(1+linez[indx])
-    em_wav = linewave[indx]*(1+specobj['Z'][0])
+    em_wav = linewave[indx]*(1+ppcbfits.get_z(filepath))
     spread = (vel*1000*em_wav)/lightspeed
 
     return spread, em_wav
@@ -204,8 +217,7 @@ def get_flux(filepath,wavel,wspread):
 
 #function to calculte flux
 def get_lum(filepath,flux_value):
-    coadd, specobj, spzline, linewave, linename, linez = get_fits_data(filepath)
-    current_z = specobj['Z'][0]
+    current_z = ppcbfits.get_z(filepath)
     lum_dis = (cosmo.luminosity_distance(current_z))*(1/u.Mpc)*(100*(prsc*10**6))
     #print('LUMDIST',lum_dis)
     luminosity = (flux_value*10**-17)*4*np.pi*(lum_dis**2)

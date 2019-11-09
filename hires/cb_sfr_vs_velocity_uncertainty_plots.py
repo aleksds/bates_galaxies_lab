@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 #Variables
 filepath = 'galaxies_fits/spec-0761-54524-0409.fits'
-galfolpath = 'C:/Users/Chris/Documents/GitHub/bates_galaxies_lab/hires/galaxies_fits/'
+galfolpath = 'C:/Users/Chris/Documents/GitHub/bates_galaxies_lab/hires/galaxies_fits_DR12/'
 fitsfiles = [f for f in listdir(galfolpath)]
 cbfits = importlib.import_module('cb_galaxy_fits_sfr_analysis_tools')
 ppcbfits = importlib.import_module('cb_ppxf_tools')

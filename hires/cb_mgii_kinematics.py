@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from astropy.io import fits
+import importlib
 
 import ppxf as ppxf_package
 from ppxf.ppxf import ppxf
@@ -22,6 +23,7 @@ from os import listdir
 from matplotlib.backends.backend_pdf import PdfPages
 from uncertainties import ufloat
 from uncertainties import unumpy as unp
+ppcbfits = importlib.import_module('cb_ppxf_tools')
 
 
 #### Variables that I could generalize
@@ -71,7 +73,8 @@ def main(file):
     hdu = fits.open(file)
     t = hdu[1].data
     # z = float(hdu[1].header["Z"]) # SDSS redshift estimate
-    z = hdu['SPECOBJ'].data['Z'][0]
+    # z = hdu['SPECOBJ'].data['Z'][0]
+    z= ppcbfits.get_z(filepath)
 
     mgII = 2799.12
     mgIIl = 2795.5
@@ -87,7 +90,7 @@ def main(file):
     wave = wavelength[mask]
 
 
-    specobj = hdu['SPECOBJ'].data
+    specobj = hdu[2].data #replacing 'SPECOBJ' with index 2 since  spec-6712-56421-0114 doesn't have name SPECOBJ
     spzline = hdu['SPZLINE'].data
     linename = spzline['LINENAME']
     linewave = spzline['LINEWAVE']
@@ -296,14 +299,19 @@ def main(file):
 
 
 
-galfolpath = 'C:/Users/Chris/Documents/GitHub/bates_galaxies_lab/hires/galaxies_fits/'
+galfolpath = 'C:/Users/Chris/Documents/GitHub/bates_galaxies_lab/hires/galaxies_fits_DR15/'
 fitsfiles = [f for f in listdir(galfolpath)]
 # spec-1305-52757-0191.fits is interesting. It might atcually have MgII
+# blacklist = ['spec-0326-52375-0382.fits',
+#              'spec-0566-52238-0319.fits',
+#              'spec-0639-52146-0388.fits',
+#              'spec-0986-52443-0580.fits',
+#              'spec-1305-52757-0191.fits']
+
 blacklist = ['spec-0326-52375-0382.fits',
              'spec-0566-52238-0319.fits',
              'spec-0639-52146-0388.fits',
-             'spec-0986-52443-0580.fits',
-             'spec-1305-52757-0191.fits']
+             'spec-0986-52443-0580.fits']
 
 with PdfPages('V50_V98.pdf') as pdf:
     for filename in fitsfiles:
