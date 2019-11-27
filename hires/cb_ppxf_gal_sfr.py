@@ -20,7 +20,7 @@ with PdfPages('Emissionlines_PPXF_U_DR15.pdf') as pdf:
         filepath = galfolpath + file
         data = cbfits.get_quantities(filepath,'H_beta')
         hb_spread, hb_wav = cbfits.wspread(filepath, 'H_beta', 400)
-        fits_data = ppcbfits.ppxf_example_population_gas_sdss(filepath,tie_balmer=True, limit_doublets=True)
+        fits_data = ppcbfits.ppxf_example_population_gas_sdss(filepath, tie_balmer=True, limit_doublets=True) # gets [pp,wave,norm_flux,flux,flux&uncert]
         hb_flux, plot_data = ppcbfits.pp_get_flux(hb_wav, hb_spread, fits_data)
         hb_lum = cbfits.get_lum(filepath, hb_flux)
         sfr = cbfits.get_sfr_hbeta(hb_lum)
