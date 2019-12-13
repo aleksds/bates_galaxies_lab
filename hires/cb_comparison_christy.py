@@ -8,6 +8,10 @@ from scipy.constants import parsec as prsc
 from scipy.constants import c as lightspeed
 import astropy.units as u
 import matplotlib.ticker as ticker
+import pandas as pd
+from uncertainties import ufloat_fromstr
+from uncertainties import ufloat
+from uncertainties import umath
 
 
 
@@ -33,6 +37,16 @@ ChristyV50 = ChristyTable[1].data['VAVG']
 ChristyV98 = ChristyTable[1].data['VMAX']
 ChristyAge = ChristyTable[1].data['LW_AGE']
 ChristyZ = ChristyTable[1].data['Z']
+
+# Importing data pertaining to Hg/Hb Ratios
+ratioscsv = pd.read_csv('Hb-Hg-ratios.csv')
+rat_str = np.array(ratioscsv['Hg/Hb Ratio'])
+rat_unc = np.array([ufloat_fromstr(i) for i in rat_str])
+ratiofullnames = ratioscsv['Unnamed: 0']
+rationames = np.array([x[21:26] for x in ratiofullnames])
+rationamenumbers = np.array([int(x[1:]) for x in rationames])
+ratio_indxs = np.argsort(rationamenumbers)
+
 
 # The strong_MgII_abs tells whether the flux goes to zero for this particular line. I write False for galaxies
 # Jose didn't include in his April Thesis Presentation: 1107, 1712, 3118
@@ -125,15 +139,29 @@ ChristyUmehMask = [True if i in umeh_shortnames else False for i in ShortNames]
 ChrstUmehSFR = ChristySFR[ChristyUmehMask]
 ##### Got Flux and ARrays to Plot ##########
 
+# ---------------- Getting the attenuation
+def attenuate(current_ratio):
+    if current_ratio > 0:
+        A_hbeta = (-2.5 / (4.60 - 5.12)) * umath.log10(0.469 / current_ratio) * 4.60
+    if current_ratio <= 0:
+        A_hbeta = ufloat(0, 0)
+
+    return A_hbeta
+A_hbeta = np.array([attenuate(r) for r in rat_unc])
+hb_correction = 10**(A_hbeta/2.5)
+sorted_hb_corr = hb_correction[ratio_indxs]
+sort_hb_corr_n = np.array([x.n for x in sorted_hb_corr])
+sort_hb_corr_s = np.array([x.s for x in sorted_hb_corr])
+
 
 # Plotting...
 plt.close('all')
 
 # fig = plt.figure(figsize=(12, 9))
-fig = plt.figure()
+fig = plt.figure(1)
 plt.tight_layout()
 
-# --------------- PLOT 1
+# ----------------------------- PLOT 1
 # Plotting Mass Tremonti vs Mass Pospector
 
 ax = fig.add_subplot(2, 3, 1)
@@ -163,7 +191,7 @@ ax.plot(np.linspace(9, 12, 16), np.linspace(9, 12, 16), "--", lw=0.5, color="bla
 ax.scatter(ourmass, mass_T)
 ax.errorbar(ourmass, mass_T, xerr=ourmasserr, ls='none')
 
-# --------------- PLOT 2
+# ------------------------------- PLOT 2
 # Plotting Stellar Age vs VMAX from Tremonti Data
 
 for i in range(0, len(ourgals)):
@@ -179,14 +207,14 @@ for i in range(0, len(ourgals)):
     if ShortNames[i] in ourgalnames:
         ax2.annotate(ourgals[i].name, (HiresAge[i]+0.02, HiresV98[i]-0.02))
 
-# ------------------ PLOT 3
+# ------------------------------- PLOT 3
 # plotting LV vs SFR
 ax3 = fig.add_subplot(2, 3, 3)
 ax3.scatter(ChrstUmehSFR, np.log10(vf*7.8e-10))
 ax3.set_xlabel(r"Tremonti SFR $log_{10}(\frac{M_{\bigodot}}{year})$")
 ax3.set_ylabel(r"$\nu$ $L_{\nu}$ $log_{10}(\frac{erg}{s})$")
 
-# -------------------- PLOT 4
+# ------------------------------- PLOT 4
 # Plotting my velocities versus Christy's
 
 #Old plot plotting VBradna vs VTremonti
@@ -205,10 +233,10 @@ ax4.scatter(((-1)*ourV98[v98_zero_mask])-ChristyV98[bradna_Cmask][v98_zero_mask]
 
 
 
-ax4.set_ylabel("Christy's Velocity")
-ax4.set_xlabel("Bradna Velocity")
+ax4.set_ylabel("Christy's Velocity " + r"$\frac{km}{s}$")
+ax4.set_xlabel("Bradna Velocity - Tremonti Velocity " + r"($\frac{km}{s}$)")
 
-# --------------- PLOT 5
+# -------------------------------- PLOT 5
 # Plotting SFR Hb versus SFR Tremonti
 ax4 = fig.add_subplot(2, 3, 5)
 ax4.plot(np.linspace(0, 3, 10), np.linspace(0, 3, 10), "--", lw=0.5, color="black", alpha=0.3)
@@ -217,7 +245,7 @@ ax4.scatter(ChristySFR[bradna_Cmask][strong_MgII_abs], np.log10(oursfr)[strong_M
 ax4.set_xlabel(r"Christy SFR $log_{10}(\frac{M_{\bigodot}}{year})$")
 ax4.set_ylabel(r"Bradna $SFR_{H\beta}$ $log_{10}(\frac{M_{\bigodot}}{year})$")
 
-# ---------------- PLOT 6
+# -------------------------------- PLOT 6
 # plt.close('all')
 # # fig = plt.figure(figsize=(12, 9))
 # fig = plt.figure()
@@ -248,6 +276,19 @@ ax5.tick_params(which='minor', color='grey', labelsize=8)
 
 ax5.grid(b=True, which='major', color='g', linestyle='-', alpha=0.2)
 ax5.grid(b=True, which='minor', color='purple', linestyle='--', alpha=0.2)
+
+
+# -------------- Plotting figure 2 for AAS 2019 poster
+aasfig = plt.figure(2)
+plt.tight_layout()
+
+ax6 = aasfig.add_subplot(1, 1, 1)
+ax6.plot(np.linspace(0, 20, 10), np.linspace(0, 20, 10), "--", lw=0.5, color="black", alpha=0.3)
+ax6.scatter((10**ChristySFR[bradna_Cmask])/oursfr, sort_hb_corr_n)
+ax6.set_xlabel(r"Tremonti SFR/Bradna SFR")
+ax6.set_ylabel(r"$10^{A(H\beta)/2.5}$")
+
+
 
 
 
