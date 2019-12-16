@@ -12,6 +12,7 @@ import pandas as pd
 from uncertainties import ufloat_fromstr
 from uncertainties import ufloat
 from uncertainties import umath
+from matplotlib.ticker import ScalarFormatter
 
 
 
@@ -207,7 +208,7 @@ for i in range(0, len(ourgals)):
     if ShortNames[i] in ourgalnames:
         ax2.annotate(ourgals[i].name, (HiresAge[i]+0.02, HiresV98[i]-0.02))
 
-# ------------------------------- PLOT 3
+# ------------------------------- PLOT 3 SFR vs nu_f
 # plotting LV vs SFR
 ax3 = fig.add_subplot(2, 3, 3)
 ax3.scatter(ChrstUmehSFR, np.log10(vf*7.8e-10))
@@ -278,15 +279,41 @@ ax5.grid(b=True, which='major', color='g', linestyle='-', alpha=0.2)
 ax5.grid(b=True, which='minor', color='purple', linestyle='--', alpha=0.2)
 
 
-# -------------- Plotting figure 2 for AAS 2019 poster
+# -------------- Plotting figure SFR ratio for AAS 2019 poster
 aasfig = plt.figure(2)
 plt.tight_layout()
 
+# ax6 = aasfig.add_subplot(1, 1, 1)
+# ax6.plot(np.linspace(0, 20, 10), np.linspace(0, 20, 10), "--", lw=0.5, color="black", alpha=0.3)
+# ax6.scatter((10**ChristySFR[bradna_Cmask])/oursfr, sort_hb_corr_n)
+# ax6.set_xlabel(r"Tremonti SFR/Bradna SFR")
+# ax6.set_ylabel(r"$10^{A(H\beta)/2.5}$")
 ax6 = aasfig.add_subplot(1, 1, 1)
-ax6.plot(np.linspace(0, 20, 10), np.linspace(0, 20, 10), "--", lw=0.5, color="black", alpha=0.3)
+ax6.plot(np.linspace(0, 50, 10), np.linspace(0, 50, 10), "--", lw=2, color="black", alpha=0.3)
 ax6.scatter((10**ChristySFR[bradna_Cmask])/oursfr, sort_hb_corr_n)
-ax6.set_xlabel(r"Tremonti SFR/Bradna SFR")
-ax6.set_ylabel(r"$10^{A(H\beta)/2.5}$")
+ax6.loglog()
+for axis in [ax6.xaxis, ax6.yaxis]:
+    axis.set_major_formatter(ScalarFormatter())
+ax6.set_xlabel(r"SFR(IR) / SFR(H$\beta$)", fontsize=14)
+ax6.set_ylim([1, 50])
+ax6.set_xlim([1, 50])
+ax6.set_ylabel(r"H$\beta$ correction $=10^{A(H\beta)/2.5}$", fontsize=14)
+
+# -------------- Plotting figure SFR ratio for AAS 2019 poster
+aasfig2 = plt.figure(3)
+plt.tight_layout()
+
+ax7 = aasfig2.add_subplot(1, 1, 1)
+ax7.plot(np.linspace(0, 500, 100), np.linspace(0, 500, 100), "--", lw=1.5, color="black", alpha=0.3)
+ax7.scatter(10**ChristySFR[bradna_Cmask], oursfr)
+#ax7.scatter(ChristySFR[bradna_Cmask][strong_MgII_abs], np.log10(oursfr)[strong_MgII_abs], s=4, c='red')
+ax7.loglog()
+for axis in [ax7.xaxis, ax7.yaxis]:
+    axis.set_major_formatter(ScalarFormatter())
+ax7.set_ylim([1, 545])
+ax7.set_xlim([1, 545])
+ax7.set_xlabel(r"SFR(IR)", fontsize=14)
+ax7.set_ylabel(r"$SFR(H\beta)$", fontsize=14)
 
 
 
