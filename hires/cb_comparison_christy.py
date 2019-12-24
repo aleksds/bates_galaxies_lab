@@ -91,6 +91,7 @@ ourmasserr = [[x.mass_lowunc for x in ourgals], [x.mass_upunc for x in ourgals]]
 ourV50 = np.array([x.v50 for x in ourgals])
 ourV98 = np.array([x.v98 for x in ourgals])
 oursfr = np.array([x.sfr for x in ourgals])
+oursfrunc = np.array([x.sfr_u for x in ourgals])
 strong_MgII_abs = np.array([x.strong_MgII_abs for x in ourgals])
 bradna_Cmask = [True if x in ourgalnames else False for x in ShortNames]
 strong_MgII_abs = np.array([x.strong_MgII_abs for x in ourgals])
@@ -101,6 +102,22 @@ TremontiGalaxies = np.array([[ShortNames[i], ChristyMass[i], ChristySFR[i], Chri
 mass_T = [float(x[1]) for x in TremontiGalaxies]
 HiresV98 = [ChristyV98[i] for i in range(0, len(ChristyV98)) if ShortNames[i] in ourgalnames]
 HiresAge = [ChristyAge[i] for i in range(0, len(ChristyAge)) if ShortNames[i] in ourgalnames]
+
+# Getting uncertainty for Tremonti SFR as 0.2 dex
+TremSFR = 10**ChristySFR  # since ChristySFR is log(SFR)
+tlsfr = 10**(ChristySFR-0.2)
+thsfr = 10**(ChristySFR+0.2)
+TremUpperSFRUnc = thsfr - TremSFR
+TremLowerSFRUnc = TremSFR - tlsfr
+# Propagating uncertainty for ratios
+TremSFR_u = np.array([ufloat(ChristySFR[x], 0.2) for x in range(0, len(ChristySFR))])
+oursfr_u = np.array([ufloat(oursfr[x], oursfrunc[x]) for x in range(0, len(oursfr))])
+SFR_ratio = (10**TremSFR_u[bradna_Cmask])/oursfr_u
+SFR_ratio_n = np.array([x.n for x in SFR_ratio])
+SFR_ratio_s = np.array([x.s for x in SFR_ratio])
+
+
+
 
 # The galaxies for which mass is 0 above have no mass calculated by prospector
 # The following statement fills in those blanks with mass from the Tremonti table
@@ -279,7 +296,7 @@ ax5.grid(b=True, which='major', color='g', linestyle='-', alpha=0.2)
 ax5.grid(b=True, which='minor', color='purple', linestyle='--', alpha=0.2)
 
 
-# -------------- Plotting figure SFR ratio for AAS 2019 poster
+# -------------- Plotting figure Hbeta correction vs SFR ratio for AAS 2019 poster
 aasfig = plt.figure(2)
 plt.tight_layout()
 
@@ -290,7 +307,17 @@ plt.tight_layout()
 # ax6.set_ylabel(r"$10^{A(H\beta)/2.5}$")
 ax6 = aasfig.add_subplot(1, 1, 1)
 ax6.plot(np.linspace(0, 50, 10), np.linspace(0, 50, 10), "--", lw=2, color="black", alpha=0.3)
-ax6.scatter((10**ChristySFR[bradna_Cmask])/oursfr, sort_hb_corr_n)
+ax6.scatter(SFR_ratio_n, sort_hb_corr_n)
+# Looking at the array "ourgals" and knowing beforhand how to label galaxies, I now define masks to index
+# Galaxies and their explanations
+lowsfr_mask = [2, 3]
+escapingrad_mask = [11, 12]
+dustatt_mask = [1, 8]
+ax6.scatter(SFR_ratio_n[lowsfr_mask], sort_hb_corr_n[lowsfr_mask], c='r', label='Low SFR')
+ax6.scatter(SFR_ratio_n[escapingrad_mask], sort_hb_corr_n[escapingrad_mask], c='g', label='Escaping Photons')
+ax6.scatter(SFR_ratio_n[dustatt_mask], sort_hb_corr_n[dustatt_mask], c='m', label='Dust')
+ax6.errorbar(SFR_ratio_n, sort_hb_corr_n, xerr=SFR_ratio_s, yerr=sort_hb_corr_s, ls='none', lw=0.5)
+
 ax6.loglog()
 for axis in [ax6.xaxis, ax6.yaxis]:
     axis.set_major_formatter(ScalarFormatter())
@@ -298,14 +325,17 @@ ax6.set_xlabel(r"SFR(IR) / SFR(H$\beta$)", fontsize=14)
 ax6.set_ylim([1, 50])
 ax6.set_xlim([1, 50])
 ax6.set_ylabel(r"H$\beta$ correction $=10^{A(H\beta)/2.5}$", fontsize=14)
+ax6.legend()
 
-# -------------- Plotting figure SFR ratio for AAS 2019 poster
+# -------------- Plotting figure SFR_Hbeta vs SFR_IR for AAS 2019 poster
 aasfig2 = plt.figure(3)
 plt.tight_layout()
 
 ax7 = aasfig2.add_subplot(1, 1, 1)
 ax7.plot(np.linspace(0, 500, 100), np.linspace(0, 500, 100), "--", lw=1.5, color="black", alpha=0.3)
-ax7.scatter(10**ChristySFR[bradna_Cmask], oursfr)
+ax7.scatter(10**ChristySFR[bradna_Cmask], oursfr, s=7)
+ax7.errorbar(10**ChristySFR[bradna_Cmask], oursfr, xerr=[TremUpperSFRUnc[bradna_Cmask], TremLowerSFRUnc[bradna_Cmask]],
+             yerr=oursfrunc, ls='none', lw=0.5)
 #ax7.scatter(ChristySFR[bradna_Cmask][strong_MgII_abs], np.log10(oursfr)[strong_MgII_abs], s=4, c='red')
 ax7.loglog()
 for axis in [ax7.xaxis, ax7.yaxis]:

@@ -188,6 +188,71 @@ def plot_area_of_interest(plot_data,txt_data,filepath,ppxf_data=False):
         #pdf.savefig(bbox_inches="tight")
         #plt.close('all')
 
+def plot_area_of_interestAAS(plot_data,txt_data,filepath,ppxf_data=False):
+    matplotlib.rcParams.update({'font.size': 12})
+
+    #Get relevant stuff for generating a figure
+    em_lowlim,em_maxlim,cont_low,cont_high,flux,lam,cont_const = plot_data[0],plot_data[1],plot_data[2],plot_data[3],\
+                                                                 plot_data[4],plot_data[5],plot_data[6]
+    hbflux,hblum,sfr_ufloat = txt_data[0],txt_data[1],txt_data[2]
+    sfr = sfr_ufloat.n
+    sfr_u = sfr_ufloat.s
+    halum = hblum*2.468
+    lam_c = lam[cont_low:cont_high+1]
+    flux_c = flux[cont_low:cont_high+1]
+    plot_title = get_plot_title(filepath)
+
+    fluxdata = cont_const[2]
+
+    #Generating that figure
+    #with PdfPages('Emissionline.pdf') as pdf:
+    fig = plt.figure()
+    fig.suptitle(plot_title)
+
+    ax = fig.add_subplot(1, 2, 1)
+    #ax.axvspan(lam[em_lowlim], lam[em_maxlim], alpha=0.5, color='red', label='Area of Emission')
+    ax.axvspan(lam[em_lowlim], lam[em_maxlim], alpha=0.5, color='red')
+    #ax.plot(lam_c, flux_c, color='black', linewidth=0.3)
+
+    if ppxf_data:
+        galfit_c = cont_const[0][cont_low:cont_high+1]
+        gasfit_c = cont_const[1][cont_low:cont_high+1]
+        tallstarfit = (galfit_c - gasfit_c) * np.median(fluxdata)
+        #ax.plot(lam_c, galfit_c, color='orange', linewidth=0.3)
+        ax.plot(lam_c, (gasfit_c*np.median(fluxdata))+tallstarfit[0], color='red', linewidth=0.3)
+        #ax.plot(lam_c, galfit_c-gasfit_c, color='blue', linewidth=0.3)
+        ax.plot(lam_c, tallstarfit, color='blue', linewidth=0.3)
+        ax.plot(lam_c, fluxdata[cont_low:cont_high+1], color='grey', linewidth=0.3)
+    elif not ppxf_data:
+        plt.axhline(y=cont_const, color='blue', label='Continuum', alpha=0.3)
+
+
+    ax.set_xlabel("$\AA ngstr \ddot{o} ms$")
+    ax.set_ylabel("Flux [$10^{-17}$ erg/$cm^{2}$/s/$\AA$]")
+    #plt.legend(loc=2)
+    ax.grid(True)
+
+    ax2 = fig.add_subplot(6, 2, 4)
+    ax2.text(0,1,'H beta flux: '+str(hbflux), fontsize=11,wrap=True)
+    ax2.axes.axis('off')
+
+    ax3 = fig.add_subplot(6, 2, 6)
+    ax3.text(0,1,'H beta luminosity: '+str(hblum), fontsize=11,wrap=True)
+    ax3.axes.axis('off')
+
+    ax4 = fig.add_subplot(6, 2, 8)
+    ax4.text(0,1,'H alpha luminosity: '+str(halum), fontsize=11,wrap=True)
+    ax4.axes.axis('off')
+
+    ax5 = fig.add_subplot(6, 2, 10)
+    ax5.text(0,1,'Star formation rate: '+str(sfr_ufloat), fontsize=11,wrap=True)
+    ax5.axes.axis('off')
+
+
+        #pdf.savefig(bbox_inches="tight")
+        #plt.close('all')
+
+
 #gets flux value (does the sums and stuff)
 def get_flux(filepath,wavel,wspread):
     coadd, specobj, spzline, linewave, linename, linez = get_fits_data(filepath)

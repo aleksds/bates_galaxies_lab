@@ -14,7 +14,7 @@ ppcbfits = importlib.import_module('cb_ppxf_tools')
 #Execution sequence
 
 
-with PdfPages('Emissionlines_PPXF_U_DR15.pdf') as pdf:
+with PdfPages('Emissionlines_PPXF_U_DR15_AAS.pdf') as pdf:
     for file in fitsfiles:
         print('\nPlotting file: ', file, '..........')
         filepath = galfolpath + file
@@ -24,7 +24,7 @@ with PdfPages('Emissionlines_PPXF_U_DR15.pdf') as pdf:
         hb_flux, plot_data = ppcbfits.pp_get_flux(hb_wav, hb_spread, fits_data)
         hb_lum = cbfits.get_lum(filepath, hb_flux)
         sfr = cbfits.get_sfr_hbeta(hb_lum)
-        cbfits.plot_area_of_interest(plot_data, [hb_flux, hb_lum, sfr], filepath, ppxf_data=True)
+        cbfits.plot_area_of_interestAAS(plot_data, [hb_flux, hb_lum, sfr], filepath, ppxf_data=True)
         pdf.savefig(bbox_inches="tight")
         plt.close('all')
         print('Success')
