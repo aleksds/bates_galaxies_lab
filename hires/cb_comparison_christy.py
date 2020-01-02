@@ -171,8 +171,15 @@ sorted_hb_corr = hb_correction[ratio_indxs]
 sort_hb_corr_n = np.array([x.n for x in sorted_hb_corr])
 sort_hb_corr_s = np.array([x.s for x in sorted_hb_corr])
 
+# Adding an additional 0.1 dex calibration error to our Hb sfr
+logoursfr = np.log10(oursfr)
+blsfr = 10**(logoursfr-0.1)
+bhsfr = 10**(logoursfr+0.1)
+BradUpperSFRUnc = bhsfr - oursfr
+BradLowerSFRUnc = oursfr - blsfr
 
-# Plotting...
+
+# ------------------------------- Plotting...
 plt.close('all')
 
 # fig = plt.figure(figsize=(12, 9))
@@ -307,24 +314,30 @@ plt.tight_layout()
 # ax6.set_ylabel(r"$10^{A(H\beta)/2.5}$")
 ax6 = aasfig.add_subplot(1, 1, 1)
 ax6.plot(np.linspace(0, 50, 10), np.linspace(0, 50, 10), "--", lw=2, color="black", alpha=0.3)
-ax6.scatter(SFR_ratio_n, sort_hb_corr_n)
+#ax6.scatter(SFR_ratio_n, sort_hb_corr_n)
 # Looking at the array "ourgals" and knowing beforhand how to label galaxies, I now define masks to index
 # Galaxies and their explanations
 lowsfr_mask = [2, 3]
 escapingrad_mask = [11, 12]
 dustatt_mask = [1, 8]
-ax6.scatter(SFR_ratio_n[lowsfr_mask], sort_hb_corr_n[lowsfr_mask], c='r', label='Low SFR')
-ax6.scatter(SFR_ratio_n[escapingrad_mask], sort_hb_corr_n[escapingrad_mask], c='g', label='Escaping Photons')
-ax6.scatter(SFR_ratio_n[dustatt_mask], sort_hb_corr_n[dustatt_mask], c='m', label='Dust')
+allmasks = [1, 2, 3, 8, 11, 12]
+ax6.scatter(SFR_ratio_n[lowsfr_mask], sort_hb_corr_n[lowsfr_mask], c='r', label='recently quenched SFR?', marker="x")
+ax6.scatter(SFR_ratio_n[escapingrad_mask], sort_hb_corr_n[escapingrad_mask], c='g',
+            label='diluted shells = escaping ionizing photons?', marker="P")
+ax6.scatter(SFR_ratio_n[dustatt_mask], sort_hb_corr_n[dustatt_mask], c='m',
+            label='explained by dust attenuation', marker="^")
+remaining_SFR_ratio_n = np.delete(SFR_ratio_n, allmasks)
+remaining_sort_hb_corr_n = np.delete(sort_hb_corr_n, allmasks)
+ax6.scatter(remaining_SFR_ratio_n, remaining_sort_hb_corr_n)
 ax6.errorbar(SFR_ratio_n, sort_hb_corr_n, xerr=SFR_ratio_s, yerr=sort_hb_corr_s, ls='none', lw=0.5)
 
 ax6.loglog()
 for axis in [ax6.xaxis, ax6.yaxis]:
     axis.set_major_formatter(ScalarFormatter())
-ax6.set_xlabel(r"SFR(IR) / SFR(H$\beta$)", fontsize=14)
+ax6.set_xlabel(r"SFR(IR) / SFR(H$\beta$)", fontsize=18)
 ax6.set_ylim([1, 50])
 ax6.set_xlim([1, 50])
-ax6.set_ylabel(r"H$\beta$ correction $=10^{A(H\beta)/2.5}$", fontsize=14)
+ax6.set_ylabel(r"H$\beta$ correction $=10^{A(H\beta)/2.5}$", fontsize=18)
 ax6.legend()
 
 # -------------- Plotting figure SFR_Hbeta vs SFR_IR for AAS 2019 poster
@@ -333,17 +346,17 @@ plt.tight_layout()
 
 ax7 = aasfig2.add_subplot(1, 1, 1)
 ax7.plot(np.linspace(0, 500, 100), np.linspace(0, 500, 100), "--", lw=1.5, color="black", alpha=0.3)
-ax7.scatter(10**ChristySFR[bradna_Cmask], oursfr, s=7)
-ax7.errorbar(10**ChristySFR[bradna_Cmask], oursfr, xerr=[TremUpperSFRUnc[bradna_Cmask], TremLowerSFRUnc[bradna_Cmask]],
-             yerr=oursfrunc, ls='none', lw=0.5)
+ax7.scatter(10**ChristySFR[bradna_Cmask], oursfr, s=15)
+ax7.errorbar(10**ChristySFR[bradna_Cmask], oursfr, xerr=[TremLowerSFRUnc[bradna_Cmask], TremUpperSFRUnc[bradna_Cmask]],
+             yerr=[(oursfrunc + BradLowerSFRUnc), (oursfrunc + BradUpperSFRUnc)], ls='none', lw=0.5)
 #ax7.scatter(ChristySFR[bradna_Cmask][strong_MgII_abs], np.log10(oursfr)[strong_MgII_abs], s=4, c='red')
 ax7.loglog()
 for axis in [ax7.xaxis, ax7.yaxis]:
     axis.set_major_formatter(ScalarFormatter())
-ax7.set_ylim([1, 545])
-ax7.set_xlim([1, 545])
-ax7.set_xlabel(r"SFR(IR)", fontsize=14)
-ax7.set_ylabel(r"$SFR(H\beta)$", fontsize=14)
+ax7.set_ylim([1, 200])
+ax7.set_xlim([1, 600])
+ax7.set_xlabel(r"SFR(IR)", fontsize=18)
+ax7.set_ylabel(r"$SFR(H\beta)$, no dust correction", fontsize=18)
 
 
 
