@@ -38,6 +38,10 @@ cosmo = FlatLambdaCDM(H0=70 * u.km / u.s / u.Mpc, Om0=0.3)
 
 re_best_kpc = re_best_arc / cosmo.arcsec_per_kpc_proper(z)
 
+sigma_star_corr = np.array([0.96/0.5, 0.97/0.5, 0.98/0.5, 0.99/0.5, 0.97/0.5, 0.93/0.5, 0.97/0.5, 0.98/0.5, 0.88/0.5, 0.58/0.5, 0.92/0.5, 0.96/0.5])
+
+sigma_star_1kpc = 10**nuc_best_mass / (2. * np.pi * 1**2) * sigma_star_corr
+
 sigma_star_best = 10**nuc_best_mass / (2. * np.pi * re_best_kpc**2) * u.kpc * u.kpc
 
 sigma_star_hi = 10**(nuc_best_mass + nuc_up_mass) / (2. * np.pi * (re_best_kpc-(re_unc/re_best*re_best_kpc))**2) * u.kpc * u.kpc
@@ -61,16 +65,33 @@ with PdfPages(filename) as pdf:
     fig = plt.figure()
 
     vel_array = np.arange(101)*30
+
+    plt.axvline(x=3e11, color='#2ca02c', linestyle='dashed')
+    plt.axvspan(3e11/2, 3e11*2, alpha=0.5, color='#2ca02c')
     
-    plt.scatter(sigma_star_best, vflow)
     #plt.plot(vel_array, vel_array)
-    plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_lo, sigma_star_hi-sigma_star_best], fmt='.', elinewidth=1, label=r'$r_e$ and mass uncertainty')
+
+    eb = plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_1kpc,np.zeros(len(vflow))], fmt='none', elinewidth=1, color='#ff7f0e', label=r'[$\Sigma_{1}$, $\Sigma_{r_e}$]')
+    eb[-1][0].set_linestyle('dotted') #eb1[-1][0] is the LineCollection objects of the errorbar lines
+
+    plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_lo, sigma_star_hi-sigma_star_best], fmt='none', elinewidth=1, label=r'$r_e$ and mass uncertainty')
     #plt.plot(vel_array, vel_array/3, linestyle='--')
     #plt.errorbar(vflow, sigma_star_best, yerr=[sigma_star_best-sigma_star_lo_mass, sigma_star_hi_mass-sigma_star_best], fmt='o')    
-    plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_lo_re, sigma_star_hi_re-sigma_star_best], fmt='o', elinewidth=3, label=r'$r_e$ uncertainty')
+    plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_lo_re, sigma_star_hi_re-sigma_star_best], fmt='none', elinewidth=3, label=r'$r_e$ uncertainty')
     #plt.xlim(0,3500)
-    plt.ylim(800,3200)
-    #plt.ylim(0,2500)
+    plt.scatter(sigma_star_best, vflow, label=r'$\Sigma (r=r_e)$', color='#ff7f0e')
+
+    
+    plt.scatter(sigma_star_1kpc, vflow, marker='*', label=r'$\Sigma (r=1$ kpc)', color='#ff7f0e')
+
+    plt.text(3.5e11, 750, r'$\Sigma=\Sigma_{Eddington}$', rotation=90, fontsize=14)
+
+
+    
+    plt.xlim(1e9, 3e12)
+    
+    #plt.ylim(800,3200)
+    plt.ylim(-500,3200)
     plt.ylabel(r'Observed Outflow Velocity [km s$^{-1}$]', fontsize=13)
     plt.xlabel(r'Central Stellar Surface Density [M$_\odot$ kpc$^{-2}$]', fontsize=13)
     plt.xscale('log')
