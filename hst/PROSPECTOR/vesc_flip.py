@@ -18,7 +18,8 @@ nuc_lo_mass =     np.array([0.05,  0.06,   0.24,   0.16,   0.31,   0.07,   0.25,
 
 #vflow = np.array([          1228,  1206,   2470,   1778,   1828,   1830,    875,   1211,   829,   2416,   1456,    606])
 #vflow = np.array([           1600,  1700,   3000,   2100,   1828,   2250,   2000,   2050,  1350,   2600,   1900,   1100])
-vflow = np.array([         1456.2, 1575.4, 2884.8, 1878.3, 2015.6, 1962.6, 1995.2, 1768.8,1151.2, 2374.1, 1915.1,  950.4])   
+vmax = np.array([         1456.2, 1575.4, 2884.8, 1878.3, 2015.6, 1962.6, 1995.2, 1768.8,1151.2, 2374.1, 1915.1,  950.4])
+vavg = np.array([         1131.2, 1210.1, 2395.3, 1172.4, 1359.8, 1543.7,  766.9, 1378.9, 807.1, 1437.5, 1056.2,  342.8])
 
 
 nuc_up_mass = np.sqrt(nuc_up_mass**2 + 0.1**2)
@@ -60,11 +61,67 @@ with PdfPages(filename) as pdf:
 
     vel_array = np.arange(101)*40
 
-    plt.scatter(vesc_best, vflow)
-    plt.errorbar(vesc_best, vflow, xerr=[vesc_best-vesc_lo, vesc_hi-vesc_best], fmt='.', elinewidth=1, label=r'$r_e$ and mass uncertainty')
+    plt.scatter(vesc_best, vmax, marker='o', color='#ff7f0e', label=r'$v_{max}$')
+    eb = plt.errorbar(vesc_best, vmax, yerr=[vmax-vavg,np.zeros(len(vavg))], fmt='none', elinewidth=1, color='#ff7f0e', label=r'[$v_{avg}$, $v_{max}$]')
+    eb[-1][0].set_linestyle('dotted') #eb1[-1][0] is the LineCollection objects of the errorbar lines
+    plt.scatter(vesc_best, vavg, marker='+', color='#ff7f0e', label=r'$v_{avg}$')
+
+
+    
+
+    plt.errorbar(vesc_best, vmax, xerr=[vesc_best-vesc_lo, vesc_hi-vesc_best], fmt='none', elinewidth=1, label=r'$r_e$ and mass uncertainty', color='#1f77b4')
     #plt.plot(vel_array, vel_array/3, linestyle='--')
-    #plt.errorbar(vflow, vesc_best, yerr=[vesc_best-vesc_lo_mass, vesc_hi_mass-vesc_best], fmt='o')    
-    plt.errorbar(vesc_best, vflow, xerr=[vesc_best-vesc_lo_re, vesc_hi_re-vesc_best], fmt='o', elinewidth=3, label=r'$r_e$ uncertainty')
+    #plt.errorbar(vmax, vesc_best, yerr=[vesc_best-vesc_lo_mass, vesc_hi_mass-vesc_best], fmt='o')
+
+    plt.errorbar(vesc_best, vmax, xerr=[vesc_best-vesc_lo_re, vesc_hi_re-vesc_best], fmt='none', elinewidth=3, label=r'$r_e$ uncertainty', color='#ff7f0e') 
+
+    plt.ylim(0,3200)
+    plt.xlim(0,3200)
+    plt.ylabel(r'Observed Outflow Velocity [km s$^{-1}$]', fontsize=13)
+    plt.xlabel(r'Central Escape Velocity [km s$^{-1}$]', fontsize=13)
+    plt.plot(vel_array, vel_array, label=r'$v_{outflow} = v_{escape}$', linestyle='dashed', color='#2ca02c')
+    #plt.plot(vel_array, vel_array/3, label=r'$3\times v_{esc} = v_{out}$')
+
+    plt.tick_params(axis='both', which='major', labelsize=12)
+
+
+#['#1f77b4', # blue
+# '#ff7f0e', # orange
+# '#2ca02c', # green
+# '#d62728', # red
+# '#9467bd',
+# '#8c564b',
+# '#e377c2',
+# '#7f7f7f',
+# '#bcbd22',
+# '#17becf']
+    
+    plt.legend(fontsize=11, loc='lower right')
+
+    #plt.scatter(vesc_best, vavg)
+
+    #for i in range(0, len(galaxies)):
+    #    plt.text(vmax[i], vesc_best[i], galaxies[i])
+    
+    pdf.savefig()
+    plt.close()
+
+    
+os.system('open %s &' % filename)
+
+filename = 'vesc_avg.pdf'
+
+with PdfPages(filename) as pdf:
+    
+    fig = plt.figure()
+
+    vel_array = np.arange(101)*40
+
+    plt.scatter(vesc_best, vavg)
+    plt.errorbar(vesc_best, vavg, xerr=[vesc_best-vesc_lo, vesc_hi-vesc_best], fmt='.', elinewidth=1, label=r'$r_e$ and mass uncertainty')
+    #plt.plot(vel_array, vel_array/3, linestyle='--')
+    #plt.errorbar(vavg, vesc_best, yerr=[vesc_best-vesc_lo_mass, vesc_hi_mass-vesc_best], fmt='o')    
+    plt.errorbar(vesc_best, vavg, xerr=[vesc_best-vesc_lo_re, vesc_hi_re-vesc_best], fmt='o', elinewidth=3, label=r'$r_e$ uncertainty')
     plt.ylim(0,3200)
     plt.xlim(0,2400)
     plt.ylabel(r'Observed Outflow Velocity [km s$^{-1}$]', fontsize=13)
@@ -75,11 +132,10 @@ with PdfPages(filename) as pdf:
     plt.legend(fontsize=12, loc='lower right')
 
     #for i in range(0, len(galaxies)):
-    #    plt.text(vflow[i], vesc_best[i], galaxies[i])
+    #    plt.text(vavg[i], vesc_best[i], galaxies[i])
     
     pdf.savefig()
     plt.close()
 
     
-
 os.system('open %s &' % filename)
