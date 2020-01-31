@@ -71,8 +71,8 @@ def get_ratios():
         hg_spread, hg_wav = cbfits.wspread(filepath, 'H_gamma', 400)
         hb_spread, hb_wav = cbfits.wspread(filepath, 'H_beta', 400)
         fits_data = ppcbfits.ppxf_example_population_gas_sdss(filepath, tie_balmer=True, limit_doublets=True) # gets [pp,wave,norm_flux,flux,flux&uncert]
-        hg_flux, plot_datab = ppcbfits.pp_get_flux(hg_wav, hg_spread, fits_data)
-        hb_flux, plot_datag = ppcbfits.pp_get_flux(hb_wav, hb_spread, fits_data)
+        hg_flux, plot_datag = ppcbfits.pp_get_flux(hg_wav, hg_spread, fits_data)
+        hb_flux, plot_datab = ppcbfits.pp_get_flux(hb_wav, hb_spread, fits_data)
         galname = cbfits.get_plot_title(filepath)
         plot_area_of_interestAAS(plot_datab, ['Hbeta', str(hb_flux)], filepath, ppxf_data=True)
         plot_area_of_interestAAS(plot_datag, ['Hgamma', str(hg_flux)], filepath, ppxf_data=True)
