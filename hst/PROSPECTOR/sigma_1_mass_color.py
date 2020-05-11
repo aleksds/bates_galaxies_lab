@@ -59,29 +59,42 @@ sigma_star_lo_mass = 10**(nuc_best_mass - nuc_lo_mass) / (2. * np.pi * (re_best_
 
 
 log_mass = np.arange(100)/33+9.
+log_mass_quie = np.arange(100)/33+10.
 
-log_sig1_quie_260 = (log_mass - 10.5) * 0.67 + 9.80
+log_sig1_quie_260 = (log_mass_quie - 10.5) * 0.67 + 9.80
+log_sig1_quie_260_lo = (log_mass_quie - 10.5) * 0.67 + 9.80 - 0.2
+log_sig1_quie_260_hi = (log_mass_quie - 10.5) * 0.67 + 9.80 + 0.2
+
 log_sig1_sf_260 = (log_mass - 10.5) * 0.89 + 9.33
 
-log_sig1_quie_180 = (log_mass - 10.5) * 0.64 + 9.74
+log_sig1_quie_180 = (log_mass_quie - 10.5) * 0.64 + 9.74
 log_sig1_sf_180 = (log_mass - 10.5) * 0.86 + 9.25
 
-log_sig1_quie_120 = (log_mass - 10.5) * 0.65 + 9.64
+log_sig1_quie_120 = (log_mass_quie - 10.5) * 0.65 + 9.64
 log_sig1_sf_120 = (log_mass - 10.5) * 0.88 + 9.16
 
-log_sig1_quie_075 = (log_mass - 10.5) * 0.65 + 9.53
+log_sig1_quie_075 = (log_mass_quie - 10.5) * 0.65 + 9.53
+log_sig1_quie_075_lo = (log_mass_quie - 10.5) * 0.65 + 9.53 - 0.2
+log_sig1_quie_075_hi = (log_mass_quie - 10.5) * 0.65 + 9.53 + 0.2
+    
 log_sig1_sf_075 = (log_mass - 10.5) * 0.89 + 9.12
 
-log_sige_quie_260 = (log_mass - 10.5) * (-0.52) + 10.28
+log_sige_quie_260 = (log_mass_quie - 10.5) * (-0.52) + 10.28
+log_sige_quie_260_lo = (log_mass_quie - 10.5) * (-0.52) + 10.28 - 0.5
+log_sige_quie_260_hi = (log_mass_quie - 10.5) * (-0.52) + 10.28 + 0.5
+    
 log_sige_sf_260 = (log_mass - 10.5) * 0.56 + 8.8
 
-log_sige_quie_180 = (log_mass - 10.5) * (-0.52) + 9.91
+log_sige_quie_180 = (log_mass_quie - 10.5) * (-0.52) + 9.91
 log_sige_sf_180 = (log_mass - 10.5) * 0.64 + 8.68
 
-log_sige_quie_120 = (log_mass - 10.5) * (-0.45) + 9.53
+log_sige_quie_120 = (log_mass_quie - 10.5) * (-0.45) + 9.53
 log_sige_sf_120 = (log_mass - 10.5) * 0.60 + 8.54
 
-log_sige_quie_075 = (log_mass - 10.5) * (-0.42) + 9.19
+log_sige_quie_075 = (log_mass_quie - 10.5) * (-0.42) + 9.19
+log_sige_quie_075_lo = (log_mass_quie - 10.5) * (-0.42) + 9.19 - 0.5
+log_sige_quie_075_hi = (log_mass_quie - 10.5) * (-0.42) + 9.19 + 0.5
+
 log_sige_sf_075 = (log_mass - 10.5) * 0.60 + 8.46
 
 
@@ -95,7 +108,7 @@ with PdfPages(filename) as pdf:
 
     ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*')
 
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_260), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_260), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_260), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e10, 5e11)
@@ -111,7 +124,7 @@ with PdfPages(filename) as pdf:
 
     ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*')
 
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_075), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_075), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_075), color='blue', linestyle='dashed')
 
     ax.set_xlim(1e10, 5e11)
@@ -142,7 +155,7 @@ with PdfPages(filename) as pdf:
     #plt.scatter(10**tot_best_mass, sigma_star_best, marker='o')
     #plt.scatter(10**nuc_best_mass, sigma_star_1kpc, marker='s')
 
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_260), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_260), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_260), color='blue', linestyle='dashed')
     
     #log_sige_quie_075 = (log_mass - 10.5) * -0.42 + 9.19
@@ -154,7 +167,7 @@ with PdfPages(filename) as pdf:
     #log_sig1_quie_075 = (log_mass - 10.5) * 0.65 + 9.53
     #plt.plot(10**(log_mass), 10**(log_sig1_quie_075), color='red', linestyle='dashed')
     
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_260), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_260), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_260), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e9, 5e11)
@@ -171,7 +184,7 @@ with PdfPages(filename) as pdf:
     ax = fig.add_subplot(2,2,2)
     
     ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*')
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_180), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_180), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_180), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e9, 5e11)
@@ -187,7 +200,7 @@ with PdfPages(filename) as pdf:
     ax = fig.add_subplot(2,2,3)
     
     ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*')
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_120), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_120), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_120), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e9, 5e11)
@@ -203,7 +216,7 @@ with PdfPages(filename) as pdf:
     ax = fig.add_subplot(2,2,4)
     
     ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*')
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_075), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_075), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_075), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e9, 5e11)
@@ -239,7 +252,7 @@ with PdfPages(filename) as pdf:
     
     ax.scatter(10**tot_best_mass, sigma_star_best, marker='*')
 
-    ax.plot(10**(log_mass), 10**(log_sige_quie_260), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_260), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sige_sf_260), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e9, 5e11)
@@ -256,7 +269,7 @@ with PdfPages(filename) as pdf:
     ax = fig.add_subplot(2,2,2)
     
     ax.scatter(10**tot_best_mass, sigma_star_best, marker='*')
-    ax.plot(10**(log_mass), 10**(log_sige_quie_180), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_180), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sige_sf_180), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e9, 5e11)
@@ -272,7 +285,7 @@ with PdfPages(filename) as pdf:
     ax = fig.add_subplot(2,2,3)
     
     ax.scatter(10**tot_best_mass, sigma_star_best, marker='*')
-    ax.plot(10**(log_mass), 10**(log_sige_quie_120), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_120), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sige_sf_120), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e9, 5e11)
@@ -288,7 +301,7 @@ with PdfPages(filename) as pdf:
     ax = fig.add_subplot(2,2,4)
     
     ax.scatter(10**tot_best_mass, sigma_star_best, marker='*')
-    ax.plot(10**(log_mass), 10**(log_sige_quie_075), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_075), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sige_sf_075), color='blue', linestyle='dashed')
     
     ax.set_xlim(1e9, 5e11)
@@ -319,91 +332,102 @@ with PdfPages(filename) as pdf:
     
     fig = plt.figure()
 
-    # first plot: 2.2<z<3.0
-    ax = fig.add_subplot(2,2,1)
+    # second plot: 2.2<z<3.0
+    ax = fig.add_subplot(2,2,2)
 
     plt.axhline(y=3e11, color='#2ca02c', linestyle='dashed')
     #plt.axhspan(3e11/2, 3e11*2, alpha=0.5, color='#2ca02c')
-    plt.text(1e11, 4.0e11, r'$\Sigma=\Sigma_{Eddington}$', fontsize=9)
+    plt.text(1.2e9, 4.0e11, r'$\Sigma=\Sigma_{Eddington}$', fontsize=9)
     
     ax.scatter(10**tot_best_mass, sigma_star_best, marker='*', color='#ff7f0e')#color='#2ca02c')
 
-    ax.plot(10**(log_mass), 10**(log_sige_quie_260), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_260), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_260_lo), color='red', linestyle='dashed')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_260_hi), color='red', linestyle='dashed')
     ax.plot(10**(log_mass), 10**(log_sige_sf_260), color='blue', linestyle='dotted')
 
     #ax.plot(10**(log_mass), 10**(log_sige_quie_075), color='red', linestyle='solid')
     #ax.plot(10**(log_mass), 10**(log_sige_sf_075), color='blue', linestyle='dotted')
     
-    ax.set_xlim(1e10, 5e11)
-    ax.set_ylim(1e8,1e12)
+    ax.set_xlim(1e9, 5e11)
+    ax.set_ylim(1e7,1e12)
     #ax.set_xlabel(r'$M\star$ [M$_\odot$]', fontsize=13)
     ax.set_ylabel(r'$\Sigma_e$ [M$_\odot$ kpc$^{-2}$]', fontsize=13)
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.tick_params(axis='both', which='major', labelsize=10)
     #plt.text(5e10,1e8,'2.2<z<3.0')
-    plt.text(1.05e10, 1.6e10, '2.2<z<3.0 quiescent', rotation=-9, fontsize=9)
-    plt.text(1.05e10, 6.8e8, '2.2<z<3.0 star-forming', rotation=10, fontsize=9)
+    plt.text(1.2e9, 4.4e10, '2.2<z<3.0 quiescent', rotation=-12, fontsize=9)
+    plt.text(1.2e9, 3.6e8, '2.2<z<3.0 star-forming', rotation=12, fontsize=9)
     
-    # second plot: 0.5<z<1.0
-    ax = fig.add_subplot(2,2,2)
+    # first plot: 0.5<z<1.0
+    ax = fig.add_subplot(2,2,1)
 
     plt.axhline(y=3e11, color='#2ca02c', linestyle='dashed')
     #plt.axhspan(3e11/2, 3e11*2, alpha=0.5, color='#2ca02c')
-    plt.text(1e11, 4.0e11, r'$\Sigma=\Sigma_{Eddington}$', fontsize=9)
+    plt.text(1.2e9, 4.0e11, r'$\Sigma=\Sigma_{Eddington}$', fontsize=9)
     
     ax.scatter(10**tot_best_mass, sigma_star_best, marker='*', color='#ff7f0e')# color='#2ca02c')
-    ax.plot(10**(log_mass), 10**(log_sige_quie_075), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_075), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_075_lo), color='red', linestyle='dashed')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_075_hi), color='red', linestyle='dashed')
     ax.plot(10**(log_mass), 10**(log_sige_sf_075), color='blue', linestyle='dotted')
     
-    ax.set_xlim(1e10, 5e11)
-    ax.set_ylim(1e8,1e12)
+    ax.set_xlim(1e9, 5e11)
+    ax.set_ylim(1e7,1e12)
     #ax.set_xlabel(r'$M\star$ [M$_\odot$]', fontsize=13)
-    #ax.set_ylabel(r'$\Sigma_1$ [M$_\odot$ kpc$^{-2}$]', fontsize=13)
+    ax.set_ylabel(r'$\Sigma_e$ [M$_\odot$ kpc$^{-2}$]', fontsize=13)
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.tick_params(axis='both', which='major', labelsize=10)
     #plt.text(1.1e10,5e11,'0.5<z<1.0', fontsize=9)
-    plt.text(1.05e10, 1.2e9, '0.5<z<1.0', rotation=-7, fontsize=9)
+    plt.text(1.2e9, 2.7e9, '0.5<z<1.0 quiescent', rotation=-10, fontsize=9)
+    plt.text(1.2e9, 1.8e8, '0.5<z<1.0 star-forming', rotation=13.5, fontsize=9)
 
-    # third plot: 2.2<z<3.0
-    ax = fig.add_subplot(2,2,3)
+    # fourth plot: 2.2<z<3.0
+    ax = fig.add_subplot(2,2,4)
     
-    ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*', color='#ff7f0e', label='Compact starbursts (this paper)')# color='#2ca02c', label='Compact starbursts (this paper)')
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_260), color='red', linestyle='solid', label='Quiescent galaxies (Barro+17)')
-    ax.plot(10**(log_mass), 10**(log_sig1_sf_260), color='blue', linestyle='dotted', label='Star-forming galaxies (Barro+17)')
+    ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*', color='#ff7f0e', label='Compact starbursts')# color='#2ca02c', label='Compact starbursts (this paper)')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_260), color='red', linestyle='solid', label='Quiescent galaxies')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_260_lo), color='red', linestyle='dashed')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_260_hi), color='red', linestyle='dashed')
+    ax.plot(10**(log_mass), 10**(log_sig1_sf_260), color='blue', linestyle='dotted', label='Star-forming galaxies')
 
     #ax.plot(10**(log_mass), 10**(log_sig1_quie_075), color='red', linestyle='solid')
     #ax.plot(10**(log_mass), 10**(log_sig1_sf_075), color='blue', linestyle='dotted')
     
-    ax.set_xlim(1e10, 5e11)
-    ax.set_ylim(1e8,3e10)
+    ax.set_xlim(1e9, 5e11)
+    ax.set_ylim(3e7,3e10)
     ax.set_xlabel(r'$M\star$ [M$_\odot$]', fontsize=13)
     ax.set_ylabel(r'$\Sigma_1$ [M$_\odot$ kpc$^{-2}$]', fontsize=13)
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.tick_params(axis='both', which='major', labelsize=10)
     #plt.text(1.1e10,1.8e10,'2.2<z<3.0', fontsize=9)
-    plt.text(1.05e10, 2.5e9, '2.2<z<3.0', rotation=24, fontsize=9)
+    plt.text(1.2e9, 2.7e9, '2.2<z<3.0', rotation=24, fontsize=9)
+    plt.text(1.5e9, 1.5e9, 'quiescent', rotation=24, fontsize=9)
 
     plt.legend(fontsize=7.5)
 
-    # fourth plot: 0.5<z<1.0
-    ax = fig.add_subplot(2,2,4)
+    # third plot: 0.5<z<1.0
+    ax = fig.add_subplot(2,2,3)
     
     ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*', color='#ff7f0e')#, color='#2ca02c', label='Compact starbursts (z~0.6)')
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_075), color='red', linestyle='solid', label='Quiescent galaxies (Barro+17)')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_075), color='red', linestyle='solid', label='Quiescent galaxies (Barro+17)')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_075_lo), color='red', linestyle='dashed')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_075_hi), color='red', linestyle='dashed')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_075), color='blue', linestyle='dotted', label='Star-forming galaxies (Barro+17)')
     
-    ax.set_xlim(1e10, 5e11)
-    ax.set_ylim(1e8,3e10)
+    ax.set_xlim(1e9, 5e11)
+    ax.set_ylim(3e7,3e10)
     ax.set_xlabel(r'$M\star$ [M$_\odot$]', fontsize=13)
-    #ax.set_ylabel(r'$\Sigma_1$ [M$_\odot$ kpc$^{-2}$]', fontsize=13)
+    ax.set_ylabel(r'$\Sigma_1$ [M$_\odot$ kpc$^{-2}$]', fontsize=13)
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.tick_params(axis='both', which='major', labelsize=10)
     #plt.text(1.1e10,1.8e10,'0.5<z<1.0', fontsize=9)
-    plt.text(1.05e10, 1.6e9, '0.5<z<1.0', rotation=24, fontsize=9)
+    plt.text(1.2e9, 1.5e9, '0.5<z<1.0', rotation=23, fontsize=9)
+    plt.text(1.5e9, 8.0e8, 'quiescent', rotation=23, fontsize=9)
 
 
     #plt.legend(fontsize=7)
@@ -411,7 +435,7 @@ with PdfPages(filename) as pdf:
     pdf.savefig()
     plt.close()
 
-#os.system('open %s &' % filename)
+os.system('open %s &' % filename)
 
 filename = 'sigmae_sigma1_2panel.pdf'
 
@@ -428,13 +452,13 @@ with PdfPages(filename) as pdf:
     
     ax.scatter(10**tot_best_mass, sigma_star_best, marker='*', color='green')#color='#2ca02c')
 
-    ax.plot(10**(log_mass), 10**(log_sige_quie_260), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_260), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sige_sf_260), color='blue', linestyle='dotted')
 
-    ax.plot(10**(log_mass), 10**(log_sige_quie_075), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_075), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sige_sf_075), color='blue', linestyle='dotted')
 
-    ax.fill_between(10**(log_mass), 10**(log_sige_quie_075), 10**(log_sige_quie_260), color='lightcoral')
+    ax.fill_between(10**(log_mass_quie), 10**(log_sige_quie_075), 10**(log_sige_quie_260), color='lightcoral')
     ax.fill_between(10**(log_mass), 10**(log_sige_sf_075), 10**(log_sige_sf_260), color='lightsteelblue')    
     
     ax.set_xlim(1e10, 5e11)
@@ -478,13 +502,13 @@ with PdfPages(filename) as pdf:
     # third plot: 2.2<z<3.0
     ax = fig.add_subplot(2,2,3)
     
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_260), color='red', linestyle='solid', label='Quiescent galaxies (0.5<z<3)')# (Barro+17)')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_260), color='red', linestyle='solid', label='Quiescent galaxies (0.5<z<3)')# (Barro+17)')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_260), color='blue', linestyle='dotted', label='Star-forming galaxies (0.5<z<3)')# (Barro+17)')
 
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_075), color='red', linestyle='solid')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_075), color='red', linestyle='solid')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_075), color='blue', linestyle='dotted')
 
-    ax.fill_between(10**(log_mass), 10**(log_sig1_quie_075), 10**(log_sig1_quie_260), color='lightcoral')
+    ax.fill_between(10**(log_mass_quie), 10**(log_sig1_quie_075), 10**(log_sig1_quie_260), color='lightcoral')
     ax.fill_between(10**(log_mass), 10**(log_sig1_sf_075), 10**(log_sig1_sf_260), color='lightsteelblue')    
 
     ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*', color='green', label='Compact starbursts (0.4<z<0.8)')# (this paper)')# color='#2ca02c', label='Compact starbursts (this paper)', color='#ff7f0e')
@@ -526,7 +550,7 @@ with PdfPages(filename) as pdf:
 
     
 
-os.system('open %s &' % filename)
+#os.system('open %s &' % filename)
 
 
 filename = 'sigmae_sigma1_combined.pdf'
@@ -540,10 +564,10 @@ with PdfPages(filename) as pdf:
     
     ax.scatter(10**tot_best_mass, sigma_star_best, marker='*', color='#2ca02c', label='Compact starbursts 0.4<z<0.8')
 
-    ax.plot(10**(log_mass), 10**(log_sige_quie_260), color='red', linestyle='solid', label='Quiescent galaxies 2.2<z<3.0')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_260), color='red', linestyle='solid', label='Quiescent galaxies 2.2<z<3.0')
     ax.plot(10**(log_mass), 10**(log_sige_sf_260), color='blue', linestyle='dashed', label='Star-forming galaxies 2.2<z<3.0')
 
-    ax.plot(10**(log_mass), 10**(log_sige_quie_075), color='red', linestyle='dashdot', label='Quiescent galaxies 0.5<z<1.0')
+    ax.plot(10**(log_mass_quie), 10**(log_sige_quie_075), color='red', linestyle='dashdot', label='Quiescent galaxies 0.5<z<1.0')
     ax.plot(10**(log_mass), 10**(log_sige_sf_075), color='blue', linestyle='dotted', label='Star-forming galaxies 0.5<z<1.0')
     
     ax.set_xlim(1e10, 5e11)
@@ -560,10 +584,10 @@ with PdfPages(filename) as pdf:
     ax = fig.add_subplot(2,1,2)
     
     ax.scatter(10**tot_best_mass, sigma_star_1kpc, marker='*', color='#2ca02c', label='Compact starbursts 0.4<z<0.8')
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_260), color='red', linestyle='solid', label='Quiescent galaxies 2.2<z<3.0')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_260), color='red', linestyle='solid', label='Quiescent galaxies 2.2<z<3.0')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_260), color='blue', linestyle='dashed', label='Star-forming galaxies 2.2<z<3.0')
 
-    ax.plot(10**(log_mass), 10**(log_sig1_quie_075), color='red', linestyle='dashdot', label='Quiescent galaxies 0.5<z<1.0')
+    ax.plot(10**(log_mass_quie), 10**(log_sig1_quie_075), color='red', linestyle='dashdot', label='Quiescent galaxies 0.5<z<1.0')
     ax.plot(10**(log_mass), 10**(log_sig1_sf_075), color='blue', linestyle='dotted', label='Star-forming galaxies 0.5<z<1.0')
     
     ax.set_xlim(1e9, 5e11)
