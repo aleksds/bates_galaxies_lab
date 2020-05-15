@@ -9,30 +9,25 @@ from astropy import constants as const
 from astropy import units as u
 
 galaxies =              ['J0826','J0901','J0905','J0944','J1107','J1219','J1341','J1506','J1558','J1613','J2116','J2140']
-#nuc_best_mass = np.array([10.20, 10.07,  10.41,  10.14,  10.11,  10.72,  10.51,  10.18,  9.81,  10.52,  10.68,  10.74])
 nuc_best_mass =  np.array([10.27, 10.11,  10.41,  10.20,  10.11,  10.45,  10.51,  10.18,  9.85,  10.65,  10.68,  10.56])
-#nuc_up_mass =    np.array([0.26,  0.28,   0.29,   0.18,   0.34,   0.25,   0.15,   0.21,  0.12,   0.20,   0.15,   0.25])
-nuc_up_mass =     np.array([0.04,  0.05,   0.29,   0.11,   0.34,   0.10,   0.15,   0.21,  0.11,   0.07,   0.15,   0.10])
-#nuc_lo_mass =    np.array([0.24,  0.25,   0.24,   0.18,   0.31,   0.42,   0.25,   0.20,  0.16,   0.23,   0.25,   0.27])
-nuc_lo_mass =     np.array([0.05,  0.06,   0.24,   0.16,   0.31,   0.07,   0.25,   0.20,  0.11,   0.13,   0.25,   0.07])
+nuc_lo_mass =     np.array([0.04,  0.06,   0.24,   0.16,   0.32,   0.07,   0.25,   0.20,  0.11,   0.13,   0.26,   0.07])
+nuc_up_mass =     np.array([0.05,  0.05,   0.29,   0.11,   0.33,   0.10,   0.15,   0.21,  0.11,   0.07,   0.15,   0.10])
 
-#vflow = np.array([          1228,  1206,   2470,   1778,   1828,   1830,    875,   1211,   829,   2416,   1456,    606])
-vflow = np.array([           1600,  1700,   3000,   2100,   1828,   2250,   2000,   2050,  1350,   2600,   1900,   1100])
-
-nuc_up_mass = np.sqrt(nuc_up_mass**2 + 0.1**2)
 nuc_lo_mass = np.sqrt(nuc_lo_mass**2 + 0.1**2)
+nuc_up_mass = np.sqrt(nuc_up_mass**2 + 0.1**2)
 
-#tot_best_mass = np.array([10.57, 10.47, 10.67, 10.52, 10.57, 11.40, 10.53, 10.57, 10.79, 11.50, 10.94, 10.92])
-#tot_up_mass = np.array([0.01, 0.01, 0.03, 0.03, 0.02, 0.11, 0.04, 0.02, 0.09, 0.10, 0.06, 0.02])
-#tot_up_mass = np.sqrt(tot_up_mass**2 + 0.075**2)
-#tot_lo_mass = np.array([0.01, 0.01, 0.03, 0.02, 0.01, 0.11, 0.03, 0.02, 0.06, 0.11, 0.06, 0.03])
-#tot_lo_mass = np.sqrt(tot_lo_mass**2 + 0.075**2)
+nuc_mass_loval = 10**(nuc_best_mass - nuc_lo_mass)
+nuc_mass_hival = 10**(nuc_best_mass + nuc_up_mass)
 
 tot_best_mass =  np.array([10.90, 10.81,  10.98,  10.80,  10.89,   11.11, 10.86,  10.84,  10.77,  11.13,  11.11,  11.16])
 tot_lo_mass =    np.array([ 0.03,  0.03,   0.03,   0.05,   0.04,    0.05,  0.02,   0.04,   0.05,   0.04,   0.07,   0.06])
-tot_lo_mass = np.sqrt(tot_lo_mass**2 + 0.075**2)
 tot_up_mass =    np.array([ 0.06,  0.05,   0.05,   0.06,   0.04,    0.06,  0.04,   0.05,   0.06,   0.05,   0.09,   0.05])
-tot_up_mass = np.sqrt(tot_up_mass**2 + 0.075**2)
+
+tot_lo_mass = np.sqrt(tot_lo_mass**2 + 0.1**2)
+tot_up_mass = np.sqrt(tot_up_mass**2 + 0.1**2)
+
+tot_mass_loval = 10**(tot_best_mass - tot_lo_mass)
+tot_mass_hival = 10**(tot_best_mass + tot_up_mass)
 
 re_best = np.array([0.0151, 0.0149, 0.0105, 0.0099, 0.0156, 0.0257, 0.0127, 0.0118, 0.0387, 0.1289, 0.0216, 0.0145]) 
 re_unc = np.array([0.0031, 0.0033, 0.0027, 0.0030, 0.0041, 0.0038, 0.0023, 0.0025, 0.0064, 0.0157, 0.0046, 0.0045])
@@ -218,13 +213,11 @@ with PdfPages(filename) as pdf:
     ax.plot(10**log_mass_quie, re_early_075_lo, color='red', linestyle='dashed')
     ax.plot(10**log_mass_quie, re_early_075_hi, color='red', linestyle='dashed')
 
-
-    nuc_mass_loval = 10**(nuc_best_mass - nuc_lo_mass)
-    nuc_mass_hival = 10**(nuc_best_mass + nuc_up_mass)
+    #ax.errorbar(10**nuc_best_mass, np.array(re_best_kpc), yerr=[np.array(re_best_kpc/u.kpc) - np.array(re_best_kpc_lo/u.kpc), np.array(re_best_kpc_hi/u.kpc) - np.array(re_best_kpc/u.kpc)], xerr=[10**nuc_best_mass-nuc_mass_loval,nuc_mass_hival-10**nuc_best_mass], fmt='none', color='green', elinewidth=1)
     
-    ax.errorbar(10**nuc_best_mass, np.array(re_best_kpc), yerr=[np.array(re_best_kpc/u.kpc) - np.array(re_best_kpc_lo/u.kpc), np.array(re_best_kpc_hi/u.kpc) - np.array(re_best_kpc/u.kpc)], xerr=[10**nuc_best_mass-nuc_mass_loval,nuc_mass_hival-10**nuc_best_mass], fmt='none', color='green', elinewidth=1)
+    ax.errorbar(10**tot_best_mass, np.array(re_best_kpc), yerr=[np.array(re_best_kpc/u.kpc) - np.array(re_best_kpc_lo/u.kpc), np.array(re_best_kpc_hi/u.kpc) - np.array(re_best_kpc/u.kpc)], xerr=[10**tot_best_mass-tot_mass_loval,tot_mass_hival-10**tot_best_mass], fmt='none', color='green', elinewidth=1)
 
-    eb = ax.errorbar(10**nuc_best_mass, np.array(re_best_kpc), xerr=[np.zeros(len(tot_best_mass)),10**tot_best_mass-10**nuc_best_mass], fmt='none', elinewidth=1, color='green')
+    eb = ax.errorbar(10**tot_best_mass, np.array(re_best_kpc), xerr=[10**tot_best_mass-10**nuc_best_mass, np.zeros(len(tot_best_mass))], fmt='none', elinewidth=1, color='green')
     eb[-1][0].set_linestyle('dotted') #eb1[-1][0] is the LineCollection objects of the errorbar lines
     
     #ax.plot(10**log_mass, re_late_075, color='blue', linestyle='dotted')
@@ -262,6 +255,11 @@ with PdfPages(filename) as pdf:
     ax.plot(10**log_mass_quie, re_early_275_lo, color='red', linestyle='dashed')
     ax.plot(10**log_mass_quie, re_early_275_hi, color='red', linestyle='dashed')
 
+
+    plt.text(9.4e9, 0.37, '2.5<z<3.0', rotation=23, fontsize=11)
+    plt.text(9.4e9, 1.8, '0.5<z<1.0', rotation=22, fontsize=11)
+
+    
     plt.legend()
     
     #ax.plot(10**log_mass, re_late_275, color='blue', linestyle='dotted')
