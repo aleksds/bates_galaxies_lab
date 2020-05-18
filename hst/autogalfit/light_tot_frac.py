@@ -173,15 +173,15 @@ with PdfPages(name) as pdf:
     #plt.scatter(few_best_mass, nuc_best_mass)
     #plt.errorbar(tot_best_mass, nuc_best_mass, yerr=[np.sqrt(nuc_lo_mass**2+0.1**2), np.sqrt(nuc_up_mass**2+0.1**2)], xerr=[np.sqrt(tot_lo_mass**2+0.1**2), np.sqrt(tot_up_mass**2+0.1**2)], fmt='o', elinewidth=1)
     #plt.errorbar(tremonti_mass, nuc_best_mass, yerr=[np.sqrt(nuc_lo_mass**2+0.1**2), np.sqrt(nuc_up_mass**2+0.1**2)], xerr=[np.sqrt(tot_lo_mass**2+0.1**2), np.sqrt(tot_up_mass**2+0.1**2)], fmt='o', elinewidth=1)
-    plt.errorbar(dew_best_mass, nuc_best_mass, yerr=[np.sqrt(nuc_lo_mass**2+0.1**2), np.sqrt(nuc_up_mass**2+0.1**2)], xerr=[np.sqrt(dew_lo_mass**2+0.1**2), np.sqrt(dew_up_mass**2+0.1**2)], fmt='o', elinewidth=1)
+    plt.errorbar(dew_best_mass, nuc_best_mass, yerr=[np.sqrt(nuc_lo_mass**2+0.1**2), np.sqrt(nuc_up_mass**2+0.1**2)], xerr=[np.sqrt(dew_lo_mass**2+0.1**2), np.sqrt(dew_up_mass**2+0.1**2)], fmt='o', elinewidth=1, color='#ff7f0e') # 20200518
     #plt.errorbar(few_best_mass, nuc_best_mass, yerr=[np.sqrt(nuc_lo_mass**2+0.1**2), np.sqrt(nuc_up_mass**2+0.1**2)], xerr=[np.sqrt(few_lo_mass**2+0.1**2), np.sqrt(few_up_mass**2+0.1**2)], fmt='o', elinewidth=1)
 
-    plt.plot(yo,yo)
+    #plt.plot(yo,yo) # 20200518
     #plt.plot(yo,yo, label=r'${M}_{*,central}=M_{*,total}$' )
-    plt.plot(yo,yo, label=r'$\mathcal{M}_{*,central}=\mathcal{M}_{*,total}$' )
+    plt.plot(yo,yo, label=r'$\mathcal{M}_{*,central}=\mathcal{M}_{*,total}$', linestyle='dashed', color='#2ca02c' ) # 20200518
     #plt.plot(yo,yo+np.log10(1/3), linestyle=':', label=r'$\mathcal{M}_{*,central}=\frac{1}{3}\mathcal{M}_{*,total}$')
     #plt.plot(yo,yo+np.log10(0.20), linestyle=':', label=r'$\mathcal{M}_{*,central}=0.2\mathcal{M}_{*,total}$')
-    plt.plot(yo,yo+np.log10(0.25), linestyle=':', label=r'$\mathcal{M}_{*,central}=0.25\mathcal{M}_{*,total}$')
+    plt.plot(yo,yo+np.log10(0.25), linestyle=':', label=r'$\mathcal{M}_{*,central}=0.25\mathcal{M}_{*,total}$', color='#1f77b4') # 20200518
     #plt.plot(yo,yo+np.log10(0.35), linestyle='--', label=r'${M}_{*,central}=10\%\ M_{*,total}$')
     #plt.plot(yo,yo+np.log10(0.25), linestyle='-.', label=r'${M}_{*,central}=50\%\ M_{*,total}$')
 

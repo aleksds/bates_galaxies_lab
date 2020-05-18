@@ -42,11 +42,11 @@ with PdfPages(name) as pdf:
     tot_err_hi = np.sqrt(dew_up_mass**2+0.1**2)
 
 
-    plt.scatter(dew_best_mass, nucext)
-    plt.errorbar(dew_best_mass, nucext, yerr=[add_err_lo,add_err_hi], xerr=[tot_err_lo, tot_err_hi], fmt='o', elinewidth=1)
+    plt.scatter(dew_best_mass, nucext) # 20200518
+    plt.errorbar(dew_best_mass, nucext, yerr=[add_err_lo,add_err_hi], xerr=[tot_err_lo, tot_err_hi], fmt='o', elinewidth=1, color='#ff7f0e')
 
-    plt.plot(yo,yo)
-    plt.plot(yo,yo, label=r'$\mathcal{M}_{*,central}+\mathcal{M}_{*,extended}=\mathcal{M}_{*,total}$' )
+    #plt.plot(yo,yo) # 20200518
+    plt.plot(yo,yo, label=r'$\mathcal{M}_{*,central}+\mathcal{M}_{*,extended}=\mathcal{M}_{*,total}$', linestyle='dashed', color='#2ca02c' ) # 20200518
     
     plt.xlabel(r'$\log_{10}(\mathcal{M}_{*, total\ }/\mathcal{M}_{\odot})$', fontsize=14)
     plt.ylabel(r'$\log_{10}((\mathcal{M}_{*, central\ }+\mathcal{M}_{*, extended\ })/\mathcal{M}_{\odot})$', fontsize=14)
