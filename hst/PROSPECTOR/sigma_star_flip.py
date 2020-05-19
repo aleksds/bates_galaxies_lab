@@ -84,7 +84,8 @@ with PdfPages(filename) as pdf:
     
     plt.scatter(sigma_star_1kpc, vflow, marker='*', label=r'$\Sigma (r=1$ kpc)', color='#ff7f0e')
 
-    plt.text(3.5e11, 750, r'$\Sigma=\Sigma_{Eddington}$', rotation=90, fontsize=14)
+    #plt.text(3.5e11, 750, r'$\Sigma=\Sigma_{Eddington}$', rotation=90, fontsize=14)
+    plt.text(3.3e11, 850, 'Eddington limit', rotation=-90, fontsize=13)
 
 
     
@@ -95,7 +96,7 @@ with PdfPages(filename) as pdf:
     plt.ylabel(r'Observed Outflow Velocity [km s$^{-1}$]', fontsize=13)
     plt.xlabel(r'Central Stellar Surface Density [M$_\odot$ kpc$^{-2}$]', fontsize=13)
     plt.xscale('log')
-    plt.tick_params(axis='both', which='major', labelsize=12)
+    plt.tick_params(axis='both', which='major', labelsize=11)
 
     plt.legend(fontsize=12, loc='lower left')
 
