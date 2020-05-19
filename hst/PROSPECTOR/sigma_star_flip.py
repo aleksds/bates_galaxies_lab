@@ -92,7 +92,7 @@ with PdfPages(filename) as pdf:
     plt.xlim(1e9, 3e12)
     
     #plt.ylim(800,3200)
-    plt.ylim(-500,3200)
+    plt.ylim(-400,3200)
     plt.ylabel(r'Observed Outflow Velocity [km s$^{-1}$]', fontsize=13)
     plt.xlabel(r'Central Stellar Surface Density [M$_\odot$ kpc$^{-2}$]', fontsize=13)
     plt.xscale('log')
