@@ -209,18 +209,18 @@ with PdfPages(filename) as pdf:
 
     ax = fig.add_subplot(1,1,1)
 
-    ax.scatter(10**tot_best_mass, re_best_kpc, marker='.', color='#ff7f0e', label=r'compact starbursts: $\mathcal{M}_{*,total}$')#label='compact starbursts, M*=Mtot')
-    ax.scatter(10**nuc_best_mass, re_best_kpc, marker='*', color='#ff7f0e', label=r'compact starbursts: $\mathcal{M}_{*,central}$')#label='compact starbursts, M*=Mnuc')
-    ax.plot(10**log_mass_quie, re_early_075, color='red', label='early-type galaxies')
-    ax.plot(10**log_mass_quie, re_early_075_lo, color='red', linestyle='dashed')
-    ax.plot(10**log_mass_quie, re_early_075_hi, color='red', linestyle='dashed')
+    ax.scatter(10**tot_best_mass, re_best_kpc, marker='.', color='#ff7f0e', label=r'$\mathcal{M}_{*,total}$')#label='compact starbursts, M*=Mtot')
+    ax.scatter(10**nuc_best_mass, re_best_kpc, marker='*', color='#ff7f0e', label=r'$\mathcal{M}_{*,central}$')#label='compact starbursts, M*=Mnuc') # label=r'compact starbursts: $\mathcal{M}_{*,central}$')
+    ax.plot(10**log_mass_quie, re_early_075, color='red', label='early-type galaxies', linestyle='dashdot')#linestyle=(0, (5, 3))) # densely dashed
+    ax.plot(10**log_mass_quie, re_early_075_lo, color='red', linestyle=(0, (5, 5))) # loosely dashed
+    ax.plot(10**log_mass_quie, re_early_075_hi, color='red', linestyle=(0, (5, 5))) # loosely dashed
 
     #ax.errorbar(10**nuc_best_mass, np.array(re_best_kpc), yerr=[np.array(re_best_kpc/u.kpc) - np.array(re_best_kpc_lo/u.kpc), np.array(re_best_kpc_hi/u.kpc) - np.array(re_best_kpc/u.kpc)], xerr=[10**nuc_best_mass-nuc_mass_loval,nuc_mass_hival-10**nuc_best_mass], fmt='none', color='green', elinewidth=1)
     
     ax.errorbar(10**tot_best_mass, np.array(re_best_kpc), yerr=[np.array(re_best_kpc/u.kpc) - np.array(re_best_kpc_lo/u.kpc), np.array(re_best_kpc_hi/u.kpc) - np.array(re_best_kpc/u.kpc)], xerr=[10**tot_best_mass-tot_mass_loval,tot_mass_hival-10**tot_best_mass], fmt='none', color='#ff7f0e', elinewidth=1)
 
     eb = ax.errorbar(10**tot_best_mass, np.array(re_best_kpc), xerr=[10**tot_best_mass-10**nuc_best_mass, np.zeros(len(tot_best_mass))], fmt='none', elinewidth=1, color='#ff7f0e')
-    eb[-1][0].set_linestyle('dotted') #eb1[-1][0] is the LineCollection objects of the errorbar lines
+    eb[-1][0].set_linestyle((0, (1, 5))) #eb1[-1][0] is the LineCollection objects of the errorbar lines
     
     #ax.plot(10**log_mass, re_late_075, color='blue', linestyle='dotted')
     #ax.plot(10**log_mass, re_late_075, color='blue', linestyle='dashed')
@@ -232,7 +232,7 @@ with PdfPages(filename) as pdf:
 
     ax.set_xlim(4e9, 4e11)
     ax.set_ylim(0.04,20)
-    ax.set_xlabel(r'$M\star$ [M$_\odot$]', fontsize=13)
+    ax.set_xlabel(r'$\mathcal{M}_*$ [$\mathcal{M}_\odot$]', fontsize=13)
     ax.set_ylabel(r'$r_e$ [kpc]', fontsize=13)
     ax.set_xscale('log')
     ax.set_yscale('log')
@@ -253,23 +253,23 @@ with PdfPages(filename) as pdf:
 
     #ax.scatter(10**tot_best_mass, re_best_kpc, marker='.', color='orange')
     #ax.scatter(10**nuc_best_mass, re_best_kpc, marker='*', color='green')
-    ax.plot(10**log_mass_quie, re_early_275, color='red')
-    ax.plot(10**log_mass_quie, re_early_275_lo, color='red', linestyle='dashed')
-    ax.plot(10**log_mass_quie, re_early_275_hi, color='red', linestyle='dashed')
+    ax.plot(10**log_mass_quie, re_early_275, color='red', linestyle='dashdot')#(0, (5, 1))) # densely dashed
+    ax.plot(10**log_mass_quie, re_early_275_lo, color='red', linestyle=(0, (5, 5))) # loosely dashed
+    ax.plot(10**log_mass_quie, re_early_275_hi, color='red', linestyle=(0, (5, 5))) # loosely dashed
 
 
-    ax.plot(10**log_mass_van, 10**log_re_van, color='black', linestyle='dashdot', label='compact massive galaxies')
+    ax.plot(10**log_mass_van, 10**log_re_van, color='black', linestyle='solid', label='compact massive galaxies')
 
     log_re_tmp = np.arange(20)/10.-2
     log_mass_tmp = np.zeros(len(log_re_tmp))+10.6
-    ax.plot(10**log_mass_tmp, 10.**log_re_tmp, color='black', linestyle='dashdot')
+    ax.plot(10**log_mass_tmp, 10.**log_re_tmp, color='black', linestyle='solid')#linestyle='dashdot')
     
     
     plt.text(9.4e9, 0.37, '2.5<z<3.0', rotation=23, fontsize=11)
     plt.text(9.4e9, 1.8, '0.5<z<1.0', rotation=22, fontsize=11)
 
     
-    plt.legend()
+    plt.legend(loc='upper left')
     
     #ax.plot(10**log_mass, re_late_275, color='blue', linestyle='dotted')
     #ax.plot(10**log_mass, re_late_075, color='blue', linestyle='dotted')
