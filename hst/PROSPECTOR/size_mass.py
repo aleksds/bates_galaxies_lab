@@ -117,6 +117,18 @@ re_early_075 = 10.**(0.60) * (10**(log_mass_quie) / 5e10)**0.75
 re_early_075_hi = 10.**(np.log10(re_early_075)+0.10)
 re_early_075_lo = 10.**(np.log10(re_early_075)-0.10)
 
+size_offset = np.zeros(len(tot_best_mass))
+
+for i in range(0, len(tot_best_mass)):
+    print(galaxies[i], tot_best_mass[i], np.log10(tot_mass_loval[i]))
+    diff = np.abs(np.log10(tot_mass_loval[i]) - log_mass_quie)
+    ind = np.where(diff == np.min(diff))
+    print(log_mass_quie[ind], re_early_275[ind])
+    size_offset[i] = re_early_275[ind] / re_best_kpc_hi.value[i]
+    print(size_offset[i])
+
+print(np.median(size_offset), np.mean(size_offset))
+
 filename = 'size_mass.pdf'
 
 with PdfPages(filename) as pdf:
