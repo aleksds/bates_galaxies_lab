@@ -288,23 +288,27 @@ with PdfPages(filename) as pdf:
     ax.plot(10**log_mass_quie, re_early_275_hi, color='red', linestyle=(0, (5, 5))) # loosely dashed
 
 
-    ax.plot(10**log_mass_van, 10**log_re_van, color='black', linestyle='solid', label='compact massive galaxies')
+    #ax.plot(10**log_mass_van, 10**log_re_van, color='black', linestyle='solid', label='compact massive galaxies')
 
     #log_re_tmp = np.arange(20)/10.-2
     log_re_tmp = np.arange(13)/20.-0.7
     log_mass_tmp = np.zeros(len(log_re_tmp))+10.6
-    ax.plot(10**log_mass_tmp, 10.**log_re_tmp, color='black', linestyle='solid')#linestyle='dashdot')
+    #ax.plot(10**log_mass_tmp, 10.**log_re_tmp, color='black', linestyle='solid')#linestyle='dashdot')
     
     
     plt.text(9.4e9, 0.37, '2.5<z<3.0', rotation=23, fontsize=11)
     plt.text(9.4e9, 1.8, '0.5<z<1.0', rotation=22, fontsize=11)
 
 
-    ax.arrow(10**(10.6),0.35,10.**(9.9),0., length_includes_head=True, head_width=0.05, head_length=10**(9.5), color='black')
-    #ax.arrow(10**(log_mass_van[82]), 10.**(log_re_van[82]), 0, -2.5, length_includes_head=True, head_width=10**(10.5), head_length=0.6, color='black')
+    #ax.arrow(10**(10.6),0.35,10.**(9.9),0., length_includes_head=True, head_width=0.05, head_length=10**(9.5), color='black')
+   # ax.arrow(10**(log_mass_van[78]), 10.**(log_re_van[78]), 0, -2.0, length_includes_head=True, head_width=10**(10.4), head_length=0.5, color='black')
 
-    plt.text(5.1e10, 0.33, 'massive & compact 2.0<z<2.5', fontsize=10)# 2.0<z<2.5')#(z~2)')(z~2.3)
+    #plt.text(5.1e10, 0.33, 'massive & compact 2.0<z<2.5', fontsize=10)# 2.0<z<2.5')#(z~2)')(z~2.3)
     #plt.text(8e10, 0.25, '2.0<z<2.5')
+
+    #ax.axhspan(3e11/2, 3e11*2, alpha=0.5, color='#2ca02c')
+    #+np.zeros(len(log_mass_van))
+    ax.fill_between(10**log_mass_van, 10**(-0.7), 10**log_re_van, alpha=0.2, color='black', label='compact massive galaxies')
     
     plt.legend(loc='upper left', fontsize=10)
     
