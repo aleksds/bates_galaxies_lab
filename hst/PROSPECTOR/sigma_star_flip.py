@@ -71,7 +71,7 @@ with PdfPages(filename) as pdf:
     
     #plt.plot(vel_array, vel_array)
 
-    eb = plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_1kpc,np.zeros(len(vflow))], fmt='none', elinewidth=1, color='#ff7f0e', label=r'[$\Sigma_{1}$, $\Sigma_{r_e}$]')
+    eb = plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_1kpc,np.zeros(len(vflow))], fmt='none', elinewidth=1, color='#ff7f0e', label=r'[$\Sigma_{1}$, $\Sigma_{e,central}$]')
     eb[-1][0].set_linestyle('dotted') #eb1[-1][0] is the LineCollection objects of the errorbar lines
 
     plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_lo, sigma_star_hi-sigma_star_best], fmt='none', elinewidth=1, label=r'$r_e$ and mass uncertainty')
@@ -79,7 +79,7 @@ with PdfPages(filename) as pdf:
     #plt.errorbar(vflow, sigma_star_best, yerr=[sigma_star_best-sigma_star_lo_mass, sigma_star_hi_mass-sigma_star_best], fmt='o')    
     plt.errorbar(sigma_star_best, vflow, xerr=[sigma_star_best-sigma_star_lo_re, sigma_star_hi_re-sigma_star_best], fmt='none', elinewidth=3, label=r'$r_e$ uncertainty')
     #plt.xlim(0,3500)
-    plt.scatter(sigma_star_best, vflow, label=r'$\Sigma (r=r_e)$', color='#ff7f0e')
+    plt.scatter(sigma_star_best, vflow, label=r'$\Sigma (r=r_{e,central})$', color='#ff7f0e')
 
     
     plt.scatter(sigma_star_1kpc, vflow, marker='*', label=r'$\Sigma (r=1$ kpc)', color='#ff7f0e')
@@ -102,6 +102,8 @@ with PdfPages(filename) as pdf:
 
     #for i in range(0, len(galaxies)):
     #    plt.text(sigma_star_best[i], vflow[i], galaxies[i])
+
+    plt.tight_layout()
     
     pdf.savefig()
     plt.close()
