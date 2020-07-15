@@ -260,7 +260,7 @@ with PdfPages(filename) as pdf:
     #ax.plot(10**log_mass_quie, re_early_075_lo, color='red', linestyle='dashed')
     #ax.plot(10**log_mass_quie, re_early_075_hi, color='red', linestyle='dashed')
 
-    ax.set_xlim(4e9, 4e11)
+    ax.set_xlim(5e9, 3e11)
     ax.set_ylim(0.04,20)
     ax.set_xlabel(r'$\mathcal{M}_*$ [$\mathcal{M}_\odot$]', fontsize=13)
     ax.set_ylabel(r'$r_e$ [kpc]', fontsize=13)
@@ -296,10 +296,12 @@ with PdfPages(filename) as pdf:
     #ax.plot(10**log_mass_tmp, 10.**log_re_tmp, color='black', linestyle='solid')#linestyle='dashdot')
     
     
-    plt.text(9.4e9, 0.37, '2.5<z<3.0', rotation=23, fontsize=11)
-    plt.text(9.4e9, 1.8, '0.5<z<1.0', rotation=22, fontsize=11)
+    plt.text(9.8e9, 0.35, '2.5<z<3.0', rotation=21, fontsize=11)
+    plt.text(9.8e9, 1.68, '0.5<z<1.0', rotation=20, fontsize=11)
 
-
+    #plt.text(1.2e10, 0.37, '2.5<z<3.0', rotation=22, fontsize=11)
+    #plt.text(1.2e10, 1.8, '0.5<z<1.0', rotation=21, fontsize=11)
+    
     #ax.arrow(10**(10.6),0.35,10.**(9.9),0., length_includes_head=True, head_width=0.05, head_length=10**(9.5), color='black')
    # ax.arrow(10**(log_mass_van[78]), 10.**(log_re_van[78]), 0, -2.0, length_includes_head=True, head_width=10**(10.4), head_length=0.5, color='black')
 
