@@ -18,8 +18,11 @@ nuc_lo_mass =     np.array([0.05,  0.06,   0.24,   0.16,   0.31,   0.07,   0.25,
 
 #vflow = np.array([          1228,  1206,   2470,   1778,   1828,   1830,    875,   1211,   829,   2416,   1456,    606])
 #vflow = np.array([           1600,  1700,   3000,   2100,   1828,   2250,   2000,   2050,  1350,   2600,   1900,   1100])
-vmax = np.array([         1456.2, 1575.4, 2884.8, 1878.3, 2015.6, 1962.6, 1995.2, 1768.8,1151.2, 2374.1, 1915.1,  950.4])
-vavg = np.array([         1131.2, 1210.1, 2395.3, 1172.4, 1359.8, 1543.7,  766.9, 1378.9, 807.1, 1437.5, 1056.2,  342.8])
+#vmax = np.array([         1456.2, 1575.4, 2884.8, 1878.3, 2015.6, 1962.6, 1995.2, 1768.8,1151.2, 2374.1, 1915.1,  950.4])
+#vavg = np.array([         1131.2, 1210.1, 2395.3, 1172.4, 1359.8, 1543.7,  766.9, 1378.9, 807.1, 1437.5, 1056.2,  342.8])
+
+vavg = np.array(   [1247.52,1308.73,2514.93,1286.62,1416.76,1684.03, 760.78,1288.30,868.45, 807.53,1124.12, 512.42])
+vmax = np.array(   [1657.28,1777.88,3019.30,1988.41,2050.23,2031.88,1997.66,2447.93,1255.89,2503.18,2238.64,1042.26])
 
 
 nuc_up_mass = np.sqrt(nuc_up_mass**2 + 0.1**2)
@@ -52,6 +55,13 @@ vesc_hi_mass = np.sqrt(G * 10**(nuc_best_mass + nuc_up_mass) * const.M_sun / re_
 vesc_lo_mass = np.sqrt(G * 10**(nuc_best_mass - nuc_lo_mass) * const.M_sun / re_best_kpc).to('km/s') * u.s / u.km
 
 
+print('mean vmax / vesc,central', np.mean(vmax/vesc_best))
+print('median vmax / vesc,central', np.median(vmax/vesc_best))
+print('mean vavg / vesc,central', np.mean(vavg/vesc_best))
+print('median vavg / vesc,central', np.median(vavg/vesc_best))
+
+print('mean vmax', np.mean(vmax))
+print('mean vavg', np.mean(vavg))
 
 filename = 'vesc_flip.pdf'
 
@@ -63,7 +73,7 @@ with PdfPages(filename) as pdf:
 
     plt.scatter(vesc_best, vmax, marker='o', color='#ff7f0e', label=r'$v_{max}$')
     eb = plt.errorbar(vesc_best, vmax, yerr=[vmax-vavg,np.zeros(len(vavg))], fmt='none', elinewidth=1, color='#ff7f0e', label=r'[$v_{avg}$, $v_{max}$]')
-    eb[-1][0].set_linestyle('dotted') #eb1[-1][0] is the LineCollection objects of the errorbar lines
+    eb[-1][0].set_linestyle((0, (1, 3)))#'dotted') #eb1[-1][0] is the LineCollection objects of the errorbar lines
     plt.scatter(vesc_best, vavg, marker='+', color='#ff7f0e', label=r'$v_{avg}$')
 
 
@@ -102,6 +112,8 @@ with PdfPages(filename) as pdf:
 
     #for i in range(0, len(galaxies)):
     #    plt.text(vmax[i], vesc_best[i], galaxies[i])
+
+    plt.tight_layout()
     
     pdf.savefig()
     plt.close()
@@ -138,4 +150,4 @@ with PdfPages(filename) as pdf:
     plt.close()
 
     
-os.system('open %s &' % filename)
+#os.system('open %s &' % filename)
