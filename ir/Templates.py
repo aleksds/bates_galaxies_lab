@@ -30,6 +30,8 @@ cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
 templates = glob.glob(projpath + 'Comprehensive_library/SFG*.txt')
 templates.extend(
     glob.glob(projpath + 'Comprehensive_library/Comp*.txt'))
+templates.extend(
+    glob.glob(projpath + 'Comprehensive_library/AGN*.txt'))
 
 print('templates:', templates)
 
@@ -292,6 +294,7 @@ def IR_SFRs(z, name, tems=templates):
             # perform least squares fit of observed W3, W4 luminosities to the simulated W3, W4 luminosities
             # this gives a normalization parameter which can be multiplied by the template TIR luminosity to give an
             # estimate of the intrinsic luminosity of the source
+            # note: this is equation 3 from this paper: https://aip.scitation.org/doi/pdf/10.1063/1.168428
             l_ratio = (measured_lums[0]*simulated[0]/(measured_lum_errs[0])**2 + measured_lums[1]*simulated[1]/(measured_lum_errs[1])**2)/((simulated[0]/measured_lum_errs[0])**2 + (simulated[1]/measured_lum_errs[1])**2)
 
         # if there is no W4 data, simply take ratio of template and observed luminosity at W3
