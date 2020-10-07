@@ -14,6 +14,8 @@ import glob
 import importlib
 import os
 importlib.reload(WISE)
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 #reload(WISE)
 
 # speed of light
@@ -274,40 +276,64 @@ def IR_SFRs(z, name, tems=templates):
     with open(projpath + 'integrations/kirk.txt', 'rb') as fb:
         total_ir = np.array(pickle.load(fb))
 
-    print('tems', tems)
+    #print('tems', tems)
     # for each template
-    for i, tem in enumerate(tems):
-        print('tem: ', tem)
-        # redshift wavelengths of template
-        tem_lum = redshift_spectrum(z, tem, False)
+    with PdfPages(name+'_sed.pdf') as pdf:
+        for i, tem in enumerate(tems):
+            print('tem: ', tem)
+            start = tem.find('y')
+            str = tem[start+2:len(tem)]
 
-        # if there is W4 data, do least squares fit of W3 & W4 points to the template curve
-        if w_four_good:
-            # join W3 & W4 observed luminosities
-            measured_lums = np.array([float(w3_lum.value), float(w4_lum.value)])
-            measured_lum_errs = np.array([float(w3_lum_err.value), float(w4_lum_err.value)])
+            # redshift wavelengths of template
+            tem_lum = redshift_spectrum(z, tem, False)
+        
+            # if there is W4 data, do least squares fit of W3 & W4 points to the template curve
+            if w_four_good:
+                # join W3 & W4 observed luminosities
+                measured_lums = np.array([float(w3_lum.value), float(w4_lum.value)])
+                measured_lum_errs = np.array([float(w3_lum_err.value), float(w4_lum_err.value)])
+        
+                # simulate a WISE flux by integrating the template over the response curves
+                simulated = np.array(simulate_wise_fluxes(z, tem, wise_bandpasses_3_4, False))
+                print('simulated WISE flux:', simulated)
+        
+                # perform least squares fit of observed W3, W4 luminosities to the simulated W3, W4 luminosities
+                # this gives a normalization parameter which can be multiplied by the template TIR luminosity to give an
+                # estimate of the intrinsic luminosity of the source
+                # note: this is equation 3 from this paper: https://aip.scitation.org/doi/pdf/10.1063/1.168428
+                l_ratio = (measured_lums[0]*simulated[0]/(measured_lum_errs[0])**2 + measured_lums[1]*simulated[1]/(measured_lum_errs[1])**2)/((simulated[0]/measured_lum_errs[0])**2 + (simulated[1]/measured_lum_errs[1])**2)
+        
+            # if there is no W4 data, simply take ratio of template and observed luminosity at W3
+            else:
+                l_ratio = float(w3_lum.value/tem_lum[2])
 
-            # simulate a WISE flux by integrating the template over the response curves
-            simulated = np.array(simulate_wise_fluxes(z, tem, wise_bandpasses_3_4, False))
-            print('simulated WISE flux:', simulated)
+            # make a plot
+            fig = plt.figure()
 
-            # perform least squares fit of observed W3, W4 luminosities to the simulated W3, W4 luminosities
-            # this gives a normalization parameter which can be multiplied by the template TIR luminosity to give an
-            # estimate of the intrinsic luminosity of the source
-            # note: this is equation 3 from this paper: https://aip.scitation.org/doi/pdf/10.1063/1.168428
-            l_ratio = (measured_lums[0]*simulated[0]/(measured_lum_errs[0])**2 + measured_lums[1]*simulated[1]/(measured_lum_errs[1])**2)/((simulated[0]/measured_lum_errs[0])**2 + (simulated[1]/measured_lum_errs[1])**2)
+            wave = np.array([12,22])/(1+z)
+            plt.scatter(wave, simulated*l_ratio, marker='s', facecolors='none', edgecolors='green')
+            #plt.scatter(wave, measured_lums, color='red', marker='*')
+            plt.errorbar(wave, measured_lums, yerr=measured_lum_errs, color='red', marker='*', ls='none')
+            print('tem_lum[0]', tem_lum[0])
+            plt.plot(tem_lum[0], tem_lum[1]*l_ratio)
+            plt.xlim(1,1000)
+            plt.title(name+': '+str)
+            plt.xlabel('Wavelength [microns]')
+            plt.ylabel('Luminosity [W/Hz]')
+            plt.xscale('log')
+            plt.yscale('log')
 
-        # if there is no W4 data, simply take ratio of template and observed luminosity at W3
-        else:
-            l_ratio = float(w3_lum.value/tem_lum[2])
-
-        # the observed LIR is just the template TIR luminosity multiplied by the normalization factor determined
-        L_ir_tot = total_ir[i]*l_ratio*u.W
-
-        SFR = murphyIRSFR(L_ir_tot)
-        print(tem, SFR)
-        SFRs.append(SFR)
-
-    return np.average(SFRs), np.std(SFRs)
+            pdf.savefig()
+            plt.close()
+            
+            # the observed LIR is just the template TIR luminosity multiplied by the normalization factor determined
+            L_ir_tot = total_ir[i]*l_ratio*u.W
+        
+            SFR = murphyIRSFR(L_ir_tot)
+            print(tem, SFR)
+            SFRs.append(SFR)
+    
+        
+        return np.average(SFRs), np.std(SFRs)
 
 
