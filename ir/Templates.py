@@ -282,7 +282,7 @@ def IR_SFRs(z, name, tems=templates):
         for i, tem in enumerate(tems):
             print('tem: ', tem)
             start = tem.find('y')
-            str = tem[start+2:len(tem)]
+            tname = tem[start+2:len(tem)]
 
             # redshift wavelengths of template
             tem_lum = redshift_spectrum(z, tem, False)
@@ -307,6 +307,14 @@ def IR_SFRs(z, name, tems=templates):
             else:
                 l_ratio = float(w3_lum.value/tem_lum[2])
 
+
+            # the observed LIR is just the template TIR luminosity multiplied by the normalization factor determined
+            L_ir_tot = total_ir[i]*l_ratio*u.W
+        
+            SFR = murphyIRSFR(L_ir_tot)
+            print(tem, SFR)
+            SFRs.append(SFR)
+                
             # make a plot
             fig = plt.figure()
 
@@ -317,7 +325,7 @@ def IR_SFRs(z, name, tems=templates):
             print('tem_lum[0]', tem_lum[0])
             plt.plot(tem_lum[0], tem_lum[1]*l_ratio)
             plt.xlim(1,1000)
-            plt.title(name+': '+str)
+            plt.title(name+': '+tname+' - SFR: '+str(round(SFR)))
             plt.xlabel('Wavelength [microns]')
             plt.ylabel('Luminosity [W/Hz]')
             plt.xscale('log')
@@ -326,12 +334,7 @@ def IR_SFRs(z, name, tems=templates):
             pdf.savefig()
             plt.close()
             
-            # the observed LIR is just the template TIR luminosity multiplied by the normalization factor determined
-            L_ir_tot = total_ir[i]*l_ratio*u.W
-        
-            SFR = murphyIRSFR(L_ir_tot)
-            print(tem, SFR)
-            SFRs.append(SFR)
+
     
         
         return np.average(SFRs), np.std(SFRs)
