@@ -252,23 +252,25 @@ def IR_SFRs(z, name, tems=templates):
     fluxes = WISE.mag_to_flux(name)
     w3_flux = fluxes[0] * u.Jy
     w3_flux_err = fluxes[2] * u.Jy
-    print('W3:', w3_flux, w3_flux_err)
+    #print('W3:', w3_flux, w3_flux_err)
     # assume no W4 data for now
     w_four_good = False
 
     # calculate luminosities with fluxes & distances
     w3_lum = (w3_flux*4*np.pi*d**2).to('W/Hz')
     w3_lum_err = ((4*np.pi*d**2)*w3_flux_err).to('W/Hz')
-
+    print('W3:', w3_lum, w3_lum_err)
+    
     # if there's data for W4
     if not np.isnan(fluxes[1]):
         w4_flux = fluxes[1] * u.Jy
         w4_flux_err = fluxes[3] * u.Jy
-        print('W4:', w4_flux, w4_flux_err)
+        #print('W4:', w4_flux, w4_flux_err)
         w_four_good = True
         w4_lum = (w4_flux*4*np.pi*d**2).to('W/Hz')
         w4_lum_err = ((4*np.pi*d**2)*w4_flux_err).to('W/Hz')
-
+        print('W4:', w4_lum, w4_lum_err)
+        
     # lists for SFR results
     SFRs = []
 
@@ -279,8 +281,10 @@ def IR_SFRs(z, name, tems=templates):
     #print('tems', tems)
     # for each template
     with PdfPages(name+'_sed.pdf') as pdf:
+        #fig = plt.figure()
+        #tems = np.sort(tems)
         for i, tem in enumerate(tems):
-            print('tem: ', tem)
+            #print('tem: ', tem)
             start = tem.find('y')
             tname = tem[start+2:len(tem)]
 
@@ -305,9 +309,15 @@ def IR_SFRs(z, name, tems=templates):
         
             # if there is no W4 data, simply take ratio of template and observed luminosity at W3
             else:
-                l_ratio = float(w3_lum.value/tem_lum[2])
+                measured_lums = np.array([float(w3_lum.value), 0.])
+                measured_lum_errs = np.array([float(w3_lum_err.value), 0.])
+                
+                simulated = np.array(simulate_wise_fluxes(z, tem, wise_bandpasses_3_4, False))
+                print('simulated WISE luminosity:', simulated)
 
-
+                #l_ratio = float(w3_lum.value/tem_lum[2])
+                l_ratio = float(w3_lum.value/simulated[0])
+                
             # the observed LIR is just the template TIR luminosity multiplied by the normalization factor determined
             L_ir_tot = total_ir[i]*l_ratio*u.W
         
@@ -318,12 +328,14 @@ def IR_SFRs(z, name, tems=templates):
             # make a plot
             fig = plt.figure()
 
+            
+            #ax = plt.subplot(4,3,i+1)
+            #print('tem_lum[0]', tem_lum[0])
+            plt.plot(tem_lum[0], tem_lum[1]*l_ratio, linewidth=0.5)
             wave = np.array([12,22])/(1+z)
             plt.scatter(wave, simulated*l_ratio, marker='s', facecolors='none', edgecolors='green')
             #plt.scatter(wave, measured_lums, color='red', marker='*')
             plt.errorbar(wave, measured_lums, yerr=measured_lum_errs, color='red', marker='*', ls='none')
-            print('tem_lum[0]', tem_lum[0])
-            plt.plot(tem_lum[0], tem_lum[1]*l_ratio)
             plt.xlim(1,1000)
             plt.title(name+': '+tname+' - SFR: '+str(round(SFR)))
             plt.xlabel('Wavelength [microns]')
@@ -335,7 +347,8 @@ def IR_SFRs(z, name, tems=templates):
             plt.close()
             
 
-    
+        #pdf.savefig()
+        #plt.close()
         
         return np.average(SFRs), np.std(SFRs)
 
