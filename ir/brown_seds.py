@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from astropy.io import ascii
 from matplotlib.ticker import ScalarFormatter
+from sedpy import observate
 
 projpath = os.getcwd()+'/Brown2014/An_Atlas_of_Galaxy_SEDs/An_Atlas_of_Galaxy_SEDs/'
 
@@ -15,6 +16,8 @@ name = 'brown_seds.pdf'
 
 with PdfPages(name) as pdf:
     for i in range(0,len(files)):
+    #for i in range(0,1):
+
 
         table = ascii.read(files[i])
 
@@ -27,116 +30,163 @@ with PdfPages(name) as pdf:
         loc = files[0].find('spec')
 
         gal = files[i][loc-9:loc-1]
-        print(gal)
+        #print(gal)
 
+        filternames = ['wise_w{}'.format(n) for n in ['1', '2', '3', '4']]
+        wise_filters = observate.load_filters(filternames)
+        redshift = np.arange(41)/100.+0.4
+        w3_minus_w4 = np.zeros(len(redshift))
+        for j in range(0,len(redshift)):
+            model_mags = observate.getSED(wave*(1+redshift[j]), flam, filterlist=wise_filters)
+            w3_minus_w4[j] = model_mags[2] - model_mags[3]
+            #print('model_mags:', model_mags)
+            #print('[W3]-[W4]:', w3_minus_w4[j])
 
-        ## lambda * f_lambda figure
-        #fig = plt.figure()
-        #ax = fig.add_subplot(111)
-        #
-        #plt.plot(wave/1e4, flux)
-        #
-        #plt.title(gal)
-        #
-        #prange = wave > 3e4
-        #fmin = np.min(flux[prange])
-        #fmax = np.max(flux[prange])
-        #
-        #plt.yscale('log')
-        #plt.ylim([fmin/2,fmax*2])
-        #
-        #plt.xscale('log')
-        #plt.xlim(3,40)
-        #
-        #plt.xlabel(r'Wavelength [$\mu$m]')
-        #plt.ylabel(r'Flux $\lambda f_{\lambda}$ [erg s$^{-1}$ cm$^{-2}$]')
-        #
-        #ax.set_xticks([3, 5, 8, 10, 20, 30])
-        #ax.xaxis.set_major_formatter(ScalarFormatter())
-        #
-        #labels = [item.get_text() for item in ax.get_xticklabels()]
-        #labels[0] = '3'
-        #labels[1] = '5'
-        #labels[2] = '8'
-        #labels[3] = '10'
-        #labels[4] = '20'
-        #labels[5] = '30'
-        #
-        #pdf.savefig()
-        #plt.close()
-
-        # 2nd plot -- fnu figure
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-
-        plt.plot(wave/1e4, fnu)
-
-        plt.title(gal)
-
-        prange = wave > 3e4
-        fmin = np.min(fnu[prange])
-        fmax = np.max(fnu[prange])
         
-        plt.yscale('log')
-        plt.ylim([fmin/2,fmax*2])
+        top = np.max(w3_minus_w4)
+        bot = np.min(w3_minus_w4)
 
-        plt.xscale('log')
-        plt.xlim(3,40)
+        if (top > 1):
 
-        plt.xlabel(r'Wavelength [$\mu$m]')
-        plt.ylabel(r'Flux $f_{\nu}$ [erg s$^{-1}$ cm$^{-2}$ Hz$^{-1}$]')
-
-        ax.set_xticks([3, 5, 8, 10, 20, 30])
-        ax.xaxis.set_major_formatter(ScalarFormatter())
+            print(gal)
+            
+            ## lambda * f_lambda figure
+            #fig = plt.figure()
+            #ax = fig.add_subplot(111)
+            #
+            #plt.plot(wave/1e4, flux)
+            #
+            #plt.title(gal)
+            #
+            #prange = wave > 3e4
+            #fmin = np.min(flux[prange])
+            #fmax = np.max(flux[prange])
+            #
+            #plt.yscale('log')
+            #plt.ylim([fmin/2,fmax*2])
+            #
+            #plt.xscale('log')
+            #plt.xlim(3,40)
+            #
+            #plt.xlabel(r'Wavelength [$\mu$m]')
+            #plt.ylabel(r'Flux $\lambda f_{\lambda}$ [erg s$^{-1}$ cm$^{-2}$]')
+            #
+            #ax.set_xticks([3, 5, 8, 10, 20, 30])
+            #ax.xaxis.set_major_formatter(ScalarFormatter())
+            #
+            #labels = [item.get_text() for item in ax.get_xticklabels()]
+            #labels[0] = '3'
+            #labels[1] = '5'
+            #labels[2] = '8'
+            #labels[3] = '10'
+            #labels[4] = '20'
+            #labels[5] = '30'
+            #
+            #pdf.savefig()
+            #plt.close()
+            
+            # 2nd plot -- fnu figure
+            fig = plt.figure()
+            ax = fig.add_subplot(211)
+            
+            plt.plot(wave/1e4, fnu)
+            
+            plt.title(gal)
+            
+            prange = wave > 3e4
+            fmin = np.min(fnu[prange])
+            fmax = np.max(fnu[prange])
+            
+            plt.yscale('log')
+            plt.ylim([fmin/2,fmax*2])
+            
+            plt.xscale('log')
+            plt.xlim(3,40)
+            
+            plt.xlabel(r'Wavelength [$\mu$m]')
+            plt.ylabel(r'Flux $f_{\nu}$ [erg s$^{-1}$ cm$^{-2}$ Hz$^{-1}$]')
+            
+            ax.set_xticks([3, 5, 8, 10, 20, 30])
+            ax.xaxis.set_major_formatter(ScalarFormatter())
+            
+            labels = [item.get_text() for item in ax.get_xticklabels()]
+            labels[0] = '3'
+            labels[1] = '5'
+            labels[2] = '8'
+            labels[3] = '10'
+            labels[4] = '20'
+            labels[5] = '30'
+            
+            ax.axvspan(12/1.4, 12/1.8, facecolor='g', alpha=0.5)
+            ax.axvspan(22/1.4, 22/1.8, facecolor='r', alpha=0.5)
+            
+            #pdf.savefig()
+            #plt.close()
+            
+            ## 3rd plot -- flambda figure
+            #fig = plt.figure()
+            #
+            #ax = fig.add_subplot(111)
+            #
+            #plt.plot(wave/1e4, flam)
+            #
+            #plt.title(gal)
+            #
+            #prange = wave > 3e4
+            #fmin = np.min(flam[prange])
+            #fmax = np.max(flam[prange])
+            #
+            #plt.yscale('log')
+            #plt.ylim([fmin/2,fmax*2])
+            #
+            #plt.xscale('log')
+            #plt.xlim(3,40)
+            #
+            #plt.xlabel(r'Wavelength [$\mu$m]')
+            #plt.ylabel(r'Flux $f_{\lambda}$ [erg s$^{-1}$ cm$^{-2}$ $\AA^{-1}$]')
+            #
+            #ax.set_xticks([3, 5, 8, 10, 20, 30])
+            #ax.xaxis.set_major_formatter(ScalarFormatter())
+            #
+            #labels = [item.get_text() for item in ax.get_xticklabels()]
+            #labels[0] = '3'
+            #labels[1] = '5'
+            #labels[2] = '8'
+            #labels[3] = '10'
+            #labels[4] = '20'
+            #labels[5] = '30'
+            #
+            #plt.tight_layout()
+            #
+            #pdf.savefig()
+            #plt.close()
+            
+            # plot of WISE W3-W4 clor
+            #fig = plt.figure()
+            ax = fig.add_subplot(212)
+            
+            plt.scatter(redshift, w3_minus_w4)
+            
+            #plt.title(gal)
+            
+            #plt.ylim([-1.5,2.5])
+            plt.ylim([0,2.5])
+            plt.xlim([0.4,0.8])
+            
+            plt.xlabel(r'Redshift')
+            plt.ylabel(r'[W3] - [W4] color')
+            
+            
+            ax.axhline(y=top)
+            ax.axhline(y=bot)
+            
+            plt.text(0.45, top+0.15, 'max='+f'{top:.2f}')
+            plt.text(0.45, bot-0.3, 'min='+f'{bot:.2f}')
+            
+            plt.tight_layout()
+            
+            pdf.savefig()
+            plt.close()
         
-        labels = [item.get_text() for item in ax.get_xticklabels()]
-        labels[0] = '3'
-        labels[1] = '5'
-        labels[2] = '8'
-        labels[3] = '10'
-        labels[4] = '20'
-        labels[5] = '30'
-
-        pdf.savefig()
-        plt.close()
-
-        ## 3rd plot -- flambda figure
-        #fig = plt.figure()
-        #
-        #ax = fig.add_subplot(111)
-        #
-        #plt.plot(wave/1e4, flam)
-        #
-        #plt.title(gal)
-        #
-        #prange = wave > 3e4
-        #fmin = np.min(flam[prange])
-        #fmax = np.max(flam[prange])
-        #
-        #plt.yscale('log')
-        #plt.ylim([fmin/2,fmax*2])
-        #
-        #plt.xscale('log')
-        #plt.xlim(3,40)
-        #
-        #plt.xlabel(r'Wavelength [$\mu$m]')
-        #plt.ylabel(r'Flux $f_{\lambda}$ [erg s$^{-1}$ cm$^{-2}$ $\AA^{-1}$]')
-        #
-        #ax.set_xticks([3, 5, 8, 10, 20, 30])
-        #ax.xaxis.set_major_formatter(ScalarFormatter())
-        #
-        #labels = [item.get_text() for item in ax.get_xticklabels()]
-        #labels[0] = '3'
-        #labels[1] = '5'
-        #labels[2] = '8'
-        #labels[3] = '10'
-        #labels[4] = '20'
-        #labels[5] = '30'
-        #
-        #plt.tight_layout()
-        #
-        #pdf.savefig()
-        #plt.close()
-
         
 os.system('open %s &' % name)
