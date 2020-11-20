@@ -6,10 +6,33 @@ from matplotlib.backends.backend_pdf import PdfPages
 from astropy.io import ascii
 from matplotlib.ticker import ScalarFormatter
 from sedpy import observate
+from astropy.io import fits
+
 
 projpath = os.getcwd()+'/Brown2014/An_Atlas_of_Galaxy_SEDs/An_Atlas_of_Galaxy_SEDs/'
 
 files = glob.glob(projpath+'*.dat')
+
+table = fits.open('hizea_photo_galex_wise_v1.0.fit')
+ngal = len(table[1].data)
+w3_mag = table[1].data['AB_MAG'][0:ngal][:,9]
+w3_mag_err = table[1].data['AB_MAG_ERR'][0:ngal][:,9]
+w4_mag = table[1].data['AB_MAG'][0:ngal][:,10]
+w4_mag_err = table[1].data['AB_MAG_ERR'][0:ngal][:,10]
+redshift = table[1].data['Z']
+names = table[1].data['SHORT_NAME'][0:ngal]
+
+w3minusw4_unc = np.sqrt(w3_mag_err ** 2 + w4_mag_err ** 2)
+valid = w3minusw4_unc<0.5
+print(valid)
+
+
+def plot_phot():
+    ax.scatter(redshift[valid], w3_mag[valid] - w4_mag[valid], marker='*')
+    ax.errorbar(redshift[valid], w3_mag[valid] - w4_mag[valid], yerr=w3minusw4_unc[valid], color='purple', linestyle="None")
+
+    for i in range(0,len(redshift[valid])):
+        plt.text(redshift[valid][i], w3_mag[valid][i]-w4_mag[valid][i], names[valid][i], fontsize=6)
 
 
 name = 'brown_seds.pdf'
@@ -34,10 +57,10 @@ with PdfPages(name) as pdf:
 
         filternames = ['wise_w{}'.format(n) for n in ['1', '2', '3', '4']]
         wise_filters = observate.load_filters(filternames)
-        redshift = np.arange(41)/100.+0.4
-        w3_minus_w4 = np.zeros(len(redshift))
-        for j in range(0,len(redshift)):
-            model_mags = observate.getSED(wave*(1+redshift[j]), flam, filterlist=wise_filters)
+        zarray = np.arange(41)/100.+0.4
+        w3_minus_w4 = np.zeros(len(zarray))
+        for j in range(0,len(zarray)):
+            model_mags = observate.getSED(wave*(1+zarray[j]), flam, filterlist=wise_filters)
             w3_minus_w4[j] = model_mags[2] - model_mags[3]
             #print('model_mags:', model_mags)
             #print('[W3]-[W4]:', w3_minus_w4[j])
@@ -46,7 +69,7 @@ with PdfPages(name) as pdf:
         top = np.max(w3_minus_w4)
         bot = np.min(w3_minus_w4)
 
-        if (top > 1):
+        if (top > 1.2):
 
             print(gal)
             
@@ -165,7 +188,7 @@ with PdfPages(name) as pdf:
             #fig = plt.figure()
             ax = fig.add_subplot(212)
             
-            plt.scatter(redshift, w3_minus_w4)
+            plt.plot(zarray, w3_minus_w4)
             
             #plt.title(gal)
             
@@ -175,13 +198,14 @@ with PdfPages(name) as pdf:
             
             plt.xlabel(r'Redshift')
             plt.ylabel(r'[W3] - [W4] color')
+
+            plot_phot()
             
+            #ax.axhline(y=top)
+            #ax.axhline(y=bot)
             
-            ax.axhline(y=top)
-            ax.axhline(y=bot)
-            
-            plt.text(0.45, top+0.15, 'max='+f'{top:.2f}')
-            plt.text(0.45, bot-0.3, 'min='+f'{bot:.2f}')
+            #plt.text(0.45, top+0.15, 'max='+f'{top:.2f}')
+            #plt.text(0.45, bot-0.3, 'min='+f'{bot:.2f}')
             
             plt.tight_layout()
             
