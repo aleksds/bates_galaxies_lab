@@ -54,12 +54,16 @@ count = 0
 def to_ab(vega_mag, band):
     #bandpasses = {"W1":2.699,"W2":3.339,"W3":5.147,"W4":6.620}
     zero_mag_fnu = {"W1":309.540,"W2":171.787,"W3":31.674,"W4":8.363}
-    f_nu = zero_mag_fnu[band]*(10**(-vega_mag/2.5))
-    mag_ab = -2.5 *np.log10(f_nu/3631)
+    f_nu = float(zero_mag_fnu[band]*(10**(-vega_mag/2.5)))
+    #print("type f_nu", type(f_nu))
+    #print('f_nu',f_nu)
+    mag_ab = float(-2.5 *np.log10(f_nu/3631))
+   # print("type mag_ab", type(mag_ab))
+   #('mag_ab',mag_ab)
 
     return mag_ab
 
-#print(float(to_ab(4.852,'W3')))
+print(float(to_ab(4.852,'W3')))
 for s in special_names:
     WISEdir = projpath + 'unWISE/%s.fits' % s
     t = Table.read(WISEdir)
@@ -67,16 +71,17 @@ for s in special_names:
     table.append(t)
     #print('t type', type(t))
     w3_mag[count] = float(to_ab(t['w3_mag'],"W3"))
-    #print("t['w3_mag_err']")
-    #(t['w3_mag_err'])
-    w3_mag_err[count] = float(to_ab(t['w3_mag_err'],"W3"))
-    #print("w3_mag_err_ab")
-    #print(w3_mag_err[count])
+    #("t['w3_mag_err']")
+    #print(t['w3_mag_err'])
+    w3_mag_err[count] = float(t['w3_mag_err'])
+    print("w3_mag_err_ab")
+    print(w3_mag_err[count])
     w4_mag[count] = float(to_ab(t['w4_mag'],"W4"))
     #print("w4_mag_err")
     #(t['w4_mag_err'])
-    w4_mag_err[count] = float(to_ab(t['w4_mag_err'],"W4"))
-    #print(w4_mag_err[count])
+    w4_mag_err[count] = float(t['w4_mag_err'])
+    print("w4_mag_err_ab")
+    print(w4_mag_err[count])
 
     count += 1
 
