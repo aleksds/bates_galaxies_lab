@@ -41,6 +41,7 @@ valid = w3minusw4_unc < 0.5
 # For 8 Galaxies of Interest
 # Need to rewrite code for use in block format, not loop format, right now it does WISEdir for every galaxy,
 # want a table w/ all of them
+'''
 projpath = os.getcwd() + '/'
 redshift = [0.603, 0.711, 0.514, 0.467, 0.451, 0.661, 0.449, 0.459]
 special_names = ['J0826', 'J0905', 'J0944', 'J1107', 'J1219', 'J1341', 'J1613', 'J2118']
@@ -50,22 +51,44 @@ w4_mag = np.zeros(len(redshift))
 w4_mag_err = np.zeros(len(redshift))
 table = []
 count = 0
+'''
+
+####################################
+'''For 6 Galaxies accepted to JWST proposal. Names are listed and stuff?
+The solution is inelegant but we use the same w3_mag etc and just comment out the top as necessary
+'''
+
+projpath = os.getcwd() + '/'
+redshift = [0.467, 0.451, 0.437, 0.449, 0.459]
+jwst_names = ['J1107', 'J1219', 'J1506', 'J1613', 'J2118']
+w3_mag = np.zeros(len(redshift))
+w3_mag_err = np.zeros(len(redshift))
+w4_mag = np.zeros(len(redshift))
+w4_mag_err = np.zeros(len(redshift))
+table = []
+count = 0
 
 def to_ab(vega_mag, band):
-    #bandpasses = {"W1":2.699,"W2":3.339,"W3":5.147,"W4":6.620}
-    zero_mag_fnu = {"W1":309.540,"W2":171.787,"W3":31.674,"W4":8.363}
+
+    '''Converts from vega magnitudes to ab mags '''
+
+    # bandpasses = {"W1":2.699,"W2":3.339,"W3":5.147,"W4":6.620}
+    zero_mag_fnu = {"W1": 309.540, "W2": 171.787, "W3": 31.674, "W4": 8.363}
     f_nu = float(zero_mag_fnu[band]*(10**(-vega_mag/2.5)))
-    #print("type f_nu", type(f_nu))
-    #print('f_nu',f_nu)
+    # print("type f_nu", type(f_nu))
+    # print('f_nu',f_nu)
     mag_ab = float(-2.5 *np.log10(f_nu/3631))
-   # print("type mag_ab", type(mag_ab))
-   #('mag_ab',mag_ab)
+    # print("type mag_ab", type(mag_ab))
+    # ('mag_ab',mag_ab)
 
     return mag_ab
 
-print(float(to_ab(4.852,'W3')))
-for s in special_names:
-    WISEdir = projpath + 'unWISE/%s.fits' % s
+#Converting to ab magnitude for each bandpass  data of each galaxy
+#print(float(to_ab(4.852,'W3')))
+
+#for s in special_names:
+for j in jwst_names:
+    WISEdir = projpath + 'unWISE/%s.fits' % j
     t = Table.read(WISEdir)
     #t.pprint_all()
     table.append(t)
@@ -74,20 +97,22 @@ for s in special_names:
     #("t['w3_mag_err']")
     #print(t['w3_mag_err'])
     w3_mag_err[count] = float(t['w3_mag_err'])
-    print("w3_mag_err_ab")
-    print(w3_mag_err[count])
+    #print("w3_mag_err_ab")
+    #print(w3_mag_err[count])
     w4_mag[count] = float(to_ab(t['w4_mag'],"W4"))
     #print("w4_mag_err")
     #(t['w4_mag_err'])
     w4_mag_err[count] = float(t['w4_mag_err'])
-    print("w4_mag_err_ab")
-    print(w4_mag_err[count])
+    # print("w4_mag_err_ab")
+    # print(w4_mag_err[count])
 
     count += 1
 
 # Can we add all the information into one file?
 # Go through each file, store the appropriate information in separate lists?
-# Then put it back together, similar to RGB ppm
+# Then put it back together, similar to RGB ppm\
+
+"""
 redshift = np.asarray(redshift)
 special_names = np.asarray(special_names)
 w3_mag = np.asarray(w3_mag)
@@ -100,13 +125,29 @@ print(w3minusw4_unc)
 valid = w3minusw4_unc < 0.5
 
 print(valid)
+"""
 
+
+
+#This is the same as above but for jwst names instead. Again this is terrible and messy  but it works
+redshift = np.asarray(redshift)
+jwst_names = np.asarray(jwst_names)
+w3_mag = np.asarray(w3_mag)
+w3_mag_err = np.asarray(w3_mag_err)
+w4_mag= np.asarray(w4_mag)
+w4_mag_err = np.asarray(w4_mag_err)
+w3minusw4_unc = np.sqrt(w3_mag_err ** 2 + w4_mag_err ** 2)
+#print('w3minusw4_unc')
+#print(w3minusw4_unc)
+valid = w3minusw4_unc < 0.5
+
+print(valid)
 
 
 def plot_phot(redshift):
-    #print(valid)
-    #print('w3_mag[valid]',w3_mag[valid])
-    #('w4_mag[valid]', w4_mag[valid])
+    print("Valid:",valid)
+    print('w3_mag[valid]',w3_mag[valid])
+    print ('w4_mag[valid]', w4_mag[valid])
     #print('redshift',redshift)
     # print("redshift valid",type(redshift[valid]))
     ax.scatter(redshift[valid], w3_mag[valid] - w4_mag[valid], marker='*')
@@ -114,20 +155,33 @@ def plot_phot(redshift):
                 linestyle="None")
 
     ## For Brown the difference is names v special_names
+    #This is for all valid names
     # for i in range(0,len(redshift[valid])):
     # plt.text(redshift[valid][i], w3_mag[valid][i]-w4_mag[valid][i], names[valid][i], fontsize=6)
 
+    ##This is for the 8 Galaxies of interest
+    '''
     for i in range(0, len(redshift[valid])):
         #print('w3_mag', w3_mag)
        # print('w3_mag[valid][0]', w3_mag[valid][0])
         plt.text(redshift[valid][i], w3_mag[valid][i] - w4_mag[valid][i], special_names[valid][i], fontsize=6)
+    '''
+    #This is for the 5 JWST Galaxies
 
 
-name = 'brown_seds_special.pdf'
+    for i in range(0, len(redshift[valid])):
+        # print('w3_mag', w3_mag)
+        # print('w3_mag[valid][0]', w3_mag[valid][0])
+        plt.text(redshift[valid][i], w3_mag[valid][i] - w4_mag[valid][i], jwst_names[valid][i], fontsize=6)
+
+
+name = 'brown_seds_jswt_gals.pdf'
 
 with PdfPages(name) as pdf:
-    print("and we got here folks")
+    #print("and we got here folks")
     print(len(files))
+    letter = ord('c')
+    best_fit = ['NGC_1275', "UGC_0869","UGCA_219","NGC_3690"]
     for i in range(0, len(files)):
         # for i in range(0,1):
        # print('we\'re in')
@@ -208,9 +262,11 @@ with PdfPages(name) as pdf:
             ax = fig.add_subplot(211)
 
             plt.plot(wave / 1e4, fnu)
-
-            plt.title(gal)
-
+            if gal in best_fit:
+                plt.title(f"({chr(letter)}) {gal}, good fit")
+            else:
+                plt.title(f"({chr(letter)}) {gal}")
+            letter += 1
             prange = wave > 3e4
             fmin = np.min(fnu[prange])
             fmax = np.max(fnu[prange])
