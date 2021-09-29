@@ -74,9 +74,57 @@ import ppxf as ppxf_package
 from ppxf.ppxf import ppxf
 import ppxf.ppxf_util as util
 import ppxf.miles_util as lib
+import pdb
+
+from matplotlib.backends.backend_pdf import PdfPages
+
 
 ##############################################################################
 
+def line_plot(line, z, wave, flux, pp):
+
+    fac = np.median(flux) / np.median(pp.bestfit)
+    stars_bestfit = pp.bestfit - pp.gas_bestfit
+
+    lambda_line = line*(1+z)
+    lower_limit = lambda_line-lambda_line*750/3e5
+    plt.axvline(x=lower_limit)
+    upper_limit = lambda_line+lambda_line*750/3e5
+    plt.axvline(x=upper_limit)
+
+    plt.plot(wave, flux)
+    plt.plot(wave, pp.gas_bestfit*fac)
+    plt.plot(wave, pp.bestfit*fac)
+    stars_bestfit = pp.bestfit - pp.gas_bestfit
+    plt.plot(wave, stars_bestfit*fac)
+    plt.xlim([lower_limit-100, upper_limit+100])
+    plt.axvline(x=lower_limit)
+    plt.axvline(x=upper_limit)
+        
+    fline = 0
+    fmodel = 0
+        
+    good = (wave > lower_limit) & (wave < upper_limit)
+    wave_zoom = wave[good]
+    flux_zoom = flux[good] - stars_bestfit[good]*fac # pp.gas_bestfit[good]
+    model_zoom = pp.gas_bestfit[good]*fac
+    ngood = len(wave_zoom)
+        
+    for i in range(0,ngood):
+        if i == 0:
+            dx = wave_zoom[i+1] - wave_zoom[i]
+        else:
+            dx = wave_zoom[i] - wave_zoom[i-1]
+        fline = fline + flux_zoom[i]*1e-17*dx
+        fmodel = fmodel + model_zoom[i]*1e-17*dx
+        print(i, wave_zoom[i], flux_zoom[i]*1e-17*dx, model_zoom[i]*1e-17*dx)
+        print(fline, fmodel)
+
+    plt.text(lower_limit, fac*1.5, 'fline: '+'{:.3e}'.format(fline))
+    plt.text(lower_limit, fac*1.7, 'fmodel: '+'{:.3e}'.format(fmodel))
+
+    return(fline, fmodel)
+        
 def ppxf_example_population_gas_sdss(tie_balmer, limit_doublets):
 
     ppxf_dir = path.dirname(path.realpath(ppxf_package.__file__))
@@ -86,6 +134,7 @@ def ppxf_example_population_gas_sdss(tie_balmer, limit_doublets):
     # pipeline and log_rebin should not be used in this case.
     #
     #file = ppxf_dir + '/spectra/NGC3522_SDSS_DR8.fits'
+    #file = 'galaxies_fits/spec-0761-54524-0409.fits'
     file = 'galaxies_fits/spec-0761-54524-0409.fits'
     hdu = fits.open(file)
     t = hdu[1].data
@@ -227,12 +276,51 @@ def ppxf_example_population_gas_sdss(tie_balmer, limit_doublets):
     plt.subplot(211)
     pp.plot()
 
+    print(pp)
+    
+
     # Plot stellar population mass fraction distribution
     plt.subplot(212)
     miles.plot(weights)
     plt.tight_layout()
     plt.pause(1)
 
+
+    filename = 'ppxf_model.pdf'
+
+    with PdfPages(filename) as pdf:
+        fig = plt.figure()
+
+        fac = np.median(flux) / np.median(pp.bestfit)
+        print('fac', fac)
+        print('median of bestfit', np.median(pp.bestfit))
+        plt.plot(wave, flux)
+        plt.plot(wave, pp.gas_bestfit*fac)
+        plt.plot(wave, pp.bestfit*fac)
+        stars_bestfit = pp.bestfit - pp.gas_bestfit
+        plt.plot(wave, stars_bestfit*fac)
+
+        pdf.savefig()
+        plt.close()
+
+
+        fig = plt.figure()
+        hbeta = line_plot(4861, z, wave, flux, pp)
+
+        pdf.savefig()
+        plt.close()
+
+
+        fig = plt.figure()
+        hgamma = line_plot(4340, z, wave, flux, pp)
+
+        pdf.savefig()
+        plt.close()
+
+
+    pdb.set_trace()
+        
+    
 ##############################################################################
 
 if __name__ == '__main__':
@@ -243,11 +331,11 @@ if __name__ == '__main__':
 
     ppxf_example_population_gas_sdss(tie_balmer=False, limit_doublets=False)
 
-    print("\n=======================================================\n" +
-             " Fit with tied Balmer lines and limited [SII] doublet: \n" +
-             "=======================================================\n")
+    #print("\n=======================================================\n" +
+    #         " Fit with tied Balmer lines and limited [SII] doublet: \n" +
+    #         "=======================================================\n")
 
     # Note tha the inclusion of a few extra faint Balmer lines is sufficient to
     # decrease the chi2 of the fit, even though the Balmer decrement is fixed.
     # In this case, the best-fitting gas reddening is at the E(B-V)=0 boundary.
-    ppxf_example_population_gas_sdss(tie_balmer=True, limit_doublets=True)
+    #ppxf_example_population_gas_sdss(tie_balmer=True, limit_doublets=True)
