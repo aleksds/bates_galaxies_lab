@@ -88,8 +88,10 @@ def line_plot(line, z, wave, flux, pp):
 
     lambda_line = line*(1+z)
     lower_limit = lambda_line-lambda_line*750/3e5
+    #lower_limit = lambda_line-lambda_line*1250/3e5
     plt.axvline(x=lower_limit)
     upper_limit = lambda_line+lambda_line*750/3e5
+    #upper_limit = lambda_line+lambda_line*1250/3e5
     plt.axvline(x=upper_limit)
 
     plt.plot(wave, flux)
@@ -98,6 +100,7 @@ def line_plot(line, z, wave, flux, pp):
     stars_bestfit = pp.bestfit - pp.gas_bestfit
     plt.plot(wave, stars_bestfit*fac)
     plt.xlim([lower_limit-100, upper_limit+100])
+    plt.ylim([-1, fac*3.])
     plt.axvline(x=lower_limit)
     plt.axvline(x=upper_limit)
         
@@ -134,12 +137,19 @@ def ppxf_example_population_gas_sdss(tie_balmer, limit_doublets):
     # pipeline and log_rebin should not be used in this case.
     #
     #file = ppxf_dir + '/spectra/NGC3522_SDSS_DR8.fits'
-    #file = 'galaxies_fits/spec-0761-54524-0409.fits'
-    file = 'galaxies_fits/spec-0761-54524-0409.fits'
+    #file = 'galaxies_fits/spec-0761-54524-0409.fits' # J0826
+    #file = 'galaxies_fits/spec-0566-52238-0319.fits' # J0901
+    #file = 'galaxies_fits/spec-0483-51924-0628.fits' # J0905
+    #file = 'galaxies_fits/spec-1305-52757-0191.fits' # J0944  z = 0.514
+    #file = 'galaxies_fits/spec-0581-52356-0196.fits' # J1107 blueshifted Hb
+    file = 'galaxies_fits/spec-0326-52375-0382.fits' # J1125
+    galname = 'J1125'
     hdu = fits.open(file)
     t = hdu[1].data
     #z = float(hdu[1].header["Z"]) # SDSS redshift estimate
     z = hdu['SPECOBJ'].data['Z'][0]
+    #z = 0.514
+
     
     # Only use the wavelength range in common between galaxy and stellar library.
     coadd = hdu['COADD'].data
@@ -297,6 +307,7 @@ def ppxf_example_population_gas_sdss(tie_balmer, limit_doublets):
         plt.plot(wave, flux)
         plt.plot(wave, pp.gas_bestfit*fac)
         plt.plot(wave, pp.bestfit*fac)
+        plt.title(galname)
         stars_bestfit = pp.bestfit - pp.gas_bestfit
         plt.plot(wave, stars_bestfit*fac)
 
